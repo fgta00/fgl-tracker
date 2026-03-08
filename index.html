@@ -149,6 +149,9 @@ th.sortable:hover{background:rgba(255,255,255,.12)!important}
 th.sortable .si{display:inline-block;margin-left:.3rem;opacity:.4;font-size:.65rem}
 th.sortable.asc .si::after{content:'▲'}th.sortable.desc .si::after{content:'▼'}
 th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
+.date-wrap{position:relative;display:inline-block;width:100%}
+.date-wrap input[type=date]{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;z-index:2}
+.date-wrap input[type=text]{width:100%;position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -205,7 +208,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
           <th class="L" style="min-width:72px">PO#</th>
           <th class="L" style="min-width:95px">Cliente</th>
-          <th class="L" style="min-width:180px">Produto / Contentor</th>
+          <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:140px">Status</th>
           <th style="min-width:58px">Dias ETA</th>
@@ -248,7 +251,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <th class="L" style="min-width:28px">#</th>
           <th class="L" style="min-width:72px">PO#</th>
           <th class="L" style="min-width:90px">Cliente</th>
-          <th class="L" style="min-width:175px">Produto / Contentor</th>
+          <th class="L" style="min-width:175px">Produto / Contêiner</th>
           <th style="min-width:68px">Unidades</th>
           <th style="min-width:130px">Status</th>
           <th style="min-width:230px">Milestone</th>
@@ -316,7 +319,12 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="sh">Lançar Pagamento ao Fornecedor</div>
       <div class="lf">
         <div class="lfg">
-          <div class="ff"><label>Data</label><input type="text" id="l-date" placeholder="15/01/26" autocomplete="off"></div>
+          <div class="ff"><label>Data</label>
+          <div class="date-wrap">
+            <input type="date" onchange="datePickerSync('l-date',this.value)">
+            <input type="text" id="l-date" placeholder="15/01/26" autocomplete="off">
+          </div>
+        </div>
           <div class="ff"><label>Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01" onblur="this.value=this.value?parseFloat(this.value).toFixed(2):''"></div>
           <div class="ff"><label>PI</label><select id="l-pi" onchange="onPiChange()"><option value="">— PI —</option></select></div>
           <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:#F0F7FF;cursor:not-allowed"></div>
@@ -356,7 +364,12 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="sh">Lançar Recebimento do Cliente</div>
       <div class="lf grn">
         <div class="lfg">
-          <div class="ff"><label>Data</label><input type="text" id="r-date" placeholder="15/01/26" autocomplete="off"></div>
+          <div class="ff"><label>Data</label>
+          <div class="date-wrap">
+            <input type="date" onchange="datePickerSync('r-date',this.value)">
+            <input type="text" id="r-date" placeholder="15/01/26" autocomplete="off">
+          </div>
+        </div>
           <div class="ff"><label>Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01" onblur="this.value=this.value?parseFloat(this.value).toFixed(2):''"></div>
           <div class="ff"><label>PI</label><select id="r-pi" onchange="onRpiChange()"><option value="">— PI —</option></select></div>
           <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:#F0FAF5;cursor:not-allowed"></div>
@@ -393,6 +406,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   </div>
 </div>
 
+<datalist id="dl-next-action"><option value="Aguardar confirmação de arte"><option value="Enviar arte para aprovação"><option value="Confirmar pedido com fornecedor"><option value="Acompanhar produção"><option value="Solicitar fotos de produção"><option value="Confirmar prontidão"><option value="Solicitar BL e documentos"><option value="Acompanhar embarque"><option value="Confirmar ETA"><option value="Aguardar chegada no CD"><option value="Enviar fatura ao cliente"><option value="Cobrar pagamento"><option value="Enviar documentos ao cliente"><option value="Pedido finalizado"></datalist>
 </main>
 
 <!-- ═══ MODAL NOVO PEDIDO ═══ -->
@@ -404,7 +418,12 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         <div class="fsep">Identificação</div>
         <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
         <div class="ff"><label>PI (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
-        <div class="ff"><label>ETD (DD/MM/AA)</label><input id="mo-etd" placeholder="28/05/26"></div>
+        <div class="ff"><label>ETD (DD/MM/AA)</label>
+          <div class="date-wrap">
+            <input type="date" onchange="datePickerSync('mo-etd',this.value)">
+            <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
+          </div>
+        </div>
         <div class="ff"><label>ETA Brasil (DD/MM/AA)</label><input id="mo-eta" placeholder="01/08/26"></div>
 
         <div class="fsep">Cliente</div>
@@ -420,7 +439,11 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <datalist id="mo-sup-list"></datalist>
         </div>
         <div class="ff"><label>Invoice # Fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div>
-        <div class="ff"><label>Contentor</label><input id="mo-cont" placeholder='ex: 40" HC VIETNÃ'></div>
+        <div class="ff"><label>Contêiner</label>
+          <input id="mo-cont" placeholder='ex: 40" HC VIETNÃ' list="dl-cont" autocomplete="off">
+          <datalist id="dl-cont"></datalist>
+          <datalist id="dl-prod"></datalist>
+        </div>
 
         <div class="fsep">Produtos — Qtd × Preço Fornecedor × Preço Cliente (USD)</div>
         <div class="ff full">
@@ -460,7 +483,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   <div class="modal" style="width:860px">
     <div class="mhdr"><h2 id="st-ttl">Gerenciar Status</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
     <div class="mbody">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
         <!-- Status -->
         <div>
           <div class="sh">Status — Pedidos</div>
@@ -486,6 +509,26 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <div style="display:flex;gap:.4rem">
             <input id="st-forn-new" placeholder="Novo fornecedor…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
             <button class="lbtn" style="height:32px" onclick="addMestre('forn')">＋</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+        <!-- Produtos -->
+        <div>
+          <div class="sh">Produtos</div>
+          <div id="st-prod-list" style="margin-bottom:.6rem"></div>
+          <div style="display:flex;gap:.4rem">
+            <input id="st-prod-new" placeholder="Novo produto…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
+            <button class="lbtn" style="height:32px" onclick="addMestre('prod')">＋</button>
+          </div>
+        </div>
+        <!-- Contêineres -->
+        <div>
+          <div class="sh">Contêineres</div>
+          <div id="st-cont-list" style="margin-bottom:.6rem"></div>
+          <div style="display:flex;gap:.4rem">
+            <input id="st-cont-new" placeholder="Novo contêiner…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
+            <button class="lbtn" style="height:32px" onclick="addMestre('cont')">＋</button>
           </div>
         </div>
       </div>
@@ -643,7 +686,7 @@ let receipts = ld('rec', REC_DEF);
 const _isDemo=!_hasOrd&&!_hasPay; // true = ainda não há dados reais
 function saveAll(){
   sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);
-  sv('cls',CLIENTES);sv('forn',FORNECEDORES);
+  sv('cls',CLIENTES);sv('forn',FORNECEDORES);sv('prod',PRODUTOS);sv('cont',CONTEINERES);
   driveSaveDebounced();
 }
 
@@ -667,6 +710,8 @@ const _finExp=new Set(); // PIs expandidos no Financeiro
 // Cadastros mestre (listas padronizadas)
 let CLIENTES=ld('cls',['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart']);
 let FORNECEDORES=ld('forn',['Thuan','TMC','Toan','Shanghai']);
+let PRODUTOS=ld('prod',['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia']);
+let CONTEINERES=ld('cont',['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL']);
 function statusSel(id,cur,isPay=false){
   const lst=isPay?PLST:SLST;
   const c=(isPay?PC:SC)[cur]?.c||'pgr';
@@ -1480,7 +1525,7 @@ function addProdRow(desc='',qty=0,pForn=0,pCli=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
   row.innerHTML=`
-    <span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${desc}" oninput="updatePreview()" style="flex:2">
+    <span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${desc}" list="dl-prod" oninput="updatePreview()" style="flex:2">
     <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1">
@@ -1512,6 +1557,12 @@ function updatePreview(){
       Margem: <b style="color:${margem>=0?'var(--green)':'var(--red)'}">${fUSD(margem)}</b> &nbsp;
       <b style="color:${pctM>=15?'var(--green)':pctM>=5?'var(--amber)':'var(--red)'}">( ${pctM}% )</b>`;
   } else {prev.style.display='none';}
+}
+function populateDatalistsMestre(){
+  const dlCont=document.getElementById('dl-cont');
+  if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>`<option value="${esc(c)}">`).join('');
+  const dlProd=document.getElementById('dl-prod');
+  if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>`<option value="${esc(p)}">`).join('');
 }
 function openOrderModal(num){
   _editNum=num;
@@ -1551,6 +1602,7 @@ function openOrderModal(num){
   if(clDL)clDL.innerHTML=allClis.map(c=>`<option value="${esc(c)}">`).join('');
   const supDL=document.getElementById('mo-sup-list');
   if(supDL)supDL.innerHTML=allForn.map(s=>`<option value="${esc(s)}">`).join('');
+  populateDatalistsMestre();
   document.getElementById('ovl-order').classList.add('open');
 }
 function submitOrder(){
@@ -1589,6 +1641,8 @@ function submitOrder(){
     if(o){
       const piAntigo=o.pi;
       o.po=po;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
+      // Se ETD mudou e Embarque ainda é estimado → atualiza automaticamente
+      if(etd&&etd!="—"&&o.dates[5]&&o.dates[5].est)o.dates[5]=mkD(etd,true);
       if(totalQty>0)o.total=totalQty;
       // Recalcular product a partir das linhas de produto
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
@@ -1622,7 +1676,9 @@ function submitOrder(){
   }
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-  // if ETA provided, pre-fill date index 6
+  // if ETD provided, pre-fill Embarque (index 5) as estimated
+  if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
+  // if ETA provided, pre-fill ETA Brasil (index 6) as estimated
   if(eta&&eta!=='—')emptyDates[6]=mkD(eta,true);
 
   const newOrder={num:nn,po,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
@@ -1653,10 +1709,17 @@ let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
   e.stopPropagation();
   const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={po:'PO#',client:'Cliente',product:'Produto',container:'Contentor',total:'Total Unidades',notes:'Notas / Issues',_nextAction:'Próxima Ação'};
+  const lbls={po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unidades',notes:'Notas / Issues',_nextAction:'Próxima Ação'};
   const isNum=['total'].includes(field);
   _epCtx={type:'order',num,field};
   showEp(e,lbls[field]||field,String(o[field]||''),isNum,false);
+  const ep=document.getElementById('ep-val');
+  if(ep){
+    if(field==='_nextAction')ep.setAttribute('list','dl-next-action');
+    else if(field==='product')ep.setAttribute('list','dl-prod');
+    else if(field==='container')ep.setAttribute('list','dl-cont');
+    else ep.removeAttribute('list');
+  }
 }
 function editFinField(pi,field,e){
   e.stopPropagation();
@@ -1675,8 +1738,11 @@ function editMS(num,di,e){
   document.getElementById('ep-ttl').textContent=MSFULL[di];
   document.getElementById('ep-body').innerHTML=`
     <label>Data (DD/MM/AA)</label>
-    <input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
-    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja)</label>`;
+    <div class="date-wrap" style="margin-bottom:.5rem">
+      <input type="date" onchange="datePickerSync('ep-val',this.value)">
+      <input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
+    </div>
+    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja)</label>\`;
   positionEp(e);
 }
 function showEp(elOrEv,lbl,val,isNum,isEst){
@@ -1779,7 +1845,7 @@ function closeOvl(id){document.getElementById(`ovl-${id}`).classList.remove('ope
 ══════════════════════════════════════ */
 function csvEsc(v){const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;}
 function exportCSV(){
-  const hdr=['Num','PO','PI','Cliente','Produto','Contentor','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
+  const hdr=['Num','PO','PI','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
   const rows=orders.map(o=>[
     o.num, csvEsc(o.po), csvEsc(o.pi||''), csvEsc(o.client),
     csvEsc(o.product), csvEsc(o.container||''), o.total, csvEsc(o.status),
@@ -1792,7 +1858,7 @@ function exportCSV(){
   dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),`fgl_controle_${todayDisp().replace(/\//g,'-')}.csv`);
 }
 function exportClientCSV(){
-  const hdr=['#','PO#','Cliente','Produto','Contentor','Unidades','Status','ETA/Entrada CD','Próxima Ação'];
+  const hdr=['#','PO#','Cliente','Produto','Contêiner','Unidades','Status','ETA/Entrada CD','Próxima Ação'];
   const rows=orders.map(o=>[o.num,o.po,o.client,`"${o.product}"`,`"${o.container||''}"`,o.total,o.status,o.dates[7]?.v||o.dates[6]?.v||'—',`"${getNextAction(o)}"`]);
   const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
   dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),`fgl_cliente_${todayDisp().replace(/\//g,'-')}.csv`);
@@ -1848,10 +1914,24 @@ function renderStatusLists(){
       <button onclick="renameMestre('forn',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
       <button onclick="deleteMestre('forn',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
     </div>`).join('');
+  // Produtos
+  document.getElementById('st-prod-list').innerHTML=PRODUTOS.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
+      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(p)}</span>
+      <button onclick="renameMestre('prod',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
+      <button onclick="deleteMestre('prod',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
+    </div>`).join('');
+  // Contêineres
+  document.getElementById('st-cont-list').innerHTML=CONTEINERES.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
+      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(c)}</span>
+      <button onclick="renameMestre('cont',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✏</button>
+      <button onclick="deleteMestre('cont',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
+    </div>`).join('');
 }
 function addMestre(tipo){
-  const id=tipo==='cli'?'st-cli-new':'st-forn-new';
-  const arr=tipo==='cli'?CLIENTES:FORNECEDORES;
+  const id=tipo==='cli'?'st-cli-new':tipo==='forn'?'st-forn-new':tipo==='prod'?'st-prod-new':'st-cont-new';
+  const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
   const v=document.getElementById(id).value.trim();
   if(!v)return;
   if(arr.includes(v)){toast('⚠ Já existe');return;}
@@ -1860,12 +1940,12 @@ function addMestre(tipo){
   saveAll();renderStatusLists();toast('Adicionado ✓');
 }
 function deleteMestre(tipo,i){
-  const arr=tipo==='cli'?CLIENTES:FORNECEDORES;
+  const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
   if(!confirm(`Remover "${arr[i]}"?`))return;
   arr.splice(i,1);saveAll();renderStatusLists();toast('Removido');
 }
 function renameMestre(tipo,i){
-  const arr=tipo==='cli'?CLIENTES:FORNECEDORES;
+  const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
   const novo=prompt(`Renomear "${arr[i]}" para:`,arr[i]);
   if(!novo||novo.trim()===arr[i])return;
   arr[i]=novo.trim();saveAll();renderStatusLists();toast('Renomeado ✓');
@@ -1940,6 +2020,19 @@ document.addEventListener('click',e=>{
 });
 
 renderAll();
+
+/* ══════════════════════════════════════
+   DATE PICKER SYNC
+══════════════════════════════════════ */
+function datePickerSync(targetId, isoVal){
+  // Convert YYYY-MM-DD → DD/Mon/YY and fill text field
+  if(!isoVal)return;
+  const [y,m,d]=isoVal.split('-');
+  const MONS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const disp=`${d}/${MONS[parseInt(m)-1]}/${y.slice(2)}`;
+  const el=document.getElementById(targetId);
+  if(el){el.value=disp;el.dispatchEvent(new Event('input'));}
+}
 
 /* ══════════════════════════════════════
    GOOGLE DRIVE SYNC
@@ -2020,6 +2113,8 @@ async function driveLoadOrCreate(){
           if(data.slst)SLST=data.slst;
           if(data.clientes)CLIENTES=data.clientes;
           if(data.fornecedores)FORNECEDORES=data.fornecedores;
+          if(data.produtos)PRODUTOS=data.produtos;
+          if(data.conteineres)CONTEINERES=data.conteineres;
           // Salva no localStorage também
           sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);
           sv('slst',SLST);sv('cls',CLIENTES);sv('forn',FORNECEDORES);
@@ -2049,7 +2144,7 @@ async function driveSaveNow(){
   const payload=JSON.stringify({
     version:4,saved:new Date().toISOString(),
     orders,payments,ledger,receipts,
-    slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES
+    slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES
   });
   try{
     if(_driveFileId){
