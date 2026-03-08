@@ -1560,9 +1560,9 @@ function updatePreview(){
 }
 function populateDatalistsMestre(){
   const dlCont=document.getElementById('dl-cont');
-  if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>`<option value="${esc(c)}">`).join('');
+  if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>'<option value="'+esc(c)+'">').join('');
   const dlProd=document.getElementById('dl-prod');
-  if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>`<option value="${esc(p)}">`).join('');
+  if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>'<option value="'+esc(p)+'">').join('');
 }
 function openOrderModal(num){
   _editNum=num;
