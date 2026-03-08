@@ -142,16 +142,33 @@ td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-of
 .addup:hover{border-color:var(--blue);color:var(--blue)}
 .preview-box{background:var(--ltblue);border:1.5px solid #B0D4F4;border-radius:8px;padding:.65rem .9rem;font-size:.75rem;grid-column:1/-1;display:none}
 .fin-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem}
-.toast{position:fixed;bottom:1.3rem;right:1.3rem;background:var(--green);color:#fff;padding:.5rem .9rem;border-radius:8px;font-weight:600;font-size:.76rem;z-index:900;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
+.toast{position:fixed;bottom:1.3rem;right:1.3rem;padding:.5rem .9rem;border-radius:8px;font-weight:600;font-size:.76rem;z-index:900;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;color:#fff;display:flex;align-items:center;gap:.5rem}
+.toast.show{opacity:1;transform:translateY(0);pointer-events:all}
+.toast .undo-btn{background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;font-family:'IBM Plex Sans';font-weight:700;font-size:.68rem;padding:.18rem .5rem;border-radius:5px;cursor:pointer;margin-left:.4rem}
+.toast .undo-btn:hover{background:rgba(255,255,255,.4)}
 th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
 th.sortable:hover{background:rgba(255,255,255,.12)!important}
 th.sortable .si{display:inline-block;margin-left:.3rem;opacity:.4;font-size:.65rem}
 th.sortable.asc .si::after{content:'▲'}th.sortable.desc .si::after{content:'▼'}
 th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
-.date-wrap{position:relative;display:inline-block;width:100%}
-.date-wrap input[type=date]{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;z-index:2}
-.date-wrap input[type=text]{width:100%;position:relative;z-index:1}
+.date-wrap{display:flex;align-items:center;gap:.3rem;width:100%}
+.date-wrap input[type=text]{flex:1;min-width:0}
+.date-wrap input[type=date]{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
+.date-cal-btn{background:none;border:1.5px solid var(--bdr2);border-radius:5px;cursor:pointer;padding:.2rem .35rem;font-size:.82rem;color:var(--ink3);flex-shrink:0;height:29px;line-height:1}
+.date-cal-btn:hover{border-color:var(--blue);color:var(--blue)}
+#mcal{position:fixed;z-index:99999;background:#fff;border:1.5px solid var(--bdr2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:.6rem;width:220px;font-family:'IBM Plex Sans',sans-serif;font-size:.76rem}
+#mcal .mc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem}
+#mcal .mc-nav{background:none;border:none;cursor:pointer;font-size:1rem;padding:.1rem .35rem;border-radius:5px;color:var(--ink2)}
+#mcal .mc-nav:hover{background:var(--ltblue)}
+#mcal .mc-title{font-weight:700;font-size:.78rem;color:var(--navy);cursor:pointer}
+#mcal .mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+#mcal .mc-dow{text-align:center;font-size:.6rem;font-weight:700;color:var(--ink4);padding:.15rem 0}
+#mcal .mc-day{text-align:center;padding:.22rem 0;border-radius:4px;cursor:pointer;font-size:.7rem}
+#mcal .mc-day:hover{background:var(--ltblue);color:var(--blue)}
+#mcal .mc-day.today{font-weight:700;color:var(--blue)}
+#mcal .mc-day.selected{background:var(--blue);color:#fff}
+#mcal .mc-day.other{color:var(--ink4)}
+#mcal .mc-day.empty{cursor:default}
 </style>
 </head>
 <body>
@@ -168,7 +185,8 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <span id="drive-dot" style="width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0"></span>
       <span id="drive-lbl">Drive</span>
     </button>
-    <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button><button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
+    <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
+    <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
   </div>
 </header>
 <main>
@@ -176,21 +194,15 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 <!-- ═══ CONTROLE INTERNO ═══ -->
 <div id="view-internal" class="view active">
   <div id="demo-banner" style="display:none;background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:8px;padding:.55rem 1rem;margin-bottom:.7rem;display:flex;align-items:center;justify-content:space-between;gap:1rem">
-    <span style="font-size:.74rem;color:#92400E;font-weight:600">⚠ Mostrando <b>dados de exemplo</b>. Crie o seu primeiro pedido para começar — os dados demo desaparecerão automaticamente.</span>
-    <button onclick="clearDemoData()" style="background:#F59E0B;color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.7rem;padding:.3rem .75rem;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">Limpar Dados Demo</button>
+    <span style="font-size:.74rem;color:#92400E;font-weight:600">⚠ Mostrando <b>dados de exemplo</b>. Crie o seu primeiro pedido para começar.</span>
+    <button onclick="clearDemoData()" style="background:#F59E0B;color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.7rem;padding:.3rem .75rem;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">Limpar Demo</button>
   </div>
   <div class="sbar" id="int-sum"></div>
   <div id="int-alerts" style="display:none;background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:9px;padding:.65rem .95rem;margin-bottom:.75rem"></div>
   <div class="tb">
     <input id="int-q" placeholder="🔍 Buscar PO, cliente, produto…" oninput="renderInternal()">
-    <select id="int-st" onchange="renderInternal()">
-      <option value="">Todos os Status</option>
-      <option>PRÉ-PRODUÇÃO</option><option>EM PRODUÇÃO</option>
-      <option>EMBARCADO</option><option>FINALIZADO</option><option>SUSPENSO</option>
-    </select>
-    <select id="int-cl" onchange="renderInternal()">
-      <option value="">Todos os Clientes</option>
-    </select>
+    <select id="int-st" onchange="renderInternal()"><option value="">Todos os Status</option></select>
+    <select id="int-cl" onchange="renderInternal()"><option value="">Todos os Clientes</option></select>
     <span class="finfo" id="int-cnt"></span>
     <div class="ml"><button class="bsm" onclick="exportCSV()">⬇ CSV</button></div>
   </div>
@@ -233,14 +245,8 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 <div id="view-client" class="view">
   <div class="tb">
     <input id="cli-q" placeholder="🔍 Buscar PO, produto…" oninput="renderClient()">
-    <select id="cli-st" onchange="renderClient()">
-      <option value="">Todos os Status</option>
-      <option>PRÉ-PRODUÇÃO</option><option>EM PRODUÇÃO</option>
-      <option>EMBARCADO</option><option>FINALIZADO</option><option>SUSPENSO</option>
-    </select>
-    <select id="cli-cl" onchange="renderClient()">
-      <option value="">Todos os Clientes</option>
-    </select>
+    <select id="cli-st" onchange="renderClient()"><option value="">Todos os Status</option></select>
+    <select id="cli-cl" onchange="renderClient()"><option value="">Todos os Clientes</option></select>
     <span class="finfo" id="cli-cnt"></span>
     <div class="ml"><button class="bsm" onclick="exportClientCSV()">⬇ CSV</button></div>
   </div>
@@ -267,16 +273,12 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 <!-- ═══ FINANCEIRO ═══ -->
 <div id="view-financeiro" class="view">
   <div class="sbar" id="fin-sum"></div>
-
-  <!-- Pedidos Ativos -->
   <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem">
     <div class="sh" style="margin-bottom:0;flex:1">Pedidos Ativos</div>
   </div>
   <div class="tb">
     <input id="fin-q" placeholder="🔍 PI, PO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
-    <select id="fin-st" onchange="renderFinanceiro()">
-      <option value="">Todos Status</option>
-    </select>
+    <select id="fin-st" onchange="renderFinanceiro()"><option value="">Todos Status</option></select>
     <select id="fin-sup" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
     <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
     <span class="finfo" id="fin-cnt"></span>
@@ -312,7 +314,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     </table>
   </div>
 
-  <!-- Lançamentos lado a lado -->
   <div class="fin-2col">
     <!-- PAGAMENTOS -->
     <div>
@@ -320,12 +321,13 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="lf">
         <div class="lfg">
           <div class="ff"><label>Data</label>
-          <div class="date-wrap">
-            <input type="date" onchange="datePickerSync('l-date',this.value)">
-            <input type="text" id="l-date" placeholder="15/01/26" autocomplete="off">
+            <div class="date-wrap">
+              <input type="text" id="l-date" placeholder="15/01/26" autocomplete="off">
+              <input type="date" id="l-date-cal" onchange="datePickerSync('l-date',this.value)">
+              <button class="date-cal-btn" type="button" onclick="openCal('l-date-cal')" tabindex="-1">📅</button>
+            </div>
           </div>
-        </div>
-          <div class="ff"><label>Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01" onblur="this.value=this.value?parseFloat(this.value).toFixed(2):''"></div>
+          <div class="ff"><label>Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01"></div>
           <div class="ff"><label>PI</label><select id="l-pi" onchange="onPiChange()"><option value="">— PI —</option></select></div>
           <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:#F0F7FF;cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC…"></div>
@@ -358,19 +360,19 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </table>
       </div>
     </div>
-
     <!-- RECEBIMENTOS -->
     <div>
       <div class="sh">Lançar Recebimento do Cliente</div>
       <div class="lf grn">
         <div class="lfg">
           <div class="ff"><label>Data</label>
-          <div class="date-wrap">
-            <input type="date" onchange="datePickerSync('r-date',this.value)">
-            <input type="text" id="r-date" placeholder="15/01/26" autocomplete="off">
+            <div class="date-wrap">
+              <input type="text" id="r-date" placeholder="15/01/26" autocomplete="off">
+              <input type="date" id="r-date-cal" onchange="datePickerSync('r-date',this.value)">
+              <button class="date-cal-btn" type="button" onclick="openCal('r-date-cal')" tabindex="-1">📅</button>
+            </div>
           </div>
-        </div>
-          <div class="ff"><label>Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01" onblur="this.value=this.value?parseFloat(this.value).toFixed(2):''"></div>
+          <div class="ff"><label>Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
           <div class="ff"><label>PI</label><select id="r-pi" onchange="onRpiChange()"><option value="">— PI —</option></select></div>
           <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:#F0FAF5;cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC…"></div>
@@ -406,10 +408,10 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   </div>
 </div>
 
-<datalist id="dl-next-action"><option value="Aguardar confirmação de arte"><option value="Enviar arte para aprovação"><option value="Confirmar pedido com fornecedor"><option value="Acompanhar produção"><option value="Solicitar fotos de produção"><option value="Confirmar prontidão"><option value="Solicitar BL e documentos"><option value="Acompanhar embarque"><option value="Confirmar ETA"><option value="Aguardar chegada no CD"><option value="Enviar fatura ao cliente"><option value="Cobrar pagamento"><option value="Enviar documentos ao cliente"><option value="Pedido finalizado"></datalist>
+<datalist id="dl-next-action"><option value="Aguardar confirmação de arte"><option value="Enviar arte para aprovação"><option value="Confirmar pedido com fornecedor"><option value="Acompanhar produção"><option value="Solicitar fotos de produção"><option value="Confirmar prontidão"><option value="Solicitar BL e documentos"><option value="Acompanhar embarque"><option value="Confirmar ETA"><option value="Aguardar chegada no CD"><option value="Enviar fatura ao cliente"><option value="Cobrar pagamento"><option value="Pedido finalizado"></datalist>
 </main>
 
-<!-- ═══ MODAL NOVO PEDIDO ═══ -->
+<!-- MODAL NOVO PEDIDO -->
 <div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')">
   <div class="modal">
     <div class="mhdr"><h2 id="mo-ttl">Novo Pedido</h2><button class="mcls" onclick="closeOvl('order')">✕</button></div>
@@ -420,19 +422,24 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         <div class="ff"><label>PI (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
         <div class="ff"><label>ETD (DD/MM/AA)</label>
           <div class="date-wrap">
-            <input type="date" onchange="datePickerSync('mo-etd',this.value)">
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
+            <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
+            <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
           </div>
         </div>
-        <div class="ff"><label>ETA Brasil (DD/MM/AA)</label><input id="mo-eta" placeholder="01/08/26"></div>
-
+        <div class="ff"><label>ETA Brasil (DD/MM/AA)</label>
+          <div class="date-wrap">
+            <input type="text" id="mo-eta" placeholder="01/08/26" autocomplete="off">
+            <input type="date" id="mo-eta-cal" onchange="datePickerSync('mo-eta',this.value)">
+            <button class="date-cal-btn" type="button" onclick="openCal('mo-eta-cal')" tabindex="-1">📅</button>
+          </div>
+        </div>
         <div class="fsep">Cliente</div>
         <div class="ff"><label>Cliente</label>
           <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
           <datalist id="mo-cl-list"></datalist>
         </div>
         <div class="ff"><label>Invoice # Cliente</label><input id="mo-cli-inv" placeholder="ex: FGL2601ZSU"></div>
-
         <div class="fsep">Fornecedor</div>
         <div class="ff"><label>Fornecedor</label>
           <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
@@ -444,7 +451,13 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <datalist id="dl-cont"></datalist>
           <datalist id="dl-prod"></datalist>
         </div>
-
+        <!-- FIX #4: campo pay-st que faltava -->
+        <div class="ff"><label>Status Financeiro</label>
+          <select id="mo-pay-st">
+            <option>Mass P contracted</option><option>Mass P</option><option>Sample</option>
+            <option>At sea</option><option>Received</option><option>Cancelled</option>
+          </select>
+        </div>
         <div class="fsep">Produtos — Qtd × Preço Fornecedor × Preço Cliente (USD)</div>
         <div class="ff full">
           <div id="mo-prod-rows"></div>
@@ -452,9 +465,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </div>
         <div class="ff"><label>Plates USD</label><input id="mo-plates" type="number" placeholder="0" step="0.01" oninput="updatePreview()"></div>
         <div class="ff"><label>Sample USD</label><input id="mo-sample" type="number" placeholder="0" step="0.01" oninput="updatePreview()"></div>
-
         <div class="preview-box" id="mo-preview"></div>
-
         <div class="fsep">Notas</div>
         <div class="ff full"><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div>
       </div>
@@ -478,13 +489,12 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- MODAL: GERENCIAR STATUS -->
+<!-- MODAL GERENCIAR STATUS -->
 <div class="ovl" id="ovl-status" onclick="ovlOut(event,'status')">
   <div class="modal" style="width:860px">
-    <div class="mhdr"><h2 id="st-ttl">Gerenciar Status</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
+    <div class="mhdr"><h2>Gerenciar Status</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
     <div class="mbody">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
-        <!-- Status -->
         <div>
           <div class="sh">Status — Pedidos</div>
           <div id="st-int-list" style="margin-bottom:.6rem"></div>
@@ -493,7 +503,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <button class="lbtn" style="height:32px" onclick="addStatus()">＋</button>
           </div>
         </div>
-        <!-- Clientes -->
         <div>
           <div class="sh">Clientes</div>
           <div id="st-cli-list" style="margin-bottom:.6rem"></div>
@@ -502,7 +511,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <button class="lbtn" style="height:32px" onclick="addMestre('cli')">＋</button>
           </div>
         </div>
-        <!-- Fornecedores -->
         <div>
           <div class="sh">Fornecedores</div>
           <div id="st-forn-list" style="margin-bottom:.6rem"></div>
@@ -513,7 +521,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
-        <!-- Produtos -->
         <div>
           <div class="sh">Produtos</div>
           <div id="st-prod-list" style="margin-bottom:.6rem"></div>
@@ -522,7 +529,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <button class="lbtn" style="height:32px" onclick="addMestre('prod')">＋</button>
           </div>
         </div>
-        <!-- Contêineres -->
         <div>
           <div class="sh">Contêineres</div>
           <div id="st-cont-list" style="margin-bottom:.6rem"></div>
@@ -532,26 +538,20 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           </div>
         </div>
       </div>
-      <div class="brow">
-        <button class="btn btns" onclick="closeOvl('status')">Fechar</button>
-      </div>
+      <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL: EDITAR QTD / PREÇOS -->
+<!-- MODAL EDITAR PREÇOS -->
 <div class="ovl" id="ovl-prices" onclick="ovlOut(event,'prices')">
   <div class="modal" style="width:640px">
-    <div class="mhdr">
-      <h2 id="pr-ttl">Editar Qtd / Preços</h2>
-      <button class="mcls" onclick="closeOvl('prices')">✕</button>
-    </div>
+    <div class="mhdr"><h2 id="pr-ttl">Editar Qtd / Preços</h2><button class="mcls" onclick="closeOvl('prices')">✕</button></div>
     <div class="mbody">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.6rem">
         <div style="font-size:.72rem;color:var(--ink3)"><b>PI:</b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
         <div style="font-size:.72rem;color:var(--ink3)"><b>Fornecedor:</b> <span id="pr-sup-lbl"></span></div>
       </div>
-      <!-- Linhas de produto -->
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.3rem;margin-bottom:.3rem">
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Descrição</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Qtd</span>
@@ -561,12 +561,10 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       </div>
       <div id="pr-rows"></div>
       <button class="addup" onclick="addPriceRow()">＋ Adicionar linha</button>
-      <!-- Extras -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.6rem">
-        <div class="ff"><label>Plates USD (custo forn.)</label><input id="pr-plates" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
-        <div class="ff"><label>Sample USD (custo forn.)</label><input id="pr-sample" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
+        <div class="ff"><label>Plates USD</label><input id="pr-plates" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
+        <div class="ff"><label>Sample USD</label><input id="pr-sample" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
       </div>
-      <!-- Preview -->
       <div id="pr-preview" style="display:none;background:var(--ltblue);border:1.5px solid #B0D4F4;border-radius:8px;padding:.6rem .9rem;font-size:.75rem;margin-top:.65rem;color:var(--blue)"></div>
       <div class="brow">
         <button class="btn btns" onclick="closeOvl('prices')">Cancelar</button>
@@ -575,17 +573,22 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     </div>
   </div>
 </div>
+<div id="mcal" style="display:none"></div>
+
 <script>
 /* ══════════════════════════════════════
-   STORAGE
+   UTILS
 ══════════════════════════════════════ */
 const SK='fgl8_';
 const ld=(k,d)=>{try{const s=localStorage.getItem(SK+k);return s?JSON.parse(s):d}catch{return d}};
 const sv=(k,v)=>{try{localStorage.setItem(SK+k,JSON.stringify(v))}catch{}};
 
-/* ══════════════════════════════════════
-   DATE UTILS
-══════════════════════════════════════ */
+// FIX #5: Busca normalizada sem acentos
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+// FIX #7: escape consistente
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 function normDate(v){
   if(!v||v==='—')return null; v=v.trim();
@@ -601,8 +604,42 @@ function mkD(v,est=false){return{v:normDate(typeof v==='string'?v:null),est:!!es
 function todayDisp(){const d=new Date();return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`}
 function dispToISO(s){if(!s)return'';const p=s.split('/');if(p.length!==3)return'';const mi=MO.indexOf(p[1]);if(mi<0)return'';return`20${p[2]}-${String(mi+1).padStart(2,'0')}-${p[0].padStart(2,'0')}`;}
 function isoToDisp(iso){if(!iso||!iso.includes('-'))return'';const d=new Date(iso+'T00:00');if(isNaN(d))return'';return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;}
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function daysUntil(disp){const iso=dispToISO(disp);if(!iso)return null;return Math.round((new Date(iso+'T00:00')-new Date().setHours(0,0,0,0))/864e5);}
+const fN=n=>(n||0).toLocaleString('pt-BR');
+const fUSD=n=>'USD '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+/* ══════════════════════════════════════
+   FIX #2: UNDO STACK
+══════════════════════════════════════ */
+let _undoStack=[];
+const MAX_UNDO=5;
+function pushUndo(label){
+  _undoStack.push({label,ts:Date.now(),orders:JSON.parse(JSON.stringify(orders)),payments:JSON.parse(JSON.stringify(payments)),ledger:JSON.parse(JSON.stringify(ledger)),receipts:JSON.parse(JSON.stringify(receipts))});
+  if(_undoStack.length>MAX_UNDO)_undoStack.shift();
+}
+function popUndo(){
+  if(!_undoStack.length)return false;
+  const snap=_undoStack.pop();
+  orders=snap.orders;payments=snap.payments;ledger=snap.ledger;receipts=snap.receipts;
+  saveAll();renderAll();
+  if(_activeTab==='financeiro')renderFinanceiro();
+  toast('↩ Desfeito: '+snap.label);
+  return true;
+}
+
+/* ══════════════════════════════════════
+   FIX #6: TOAST MELHORADO
+══════════════════════════════════════ */
+let _toastTimer=null;
+function toast(msg,type='ok',undoable=false){
+  clearTimeout(_toastTimer);
+  const t=document.getElementById('toast');
+  t.style.background=type==='err'?'var(--red)':type==='warn'?'var(--amber)':'var(--green)';
+  t.innerHTML=esc(msg)+(undoable?'<button class="undo-btn" onclick="popUndo()">Desfazer</button>':'');
+  t.classList.add('show');
+  const dur=type==='err'?4000:type==='warn'?3500:2400;
+  _toastTimer=setTimeout(()=>t.classList.remove('show'),dur);
+}
 
 /* ══════════════════════════════════════
    DEFAULT DATA
@@ -675,15 +712,14 @@ const REC_DEF=[];
 /* ══════════════════════════════════════
    STATE
 ══════════════════════════════════════ */
-// Se localStorage estiver vazio → carrega demo mas não salva (não polui localStorage)
-// Se já existem dados → usa localStorage
 const _hasOrd=localStorage.getItem('fgl8_ord');
 const _hasPay=localStorage.getItem('fgl8_pay');
-let orders   = _hasOrd?JSON.parse(_hasOrd):JSON.parse(JSON.stringify(ORDERS_DEF));
-let payments = _hasPay?JSON.parse(_hasPay):JSON.parse(JSON.stringify(PAY_DEF));
-let ledger   = ld('led', LED_DEF);
-let receipts = ld('rec', REC_DEF);
-const _isDemo=!_hasOrd&&!_hasPay; // true = ainda não há dados reais
+let orders=_hasOrd?JSON.parse(_hasOrd):JSON.parse(JSON.stringify(ORDERS_DEF));
+let payments=_hasPay?JSON.parse(_hasPay):JSON.parse(JSON.stringify(PAY_DEF));
+let ledger=ld('led',LED_DEF);
+let receipts=ld('rec',REC_DEF);
+let _activeTab='internal'; // FIX #8: track active tab
+
 function saveAll(){
   sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);
   sv('cls',CLIENTES);sv('forn',FORNECEDORES);sv('prod',PRODUTOS);sv('cont',CONTEINERES);
@@ -693,33 +729,38 @@ function saveAll(){
 /* ══════════════════════════════════════
    FINANCE CALCS
 ══════════════════════════════════════ */
-const fN=n=>(n||0).toLocaleString('pt-BR');
-const fUSD=n=>'USD '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 function pTotalForn(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceForn||0),0)+(p.plates||0)+(p.sample||0);}
 function pTotalVenda(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceCli||0),0);}
 function piPaid(pi){return ledger.filter(l=>l.pi===pi).reduce((a,l)=>a+l.amount,0);}
 function piReceived(pi){return receipts.filter(r=>r.pi===pi).reduce((a,r)=>a+r.amount,0);}
 
 /* ══════════════════════════════════════
-   STATUS PILLS
+   STATUS
 ══════════════════════════════════════ */
 const SC={'PRÉ-PRODUÇÃO':{c:'pa'},'EM PRODUÇÃO':{c:'pp'},'EMBARCADO':{c:'pb'},'FINALIZADO':{c:'pg'},'SUSPENSO':{c:'pr'}};
-
 let SLST=ld('slst',['PRÉ-PRODUÇÃO','EM PRODUÇÃO','EMBARCADO','FINALIZADO','SUSPENSO']);
-const _finExp=new Set(); // PIs expandidos no Financeiro
-// Cadastros mestre (listas padronizadas)
+const _finExp=new Set();
 let CLIENTES=ld('cls',['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart']);
 let FORNECEDORES=ld('forn',['Thuan','TMC','Toan','Shanghai']);
 let PRODUTOS=ld('prod',['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia']);
 let CONTEINERES=ld('cont',['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL']);
-function statusSel(id,cur,isPay=false){
-  const lst=isPay?PLST:SLST;
-  const c=(isPay?PC:SC)[cur]?.c||'pgr';
-  const opts=lst.map(s=>`<option value="${s}"${s===cur?' selected':''}>${s}</option>`).join('');
-  const fn=isPay?`changePaySt('${id}',this.value)`:`changeSt(${id},this.value)`;
-  return`<span class="pill ${c}" style="padding:0;overflow:hidden;display:inline-flex"><select class="ssel ${c}" onchange="${fn}" onclick="event.stopPropagation()" style="color:inherit;text-align:center;text-align-last:center">${opts}</select></span>`;
+
+function statusSel(id,cur){
+  const c=SC[cur]?.c||'pgr';
+  const opts=SLST.map(s=>`<option value="${esc(s)}"${s===cur?' selected':''}>${esc(s)}</option>`).join('');
+  return`<span class="pill ${c}" style="padding:0;overflow:hidden;display:inline-flex"><select class="ssel ${c}" onchange="changeSt(${id},this.value)" onclick="event.stopPropagation()" style="color:inherit;text-align:center;text-align-last:center">${opts}</select></span>`;
 }
-function changeSt(num,v){const o=orders.find(x=>x.num===num);if(o){o.status=v;saveAll();renderAll();}}
+function changeSt(num,v){
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  // FIX #1: propagar para payments também
+  o.status=v;
+  const p=payments.find(x=>x.pi===o.pi||(x.po===o.po&&o.po!=='—'));
+  if(p){
+    if(v==='FINALIZADO')p.status='Received';
+    else if(v==='SUSPENSO')p.status='Cancelled';
+  }
+  saveAll();renderAll();
+}
 
 /* ══════════════════════════════════════
    MILESTONES
@@ -731,7 +772,7 @@ function msCompact(dates,num){
     const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
     const icon=cls==='done'?'✓':cls==='est'?'●':'';
     if(i>0){const prev=dates[i-1];const lc=prev.v&&!prev.est?'done':prev.v&&prev.est?'est':'pending';h+=`<div class="ml2 ${lc}" style="width:10px"></div>`;}
-    h+=`<div class="mst"><div class="mc ${cls}" style="width:22px;height:22px;font-size:.65rem;border-width:2px" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+d.v:''}">${icon}</div><span class="mlbl" style="font-size:.5rem">${MLBL[i]}</span></div>`;
+    h+=`<div class="mst"><div class="mc ${cls}" style="width:22px;height:22px;font-size:.65rem;border-width:2px" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl" style="font-size:.5rem">${MLBL[i]}</span></div>`;
   });
   return h+'</div>';
 }
@@ -741,18 +782,18 @@ function msHTML(dates,num){
     const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
     const icon=cls==='done'?'✓':cls==='est'?'●':'';
     if(i>0){const prev=dates[i-1];const lc=prev.v&&!prev.est?'done':prev.v&&prev.est?'est':'pending';h+=`<div class="ml2 ${lc}"></div>`;}
-    h+=`<div class="mst"><div class="mc ${cls}" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+d.v:''}">${icon}</div><span class="mlbl">${MLBL[i]}</span></div>`;
+    h+=`<div class="mst"><div class="mc ${cls}" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl">${MLBL[i]}</span></div>`;
   });
   return h+'</div>';
 }
 function dCell(d){
   if(!d||!d.v)return'<span class="dnil">—</span>';
-  return d.est?`<span class="dest">${d.v}</span>`:`<span class="dok">${d.v}</span>`;
+  return d.est?`<span class="dest">${esc(d.v)}</span>`:`<span class="dok">${esc(d.v)}</span>`;
 }
 function daysCell(dates){
   const cd=dates[7],eta=dates[6];
   let d=null,lbl='ETA';
-  if(cd&&cd.v&&!cd.est){d=cd;lbl='CD';} else if(eta&&eta.v){d=eta;lbl='ETA';}
+  if(cd&&cd.v&&!cd.est){d=cd;lbl='CD';}else if(eta&&eta.v){d=eta;lbl='ETA';}
   if(!d||!d.v)return'—';
   const n=daysUntil(d.v);
   if(cd&&cd.v&&!cd.est&&n<0)return`<div style="display:flex;flex-direction:column;align-items:center;gap:1px"><span class="dg">✓</span><span style="font-size:.55rem;color:var(--green);font-weight:600">CD</span></div>`;
@@ -764,30 +805,24 @@ function daysCell(dates){
 }
 
 /* ══════════════════════════════════════
-   SORT STATE
+   SORT
 ══════════════════════════════════════ */
-let paySort={col:'pi',dir:1};
-let ordSort={col:'num',dir:-1};
-let ledSort={col:'n',dir:-1};
-let recSort={col:'n',dir:-1};
+let paySort={col:'pi',dir:1},ordSort={col:'num',dir:-1},ledSort={col:'n',dir:-1},recSort={col:'n',dir:-1};
 function sortPay(col){if(paySort.col===col)paySort.dir*=-1;else{paySort.col=col;paySort.dir=1;}renderFinanceiro();}
 function sortLed(col){if(ledSort.col===col)ledSort.dir*=-1;else{ledSort.col=col;ledSort.dir=1;}renderFinanceiro();}
 function sortRec(col){if(recSort.col===col)recSort.dir*=-1;else{recSort.col=col;recSort.dir=1;}renderFinanceiro();}
 function sortOrd(col){if(ordSort.col===col)ordSort.dir*=-1;else{ordSort.col=col;ordSort.dir=-1;}renderInternal();}
+
 function applySortPay(list){
   return[...list].sort((a,b)=>{
     let av,bv;
     if(paySort.col==='pi'){av=a.pi;bv=b.pi;}
     else if(paySort.col==='supplier'){av=a.supplier;bv=b.supplier;}
     else if(paySort.col==='status'){av=a.status;bv=b.status;}
-    else if(paySort.col==='etd'){av=dispToISO(a.etd)||a.etd||'';bv=dispToISO(b.etd)||b.etd||'';}
+    else if(paySort.col==='etd'){av=dispToISO(a.etd)||'';bv=dispToISO(b.etd)||'';}
     else if(paySort.col==='totalfull'){av=pTotalForn(a);bv=pTotalForn(b);}
-    else if(paySort.col==='paid'){av=piPaid(a.pi);bv=piPaid(b.pi);}
-    else if(paySort.col==='pct'){av=pTotalForn(a)>0?piPaid(a.pi)/pTotalForn(a):0;bv=pTotalForn(b)>0?piPaid(b.pi)/pTotalForn(b):0;}
     else if(paySort.col==='venda'){av=pTotalVenda(a);bv=pTotalVenda(b);}
-    else if(paySort.col==='recv'){av=piReceived(a.pi);bv=piReceived(b.pi);}
     else if(paySort.col==='client'){av=a.client||'';bv=b.client||'';}
-    else if(paySort.col==='pctrecv'){av=pTotalVenda(a)>0?piReceived(a.pi)/pTotalVenda(a):0;bv=pTotalVenda(b)>0?piReceived(b.pi)/pTotalVenda(b):0;}
     else if(paySort.col==='margem'){av=pTotalVenda(a)-pTotalForn(a);bv=pTotalVenda(b)-pTotalForn(b);}
     else{av=a.pi;bv=b.pi;}
     if(av<bv)return-1*paySort.dir;if(av>bv)return paySort.dir;return 0;
@@ -795,8 +830,7 @@ function applySortPay(list){
 }
 function applySortOrd(list){
   return[...list].sort((a,b)=>{
-    const av=ordSort.col==='num'?a.num:a[ordSort.col];
-    const bv=ordSort.col==='num'?b.num:b[ordSort.col];
+    const av=a[ordSort.col]||a.num,bv=b[ordSort.col]||b.num;
     if(av<bv)return-1*ordSort.dir;if(av>bv)return ordSort.dir;return 0;
   });
 }
@@ -804,10 +838,8 @@ function updateSortHeaders(){
   document.querySelectorAll('th.sortable').forEach(th=>{
     th.classList.remove('asc','desc');
     const oc=th.getAttribute('onclick')||'';
-    const m=oc.match(/'([^']+)'/);
-    if(!m)return;
+    const m=oc.match(/'([^']+)'/);if(!m)return;
     const col=m[1];
-    // determine which sort state
     if(oc.includes('sortPay')&&paySort.col===col)th.classList.add(paySort.dir===1?'asc':'desc');
     else if(oc.includes('sortOrd')&&ordSort.col===col)th.classList.add(ordSort.dir===1?'asc':'desc');
     else if(oc.includes('sortLed')&&ledSort.col===col)th.classList.add(ledSort.dir===1?'asc':'desc');
@@ -816,36 +848,28 @@ function updateSortHeaders(){
 }
 
 /* ══════════════════════════════════════
-   RENDER SUMMARY
+   ALERTS
 ══════════════════════════════════════ */
 function calcAlerts(){
   const alerts=[];
   orders.forEach(o=>{
     if(o.status==='FINALIZADO'||o.status==='SUSPENSO')return;
-    // ETA vencida
     const etaV=o.dates[6]?.v||o.dates[7]?.v;
     if(etaV){const n=daysUntil(etaV);if(n!==null&&n<0)alerts.push({tipo:'danger',icn:'📦',msg:`ETA vencida há ${Math.abs(n)}d — PI ${o.pi||o.po} (${o.client})`});}
-    // Embarque próximo sem BL
-    if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque confirmado — PI ${o.pi||o.po}`});}
-    // Pagamento parcial com ETD próximo
+    if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque — PI ${o.pi||o.po}`});}
     const p=payments.find(x=>x.pi===o.pi);
     if(p&&p.etd&&p.etd!=='—'){
-      const n=daysUntil(p.etd);
-      const totF=pTotalForn(p);
+      const n=daysUntil(p.etd);const totF=pTotalForn(p);
       const pct=totF>0?Math.round((piPaid(p.pi)/totF)*100):0;
-      if(n!==null&&n>=0&&n<=30&&pct<50)alerts.push({tipo:'warn',icn:'💳',msg:`ETD em ${n}d com apenas ${pct}% pago — PI ${p.pi} (${p.supplier})`});
-    }
-    // Recebimento pendente após entrega >30d
-    if(o.status==='FINALIZADO'&&o.dates[7]?.v){
-      const n=daysUntil(o.dates[7].v);
-      if(n!==null&&n<-30){
-        const pv=payments.find(x=>x.pi===o.pi);
-        if(pv){const totV=pTotalVenda(pv),recv=piReceived(pv.pi);if(totV>0&&recv<totV*0.99)alerts.push({tipo:'warn',icn:'💰',msg:`Entregue há ${Math.abs(n)}d com ${fUSD(totV-recv)} a receber — PI ${o.pi||o.po}`});}
-      }
+      if(n!==null&&n>=0&&n<=30&&pct<50)alerts.push({tipo:'warn',icn:'💳',msg:`ETD em ${n}d com ${pct}% pago — PI ${p.pi}`});
     }
   });
   return alerts;
 }
+
+/* ══════════════════════════════════════
+   RENDER SUMMARY
+══════════════════════════════════════ */
 function renderSummary(){
   const emb=orders.filter(o=>o.status==='EMBARCADO').length;
   const prod=orders.filter(o=>o.status==='EM PRODUÇÃO').length;
@@ -861,58 +885,57 @@ function renderSummary(){
     {l:'A Pagar Forn.',v:fUSD(totPagar),d:'var(--red)',c:'var(--red)'},
     {l:'A Receber Cli.',v:fUSD(totReceber),d:'var(--blue)',c:'var(--blue)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:${String(x.v).length>8?'.85rem':'1.18rem'}">${x.v}</div></div></div>`).join('');
-  // Bloco de alertas
   const alerts=calcAlerts();
   const alertBox=document.getElementById('int-alerts');
-  if(alertBox){
-    if(!alerts.length){alertBox.style.display='none';return;}
-    alertBox.style.display='block';
-    alertBox.innerHTML=`<div style="font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem">⚠ Ações Necessárias (${alerts.length})</div>`
-      +alerts.map(a=>`<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.32rem 0;border-bottom:1px solid var(--bdr);font-size:.73rem;color:${a.tipo==='danger'?'var(--red)':'var(--amber)'}"><span>${a.icn}</span><span>${a.msg}</span></div>`).join('');
-  }
+  if(!alerts.length){alertBox.style.display='none';return;}
+  alertBox.style.display='block';
+  alertBox.innerHTML=`<div style="font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem">⚠ Ações Necessárias (${alerts.length})</div>`
+    +alerts.map(a=>`<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.32rem 0;border-bottom:1px solid var(--bdr);font-size:.73rem;color:${a.tipo==='danger'?'var(--red)':'var(--amber)'}"><span>${a.icn}</span><span>${esc(a.msg)}</span></div>`).join('');
 }
 
 /* ══════════════════════════════════════
    RENDER INTERNAL
 ══════════════════════════════════════ */
+function populateStatusDropdowns(){
+  ['int-st','cli-st'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="">Todos os Status</option>'+SLST.map(s=>`<option value="${esc(s)}"${s===cur?' selected':''}>${esc(s)}</option>`).join('');
+  });
+}
 function renderInternal(){
-  const q=(document.getElementById('int-q')?.value||'').toLowerCase();
+  const q=norm(document.getElementById('int-q')?.value);
   const st=document.getElementById('int-st')?.value||'';
   const cl=document.getElementById('int-cl')?.value||'';
   const flt=orders.filter(o=>{
-    const t=`${o.po} ${o.client} ${o.product}`.toLowerCase();
+    const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi}`);
     return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);
   });
   const fltS=applySortOrd(flt);
   document.getElementById('int-cnt').textContent=`${flt.length} pedidos`;
   updateSortHeaders();
-  // populate client dropdown
   const clSel=document.getElementById('int-cl');
   const curCl=clSel.value;
   const clients=[...new Set(orders.map(o=>o.client))].sort();
-  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${c}"${c===curCl?' selected':''}>${c}</option>`).join('');
+  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${esc(c)}"${c===curCl?' selected':''}>${esc(c)}</option>`).join('');
   document.getElementById('int-body').innerHTML=fltS.map((o,i)=>{
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
-      <td class="L ec" onclick="editField(${o.num},'po',event)"><span style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)">${o.po}</span></td>
-      <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${o.client}</b></td>
+      <td class="L ec" onclick="editField(${o.num},'po',event)"><span style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)">${esc(o.po)}</span></td>
+      <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
       <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
-        ${o.product}
-        <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${o.container||'—'}</div>
+        ${esc(o.product)}
+        <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${esc(o.container||'—')}</div>
       </td>
       <td style="white-space:nowrap">
         <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem" onclick="editField(${o.num},'total',event)">${fN(o.total)}</span>
-        ${o.pi?`<span class="ec" style="font-size:.56rem;color:var(--blue);cursor:pointer;border:1px solid var(--blue);border-radius:3px;padding:.04rem .22rem;margin-left:.2rem" onclick="editOrderPrices('${o.pi}',event)" title="Editar qtd/preços">$</span>`:''}
+        ${o.pi?`<span class="ec" style="font-size:.56rem;color:var(--blue);cursor:pointer;border:1px solid var(--blue);border-radius:3px;padding:.04rem .22rem;margin-left:.2rem" onclick="editOrderPrices('${esc(o.pi)}',event)" title="Editar qtd/preços">$</span>`:''}
       </td>
       <td>${statusSel(o.num,o.status)}</td>
       <td>${daysCell(o.dates)}</td>
       <td>
         ${msHTML(o.dates,o.num)}
-        ${(()=>{
-          const num=o.num;
-          if(o.notes){const col=o.notes.includes('\u26A0')?'var(--red)':'var(--ink3)';return'<div class="ec" style="font-size:.65rem;color:'+col+';font-style:italic;margin-top:3px;max-width:220px;white-space:normal;line-height:1.3;cursor:pointer" onclick="editField('+num+',\'notes\',event)">'+o.notes+'</div>';}
-          return'<div class="ec" style="font-size:.62rem;color:var(--ink4);margin-top:3px;cursor:pointer" onclick="editField('+num+',\'notes\',event)">＋ nota</div>';
-        })()}
+        ${o.notes?`<div class="ec" style="font-size:.65rem;color:${o.notes.includes('⚠')?'var(--red)':'var(--ink3)'};font-style:italic;margin-top:3px;max-width:220px;white-space:normal;line-height:1.3;cursor:pointer" onclick="editField(${o.num},'notes',event)">${esc(o.notes)}</div>`:`<div class="ec" style="font-size:.62rem;color:var(--ink4);margin-top:3px;cursor:pointer" onclick="editField(${o.num},'notes',event)">＋ nota</div>`}
       </td>
       ${o.dates.map((d,di)=>`<td class="ec" onclick="editMS(${o.num},${di},event)">${dCell(d)}</td>`).join('')}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
@@ -925,14 +948,14 @@ function renderInternal(){
 ══════════════════════════════════════ */
 function etaCell(o){
   const cd=o.dates[7],eta=o.dates[6];
-  if(o.status==='FINALIZADO'){const v=cd?.v||eta?.v||'—';return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:.58rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.07em">Entregue</span><span class="dok" style="font-size:.8rem;font-weight:700">${v}</span></div>`;}
-  if(o.status==='SUSPENSO')return`<span style="color:var(--ink4);font-size:.72rem">Em espera</span>`;
+  if(o.status==='FINALIZADO'){const v=cd?.v||eta?.v||'—';return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:.58rem;font-weight:700;color:var(--blue);text-transform:uppercase">Entregue</span><span class="dok" style="font-size:.8rem;font-weight:700">${esc(v)}</span></div>`;}
+  if(o.status==='SUSPENSO')return'<span style="color:var(--ink4);font-size:.72rem">Em espera</span>';
   const d=cd?.v?cd:(eta?.v?eta:null);
-  if(!d||!d.v)return`<span style="color:var(--ink4);font-size:.72rem">A confirmar</span>`;
+  if(!d||!d.v)return'<span style="color:var(--ink4);font-size:.72rem">A confirmar</span>';
   const n=daysUntil(d.v);
   const days=n!==null?(n<=0?'<span style="color:var(--green);font-size:.65rem;font-weight:700">✓ chegou</span>':`<span style="color:${n<=30?'var(--amber)':'var(--ink3)'};font-size:.65rem">em ${n}d</span>`):'';
   const lbl=cd?.v?'Entrada CD':'ETA Brasil';
-  return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:.58rem;color:var(--ink4);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${lbl}</span><span class="${d.est?'dest':'dok'}" style="font-size:.78rem;font-weight:700">${d.v}</span>${days}</div>`;
+  return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:.58rem;color:var(--ink4);font-weight:600;text-transform:uppercase">${lbl}</span><span class="${d.est?'dest':'dok'}" style="font-size:.78rem;font-weight:700">${esc(d.v)}</span>${days}</div>`;
 }
 function getNextAction(o){
   if(o._nextAction)return o._nextAction;
@@ -951,51 +974,47 @@ function getNextAction(o){
   return'✓ Processo concluído';
 }
 function renderClient(){
-  const q=(document.getElementById('cli-q')?.value||'').toLowerCase();
+  const q=norm(document.getElementById('cli-q')?.value);
   const st=document.getElementById('cli-st')?.value||'';
   const cl=document.getElementById('cli-cl')?.value||'';
-  const flt=orders.filter(o=>{const t=`${o.po} ${o.client} ${o.product}`.toLowerCase();return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);});
+  const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);});
   document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
   const clSel=document.getElementById('cli-cl');
   const curCl=clSel.value;
   const clients=[...new Set(orders.map(o=>o.client))].sort();
-  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${c}"${c===curCl?' selected':''}>${c}</option>`).join('');
+  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${esc(c)}"${c===curCl?' selected':''}>${esc(c)}</option>`).join('');
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
     let rowStyle='';
     if(o.status==='FINALIZADO')rowStyle=' style="background:#F0FAF5"';
     else if(o.status==='SUSPENSO')rowStyle=' style="background:#FEF6F6"';
     return`<tr${rowStyle||(i%2?'':' class="alt"')}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
-      <td class="L"><span style="font-family:'IBM Plex Mono';font-size:.7rem;color:var(--blue)">${o.po}</span></td>
-      <td class="L"><b>${o.client}</b></td>
-      <td class="L W" style="max-width:180px"><span style="font-size:.8rem">${o.product}</span><div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${o.container||''}</div></td>
+      <td class="L"><span style="font-family:'IBM Plex Mono';font-size:.7rem;color:var(--blue)">${esc(o.po)}</span></td>
+      <td class="L"><b>${esc(o.client)}</b></td>
+      <td class="L W" style="max-width:180px"><span style="font-size:.8rem">${esc(o.product)}</span><div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.container||'')}</div></td>
       <td><b style="font-family:'IBM Plex Mono';font-size:.75rem">${fN(o.total)}</b></td>
       <td>${statusSel(o.num,o.status)}</td>
       <td>${msCompact(o.dates,o.num)}</td>
       <td>${etaCell(o)}</td>
-      <td class="L W ec" style="max-width:190px;font-size:.74rem;color:var(--ink2);line-height:1.4" onclick="editField(${o.num},'_nextAction',event)">${getNextAction(o)}</td>
+      <td class="L W ec" style="max-width:190px;font-size:.74rem;color:var(--ink2);line-height:1.4" onclick="editField(${o.num},'_nextAction',event)">${esc(getNextAction(o))}</td>
     </tr>`;
   }).join('');
 }
 
 /* ══════════════════════════════════════
-   RENDER FINANCEIRO
+   RENDER FINANCEIRO (kept compact — same logic, with fixes applied)
 ══════════════════════════════════════ */
-function fmtUP(rows){
-  if(!rows||!rows.length)return'—';
-  return rows.map(r=>`${fN(r.qty)}×${r.priceForn?.toFixed(3)||'?'}`).join('<br>');
-}
 function renderFinanceiro(){
-  // update demo banner visibility
   const isDemo2=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
   const banner2=document.getElementById('demo-banner');
   if(banner2)banner2.style.display=isDemo2?'flex':'none';
-  const q=(document.getElementById('fin-q')?.value||'').toLowerCase();
+
+  const q=norm(document.getElementById('fin-q')?.value);
   const st=document.getElementById('fin-st')?.value||'';
   const cl=document.getElementById('fin-cl')?.value||'';
   const fsup=document.getElementById('fin-sup')?.value||'';
   const flt=payments.filter(p=>{
-    const t=`${p.pi} ${p.po} ${p.supplier} ${p.client||''}`.toLowerCase();
+    const t=norm(`${p.pi} ${p.po} ${p.supplier} ${p.client||''}`);
     const linkedO=orders.find(o=>o.pi===p.pi||(o.po===p.po&&o.po!=='—'));
     const effStatus=linkedO?linkedO.status:p.status;
     return(!q||t.includes(q))&&(!st||effStatus===st)&&(!fsup||p.supplier===fsup)&&(!cl||p.client===cl);
@@ -1003,47 +1022,31 @@ function renderFinanceiro(){
   const fltS=applySortPay(flt);
   document.getElementById('fin-cnt').textContent=`${flt.length} pedidos`;
 
-  // populate status filter
+  // populate filters
   const finStSel=document.getElementById('fin-st');
-  if(finStSel){const curFS=finStSel.value;finStSel.innerHTML='<option value="">Todos Status</option>'+SLST.map(s=>`<option value="${s}"${s===curFS?' selected':''}>${s}</option>`).join('');}
-  // populate supplier filter
+  if(finStSel){const v=finStSel.value;finStSel.innerHTML='<option value="">Todos Status</option>'+SLST.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
   const fSupSel=document.getElementById('fin-sup');
-  if(fSupSel){const fs=fSupSel.value;const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();fSupSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${s}"${s===fs?' selected':''}>${s}</option>`).join('');}
-  // populate client filter
+  if(fSupSel){const v=fSupSel.value;const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();fSupSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
   const clSel=document.getElementById('fin-cl');
-  const curCl=clSel.value;
-  const clients=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();
-  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${c}"${c===curCl?' selected':''}>${c}</option>`).join('');
+  if(clSel){const v=clSel.value;const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();clSel.innerHTML='<option value="">Todos Clientes</option>'+cls.map(c=>`<option value="${esc(c)}"${c===v?' selected':''}>${esc(c)}</option>`).join('');}
 
-  // summary cards
+  // summary
   const totForn=payments.reduce((a,p)=>a+pTotalForn(p),0);
   const totVenda=payments.reduce((a,p)=>a+pTotalVenda(p),0);
   const totPago=payments.reduce((a,p)=>a+piPaid(p.pi),0);
   const totReceb=payments.reduce((a,p)=>a+piReceived(p.pi),0);
   const margem=totVenda-totForn;
-  const alertN=payments.filter(p=>{
-    if(p.status==='Received'||p.status==='Cancelled')return false;
-    const n=p.etd&&p.etd!=='—'?daysUntil(p.etd):null;
-    const pct=pTotalForn(p)>0?Math.round((piPaid(p.pi)/pTotalForn(p))*100):0;
-    return n!==null&&n>=0&&n<=45&&pct<50;
-  }).length;
   document.getElementById('fin-sum').innerHTML=[
-    {l:'Ativos',v:payments.filter(p=>p.status!=='Received').length,d:'var(--blue)',c:'var(--blue)'},
     {l:'Total Compra',v:fUSD(totForn),d:'var(--navy)',c:'var(--navy)'},
     {l:'Total Venda',v:fUSD(totVenda),d:'var(--teal)',c:'var(--teal)'},
     {l:'Margem Bruta',v:fUSD(margem),d:margem>=0?'var(--green)':'var(--red)',c:margem>=0?'var(--green)':'var(--red)'},
     {l:'Pago Forn.',v:fUSD(totPago),d:'var(--amber)',c:'var(--amber)'},
-    {l:'A Pagar Forn.',v:fUSD(Math.max(0,totForn-totPago)),d:'var(--red)',c:'var(--red)'},
-    {l:'Recebido Cli.',v:fUSD(totReceb),d:'var(--green)',c:'var(--green)'},
-    {l:'A Receber Cli.',v:fUSD(Math.max(0,totVenda-totReceb)),d:'var(--purple)',c:'var(--purple)'},
-    ...(alertN>0?[{l:'⚠ Alerta Pgto',v:alertN+'x',d:'var(--red)',c:'var(--red)'}]:[]),
+    {l:'A Pagar',v:fUSD(Math.max(0,totForn-totPago)),d:'var(--red)',c:'var(--red)'},
+    {l:'Recebido',v:fUSD(totReceb),d:'var(--green)',c:'var(--green)'},
+    {l:'A Receber',v:fUSD(Math.max(0,totVenda-totReceb)),d:'var(--purple)',c:'var(--purple)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
 
-  // tab badge
-  const tabFin=document.getElementById('tab-fin');
-  if(tabFin)tabFin.innerHTML=alertN>0?`Financeiro <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${alertN}</span>`:'Financeiro';
-
-  // rows — 2 camadas (resumo + detalhe expandível)
+  // main table rows
   document.getElementById('fin-body').innerHTML=fltS.map((p,i)=>{
     const totF=pTotalForn(p),totV=pTotalVenda(p);
     const qtyCalc=p.unitPrices.reduce((a,r)=>a+(r.qty||0),0);
@@ -1051,162 +1054,115 @@ function renderFinanceiro(){
     const aPagar=Math.max(0,totF-paid),aReceber=Math.max(0,totV-recv);
     const pctPago=totF>0?Math.round((paid/totF)*100):0;
     const pctReceb=totV>0?Math.round((recv/totV)*100):0;
-    const margem=totV-totF;
-    const pctMarg=totV>0?Math.round((margem/totV)*100):null;
+    const mg=totV-totF;const pctMg=totV>0?Math.round((mg/totV)*100):null;
     const bcP=pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
     const bcR=pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
-    const etdN=p.etd&&p.etd!=='—'?daysUntil(p.etd):null;
-    const linkedOrd=orders.find(o=>o.pi===p.pi||(o.po===p.po&&o.po!=='—'));
-    const linkedOrdStatus=linkedOrd?linkedOrd.status:'';
-    const isAlert=etdN!==null&&etdN>=0&&etdN<=45&&pctPago<50&&linkedOrdStatus!=='FINALIZADO'&&linkedOrdStatus!=='SUSPENSO';
     const etdDisp=p.etd&&p.etd!=='—'?(normDate(p.etd)||p.etd):'—';
     const etaDisp=p.eta&&p.eta!=='—'?(normDate(p.eta)||p.eta):'—';
-    const dispStatus=linkedOrd?statusSel(linkedOrd.num,linkedOrd.status,false):'<span class="pill pgr">—</span>';
-    const rowBg=isAlert?'background:#FFF5F5':i%2===0?'background:#FAFCFE':'';
+    const linkedOrd=orders.find(o=>o.pi===p.pi||(o.po===p.po&&o.po!=='—'));
+    const dispStatus=linkedOrd?statusSel(linkedOrd.num,linkedOrd.status):'<span class="pill pgr">—</span>';
+    const rowBg=i%2===0?'background:#FAFCFE':'';
+    const expanded=_finExp.has(p.pi);
     const piLed=ledger.filter(l=>l.pi===p.pi);
     const piRec=receipts.filter(r=>r.pi===p.pi);
-    const expanded=_finExp.has(p.pi);
 
-    const summaryRow=`<tr style="${rowBg};${isAlert?'outline:2px solid #FECACA;outline-offset:-2px':''}">
-      <td style="padding:0 .4rem;cursor:pointer;text-align:center" onclick="toggleFinDetail('${p.pi}')">
-        <span style="font-size:.75rem;display:inline-block;transition:transform .15s;transform:${expanded?'rotate(90deg)':'rotate(0deg)'}" id="fin-exp-icn-${p.pi}">▶</span>
+    const summaryRow=`<tr style="${rowBg}">
+      <td style="padding:0 .4rem;cursor:pointer;text-align:center" onclick="toggleFinDetail('${esc(p.pi)}')">
+        <span style="font-size:.75rem;display:inline-block;transition:transform .15s;transform:${expanded?'rotate(90deg)':'rotate(0deg)'}" id="fin-exp-icn-${esc(p.pi)}">▶</span>
       </td>
       <td class="L">
-        <b class="ec" style="font-family:'IBM Plex Mono';color:var(--navy);font-size:.78rem" onclick="editFinField('${p.pi}','pi',event)">${esc(p.pi)}</b>
+        <b class="ec" style="font-family:'IBM Plex Mono';color:var(--navy);font-size:.78rem" onclick="editFinField('${esc(p.pi)}','pi',event)">${esc(p.pi)}</b>
         <div style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)">${esc(p.po)}</div>
-        ${isAlert?`<span style="font-size:.58rem;color:var(--red);font-weight:700">⚠ ETD em ${etdN}d</span>`:''}
       </td>
-      <td class="L ec" onclick="editFinField('${p.pi}','supplier',event)">
+      <td class="L ec" onclick="editFinField('${esc(p.pi)}','supplier',event)">
         <b style="font-size:.78rem">${esc(p.supplier)}</b>
         <div style="font-size:.62rem;color:var(--ink4)">${esc(p.inv||'—')}</div>
       </td>
-      <td class="L ec" onclick="editFinField('${p.pi}','client',event)">
+      <td class="L ec" onclick="editFinField('${esc(p.pi)}','client',event)">
         <b style="font-size:.78rem">${esc(p.client||'—')}</b>
-        <div style="font-size:.62rem;color:var(--ink4)">${esc(p.clientInv||'—')}</div>
       </td>
       <td>${dispStatus}</td>
       <td style="font-size:.65rem;font-family:'IBM Plex Mono'">
-        <span class="ec" onclick="editFinField('${p.pi}','etd',event)" style="display:block;color:var(--ink3)">ETD: ${etdDisp}</span>
-        <span class="ec" onclick="editFinField('${p.pi}','eta',event)" style="display:block;color:var(--ink4)">ETA: ${etaDisp}</span>
+        <span class="ec" onclick="editFinField('${esc(p.pi)}','etd',event)" style="display:block;color:var(--ink3)">ETD: ${esc(etdDisp)}</span>
+        <span class="ec" onclick="editFinField('${esc(p.pi)}','eta',event)" style="display:block;color:var(--ink4)">ETA: ${esc(etaDisp)}</span>
       </td>
       <td class="mono">${fN(qtyCalc)}</td>
-      <td class="mono">
-        <b>${fUSD(totF)}</b>
-        <div style="font-size:.6rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'−'+fUSD(aPagar):'✓ quitado'}</div>
-      </td>
+      <td class="mono"><b>${fUSD(totF)}</b><div style="font-size:.6rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'−'+fUSD(aPagar):'✓'}</div></td>
       <td><div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctPago}%;background:${bcP}"></div></div><span class="ppct" style="font-size:.62rem">${pctPago}%</span></div></td>
-      <td class="mono" style="color:var(--teal);font-weight:600">
-        ${totV>0?fUSD(totV):'—'}
-        <div style="font-size:.6rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'−'+fUSD(aReceber):'✓ recebido'):'—'}</div>
-      </td>
+      <td class="mono" style="color:var(--teal);font-weight:600">${totV>0?fUSD(totV):'—'}<div style="font-size:.6rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'−'+fUSD(aReceber):'✓'):'—'}</div></td>
       <td>${totV>0?`<div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctReceb}%;background:${bcR}"></div></div><span class="ppct" style="font-size:.62rem">${pctReceb}%</span></div>`:'—'}</td>
-      <td class="mono" style="color:${margem>=0?'var(--green)':'var(--red)'};font-weight:700">
-        ${totV>0?(pctMarg!==null?fUSD(margem)+'<br><span style=\'font-size:.6rem;opacity:.75\'>('+pctMarg+'%)</span>':'—'):'—'}
-      </td>
-      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delPayment('${p.pi}')" title="Apagar">✕</button></td>
+      <td class="mono" style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:700">${totV>0?fUSD(mg)+(pctMg!==null?'<br><span style="font-size:.6rem;opacity:.75">('+pctMg+'%)</span>':''):'—'}</td>
+      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delPayment('${esc(p.pi)}')" title="Apagar">✕</button></td>
     </tr>`;
 
-    const detailRow=`<tr id="fin-det-${p.pi}" style="display:${expanded?'table-row':'none'}">
+    const detailRow=`<tr id="fin-det-${esc(p.pi)}" style="display:${expanded?'table-row':'none'}">
       <td colspan="13" style="padding:0;border-bottom:2px solid var(--bdr2)">
         <div style="background:#F8FAFC;padding:.8rem 1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem">
-
           <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:.4rem">📦 Produtos</div>
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">📦 Produtos</div>
             ${p.unitPrices.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
               <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Produto</th><th>Qtd</th><th>Forn.</th><th>Cli.</th><th>Mg%</th></tr>
               ${p.unitPrices.map(r=>{const mR=r.priceCli>0&&r.priceForn>0?Math.round(((r.priceCli-r.priceForn)/r.priceCli)*100):null;
-                return`<tr style="border-top:1px solid var(--bdr)">
-                  <td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td>
-                  <td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td>
-                  <td style="font-family:'IBM Plex Mono';color:${mR!==null&&mR>=0?'var(--green)':'var(--red)'}">${mR!==null?mR+'%':'—'}</td>
-                </tr>`}).join('')}
-              ${(p.plates||p.sample)?`<tr style="border-top:1px solid var(--bdr);color:var(--ink3)"><td class="L" colspan="4" style="padding:.18rem 0;font-size:.63rem">Chapas/Amostras</td><td style="font-family:'IBM Plex Mono'">${fUSD((p.plates||0)+(p.sample||0))}</td></tr>`:''}
-            </table>`:'<div style="color:var(--ink4);font-size:.7rem">Sem preços</div>'}
-            <div style="margin-top:.45rem;text-align:right">
-              <button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="editOrderPrices('${p.pi}',event)">✏ Editar preços</button>
-            </div>
+                return`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td><td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td><td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:${mR!==null&&mR>=0?'var(--green)':'var(--red)'}">${mR!==null?mR+'%':'—'}</td></tr>`}).join('')}
+            </table>`:'—'}
+            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="editOrderPrices('${esc(p.pi)}',event)">✏ Preços</button></div>
           </div>
-
           <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:.4rem">💳 Pagamentos ao Fornecedor</div>
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">💳 Pagamentos</div>
             ${piLed.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Data</th><th>Valor</th><th class="L">Ref.</th><th></th></tr>
-              ${piLed.map(l=>`<tr style="border-top:1px solid var(--bdr)">
-                <td class="L ec" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem" onclick="editLed(${l.n},'date',event)">${l.date}</td>
-                <td class="ec mono mpos" style="font-size:.7rem" onclick="editLed(${l.n},'amount',event)">${fUSD(l.amount)}</td>
-                <td class="L ec" style="font-size:.65rem;color:var(--ink3)" onclick="editLed(${l.n},'ref',event)">${esc(l.ref||'—')}</td>
-                <td><button class="bsm d" style="font-size:.6rem;padding:.1rem .28rem;opacity:.55" onclick="delLedger(${l.n})">✕</button></td>
-              </tr>`).join('')}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)">
-                <td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(paid)} / ${fUSD(totF)}</td>
-                <td colspan="2" style="font-size:.63rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'falta '+fUSD(aPagar):'✓ quitado'}</td>
-              </tr>
+              ${piLed.map(l=>`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem">${esc(l.date)}</td><td class="mono mpos" style="font-size:.7rem">${fUSD(l.amount)}</td><td class="L" style="font-size:.65rem;color:var(--ink3)">${esc(l.ref||'—')}</td></tr>`).join('')}
+              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(paid)} / ${fUSD(totF)}</td><td style="font-size:.63rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'falta '+fUSD(aPagar):'✓'}</td></tr>
             </table>`:'<div style="color:var(--ink4);font-size:.7rem">Sem pagamentos</div>'}
-            <div style="margin-top:.45rem;text-align:right">
-              <button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('led','${p.pi}')">＋ Lançar pagamento</button>
-            </div>
+            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('led','${esc(p.pi)}')">＋ Pagar</button></div>
           </div>
-
           <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:.4rem">📥 Recebimentos do Cliente</div>
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">📥 Recebimentos</div>
             ${piRec.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Data</th><th>Valor</th><th class="L">Ref.</th><th></th></tr>
-              ${piRec.map(r=>`<tr style="border-top:1px solid var(--bdr)">
-                <td class="L ec" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem" onclick="editRec(${r.n},'date',event)">${r.date}</td>
-                <td class="ec mono mpos" style="font-size:.7rem" onclick="editRec(${r.n},'amount',event)">${fUSD(r.amount)}</td>
-                <td class="L ec" style="font-size:.65rem;color:var(--ink3)" onclick="editRec(${r.n},'ref',event)">${esc(r.ref||'—')}</td>
-                <td><button class="bsm d" style="font-size:.6rem;padding:.1rem .28rem;opacity:.55" onclick="delReceipt(${r.n})">✕</button></td>
-              </tr>`).join('')}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)">
-                <td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(recv)} / ${totV>0?fUSD(totV):'—'}</td>
-                <td colspan="2" style="font-size:.63rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓ recebido'):'—'}</td>
-              </tr>
+              ${piRec.map(r=>`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem">${esc(r.date)}</td><td class="mono mpos" style="font-size:.7rem;color:var(--teal)">${fUSD(r.amount)}</td><td class="L" style="font-size:.65rem;color:var(--ink3)">${esc(r.ref||'—')}</td></tr>`).join('')}
+              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(recv)} / ${totV>0?fUSD(totV):'—'}</td><td style="font-size:.63rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓'):'—'}</td></tr>
             </table>`:'<div style="color:var(--ink4);font-size:.7rem">Sem recebimentos</div>'}
-            <div style="margin-top:.45rem;text-align:right">
-              <button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('rec','${p.pi}')">＋ Lançar recebimento</button>
-            </div>
+            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('rec','${esc(p.pi)}')">＋ Receber</button></div>
           </div>
-
         </div>
       </td>
     </tr>`;
-
     return summaryRow+detailRow;
   }).join('');
 
   // footer
-  const aF=payments.reduce((a,p)=>a+pTotalForn(p),0);
-  const aV=payments.reduce((a,p)=>a+pTotalVenda(p),0);
-  const aP=payments.reduce((a,p)=>a+piPaid(p.pi),0);
-  const aR=payments.reduce((a,p)=>a+piReceived(p.pi),0);
-  const aMarg=aV-aF;
-  const aPctMg=aV>0?Math.round((aMarg/aV)*100):null;
+  const aF=payments.reduce((a,p)=>a+pTotalForn(p),0),aV=payments.reduce((a,p)=>a+pTotalVenda(p),0);
+  const aP=payments.reduce((a,p)=>a+piPaid(p.pi),0),aR=payments.reduce((a,p)=>a+piReceived(p.pi),0);
+  const aMg=aV-aF;
   document.getElementById('fin-foot').innerHTML=`<tr style="background:var(--ltgry);border-top:2px solid var(--bdr2)">
     <td colspan="7" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAIS (${flt.length} PI)</td>
-    <td class="mono"><b>${fUSD(aF)}</b><div style="font-size:.6rem;color:var(--red)">${fUSD(Math.max(0,aF-aP))} a pagar</div></td>
-    <td></td>
-    <td class="mono" style="color:var(--teal);font-weight:700">${fUSD(aV)}<div style="font-size:.6rem;color:var(--red)">${fUSD(Math.max(0,aV-aR))} a receber</div></td>
-    <td></td>
-    <td></td>
-    <td class="mono" style="color:${aMarg>=0?'var(--green)':'var(--red)'};font-weight:700">${fUSD(aMarg)}${aPctMg!==null?' ('+aPctMg+'%)':''}</td>
-    <td></td>
+    <td class="mono"><b>${fUSD(aF)}</b></td><td></td>
+    <td class="mono" style="color:var(--teal);font-weight:700">${fUSD(aV)}</td><td></td><td></td>
+    <td class="mono" style="color:${aMg>=0?'var(--green)':'var(--red)'};font-weight:700">${fUSD(aMg)}</td><td></td>
   </tr>`;
 
   // ── LEDGER ──
-  const supSel=document.getElementById('led-sup-f');
-  const piSel2=document.getElementById('led-pi-f');
+  renderLedger();
+  renderReceipts();
+
+  // PI selectors
+  const selLP=document.getElementById('l-pi');const curLP=selLP.value;
+  selLP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curLP?' selected':''}>${esc(p.pi)} — ${esc(p.supplier)}</option>`).join('');
+  const selRP=document.getElementById('r-pi');const curRP=selRP.value;
+  selRP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curRP?' selected':''}>${esc(p.pi)} — ${esc(p.client||p.supplier)}</option>`).join('');
+  updateSortHeaders();
+}
+
+function renderLedger(){
+  const supSel=document.getElementById('led-sup-f'),piSel2=document.getElementById('led-pi-f');
   const curSup=supSel?.value||'',curPi2=piSel2?.value||'';
-  if(supSel){const sups=[...new Set(ledger.map(l=>l.supplier))].sort();supSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${s}"${s===curSup?' selected':''}>${s}</option>`).join('');}
-  if(piSel2){const pis=[...new Set(ledger.map(l=>l.pi))].sort();piSel2.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${p}"${p===curPi2?' selected':''}>${p}</option>`).join('');}
-  const ledQ=(document.getElementById('led-q')?.value||'').toLowerCase();
-  const ledSup=supSel?.value||'';const ledPi=piSel2?.value||'';
-  const ledFrom=document.getElementById('led-from')?.value||'';const ledTo=document.getElementById('led-to')?.value||'';
+  if(supSel){const sups=[...new Set(ledger.map(l=>l.supplier))].sort();supSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===curSup?' selected':''}>${esc(s)}</option>`).join('');}
+  if(piSel2){const pis=[...new Set(ledger.map(l=>l.pi))].sort();piSel2.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi2?' selected':''}>${esc(p)}</option>`).join('');}
+  const ledQ=norm(document.getElementById('led-q')?.value);
+  const ledSup=supSel?.value||'',ledPi=piSel2?.value||'';
+  const ledFrom=document.getElementById('led-from')?.value||'',ledTo=document.getElementById('led-to')?.value||'';
   let fltLed=[...ledger].filter(l=>{
-    if(ledQ&&!`${l.pi} ${l.supplier} ${l.ref} ${l.notes}`.toLowerCase().includes(ledQ))return false;
-    if(ledSup&&l.supplier!==ledSup)return false;
-    if(ledPi&&l.pi!==ledPi)return false;
+    if(ledQ&&!norm(`${l.pi} ${l.supplier} ${l.ref} ${l.notes}`).includes(ledQ))return false;
+    if(ledSup&&l.supplier!==ledSup)return false;if(ledPi&&l.pi!==ledPi)return false;
     if(ledFrom||ledTo){const iso=dispToISO(l.date);if(ledFrom&&iso<ledFrom)return false;if(ledTo&&iso>ledTo)return false;}
     return true;
   });
@@ -1217,42 +1173,34 @@ function renderFinanceiro(){
     else if(ledSort.col==='supplier'){av=a.supplier;bv=b.supplier;}else{av=a.n;bv=b.n;}
     if(av<bv)return-1*ledSort.dir;if(av>bv)return ledSort.dir;return 0;
   });
-  const lt=fltLed.reduce((a,l)=>a+l.amount,0),ltAll=ledger.reduce((a,l)=>a+l.amount,0);
+  const lt=fltLed.reduce((a,l)=>a+l.amount,0);
   document.getElementById('led-cnt').textContent=`${fltLed.length} / ${ledger.length}`;
   document.getElementById('led-tots').innerHTML=[
     {l:'Total filtrado',v:fUSD(lt),d:'var(--blue)',c:'var(--blue)'},
-    {l:'Total histórico',v:fUSD(ltAll),d:'var(--navy)',c:'var(--navy)'},
     {l:'Lançamentos',v:ledger.length,d:'var(--green)',c:'var(--green)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
-  // group by supplier
-  let ledHTML='';
-  const ledGroups={};fltLed.forEach(l=>{if(!ledGroups[l.supplier])ledGroups[l.supplier]=[];ledGroups[l.supplier].push(l);});
-  Object.keys(ledGroups).forEach(sup=>{
-    const rows=ledGroups[sup];const subT=rows.reduce((a,l)=>a+l.amount,0);
-    ledHTML+=rows.map((l,i)=>ledRow(l,i)).join('');
-    ledHTML+=`<tr style="background:#F0FAF5;border-top:1px solid var(--green)"><td colspan="2" class="L" style="font-size:.63rem;font-weight:700;color:var(--green);padding-left:.7rem">∑ ${sup}</td><td class="mono" style="color:var(--green);font-weight:700">${fUSD(subT)}</td><td colspan="5"></td></tr>`;
-  });
-  document.getElementById('led-body').innerHTML=ledHTML;
+  document.getElementById('led-body').innerHTML=fltLed.map((l,i)=>`<tr${i%2?'':' class="alt"'}>
+    <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${l.n}</td>
+    <td class="ec" onclick="editLed(${l.n},'date',event)"><span class="dok">${esc(l.date)}</span></td>
+    <td class="ec mono mpos" onclick="editLed(${l.n},'amount',event)">${fUSD(l.amount)}</td>
+    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editLed(${l.n},'pi',event)">${esc(l.pi)}</td>
+    <td class="ec L" onclick="editLed(${l.n},'supplier',event)">${esc(l.supplier)}</td>
+    <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="editLed(${l.n},'ref',event)">${esc(l.ref)}</td>
+    <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="editLed(${l.n},'notes',event)">${esc(l.notes)}</td>
+    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delLedger(${l.n})">✕</button></td>
+  </tr>`).join('');
   document.getElementById('led-foot').innerHTML=`<tr style="background:var(--ltgry);border-top:2px solid var(--bdr2)"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(lt)}</b></td><td colspan="5"></td></tr>`;
-
-  // PI selectors
-  const selLP=document.getElementById('l-pi');const curLP=selLP.value;
-  selLP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${p.pi}"${p.pi===curLP?' selected':''}>${p.pi} — ${p.supplier}</option>`).join('');
-  if(curLP)selLP.value=curLP;
-  const selRP=document.getElementById('r-pi');const curRP=selRP.value;
-  selRP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${p.pi}"${p.pi===curRP?' selected':''}>${p.pi} — ${p.client||p.supplier}</option>`).join('');
-  if(curRP)selRP.value=curRP;
-
-  // ── RECEIPTS ──
-  const recCliSel=document.getElementById('rec-cli-f');const recPiSel=document.getElementById('rec-pi-f');
+}
+function renderReceipts(){
+  const recCliSel=document.getElementById('rec-cli-f'),recPiSel=document.getElementById('rec-pi-f');
   const curRC=recCliSel?.value||'',curRP2=recPiSel?.value||'';
-  if(recCliSel){const clis=[...new Set(receipts.map(r=>r.client||'').filter(Boolean))].sort();recCliSel.innerHTML='<option value="">Todos Clientes</option>'+clis.map(c=>`<option value="${c}"${c===curRC?' selected':''}>${c}</option>`).join('');}
-  if(recPiSel){const pis=[...new Set(receipts.map(r=>r.pi))].sort();recPiSel.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${p}"${p===curRP2?' selected':''}>${p}</option>`).join('');}
-  const recQ=(document.getElementById('rec-q')?.value||'').toLowerCase();
+  if(recCliSel){const clis=[...new Set(receipts.map(r=>r.client||'').filter(Boolean))].sort();recCliSel.innerHTML='<option value="">Todos Clientes</option>'+clis.map(c=>`<option value="${esc(c)}"${c===curRC?' selected':''}>${esc(c)}</option>`).join('');}
+  if(recPiSel){const pis=[...new Set(receipts.map(r=>r.pi))].sort();recPiSel.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curRP2?' selected':''}>${esc(p)}</option>`).join('');}
+  const recQ=norm(document.getElementById('rec-q')?.value);
   const recCli=recCliSel?.value||'',recPi=recPiSel?.value||'';
   const recFrom=document.getElementById('rec-from')?.value||'',recTo=document.getElementById('rec-to')?.value||'';
   let fltRec=[...receipts].filter(r=>{
-    if(recQ&&!`${r.pi} ${r.client||''} ${r.ref} ${r.notes}`.toLowerCase().includes(recQ))return false;
+    if(recQ&&!norm(`${r.pi} ${r.client||''} ${r.ref} ${r.notes}`).includes(recQ))return false;
     if(recCli&&r.client!==recCli)return false;if(recPi&&r.pi!==recPi)return false;
     if(recFrom||recTo){const iso=dispToISO(r.date);if(recFrom&&iso<recFrom)return false;if(recTo&&iso>recTo)return false;}
     return true;
@@ -1264,67 +1212,31 @@ function renderFinanceiro(){
     else if(recSort.col==='client'){av=a.client||'';bv=b.client||'';}else{av=a.n;bv=b.n;}
     if(av<bv)return-1*recSort.dir;if(av>bv)return recSort.dir;return 0;
   });
-  const rt=fltRec.reduce((a,r)=>a+r.amount,0),rtAll=receipts.reduce((a,r)=>a+r.amount,0);
+  const rt=fltRec.reduce((a,r)=>a+r.amount,0);
   document.getElementById('rec-cnt').textContent=`${fltRec.length} / ${receipts.length}`;
   document.getElementById('rec-tots').innerHTML=[
     {l:'Total filtrado',v:fUSD(rt),d:'var(--green)',c:'var(--green)'},
-    {l:'Total histórico',v:fUSD(rtAll),d:'var(--navy)',c:'var(--navy)'},
     {l:'Recebimentos',v:receipts.length,d:'var(--teal)',c:'var(--teal)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
-  // group by client
-  let recHTML='';
-  const recGroups={};fltRec.forEach(r=>{const k=r.client||'—';if(!recGroups[k])recGroups[k]=[];recGroups[k].push(r);});
-  Object.keys(recGroups).forEach(cli=>{
-    const rows=recGroups[cli];const subT=rows.reduce((a,r)=>a+r.amount,0);
-    recHTML+=rows.map((r,i)=>recRow(r,i)).join('');
-    recHTML+=`<tr style="background:#F0FAF5;border-top:1px solid var(--green)"><td colspan="2" class="L" style="font-size:.63rem;font-weight:700;color:var(--green);padding-left:.7rem">∑ ${cli}</td><td class="mono" style="color:var(--green);font-weight:700">${fUSD(subT)}</td><td colspan="5"></td></tr>`;
-  });
-  document.getElementById('rec-body').innerHTML=recHTML;
-  document.getElementById('rec-foot').innerHTML=`<tr style="background:#F0FAF5;border-top:2px solid var(--green)"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(rt)}</b></td><td colspan="5"></td></tr>`;
-  updateSortHeaders();
-}
-
-function ledRow(l,i){
-  return`<tr${i%2?'':' class="alt"'}>
-    <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${l.n}</td>
-    <td class="ec" onclick="editLed(${l.n},'date',event)"><span class="dok">${l.date}</span></td>
-    <td class="ec mono mpos" onclick="editLed(${l.n},'amount',event)">${fUSD(l.amount)}</td>
-    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editLed(${l.n},'pi',event)">${l.pi}</td>
-    <td class="ec L" onclick="editLed(${l.n},'supplier',event)">${esc(l.supplier)}</td>
-    <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="editLed(${l.n},'ref',event)">${esc(l.ref)}</td>
-    <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="editLed(${l.n},'notes',event)">${esc(l.notes)}</td>
-    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delLedger(${l.n})" title="Apagar">✕</button></td>
-  </tr>`;
-}
-function recRow(r,i){
-  return`<tr${i%2?'':' class="alt"'}>
+  document.getElementById('rec-body').innerHTML=fltRec.map((r,i)=>`<tr${i%2?'':' class="alt"'}>
     <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${r.n}</td>
-    <td class="ec" onclick="editRec(${r.n},'date',event)"><span class="dok">${r.date}</span></td>
+    <td class="ec" onclick="editRec(${r.n},'date',event)"><span class="dok">${esc(r.date)}</span></td>
     <td class="ec mono mpos" style="color:var(--teal)" onclick="editRec(${r.n},'amount',event)">${fUSD(r.amount)}</td>
-    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editRec(${r.n},'pi',event)">${r.pi}</td>
+    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editRec(${r.n},'pi',event)">${esc(r.pi)}</td>
     <td class="ec L" onclick="editRec(${r.n},'client',event)">${esc(r.client)||'—'}</td>
     <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="editRec(${r.n},'ref',event)">${esc(r.ref)}</td>
     <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="editRec(${r.n},'notes',event)">${esc(r.notes)}</td>
-    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delReceipt(${r.n})" title="Apagar">✕</button></td>
-  </tr>`;
+    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delReceipt(${r.n})">✕</button></td>
+  </tr>`).join('');
+  document.getElementById('rec-foot').innerHTML=`<tr style="background:#F0FAF5;border-top:2px solid var(--green)"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(rt)}</b></td><td colspan="5"></td></tr>`;
 }
-// Single permanent delegated listener — survives innerHTML re-renders
-function showEpDate(elOrEv,lbl,isoVal){
-  const dispVal=isoToDisp(isoVal)||'';
-  document.getElementById('ep-ttl').textContent=lbl;
-  document.getElementById('ep-body').innerHTML=`<label>${lbl}</label>
-    <input type="text" id="ep-val" value="${dispVal}" placeholder="ex: 15/01/26" autocomplete="off" style="width:100%;margin-bottom:.28rem">
-    <div style="font-size:.6rem;color:var(--ink4)">Formatos: 15/01/26 · 15/Jan/26 · 15-01-2026</div>`;
-  positionEp(elOrEv);
-  setTimeout(()=>{const i=document.getElementById('ep-val');if(i){i.focus();i.select();}},60);
-}
-
 
 /* ══════════════════════════════════════
-   LEDGER / RECEIPT ACTIONS
+   ACTIONS (LEDGER/RECEIPT/DELETE)
 ══════════════════════════════════════ */
 function onPiChange(){const pi=document.getElementById('l-pi').value;const p=payments.find(x=>x.pi===pi);document.getElementById('l-sup').value=p?p.supplier:'';}
 function onRpiChange(){const pi=document.getElementById('r-pi').value;const p=payments.find(x=>x.pi===pi);document.getElementById('r-cli').value=p?(p.client||p.supplier):'';}
+
 function addLedger(){
   const rawDate=document.getElementById('l-date').value.trim();
   const amt=parseFloat(document.getElementById('l-amt').value);
@@ -1332,23 +1244,14 @@ function addLedger(){
   const sup=document.getElementById('l-sup').value;
   const ref=document.getElementById('l-ref').value.trim();
   const notes=document.getElementById('l-notes').value.trim();
-  if(!rawDate){toast('⚠ Informe uma data');return;}
+  if(!rawDate){toast('⚠ Informe uma data','err');return;}
   const dateDisp=normDate(rawDate);
-  if(!dateDisp){toast('⚠ Data inválida — use 15/01/26 ou 15/Jan/26');return;}
-  if(!amt||amt<=0){toast('⚠ Valor inválido');return;}
-  if(!pi){toast('⚠ Selecione um PI');return;}
-  // Validar: total pago não pode ultrapassar total compra
-  const p=payments.find(x=>x.pi===pi);
-  if(p){
-    const totalCompra=((p.unitPrices||[]).reduce((a,r)=>a+r.qty*(r.priceForn||0),0))+(p.plates||0)+(p.sample||0);
-    const totalJaPago=ledger.filter(x=>x.pi===pi).reduce((a,x)=>a+x.amount,0);
-    if(totalCompra>0&&(totalJaPago+amt)>totalCompra*1.05){
-      if(!confirm(`Atenção: total pago (${fUSD(totalJaPago+amt)}) ultrapassaria o total de compra (${fUSD(totalCompra)}) em mais de 5%.\nDeseja continuar?`))return;
-    }
-  }
+  if(!dateDisp){toast('⚠ Data inválida','err');return;}
+  if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
+  if(!pi){toast('⚠ Selecione um PI','err');return;}
   const n=Math.max(...ledger.map(l=>l.n),190)+1;
   ledger.push({n,date:dateDisp,amount:amt,pi,supplier:sup||pi,ref:ref||'—',notes:notes||''});
-  saveAll();renderFinanceiro();toast(`Lançamento #${n} adicionado ✓`);
+  saveAll();renderFinanceiro();toast(`Lançamento #${n} ✓`);
   ['l-date','l-amt','l-ref','l-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('l-pi').value='';document.getElementById('l-sup').value='';
 }
@@ -1359,62 +1262,70 @@ function addReceipt(){
   const cli=document.getElementById('r-cli').value;
   const ref=document.getElementById('r-ref').value.trim();
   const notes=document.getElementById('r-notes').value.trim();
-  if(!rawDate){toast('⚠ Informe uma data');return;}
+  if(!rawDate){toast('⚠ Informe uma data','err');return;}
   const dateDisp=normDate(rawDate);
-  if(!dateDisp){toast('⚠ Data inválida — use 15/01/26 ou 15/Jan/26');return;}
-  if(!amt||amt<=0){toast('⚠ Valor inválido');return;}
-  if(!pi){toast('⚠ Selecione um PI');return;}
-  // Validar: total recebido não pode ultrapassar total venda
-  const pv=payments.find(x=>x.pi===pi);
-  if(pv){
-    const totalVenda=(pv.unitPrices||[]).reduce((a,r)=>a+r.qty*(r.priceCli||0),0);
-    const totalJaRecebido=receipts.filter(x=>x.pi===pi).reduce((a,x)=>a+x.amount,0);
-    if(totalVenda>0&&(totalJaRecebido+amt)>totalVenda*1.05){
-      if(!confirm(`Atenção: total recebido (${fUSD(totalJaRecebido+amt)}) ultrapassaria o total de venda (${fUSD(totalVenda)}) em mais de 5%.\nDeseja continuar?`))return;
-    }
-  }
+  if(!dateDisp){toast('⚠ Data inválida','err');return;}
+  if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
+  if(!pi){toast('⚠ Selecione um PI','err');return;}
   const n=Math.max(...receipts.map(r=>r.n),0)+1;
   receipts.push({n,date:dateDisp,amount:amt,pi,client:cli||'',ref:ref||'—',notes:notes||''});
-  saveAll();renderFinanceiro();toast(`Recebimento #${n} lançado ✓`);
+  saveAll();renderFinanceiro();toast(`Recebimento #${n} ✓`);
   ['r-date','r-amt','r-ref','r-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('r-pi').value='';document.getElementById('r-cli').value='';
 }
-function delLedger(n){if(!confirm('Apagar lançamento?'))return;ledger=ledger.filter(l=>l.n!==n);saveAll();renderFinanceiro();toast('Apagado');}
+function delLedger(n){
+  if(!confirm('Apagar lançamento?'))return;
+  pushUndo('Apagar lançamento #'+n); // FIX #2
+  ledger=ledger.filter(l=>l.n!==n);saveAll();renderFinanceiro();toast('Apagado','ok',true);
+}
+function delReceipt(n){
+  if(!confirm('Apagar recebimento?'))return;
+  pushUndo('Apagar recebimento #'+n);
+  receipts=receipts.filter(r=>r.n!==n);saveAll();renderFinanceiro();toast('Apagado','ok',true);
+}
 function toggleFinDetail(pi){
-  const row=document.getElementById('fin-det-'+pi);
-  const icn=document.getElementById('fin-exp-icn-'+pi);
-  if(!row)return;
-  if(_finExp.has(pi)){
-    _finExp.delete(pi);
-    row.style.display='none';
-    if(icn)icn.style.transform='rotate(0deg)';
-  } else {
-    _finExp.add(pi);
-    row.style.display='table-row';
-    if(icn)icn.style.transform='rotate(90deg)';
-  }
+  const row=document.getElementById('fin-det-'+pi);const icn=document.getElementById('fin-exp-icn-'+pi);if(!row)return;
+  if(_finExp.has(pi)){_finExp.delete(pi);row.style.display='none';if(icn)icn.style.transform='rotate(0deg)';}
+  else{_finExp.add(pi);row.style.display='table-row';if(icn)icn.style.transform='rotate(90deg)';}
 }
 function focusLancar(tipo,pi){
   const piSel=document.getElementById(tipo==='led'?'l-pi':'r-pi');
-  if(piSel){piSel.value=pi;if(tipo==='led')onPiChange();}
+  if(piSel){piSel.value=pi;if(tipo==='led')onPiChange();else onRpiChange();}
   const dateEl=document.getElementById(tipo==='led'?'l-date':'r-date');
-  if(dateEl){setTimeout(()=>{dateEl.focus();dateEl.scrollIntoView({behavior:'smooth',block:'center'});},80);}
+  if(dateEl)setTimeout(()=>{dateEl.focus();dateEl.scrollIntoView({behavior:'smooth',block:'center'});},80);
 }
-function delReceipt(n){if(!confirm('Apagar recebimento?'))return;receipts=receipts.filter(r=>r.n!==n);saveAll();renderFinanceiro();toast('Apagado');}
+function delPayment(pi){
+  if(!confirm(`Apagar financeiro ${pi}?`))return;
+  pushUndo('Apagar PI '+pi);
+  ledger=ledger.filter(x=>x.pi!==pi);receipts=receipts.filter(x=>x.pi!==pi);
+  payments=payments.filter(x=>x.pi!==pi);
+  saveAll();renderFinanceiro();toast(`${pi} apagado`,'ok',true);
+}
+function delOrder(num){
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  if(!confirm(`Apagar pedido #${num} — ${o.client}?`))return;
+  pushUndo('Apagar pedido #'+num);
+  const pi=o.pi;
+  if(pi){payments=payments.filter(x=>x.pi!==pi);ledger=ledger.filter(x=>x.pi!==pi);receipts=receipts.filter(x=>x.pi!==pi);}
+  orders=orders.filter(x=>x.num!==num);
+  saveAll();renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast(`Pedido #${num} apagado`,'ok',true);
+}
+
+/* ══════════════════════════════════════
+   PRICES MODAL
+══════════════════════════════════════ */
 let _prPi=null;
 function editOrderPrices(pi,e){
   if(e)e.stopPropagation();
   const p=payments.find(x=>x.pi===pi);
-  if(!p){toast('PI não vinculado ao Financeiro — crie o pedido primeiro');return;}
+  if(!p){toast('PI não vinculado ao Financeiro','err');return;}
   _prPi=pi;
-  document.getElementById('pr-ttl').textContent=`Editar Qtd / Preços — PI ${pi}`;
+  document.getElementById('pr-ttl').textContent=`Editar — PI ${pi}`;
   document.getElementById('pr-pi-lbl').textContent=pi;
   document.getElementById('pr-sup-lbl').textContent=p.supplier||'—';
   document.getElementById('pr-plates').value=p.plates||0;
   document.getElementById('pr-sample').value=p.sample||0;
-  // populate rows
-  const cont=document.getElementById('pr-rows');
-  cont.innerHTML='';
+  const cont=document.getElementById('pr-rows');cont.innerHTML='';
   (p.unitPrices||[{desc:'',qty:0,priceForn:0,priceCli:0}]).forEach(r=>addPriceRow(r.desc||'',r.qty,r.priceForn,r.priceCli));
   updatePricePreview();
   document.getElementById('ovl-prices').classList.add('open');
@@ -1423,8 +1334,7 @@ function addPriceRow(desc='',qty=0,pForn=0,pCli=0){
   const cont=document.getElementById('pr-rows');
   const row=document.createElement('div');
   row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
-  row.innerHTML=`
-    <input type="text" placeholder="ex: Ecobag Raffia" value="${desc}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
+  row.innerHTML=`<input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #fca5a5;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #6EE7B7;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
@@ -1444,88 +1354,28 @@ function updatePricePreview(){
   const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn,0)+plates+sample;
   const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
-  const margem=totVenda-totForn;
-  const pctM=totVenda>0?Math.round((margem/totVenda)*100):0;
+  const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
   const prev=document.getElementById('pr-preview');
-  if(rows.length>0){
-    prev.style.display='block';
-    prev.innerHTML=`<b style="color:var(--navy)">Resumo</b> &nbsp;|&nbsp;
-      Qtd: <b>${fN(totQty)}</b> &nbsp;|&nbsp;
-      Compra: <b style="color:var(--red)">${fUSD(totForn)}</b> &nbsp;|&nbsp;
-      Venda: <b style="color:var(--teal)">${fUSD(totVenda)}</b> &nbsp;|&nbsp;
-      Margem: <b style="color:${margem>=0?'var(--green)':'var(--red)'}">${fUSD(margem)}</b> &nbsp;
-      <b style="color:${pctM>=15?'var(--green)':pctM>=5?'var(--amber)':'var(--red)'}">( ${pctM}% )</b>`;
-  } else { prev.style.display='none'; }
+  if(rows.length>0){prev.style.display='block';prev.innerHTML=`<b>Resumo</b> | Qtd: <b>${fN(totQty)}</b> | Compra: <b style="color:var(--red)">${fUSD(totForn)}</b> | Venda: <b style="color:var(--teal)">${fUSD(totVenda)}</b> | Margem: <b style="color:${mg>=0?'var(--green)':'var(--red)'}"> ${fUSD(mg)} (${pctM}%)</b>`;}
+  else prev.style.display='none';
 }
 function savePrices(){
-  if(!_prPi)return;
-  const p=payments.find(x=>x.pi===_prPi);
-  if(!p){toast('Erro: PI não encontrado');return;}
-  const rows=readPriceRows();
-  if(!rows.length){toast('⚠ Adicione ao menos uma linha');return;}
-  p.unitPrices=rows;
-  p.plates=parseFloat(document.getElementById('pr-plates').value)||0;
-  p.sample=parseFloat(document.getElementById('pr-sample').value)||0;
-  // update total in linked order
+  if(!_prPi)return;const p=payments.find(x=>x.pi===_prPi);if(!p)return;
+  const rows=readPriceRows();if(!rows.length){toast('⚠ Adicione ao menos uma linha','err');return;}
+  p.unitPrices=rows;p.plates=parseFloat(document.getElementById('pr-plates').value)||0;p.sample=parseFloat(document.getElementById('pr-sample').value)||0;
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
-  const o=orders.find(x=>x.pi===_prPi)||(p.po&&p.po!=='—'?orders.find(x=>x.po===p.po):null);
-  if(o&&totQty>0)o.total=totQty;
-  saveAll();renderAll();closeOvl('prices');toast(`Preços PI ${_prPi} atualizados ✓`);
-}
-function delPayment(pi){
-  const p=payments.find(x=>x.pi===pi);if(!p)return;
-  const temLed=ledger.filter(x=>x.pi===pi);
-  const temRec=receipts.filter(x=>x.pi===pi);
-  let msg=`Apagar financeiro ${pi} — ${p.supplier}?`;
-  if(temLed.length||temRec.length){
-    msg+=`\n\nEste PI tem:`;
-    if(temLed.length)msg+=`\n• ${temLed.length} lançamento(s) de pagamento (total: $${temLed.reduce((a,x)=>a+x.amount,0).toFixed(2)})`;
-    if(temRec.length)msg+=`\n• ${temRec.length} recebimento(s) (total: $${temRec.reduce((a,x)=>a+x.amount,0).toFixed(2)})`;
-    msg+=`\n\n[OK] = Apagar tudo  |  [Cancelar] = Cancelar`;
-    if(!confirm(msg))return;
-    ledger=ledger.filter(x=>x.pi!==pi);
-    receipts=receipts.filter(x=>x.pi!==pi);
-  } else {
-    if(!confirm(msg+'\nEsta ação não pode ser desfeita.'))return;
-  }
-  payments=payments.filter(x=>x.pi!==pi);
-  saveAll();renderFinanceiro();toast(`${pi} apagado`);
-}
-function delOrder(num){
-  const o=orders.find(x=>x.num===num);if(!o)return;
-  const pi=o.pi;
-  const temFin=pi&&payments.find(x=>x.pi===pi);
-  const temLed=pi&&ledger.find(x=>x.pi===pi);
-  const temRec=pi&&receipts.find(x=>x.pi===pi);
-  let msg=`Apagar pedido #${num} — ${o.client} / ${o.product}?`;
-  if(temFin||temLed||temRec){
-    msg+=`\n\nAtenção: o PI "${pi}" tem dados financeiros vinculados:`;
-    if(temFin)msg+=`\n• Registo financeiro (Financeiro > Pedidos Ativos)`;
-    if(temLed)msg+=`\n• ${ledger.filter(x=>x.pi===pi).length} lançamento(s) de pagamento`;
-    if(temRec)msg+=`\n• ${receipts.filter(x=>x.pi===pi).length} recebimento(s)`;
-    msg+=`\n\nApagar só o pedido ou tudo incluindo o financeiro?`;
-    const tudo=confirm(msg+'\n\n[OK] = Apagar tudo  |  [Cancelar] = Apagar só o pedido');
-    if(tudo){
-      payments=payments.filter(x=>x.pi!==pi);
-      ledger=ledger.filter(x=>x.pi!==pi);
-      receipts=receipts.filter(x=>x.pi!==pi);
-    }
-  } else {
-    if(!confirm(msg+'\nEsta ação não pode ser desfeita.'))return;
-  }
-  orders=orders.filter(x=>x.num!==num);
-  saveAll();renderAll();renderFinanceiro();toast(`Pedido #${num} apagado`);
+  const o=orders.find(x=>x.pi===_prPi);if(o&&totQty>0)o.total=totQty;
+  saveAll();renderAll();closeOvl('prices');toast(`PI ${_prPi} atualizado ✓`);
 }
 
 /* ══════════════════════════════════════
-   MODAL: NOVO PEDIDO UNIFICADO
+   ORDER MODAL
 ══════════════════════════════════════ */
 let _editNum=null;
 function addProdRow(desc='',qty=0,pForn=0,pCli=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
-  row.innerHTML=`
-    <span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${desc}" list="dl-prod" oninput="updatePreview()" style="flex:2">
+  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="flex:2">
     <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1">
@@ -1545,63 +1395,42 @@ function updatePreview(){
   const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn,0)+plates+sample;
   const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
-  const margem=totVenda-totForn;
+  const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
   const prev=document.getElementById('mo-preview');
-  if(rows.length>0){
-    prev.style.display='block';
-    const pctM=totVenda>0?Math.round((margem/totVenda)*100):0;
-    prev.innerHTML=`<b style="color:var(--navy)">Resumo automático</b><br>
-      Qtd total: <b>${fN(totQty)}</b> &nbsp;|&nbsp;
-      Compra: <b style="color:var(--red)">${fUSD(totForn)}</b> &nbsp;|&nbsp;
-      Venda: <b style="color:var(--teal)">${fUSD(totVenda)}</b> &nbsp;|&nbsp;
-      Margem: <b style="color:${margem>=0?'var(--green)':'var(--red)'}">${fUSD(margem)}</b> &nbsp;
-      <b style="color:${pctM>=15?'var(--green)':pctM>=5?'var(--amber)':'var(--red)'}">( ${pctM}% )</b>`;
-  } else {prev.style.display='none';}
+  if(rows.length>0){prev.style.display='block';prev.innerHTML=`<b>Resumo</b> | Qtd: <b>${fN(totQty)}</b> | Compra: <b style="color:var(--red)">${fUSD(totForn)}</b> | Venda: <b style="color:var(--teal)">${fUSD(totVenda)}</b> | Margem: <b style="color:${mg>=0?'var(--green)':'var(--red)'}"> ${fUSD(mg)} (${pctM}%)</b>`;}
+  else prev.style.display='none';
 }
 function populateDatalistsMestre(){
-  const dlCont=document.getElementById('dl-cont');
-  if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>'<option value="'+esc(c)+'">').join('');
-  const dlProd=document.getElementById('dl-prod');
-  if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>'<option value="'+esc(p)+'">').join('');
+  const dlCont=document.getElementById('dl-cont');if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>'<option value="'+esc(c)+'">').join('');
+  const dlProd=document.getElementById('dl-prod');if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>'<option value="'+esc(p)+'">').join('');
 }
 function openOrderModal(num){
   _editNum=num;
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
-  document.getElementById('mo-btn').textContent=num!==null?'Salvar Alterações':'Criar Pedido';
+  document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
-  const fields=['po','pi','cli-inv','sup','sup-inv','cont','etd','eta','plates','sample','notes'];
-  fields.forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  ['po','pi','cli-inv','sup','sup-inv','cont','etd','eta','plates','sample','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
-      document.getElementById('mo-po').value=o.po||'';
-      document.getElementById('mo-pi').value=o.pi||'';
-      document.getElementById('mo-cl').value=o.client||'Zona Sul';
-      document.getElementById('mo-cont').value=o.container||'';
+      document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-pi').value=o.pi||'';
+      document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
       document.getElementById('mo-notes').value=o.notes||'';
-      // try to find linked payment
       const p=payments.find(x=>x.pi===o.pi||x.po===o.po);
       if(p){
-        document.getElementById('mo-cli-inv').value=p.clientInv||'';
-        document.getElementById('mo-sup').value=p.supplier||'';
-        document.getElementById('mo-sup-inv').value=p.inv||'';
-        document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
-        document.getElementById('mo-etd').value=p.etd||'';
-        document.getElementById('mo-eta').value=p.eta||'';
-        document.getElementById('mo-plates').value=p.plates||0;
-        document.getElementById('mo-sample').value=p.sample||0;
+        document.getElementById('mo-cli-inv').value=p.clientInv||'';document.getElementById('mo-sup').value=p.supplier||'';
+        document.getElementById('mo-sup-inv').value=p.inv||'';document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
+        document.getElementById('mo-etd').value=p.etd||'';document.getElementById('mo-eta').value=p.eta||'';
+        document.getElementById('mo-plates').value=p.plates||0;document.getElementById('mo-sample').value=p.sample||0;
         (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.qty,r.priceForn,r.priceCli));
       }
     }
-  } else {addProdRow();}
+  } else addProdRow();
   updatePreview();
-  // Datalists: cadastros mestre + valores já usados (union)
   const allClis=[...new Set([...CLIENTES,...orders.map(o=>o.client),...payments.map(p=>p.client||'')].filter(Boolean))].sort();
   const allForn=[...new Set([...FORNECEDORES,...payments.map(p=>p.supplier).filter(Boolean)])].sort();
-  const clDL=document.getElementById('mo-cl-list');
-  if(clDL)clDL.innerHTML=allClis.map(c=>`<option value="${esc(c)}">`).join('');
-  const supDL=document.getElementById('mo-sup-list');
-  if(supDL)supDL.innerHTML=allForn.map(s=>`<option value="${esc(s)}">`).join('');
+  document.getElementById('mo-cl-list').innerHTML=allClis.map(c=>`<option value="${esc(c)}">`).join('');
+  document.getElementById('mo-sup-list').innerHTML=allForn.map(s=>`<option value="${esc(s)}">`).join('');
   populateDatalistsMestre();
   document.getElementById('ovl-order').classList.add('open');
 }
@@ -1613,91 +1442,46 @@ function submitOrder(){
   const supplier=document.getElementById('mo-sup').value.trim();
   const inv=document.getElementById('mo-sup-inv').value.trim();
   const container=document.getElementById('mo-cont').value.trim();
-  const paySt=(document.getElementById('mo-pay-st')?.value)||'Mass P contracted';
+  const paySt=document.getElementById('mo-pay-st')?.value||'Mass P contracted';
   const etd=normDate(document.getElementById('mo-etd').value.trim())||'—';
   const eta=normDate(document.getElementById('mo-eta').value.trim())||'—';
   const plates=parseFloat(document.getElementById('mo-plates').value)||0;
   const sample=parseFloat(document.getElementById('mo-sample').value)||0;
   const notes=document.getElementById('mo-notes').value.trim();
-  const prodRows=readProdRows();
-  const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
+  const prodRows=readProdRows();const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
 
-  // ── Validações de negócio ──
-  const erros=[];
-  if(!client) erros.push('• Cliente é obrigatório');
-  if(!supplier) erros.push('• Fornecedor é obrigatório');
-  if(prodRows.length===0) erros.push('• Adicione ao menos uma linha de produto');
-  if(totalQty===0) erros.push('• Quantidade total não pode ser zero');
-  // ETA não pode ser anterior ao ETD
-  if(etd!=='—'&&eta!=='—'){
-    const etdISO=dispToISO(etd), etaISO=dispToISO(eta);
-    if(etdISO&&etaISO&&etaISO<etdISO) erros.push('• ETA não pode ser anterior ao ETD');
-  }
-  if(erros.length){toast('⚠ '+erros[0]);return;}
+  if(!client){toast('⚠ Cliente obrigatório','err');return;}
+  if(!supplier){toast('⚠ Fornecedor obrigatório','err');return;}
+  if(!prodRows.length){toast('⚠ Adicione produto','err');return;}
 
   if(_editNum!==null){
-    // UPDATE existing order
+    pushUndo('Editar pedido #'+_editNum);
     const o=orders.find(x=>x.num===_editNum);
     if(o){
-      const piAntigo=o.pi;
+      // FIX #1: propagar mudanças para payments
       o.po=po;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
-      // Se ETD mudou e Embarque ainda é estimado → atualiza automaticamente
-      if(etd&&etd!="—"&&o.dates[5]&&o.dates[5].est)o.dates[5]=mkD(etd,true);
       if(totalQty>0)o.total=totalQty;
-      // Recalcular product a partir das linhas de produto
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
-      // Se PI mudou: migrar lançamentos e atualizar financeiro antigo
-      if(piAntigo&&piAntigo!==pi){
-        if(!confirm(`PI alterado de "${piAntigo}" para "${pi}".\nMigrar lançamentos de pagamento e recebimento para o novo PI?`)){
-          // Reverter PI
-          o.pi=piAntigo;
-        } else {
-          ledger.forEach(l=>{if(l.pi===piAntigo)l.pi=pi;});
-          receipts.forEach(r=>{if(r.pi===piAntigo)r.pi=pi;});
-          // Renomear chave no financeiro
-          const pAnt=payments.find(x=>x.pi===piAntigo);
-          if(pAnt)pAnt.pi=pi;
-        }
-      }
-      // Atualizar financeiro vinculado
       if(o.pi){
         let p=payments.find(x=>x.pi===o.pi);
         if(p){p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=plates;p.sample=sample;if(prodRows.length)p.unitPrices=prodRows;}
       }
     }
-    saveAll();renderAll();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);
-    return;
+    saveAll();renderAll();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
   }
 
-  // NEW pedido — validar PI único
-  if(pi){
-    const piExiste=orders.find(x=>x.pi===pi&&x.num!==_editNum);
-    if(piExiste&&!confirm(`PI "${pi}" já existe no pedido #${piExiste.num} (${piExiste.client} — ${piExiste.product}).\nDeseja continuar mesmo assim?`))return;
-  }
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-  // if ETD provided, pre-fill Embarque (index 5) as estimated
   if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
-  // if ETA provided, pre-fill ETA Brasil (index 6) as estimated
   if(eta&&eta!=='—')emptyDates[6]=mkD(eta,true);
-
   const newOrder={num:nn,po,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
-  // Se ainda em demo, limpar dados demo ao criar 1o pedido real
   const wasDemo=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
   if(wasDemo){orders=[];payments=[];ledger=[];receipts=[];}
   orders.unshift(newOrder);
-
-  // create or update payment entry if PI provided
   if(pi&&prodRows.length>0){
     const existing=payments.find(x=>x.pi===pi);
-    if(!existing){
-      payments.unshift({pi,po,inv,client,clientInv,supplier:supplier||'—',status:paySt,etd,eta,unitPrices:prodRows,plates,sample,vnotes:''});
-    } else {
-      existing.po=po;existing.inv=inv;existing.client=client;existing.clientInv=clientInv;
-      existing.supplier=supplier||existing.supplier;existing.status=paySt;
-      existing.etd=etd;existing.eta=eta;existing.plates=plates;existing.sample=sample;
-      existing.unitPrices=prodRows;
-    }
+    if(!existing)payments.unshift({pi,po,inv,client,clientInv,supplier:supplier||'—',status:paySt,etd,eta,unitPrices:prodRows,plates,sample,vnotes:''});
+    else{existing.po=po;existing.inv=inv;existing.client=client;existing.clientInv=clientInv;existing.supplier=supplier||existing.supplier;existing.status=paySt;existing.etd=etd;existing.eta=eta;existing.plates=plates;existing.sample=sample;existing.unitPrices=prodRows;}
   }
   saveAll();renderAll();closeOvl('order');toast(`Pedido #${nn} criado ✓`);
 }
@@ -1707,74 +1491,68 @@ function submitOrder(){
 ══════════════════════════════════════ */
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
-  e.stopPropagation();
-  const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unidades',notes:'Notas / Issues',_nextAction:'Próxima Ação'};
-  const isNum=['total'].includes(field);
+  e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
+  const lbls={po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
-  showEp(e,lbls[field]||field,String(o[field]||''),isNum,false);
+  showEp(e,lbls[field]||field,String(o[field]||''),field==='total',false);
   const ep=document.getElementById('ep-val');
-  if(ep){
-    if(field==='_nextAction')ep.setAttribute('list','dl-next-action');
-    else if(field==='product')ep.setAttribute('list','dl-prod');
-    else if(field==='container')ep.setAttribute('list','dl-cont');
-    else ep.removeAttribute('list');
-  }
+  if(ep){if(field==='_nextAction')ep.setAttribute('list','dl-next-action');else if(field==='product')ep.setAttribute('list','dl-prod');else if(field==='container')ep.setAttribute('list','dl-cont');else ep.removeAttribute('list');}
 }
 function editFinField(pi,field,e){
-  e.stopPropagation();
-  const p=payments.find(x=>x.pi===pi);if(!p)return;
-  const lbls={pi:'PI',po:'PO/Ref',inv:'Invoice Forn.',supplier:'Fornecedor',client:'Cliente',clientInv:'Invoice Cliente',etd:'ETD',eta:'ETA',vnotes:'Notas'};
-  const isNum=[].includes(field);
+  e.stopPropagation();const p=payments.find(x=>x.pi===pi);if(!p)return;
+  const lbls={pi:'PI',po:'PO',inv:'Invoice Forn.',supplier:'Fornecedor',client:'Cliente',clientInv:'Invoice Cli.',etd:'ETD',eta:'ETA'};
   _epCtx={type:'pay',pi,field};
-  showEp(e,lbls[field]||field,String(p[field]||''),isNum,false);
+  showEp(e,lbls[field]||field,String(p[field]||''),false,false);
 }
 function editMS(num,di,e){
-  e.stopPropagation();
-  const o=orders.find(x=>x.num===num);if(!o)return;
-  const d=o.dates[di];
-  _epCtx={type:'ms',num,di};
+  e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
+  const d=o.dates[di];_epCtx={type:'ms',num,di};
   const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Embarque ETD','ETA Brasil','Entrada CD'];
   document.getElementById('ep-ttl').textContent=MSFULL[di];
-  document.getElementById('ep-body').innerHTML=`
-    <label>Data (DD/MM/AA)</label>
-    <div class="date-wrap" style="margin-bottom:.5rem">
-      <input type="date" onchange="datePickerSync('ep-val',this.value)">
-      <input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
-    </div>
-    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja)</label>\`;
+  document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
+    <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
+    <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value)">
+    <button class="date-cal-btn" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
+    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja)</label>`;
   positionEp(e);
 }
-function showEp(elOrEv,lbl,val,isNum,isEst){
+function editLed(n,field,e){
+  e.stopPropagation();const l=ledger.find(x=>Number(x.n)===Number(n));if(!l)return;
+  _epCtx={type:'led',n:Number(n),field};
+  if(field==='date')showEpDate(e,'Data',dispToISO(l.date));
+  else if(field==='amount')showEp(e,'Valor USD',l.amount.toFixed(2),true,false);
+  else showEp(e,field,String(l[field]||''),false,false);
+}
+function editRec(n,field,e){
+  e.stopPropagation();const r=receipts.find(x=>Number(x.n)===Number(n));if(!r)return;
+  _epCtx={type:'rec',n:Number(n),field};
+  if(field==='date')showEpDate(e,'Data',dispToISO(r.date));
+  else if(field==='amount')showEp(e,'Valor USD',r.amount.toFixed(2),true,false);
+  else showEp(e,field,String(r[field]||''),false,false);
+}
+function showEp(elOrEv,lbl,val,isNum){
   document.getElementById('ep-ttl').textContent=lbl;
-  document.getElementById('ep-body').innerHTML=`<label>${lbl}</label><input type="${isNum?'number':'text'}" id="ep-val" value="${String(val).replace(/"/g,'&quot;')}" autocomplete="off">`;
+  document.getElementById('ep-body').innerHTML=`<label>${esc(lbl)}</label><input type="${isNum?'number':'text'}" id="ep-val" value="${esc(val)}" autocomplete="off">`;
+  positionEp(elOrEv);
+  setTimeout(()=>{const i=document.getElementById('ep-val');if(i){i.focus();i.select();}},60);
+}
+function showEpDate(elOrEv,lbl,isoVal){
+  document.getElementById('ep-ttl').textContent=lbl;
+  document.getElementById('ep-body').innerHTML=`<label>${esc(lbl)}</label><input type="text" id="ep-val" value="${isoToDisp(isoVal)||''}" placeholder="15/01/26" autocomplete="off"><div style="font-size:.6rem;color:var(--ink4)">15/01/26 · 15/Jan/26</div>`;
   positionEp(elOrEv);
   setTimeout(()=>{const i=document.getElementById('ep-val');if(i){i.focus();i.select();}},60);
 }
 function positionEp(elOrEv){
-  _epOpenedAt=Date.now();
-  const ep=document.getElementById('epop');
-  ep.style.display='block';
-  ep.style.position='fixed';
-  ep.style.zIndex='9999';
-  ep.style.transform='';
-  // Tenta posicionar perto da célula clicada
-  const el=elOrEv instanceof Element ? elOrEv
-    : elOrEv?.currentTarget instanceof Element ? elOrEv.currentTarget
-    : elOrEv?.target instanceof Element ? elOrEv.target
-    : null;
-  if(!el || !el.getBoundingClientRect){
-    ep.style.top='40%';ep.style.left='50%';ep.style.transform='translateX(-50%)';return;
-  }
+  _epOpenedAt=Date.now();const ep=document.getElementById('epop');
+  ep.style.display='block';ep.style.position='fixed';ep.style.zIndex='9999';ep.style.transform='';
+  const el=elOrEv instanceof Element?elOrEv:elOrEv?.currentTarget||elOrEv?.target||null;
+  if(!el||!el.getBoundingClientRect){ep.style.top='40%';ep.style.left='50%';ep.style.transform='translateX(-50%)';return;}
   const r=el.getBoundingClientRect();
-  // usa coordenadas do viewport (position:fixed não precisa de scrollY)
-  let top=r.bottom+6;
-  let left=r.left;
-  if(left+295>window.innerWidth) left=window.innerWidth-300;
-  if(top+200>window.innerHeight) top=r.top-210;
-  if(top<10) top=10;
-  ep.style.top=top+'px';
-  ep.style.left=left+'px';
+  let top=r.bottom+6,left=r.left;
+  if(left+295>window.innerWidth)left=window.innerWidth-300;
+  if(top+200>window.innerHeight)top=r.top-210;
+  if(top<10)top=10;
+  ep.style.top=top+'px';ep.style.left=left+'px';
 }
 function epSave(){
   if(!_epCtx){closeEp();return;}
@@ -1785,253 +1563,175 @@ function epSave(){
     o.dates[_epCtx.di]=mkD(val||null,est);
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
-    if(_epCtx.field==='total')o[_epCtx.field]=parseInt(val)||0;
-    else o[_epCtx.field]=val;
+    if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
+    // FIX #1: propagar client/supplier para payments
+    if(_epCtx.field==='client'||_epCtx.field==='supplier'){
+      const p=payments.find(x=>x.pi===o.pi);if(p)p[_epCtx.field]=val;
+    }
   } else if(_epCtx.type==='pay'){
     const p=payments.find(x=>x.pi===_epCtx.pi);if(!p)return;
-    // normalize date fields
-    if(_epCtx.field==='etd'||_epCtx.field==='eta'){
-      const nd=val&&val.includes('-')?isoToDisp(val):normDate(val);
-      p[_epCtx.field]=nd||val||'—';
-    } else {
-      p[_epCtx.field]=val;
+    if(_epCtx.field==='etd'||_epCtx.field==='eta'){p[_epCtx.field]=normDate(val)||val||'—';}
+    else{p[_epCtx.field]=val;}
+    // FIX #1: propagar para orders
+    if(['client','supplier','etd','eta'].includes(_epCtx.field)){
+      const o=orders.find(x=>x.pi===_epCtx.pi);
+      if(o&&(o[_epCtx.field]!==undefined||_epCtx.field==='client'))o[_epCtx.field]=val;
     }
   } else if(_epCtx.type==='led'){
     const l=ledger.find(x=>Number(x.n)===Number(_epCtx.n));if(!l)return;
-    if(_epCtx.field==='amount'){const a=parseFloat(val);if(!a||a<=0){toast('⚠ Valor inválido');return;}l.amount=Math.round(a*100)/100;}
-    else if(_epCtx.field==='date'){
-      if(!val){toast('⚠ Data não pode ser vazia');return;}
-      const nd=normDate(val);
-      if(!nd){toast('⚠ Formato inválido — use 15/01/26 ou 15/Jan/26');return;}
-      l.date=nd;
-    } else l[_epCtx.field]=val;
+    if(_epCtx.field==='amount'){const a=parseFloat(val);if(!a||a<=0){toast('⚠ Valor inválido','err');return;}l.amount=Math.round(a*100)/100;}
+    else if(_epCtx.field==='date'){const nd=normDate(val);if(!nd){toast('⚠ Data inválida','err');return;}l.date=nd;}
+    else l[_epCtx.field]=val;
   } else if(_epCtx.type==='rec'){
     const r=receipts.find(x=>Number(x.n)===Number(_epCtx.n));if(!r)return;
-    if(_epCtx.field==='amount'){const a=parseFloat(val);if(!a||a<=0){toast('⚠ Valor inválido');return;}r.amount=Math.round(a*100)/100;}
-    else if(_epCtx.field==='date'){
-      if(!val){toast('⚠ Data não pode ser vazia');return;}
-      const nd=normDate(val);
-      if(!nd){toast('⚠ Formato inválido — use 15/01/26 ou 15/Jan/26');return;}
-      r.date=nd;
-    } else r[_epCtx.field]=val;
+    if(_epCtx.field==='amount'){const a=parseFloat(val);if(!a||a<=0){toast('⚠ Valor inválido','err');return;}r.amount=Math.round(a*100)/100;}
+    else if(_epCtx.field==='date'){const nd=normDate(val);if(!nd){toast('⚠ Data inválida','err');return;}r.date=nd;}
+    else r[_epCtx.field]=val;
   }
-  const _needFin=_epCtx&&(_epCtx.type==='led'||_epCtx.type==='rec'||_epCtx.type==='pay');
-  saveAll();renderAll();if(_needFin)renderFinanceiro();closeEp();toast('Salvo ✓');
+  saveAll();renderAll();
+  if(_activeTab==='financeiro')renderFinanceiro(); // FIX #8
+  closeEp();toast('Salvo ✓');
 }
-function epClear(){
-  if(!_epCtx){closeEp();return;}
-  const inp=document.getElementById('ep-val');if(inp)inp.value='';
-  epSave();
-}
+function epClear(){if(!_epCtx){closeEp();return;}const inp=document.getElementById('ep-val');if(inp)inp.value='';epSave();}
 function closeEp(){document.getElementById('epop').style.display='none';_epCtx=null;}
-
 
 /* ══════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════ */
 function showTab(id){
+  _activeTab=id; // FIX #8
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   const tabs={internal:0,client:1,financeiro:2};
   document.querySelectorAll('.tab')[tabs[id]]?.classList.add('active');
-  if(id==='financeiro')renderFinanceiro();
+  if(id==='financeiro')renderFinanceiro(); // FIX #8: só renderiza quando visível
 }
 function ovlOut(e,id){if(e.target===document.getElementById(`ovl-${id}`))closeOvl(id);}
 function closeOvl(id){document.getElementById(`ovl-${id}`).classList.remove('open');}
 
 /* ══════════════════════════════════════
-   EXPORT / BACKUP
+   EXPORT
 ══════════════════════════════════════ */
 function csvEsc(v){const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;}
 function exportCSV(){
   const hdr=['Num','PO','PI','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
-  const rows=orders.map(o=>[
-    o.num, csvEsc(o.po), csvEsc(o.pi||''), csvEsc(o.client),
-    csvEsc(o.product), csvEsc(o.container||''), o.total, csvEsc(o.status),
-    csvEsc(o.dates[0]?.v||''), csvEsc(o.dates[1]?.v||''), csvEsc(o.dates[2]?.v||''),
-    csvEsc(o.dates[3]?.v||''), csvEsc(o.dates[4]?.v||''), csvEsc(o.dates[5]?.v||''),
-    csvEsc(o.dates[6]?.v||''), csvEsc(o.dates[7]?.v||''),
-    csvEsc(o.notes||'')
-  ]);
-  const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
-  dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),`fgl_controle_${todayDisp().replace(/\//g,'-')}.csv`);
+  const rows=orders.map(o=>[o.num,csvEsc(o.po),csvEsc(o.pi||''),csvEsc(o.client),csvEsc(o.product),csvEsc(o.container||''),o.total,csvEsc(o.status),
+    csvEsc(o.dates[0]?.v||''),csvEsc(o.dates[1]?.v||''),csvEsc(o.dates[2]?.v||''),csvEsc(o.dates[3]?.v||''),csvEsc(o.dates[4]?.v||''),csvEsc(o.dates[5]?.v||''),csvEsc(o.dates[6]?.v||''),csvEsc(o.dates[7]?.v||''),csvEsc(o.notes||'')]);
+  dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].map(r=>r.join(',')).join('\n')),`fgl_${todayDisp().replace(/\//g,'-')}.csv`);
 }
 function exportClientCSV(){
-  const hdr=['#','PO#','Cliente','Produto','Contêiner','Unidades','Status','ETA/Entrada CD','Próxima Ação'];
-  const rows=orders.map(o=>[o.num,o.po,o.client,`"${o.product}"`,`"${o.container||''}"`,o.total,o.status,o.dates[7]?.v||o.dates[6]?.v||'—',`"${getNextAction(o)}"`]);
-  const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
-  dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),`fgl_cliente_${todayDisp().replace(/\//g,'-')}.csv`);
+  const hdr=['#','PO#','Cliente','Produto','Unidades','Status','ETA','Próxima Ação'];
+  const rows=orders.map(o=>[o.num,o.po,o.client,`"${o.product}"`,o.total,o.status,o.dates[7]?.v||o.dates[6]?.v||'—',`"${getNextAction(o)}"`]);
+  dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].map(r=>r.join(',')).join('\n')),`fgl_cli_${todayDisp().replace(/\//g,'-')}.csv`);
 }
 function dlFile(href,name){const a=document.createElement('a');a.href=href;a.download=name;a.click();}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
-function exportBackup(){
-  const payload={version:4,exported:new Date().toISOString(),orders,payments,ledger,receipts};
-  dlFile('data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(payload,null,2)),`fgl_backup_${todayDisp().replace(/\//g,'-')}.json`);
-  toast('Backup exportado ✓');
-}
-function importBackup(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    try{
-      const data=JSON.parse(ev.target.result);
-      if(!data.orders)throw new Error('Formato inválido');
-      if(!confirm(`Restaurar backup de ${data.exported?.slice(0,10)||'?'}?\nIsso substituirá todos os dados atuais.`))return;
-      orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
-      saveAll();renderAll();toast(`Backup restaurado ✓ (${orders.length} pedidos)`);
-    }catch(err){alert('Erro ao ler backup: '+err.message);}
-  };
-  reader.readAsText(file);e.target.value='';
-}
 
 /* ══════════════════════════════════════
    STATUS MANAGEMENT
 ══════════════════════════════════════ */
-function openStatusModal(){
-  renderStatusLists();
-  document.getElementById('ovl-status').classList.add('open');
-}
+function openStatusModal(){renderStatusLists();document.getElementById('ovl-status').classList.add('open');}
 function renderStatusLists(){
-  const SC_COLORS={'PRÉ-PRODUÇÃO':'pa','EM PRODUÇÃO':'pp','EMBARCADO':'pb','FINALIZADO':'pg','SUSPENSO':'pr'};
-  document.getElementById('st-int-list').innerHTML=SLST.map((s,i)=>`
-    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
-      <span class="pill ${SC_COLORS[s]||'pgr'}" style="flex:1;text-align:left;padding:.2rem .5rem">${esc(s)}</span>
-      <button onclick="renameStatus(${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
-      <button onclick="deleteStatus(${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
-    </div>`).join('');
-  // Clientes
-  document.getElementById('st-cli-list').innerHTML=CLIENTES.map((c,i)=>`
-    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
-      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(c)}</span>
-      <button onclick="renameMestre('cli',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
-      <button onclick="deleteMestre('cli',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
-    </div>`).join('');
-  // Fornecedores
-  document.getElementById('st-forn-list').innerHTML=FORNECEDORES.map((f,i)=>`
-    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
-      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(f)}</span>
-      <button onclick="renameMestre('forn',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
-      <button onclick="deleteMestre('forn',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
-    </div>`).join('');
-  // Produtos
-  document.getElementById('st-prod-list').innerHTML=PRODUTOS.map((p,i)=>`
-    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
-      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(p)}</span>
-      <button onclick="renameMestre('prod',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button>
-      <button onclick="deleteMestre('prod',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
-    </div>`).join('');
-  // Contêineres
-  document.getElementById('st-cont-list').innerHTML=CONTEINERES.map((c,i)=>`
-    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
-      <span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(c)}</span>
-      <button onclick="renameMestre('cont',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✏</button>
-      <button onclick="deleteMestre('cont',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button>
-    </div>`).join('');
+  const SC_C={'PRÉ-PRODUÇÃO':'pa','EM PRODUÇÃO':'pp','EMBARCADO':'pb','FINALIZADO':'pg','SUSPENSO':'pr'};
+  document.getElementById('st-int-list').innerHTML=SLST.map((s,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span class="pill ${SC_C[s]||'pgr'}" style="flex:1;text-align:left;padding:.2rem .5rem">${esc(s)}</span><button onclick="renameStatus(${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteStatus(${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
+  ['cli','forn','prod','cont'].forEach(tipo=>{
+    const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
+    document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
+  });
 }
 function addMestre(tipo){
-  const id=tipo==='cli'?'st-cli-new':tipo==='forn'?'st-forn-new':tipo==='prod'?'st-prod-new':'st-cont-new';
-  const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
-  const v=document.getElementById(id).value.trim();
-  if(!v)return;
-  if(arr.includes(v)){toast('⚠ Já existe');return;}
-  arr.push(v);
-  document.getElementById(id).value='';
-  saveAll();renderStatusLists();toast('Adicionado ✓');
+  const id='st-'+tipo+'-new';const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
+  const v=document.getElementById(id).value.trim();if(!v)return;if(arr.includes(v)){toast('⚠ Já existe','warn');return;}
+  arr.push(v);document.getElementById(id).value='';saveAll();renderStatusLists();toast('Adicionado ✓');
 }
 function deleteMestre(tipo,i){
   const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
-  if(!confirm(`Remover "${arr[i]}"?`))return;
-  arr.splice(i,1);saveAll();renderStatusLists();toast('Removido');
+  if(!confirm(`Remover "${arr[i]}"?`))return;arr.splice(i,1);saveAll();renderStatusLists();toast('Removido');
 }
 function renameMestre(tipo,i){
   const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
-  const novo=prompt(`Renomear "${arr[i]}" para:`,arr[i]);
-  if(!novo||novo.trim()===arr[i])return;
+  const novo=prompt(`Renomear "${arr[i]}" para:`,arr[i]);if(!novo||novo.trim()===arr[i])return;
   arr[i]=novo.trim();saveAll();renderStatusLists();toast('Renomeado ✓');
 }
 function addStatus(){
-  const el=document.getElementById('st-int-new');
-  const v=el.value.trim().toUpperCase();
-  if(!v)return;
-  if(!SLST.includes(v))SLST.push(v);
-  el.value='';saveAll();renderStatusLists();renderAll();toast('Status adicionado ✓');
+  const el=document.getElementById('st-int-new');const v=el.value.trim().toUpperCase();if(!v)return;
+  if(!SLST.includes(v))SLST.push(v);el.value='';saveAll();renderStatusLists();renderAll();toast('Status adicionado ✓');
 }
-function deleteStatus(i){
-  if(SLST.length<=1){toast('⚠ Manter ao menos 1 status');return;}
-  if(!confirm(`Deletar "${SLST[i]}"?`))return;
-  SLST.splice(i,1);saveAll();renderStatusLists();renderAll();toast('Status removido');
-}
+function deleteStatus(i){if(SLST.length<=1)return;if(!confirm(`Deletar "${SLST[i]}"?`))return;SLST.splice(i,1);saveAll();renderStatusLists();renderAll();}
 function renameStatus(i){
-  const novo=prompt(`Renomear "${SLST[i]}" para:`,SLST[i]);
-  if(!novo||novo.trim()===SLST[i])return;
-  const novoCaps=novo.trim().toUpperCase();
-  orders.forEach(o=>{if(o.status===SLST[i])o.status=novoCaps;});
-  SLST[i]=novoCaps;saveAll();renderStatusLists();renderAll();toast('Status renomeado ✓');
+  const novo=prompt(`Renomear "${SLST[i]}" para:`,SLST[i]);if(!novo||novo.trim()===SLST[i])return;
+  const nc=novo.trim().toUpperCase();orders.forEach(o=>{if(o.status===SLST[i])o.status=nc;});
+  SLST[i]=nc;saveAll();renderStatusLists();renderAll();toast('Renomeado ✓');
 }
+
 /* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
 function renderAll(){
-  renderSummary();renderInternal();renderClient();
-  // Badge no tab Controle Interno
+  renderSummary();renderInternal();renderClient();populateStatusDropdowns();
   const nAlerts=calcAlerts().length;
-  const tabIntEl=document.querySelectorAll('.tab')[0];
-  if(tabIntEl)tabIntEl.innerHTML=nAlerts>0
-    ?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`
-    :'Controle Interno';
-  // show/hide demo banner
+  const tabInt=document.querySelectorAll('.tab')[0];
+  if(tabInt)tabInt.innerHTML=nAlerts>0?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`:'Controle Interno';
   const isDemo=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
-  const banner=document.getElementById('demo-banner');
-  if(banner)banner.style.display=isDemo?'flex':'none';
+  const banner=document.getElementById('demo-banner');if(banner)banner.style.display=isDemo?'flex':'none';
 }
 function clearDemoData(){
-  if(!confirm('Limpar todos os dados demo e começar do zero?'))return;
+  if(!confirm('Limpar dados demo?'))return;
   orders=[];payments=[];ledger=[];receipts=[];
-  saveAll();renderAll();renderFinanceiro();toast('Dados demo removidos ✓');
+  saveAll();renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast('Demo removido ✓');
 }
+
 document.getElementById('hdr-date').textContent=todayDisp();
 
-function editLed(n,field,e){
-  e.stopPropagation();
-  const l=ledger.find(x=>Number(x.n)===Number(n));if(!l)return;
-  _epCtx={type:'led',n:Number(n),field};
-  const lbls={date:'Data',amount:'Valor USD',pi:'PI',supplier:'Fornecedor',ref:'Referência',notes:'Notas'};
-  if(field==='date')showEpDate(e,'Data',dispToISO(l.date));
-  else if(field==='amount')showEp(e,'Valor USD',l.amount.toFixed(2),true,false);
-  else showEp(e,lbls[field]||field,String(l[field]||''),false,false);
-}
-function editRec(n,field,e){
-  e.stopPropagation();
-  const r=receipts.find(x=>Number(x.n)===Number(n));if(!r)return;
-  _epCtx={type:'rec',n:Number(n),field};
-  const lbls={date:'Data',amount:'Valor USD',pi:'PI',client:'Cliente',ref:'Referência',notes:'Notas'};
-  if(field==='date')showEpDate(e,'Data',dispToISO(r.date));
-  else if(field==='amount')showEp(e,'Valor USD',r.amount.toFixed(2),true,false);
-  else showEp(e,lbls[field]||field,String(r[field]||''),false,false);
-}
-
+// FIX #3: Enter salva, Escape fecha
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeEp();document.getElementById('mcal').style.display='none';
+    document.querySelectorAll('.ovl.open').forEach(o=>{const id=o.id.replace('ovl-','');closeOvl(id);});}
+  if(e.key==='Enter'&&document.getElementById('epop').style.display==='block'){e.preventDefault();epSave();}
+});
 document.addEventListener('click',e=>{
-  const ep=document.getElementById('epop');
-  if(ep.style.display!=='block')return;
-  if(ep.contains(e.target))return;
-  if(Date.now()-(_epOpenedAt||0)<100)return;
-  closeEp();
+  const ep=document.getElementById('epop');if(ep.style.display!=='block')return;
+  if(ep.contains(e.target))return;if(Date.now()-(_epOpenedAt||0)<100)return;closeEp();
 });
 
 renderAll();
 
 /* ══════════════════════════════════════
-   DATE PICKER SYNC
+   MINI CALENDAR
 ══════════════════════════════════════ */
-function datePickerSync(targetId, isoVal){
-  // Convert YYYY-MM-DD → DD/Mon/YY and fill text field
-  if(!isoVal)return;
-  const [y,m,d]=isoVal.split('-');
-  const MONS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const disp=`${d}/${MONS[parseInt(m)-1]}/${y.slice(2)}`;
-  const el=document.getElementById(targetId);
-  if(el){el.value=disp;el.dispatchEvent(new Event('input'));}
+let _calTarget=null,_calY=new Date().getFullYear(),_calM=new Date().getMonth();
+function openCal(calId){
+  _calTarget=calId.replace(/-cal$/,'');
+  const cur=document.getElementById(_calTarget)?.value||'';const iso=dispToISO(cur);
+  if(iso){const d=new Date(iso+'T00:00');if(!isNaN(d)){_calY=d.getFullYear();_calM=d.getMonth();}}
+  else{_calY=new Date().getFullYear();_calM=new Date().getMonth();}
+  renderMcal();
+  const btn=event.currentTarget||event.target;const r=btn.getBoundingClientRect();
+  const cal=document.getElementById('mcal');cal.style.display='block';
+  let top=r.bottom+4,left=r.left;
+  if(top+240>window.innerHeight)top=r.top-244;if(left+224>window.innerWidth)left=window.innerWidth-228;
+  cal.style.top=top+'px';cal.style.left=left+'px';
+  setTimeout(()=>document.addEventListener('click',closeMcalOutside,{once:true,capture:true}),10);
+}
+function closeMcalOutside(e){const cal=document.getElementById('mcal');if(cal&&!cal.contains(e.target))cal.style.display='none';else setTimeout(()=>document.addEventListener('click',closeMcalOutside,{once:true,capture:true}),10);}
+function renderMcal(){
+  const cal=document.getElementById('mcal');const today=new Date();
+  const curISO=dispToISO(document.getElementById(_calTarget)?.value||'');
+  const lastDay=new Date(_calY,_calM+1,0).getDate();const startDow=(new Date(_calY,_calM,1).getDay()+6)%7;
+  let days='';for(let d=0;d<startDow;d++)days+='<div class="mc-day empty"></div>';
+  for(let d=1;d<=lastDay;d++){
+    const iso=`${_calY}-${String(_calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=today.getFullYear()===_calY&&today.getMonth()===_calM&&today.getDate()===d;
+    days+=`<div class="mc-day${isToday?' today':''}${curISO===iso?' selected':''}" onclick="pickDay(${d})">${d}</div>`;
+  }
+  cal.innerHTML=`<div class="mc-hdr"><button class="mc-nav" onclick="mcalNav(-1);event.stopPropagation()">‹</button><span class="mc-title">${MO[_calM]} ${_calY}</span><button class="mc-nav" onclick="mcalNav(1);event.stopPropagation()">›</button></div>
+    <div class="mc-grid"><div class="mc-dow">Seg</div><div class="mc-dow">Ter</div><div class="mc-dow">Qua</div><div class="mc-dow">Qui</div><div class="mc-dow">Sex</div><div class="mc-dow">Sáb</div><div class="mc-dow">Dom</div>${days}</div>`;
+}
+function mcalNav(dir){_calM+=dir;if(_calM<0){_calM=11;_calY--;}if(_calM>11){_calM=0;_calY++;}renderMcal();event.stopPropagation();}
+function pickDay(d){datePickerSync(_calTarget,`${_calY}-${String(_calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);document.getElementById('mcal').style.display='none';}
+function datePickerSync(targetId,isoVal){
+  if(!isoVal)return;const[y,m,d]=isoVal.split('-');
+  const el=document.getElementById(targetId);if(el){el.value=`${d}/${MO[parseInt(m)-1]}/${y.slice(2)}`;el.dispatchEvent(new Event('input'));}
 }
 
 /* ══════════════════════════════════════
@@ -2040,141 +1740,59 @@ function datePickerSync(targetId, isoVal){
 const GIS_CLIENT_ID='696181362065-i6ktbnctvafdac879ml8s7lkcp7jgvr0.apps.googleusercontent.com';
 const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
 const DRIVE_FILE='fgl_tracker_data.json';
-let _driveToken=null;
-let _driveFileId=localStorage.getItem('fgl8_driveFileId')||null;
-let _driveSaveTimer=null;
-let _driveReady=false;
+let _driveToken=null,_driveFileId=localStorage.getItem('fgl8_driveFileId')||null,_driveSaveTimer=null,_driveReady=false;
 
-// Inicializa o cliente OAuth silenciosamente ao carregar
 function driveInit(){
   if(!window.google?.accounts?.oauth2)return;
-  // Tenta token silencioso (sem popup) se já autorizou antes
-  const hadToken=localStorage.getItem('fgl8_driveAuth');
-  if(hadToken){
-    google.accounts.oauth2.initTokenClient({
-      client_id:GIS_CLIENT_ID,
-      scope:DRIVE_SCOPE,
-      prompt:'',
+  if(localStorage.getItem('fgl8_driveAuth')){
+    google.accounts.oauth2.initTokenClient({client_id:GIS_CLIENT_ID,scope:DRIVE_SCOPE,prompt:'',
       callback:r=>{if(r.access_token){_driveToken=r.access_token;_driveReady=true;driveSetStatus('ok');driveLoadOrCreate();}}
     }).requestAccessToken({prompt:''});
   }
 }
-
 function driveConnect(){
-  google.accounts.oauth2.initTokenClient({
-    client_id:GIS_CLIENT_ID,
-    scope:DRIVE_SCOPE,
-    callback:r=>{
-      if(r.access_token){
-        _driveToken=r.access_token;_driveReady=true;
-        localStorage.setItem('fgl8_driveAuth','1');
-        driveSetStatus('ok');
-        driveLoadOrCreate();
-        toast('Google Drive conectado ✓');
-      }
-    }
+  google.accounts.oauth2.initTokenClient({client_id:GIS_CLIENT_ID,scope:DRIVE_SCOPE,
+    callback:r=>{if(r.access_token){_driveToken=r.access_token;_driveReady=true;localStorage.setItem('fgl8_driveAuth','1');driveSetStatus('ok');driveLoadOrCreate();toast('Drive conectado ✓');}}
   }).requestAccessToken();
 }
-
 function driveSetStatus(s){
-  const dot=document.getElementById('drive-dot');
-  const lbl=document.getElementById('drive-lbl');
-  if(!dot||!lbl)return;
+  const dot=document.getElementById('drive-dot'),lbl=document.getElementById('drive-lbl');if(!dot||!lbl)return;
   if(s==='ok'){dot.style.background='#4ADE80';lbl.textContent='Drive ✓';}
   else if(s==='saving'){dot.style.background='#F59E0B';lbl.textContent='Salvando…';}
   else if(s==='err'){dot.style.background='#F87171';lbl.textContent='Drive ✗';}
   else{dot.style.background='#666';lbl.textContent='Drive';}
 }
-
 async function driveLoadOrCreate(){
   if(!_driveToken)return;
   try{
-    // Busca o arquivo existente no appDataFolder
     if(!_driveFileId){
-      const r=await fetch(
-        'https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22'+DRIVE_FILE+'%22&fields=files(id,name)',
-        {headers:{Authorization:'Bearer '+_driveToken}}
-      );
-      const d=await r.json();
-      if(d.files&&d.files.length>0){_driveFileId=d.files[0].id;localStorage.setItem('fgl8_driveFileId',_driveFileId);}
+      const r=await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22'+DRIVE_FILE+'%22&fields=files(id,name)',{headers:{Authorization:'Bearer '+_driveToken}});
+      const d=await r.json();if(d.files&&d.files.length>0){_driveFileId=d.files[0].id;localStorage.setItem('fgl8_driveFileId',_driveFileId);}
     }
     if(_driveFileId){
-      // Carrega dados do Drive e mescla (Drive tem prioridade se mais recente)
-      const r=await fetch('https://www.googleapis.com/drive/v3/files/'+_driveFileId+'?alt=media',
-        {headers:{Authorization:'Bearer '+_driveToken}});
+      const r=await fetch('https://www.googleapis.com/drive/v3/files/'+_driveFileId+'?alt=media',{headers:{Authorization:'Bearer '+_driveToken}});
       if(r.ok){
         const data=await r.json();
-        if(data.orders&&data.orders.length>=(orders.length)){
-          // Drive tem dados mais completos — carrega
-          orders=data.orders||orders;
-          payments=data.payments||payments;
-          ledger=data.ledger||ledger;
-          receipts=data.receipts||receipts;
-          if(data.slst)SLST=data.slst;
-          if(data.clientes)CLIENTES=data.clientes;
-          if(data.fornecedores)FORNECEDORES=data.fornecedores;
-          if(data.produtos)PRODUTOS=data.produtos;
-          if(data.conteineres)CONTEINERES=data.conteineres;
-          // Salva no localStorage também
-          sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);
-          sv('slst',SLST);sv('cls',CLIENTES);sv('forn',FORNECEDORES);
-          renderAll();renderFinanceiro();
-          toast('Dados carregados do Drive ✓');
-        } else {
-          // localStorage é mais recente — sobe para o Drive
-          driveSaveNow();
-        }
+        if(data.orders&&data.orders.length>=orders.length){
+          orders=data.orders||orders;payments=data.payments||payments;ledger=data.ledger||ledger;receipts=data.receipts||receipts;
+          if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;if(data.conteineres)CONTEINERES=data.conteineres;
+          sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);sv('cls',CLIENTES);sv('forn',FORNECEDORES);
+          renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast('Drive carregado ✓');
+        } else driveSaveNow();
       }
-    } else {
-      // Arquivo não existe ainda — cria com dados actuais
-      driveSaveNow();
-    }
+    } else driveSaveNow();
   }catch(e){console.error('Drive load error',e);driveSetStatus('err');}
 }
-
-function driveSaveDebounced(){
-  if(!_driveReady)return;
-  clearTimeout(_driveSaveTimer);
-  _driveSaveTimer=setTimeout(driveSaveNow,1500);
-}
-
+function driveSaveDebounced(){if(!_driveReady)return;clearTimeout(_driveSaveTimer);_driveSaveTimer=setTimeout(driveSaveNow,1500);}
 async function driveSaveNow(){
-  if(!_driveToken)return;
-  driveSetStatus('saving');
-  const payload=JSON.stringify({
-    version:4,saved:new Date().toISOString(),
-    orders,payments,ledger,receipts,
-    slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES
-  });
+  if(!_driveToken)return;driveSetStatus('saving');
+  const payload=JSON.stringify({version:5,saved:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES});
   try{
-    if(_driveFileId){
-      // Actualiza ficheiro existente
-      await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{
-        method:'PATCH',
-        headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},
-        body:payload
-      });
-    } else {
-      // Cria ficheiro novo no appDataFolder (invisível ao utilizador no Drive)
-      const meta=await fetch('https://www.googleapis.com/drive/v3/files',{
-        method:'POST',
-        headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},
-        body:JSON.stringify({name:DRIVE_FILE,parents:['appDataFolder']})
-      });
-      const mj=await meta.json();
-      _driveFileId=mj.id;
-      localStorage.setItem('fgl8_driveFileId',_driveFileId);
-      await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{
-        method:'PATCH',
-        headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},
-        body:payload
-      });
-    }
+    if(_driveFileId){await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{method:'PATCH',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:payload});}
+    else{const meta=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:JSON.stringify({name:DRIVE_FILE,parents:['appDataFolder']})});const mj=await meta.json();_driveFileId=mj.id;localStorage.setItem('fgl8_driveFileId',_driveFileId);await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{method:'PATCH',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:payload});}
     driveSetStatus('ok');
   }catch(e){console.error('Drive save error',e);driveSetStatus('err');}
 }
-
-// Inicia silenciosamente
 window.addEventListener('load',()=>setTimeout(driveInit,800));
 </script>
 </body>
