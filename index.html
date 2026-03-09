@@ -218,7 +218,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
-          <th class="L" style="min-width:72px">PO#</th>
+          <th class="L" style="min-width:80px">PI / PO</th>
           <th class="L" style="min-width:95px">Cliente</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
@@ -921,7 +921,10 @@ function renderInternal(){
   document.getElementById('int-body').innerHTML=fltS.map((o,i)=>{
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
-      <td class="L ec" onclick="editField(${o.num},'po',event)"><span style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)">${esc(o.po)}</span></td>
+      <td class="L">
+        ${o.pi?`<b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:var(--navy)" onclick="editField(${o.num},'pi',event)">${esc(o.pi)}</b>`:''}
+        <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
+      </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
       <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
         ${esc(o.product)}
@@ -1493,7 +1496,7 @@ function submitOrder(){
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
+  const lbls={pi:'PI',po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
   showEp(e,lbls[field]||field,String(o[field]||''),field==='total',false);
   const ep=document.getElementById('ep-val');
