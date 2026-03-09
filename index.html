@@ -210,7 +210,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     <table id="int-tbl">
       <thead>
         <tr class="grp">
-          <th colspan="5" style="background:var(--navy);text-align:left;padding-left:.8rem">PEDIDOS</th>
+          <th colspan="5" style="background:var(--navy);text-align:center">PEDIDOS</th>
           <th colspan="3" style="background:#163D5C">PROGRESSO</th>
           <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
@@ -1074,12 +1074,13 @@ function renderFinanceiro(){
         <b class="ec" style="font-family:'IBM Plex Mono';color:var(--navy);font-size:.78rem" onclick="editFinField('${esc(p.pi)}','pi',event)">${esc(p.pi)}</b>
         <div style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)">${esc(p.po)}</div>
       </td>
-      <td class="L ec" onclick="editFinField('${esc(p.pi)}','supplier',event)">
-        <b style="font-size:.78rem">${esc(p.supplier)}</b>
-        <div style="font-size:.62rem;color:var(--ink4)">${esc(p.inv||'—')}</div>
+      <td class="L">
+        <b class="ec" style="font-size:.78rem" onclick="editFinField('${esc(p.pi)}','supplier',event)">${esc(p.supplier)}</b>
+        <div class="ec" style="font-size:.62rem;color:var(--ink4)" onclick="editFinField('${esc(p.pi)}','inv',event)">${esc(p.inv||'— inv forn.')}</div>
       </td>
-      <td class="L ec" onclick="editFinField('${esc(p.pi)}','client',event)">
-        <b style="font-size:.78rem">${esc(p.client||'—')}</b>
+      <td class="L">
+        <b class="ec" style="font-size:.78rem" onclick="editFinField('${esc(p.pi)}','client',event)">${esc(p.client||'—')}</b>
+        <div class="ec" style="font-size:.62rem;color:var(--ink4)" onclick="editFinField('${esc(p.pi)}','clientInv',event)">${esc(p.clientInv||'— inv cli.')}</div>
       </td>
       <td>${dispStatus}</td>
       <td style="font-size:.65rem;font-family:'IBM Plex Mono'">
@@ -1375,7 +1376,7 @@ let _editNum=null;
 function addProdRow(desc='',qty=0,pForn=0,pCli=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
-  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="flex:2">
+  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" autocomplete="off" oninput="updatePreview()" style="flex:2">
     <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1">
     <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1">
