@@ -720,6 +720,29 @@ let ledger=ld('led',LED_DEF);
 let receipts=ld('rec',REC_DEF);
 let _activeTab='internal'; // FIX #8: track active tab
 
+// Auto-migração: garantir vínculo orders↔payments
+(function migrateLinks(){
+  // 1) Para cada payment sem order vinculado, criar order automaticamente
+  payments.forEach(p=>{
+    const hasOrder=orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po));
+    if(!hasOrder&&p.pi){
+      const nn=Math.max(...orders.map(x=>x.num),0)+1;
+      const totalQty=(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0),0);
+      const product=(p.unitPrices||[]).map(r=>r.desc||'').filter(Boolean).join(' + ')||'—';
+      const dates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
+      if(p.etd&&p.etd!=='—')dates[5]=mkD(p.etd,true);
+      if(p.eta&&p.eta!=='—')dates[6]=mkD(p.eta,true);
+      orders.push({num:nn,po:p.po||'—',pi:p.pi,client:p.client||'—',supplier:p.supplier||'',container:'',status:'EM PRODUÇÃO',total:totalQty,product,dates,notes:''});
+    }
+  });
+  // 2) Order com pi vazio mas PO que bate com payment → preencher pi
+  orders.forEach(o=>{
+    if(o.pi)return;
+    const p=payments.find(x=>x.po&&x.po!=='—'&&x.po===o.po);
+    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;}
+  });
+})();
+
 function saveAll(){
   sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);
   sv('cls',CLIENTES);sv('forn',FORNECEDORES);sv('prod',PRODUTOS);sv('cont',CONTEINERES);
@@ -1473,16 +1496,18 @@ function submitOrder(){
     pushUndo('Editar pedido #'+_editNum);
     const o=orders.find(x=>x.num===_editNum);
     if(o){
-      // FIX #1: propagar mudanças para payments
+      // Buscar payment ANTES de alterar pi/po
+      const p=linkPay(o);
+      const oldPi=o.pi;
       o.po=po;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
       if(totalQty>0)o.total=totalQty;
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
-      if(o.pi){
-        let p=linkPay(o);
-        if(p){p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=plates;p.sample=sample;if(prodRows.length)p.unitPrices=prodRows;}
+      if(p){
+        if(pi&&pi!==oldPi){p.pi=pi; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
+        p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=plates;p.sample=sample;if(prodRows.length)p.unitPrices=prodRows;
       }
     }
-    saveAll();renderAll();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
+    saveAll();renderAll();renderFinanceiro();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
   }
 
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
@@ -1584,10 +1609,16 @@ function epSave(){
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
+    // Buscar payment ANTES de alterar o valor (senão pi/po antigo se perde)
+    const p=linkPay(o);
+    const oldPi=o.pi, oldPo=o.po;
     if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
-    // FIX #1: propagar client/supplier para payments
-    if(_epCtx.field==='client'||_epCtx.field==='supplier'){
-      const p=linkPay(o);if(p)p[_epCtx.field]=val;
+    // Propagar para payments
+    if(p){
+      if(_epCtx.field==='pi'){p.pi=val; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=val;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=val;});}
+      if(_epCtx.field==='po')p.po=val;
+      if(_epCtx.field==='client')p.client=val;
+      if(_epCtx.field==='supplier')p.supplier=val;
     }
   } else if(_epCtx.type==='pay'){
     const p=payments.find(x=>x.pi===_epCtx.pi);if(!p)return;
@@ -1615,8 +1646,7 @@ function epSave(){
     else if(_epCtx.field==='date'){const nd=normDate(val);if(!nd){toast('⚠ Data inválida','err');return;}r.date=nd;}
     else r[_epCtx.field]=val;
   }
-  saveAll();renderAll();
-  if(_activeTab==='financeiro')renderFinanceiro(); // FIX #8
+  saveAll();renderAll();renderFinanceiro();
   closeEp();toast('Salvo ✓');
 }
 function epClear(){if(!_epCtx){closeEp();return;}const inp=document.getElementById('ep-val');if(inp)inp.value='';epSave();}
