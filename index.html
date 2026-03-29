@@ -722,6 +722,7 @@ let _activeTab='internal'; // FIX #8: track active tab
 
 // Auto-migração: garantir vínculo orders↔payments
 (function migrateLinks(){
+  let changed=false;
   // 1) Para cada payment sem order vinculado, criar order automaticamente
   payments.forEach(p=>{
     const hasOrder=orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po));
@@ -733,14 +734,17 @@ let _activeTab='internal'; // FIX #8: track active tab
       if(p.etd&&p.etd!=='—')dates[5]=mkD(p.etd,true);
       if(p.eta&&p.eta!=='—')dates[6]=mkD(p.eta,true);
       orders.push({num:nn,po:p.po||'—',pi:p.pi,client:p.client||'—',supplier:p.supplier||'',container:'',status:'EM PRODUÇÃO',total:totalQty,product,dates,notes:''});
+      changed=true;
     }
   });
   // 2) Order com pi vazio mas PO que bate com payment → preencher pi
   orders.forEach(o=>{
     if(o.pi)return;
     const p=payments.find(x=>x.po&&x.po!=='—'&&x.po===o.po);
-    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;}
+    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;changed=true;}
   });
+  // Persistir vínculos criados
+  if(changed){sv('ord',orders);sv('pay',payments);}
 })();
 
 function saveAll(){
@@ -956,7 +960,7 @@ function renderInternal(){
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L">
-        ${o.pi?`<b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:var(--navy)" onclick="editField(${o.num},'pi',event)">${esc(o.pi)}</b>`:''}
+        <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ PI'}</b>
         <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
@@ -1609,13 +1613,23 @@ function epSave(){
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
-    // Buscar payment ANTES de alterar o valor (senão pi/po antigo se perde)
-    const p=linkPay(o);
+    // Buscar payment ANTES de alterar o valor
+    let p=linkPay(o);
     const oldPi=o.pi, oldPo=o.po;
     if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
+    // Se PI foi preenchido/alterado e não havia vínculo, tentar vincular pelo novo PI
+    if(_epCtx.field==='pi'&&val&&!p){
+      p=payments.find(x=>x.pi===val);
+      if(p) console.log('Auto-link: order #'+o.num+' → payment PI '+p.pi);
+    }
+    // Se PO foi alterado e não havia vínculo, tentar vincular pelo novo PO
+    if(_epCtx.field==='po'&&val&&val!=='—'&&!p){
+      p=payments.find(x=>x.po===val);
+      if(p){o.pi=o.pi||p.pi; console.log('Auto-link por PO: order #'+o.num+' → payment PI '+p.pi);}
+    }
     // Propagar para payments
     if(p){
-      if(_epCtx.field==='pi'){p.pi=val; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=val;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=val;});}
+      if(_epCtx.field==='pi'&&oldPi&&oldPi!==val){p.pi=val; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=val;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=val;});}
       if(_epCtx.field==='po')p.po=val;
       if(_epCtx.field==='client')p.client=val;
       if(_epCtx.field==='supplier')p.supplier=val;
