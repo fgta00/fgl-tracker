@@ -1627,6 +1627,8 @@ function epSave(){
     // Propagar Embarque→etd e ETA Brasil→eta para payments
     const p=linkPay(o);
     if(p){
+      if(_epCtx.di===5) p.etd=normDate(val)||'—';
+      if(_epCtx.di===6) p.eta=normDate(val)||'—';
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
@@ -1660,6 +1662,8 @@ function epSave(){
         if(_epCtx.field==='client')o.client=val;
         if(_epCtx.field==='supplier')o.supplier=val;
         const nd=normDate(val);
+        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true);
+        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
       }
     }
   } else if(_epCtx.type==='led'){
