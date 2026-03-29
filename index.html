@@ -1571,6 +1571,14 @@ function epSave(){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     const est=document.getElementById('ep-est')?.checked||false;
     o.dates[_epCtx.di]=mkD(val||null,est);
+    // Propagar Embarque→etd e ETA Brasil→eta para payments
+    if(o.pi){
+      const p=payments.find(x=>x.pi===o.pi);
+      if(p){
+        if(_epCtx.di===5) p.etd=normDate(val)||'—'; // Embarque → ETD
+        if(_epCtx.di===6) p.eta=normDate(val)||'—'; // ETA Brasil → ETA
+      }
+    }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
@@ -1585,7 +1593,13 @@ function epSave(){
     // FIX #1: propagar para orders
     if(['client','supplier','etd','eta'].includes(_epCtx.field)){
       const o=orders.find(x=>x.pi===_epCtx.pi);
-      if(o&&(o[_epCtx.field]!==undefined||_epCtx.field==='client'))o[_epCtx.field]=val;
+      if(o){
+        if(_epCtx.field==='client')o.client=val;
+        if(_epCtx.field==='supplier')o.supplier=val;
+        const nd=normDate(val);
+        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true); // ETD → Embarque
+        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true); // ETA → ETA Brasil
+      }
     }
   } else if(_epCtx.type==='led'){
     const l=ledger.find(x=>Number(x.n)===Number(_epCtx.n));if(!l)return;
