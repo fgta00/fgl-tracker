@@ -1117,9 +1117,20 @@ function renderFinanceiro(){
     const mg=totV-totF;const pctMg=totV>0?Math.round((mg/totV)*100):null;
     const bcP=pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
     const bcR=pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
-    const etdDisp=p.etd&&p.etd!=='—'?(normDate(p.etd)||p.etd):'—';
-    const etaDisp=p.eta&&p.eta!=='—'?(normDate(p.eta)||p.eta):'—';
     const linkedOrd=linkOrd(p);
+    // Fonte de verdade: order.dates[5]=Embarque/ETD, order.dates[6]=ETA Brasil
+    const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
+    const etaVal=linkedOrd?.dates[6]?.v||p.eta||'—';
+    const etdDisp=etdVal!=='—'?(normDate(etdVal)||etdVal):'—';
+    const etaDisp=etaVal!=='—'?(normDate(etaVal)||etaVal):'—';
+    // Manter payment sincronizado com order vinculado
+    if(etdDisp!=='—')p.etd=etdDisp;
+    if(etaDisp!=='—')p.eta=etaDisp;
+    if(linkedOrd){
+      if(linkedOrd.client)p.client=linkedOrd.client;
+      if(linkedOrd.supplier)p.supplier=linkedOrd.supplier;
+      if(linkedOrd.po&&linkedOrd.po!=='—')p.po=linkedOrd.po;
+    }
     const dispStatus=linkedOrd?statusSel(linkedOrd.num,linkedOrd.status):'<span class="pill pgr">—</span>';
     const rowBg=i%2===0?'background:#FAFCFE':'';
     const expanded=_finExp.has(p.pi);
