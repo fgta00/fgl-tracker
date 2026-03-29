@@ -1624,11 +1624,10 @@ function epSave(){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     const est=document.getElementById('ep-est')?.checked||false;
     o.dates[_epCtx.di]=mkD(val||null,est);
-    // Propagar Embarque→etd e ETA Brasil→eta para payments
     const p=linkPay(o);
     if(p){
-      if(_epCtx.di===5) p.etd=normDate(val)||'—';
-      if(_epCtx.di===6) p.eta=normDate(val)||'—';
+      if(_epCtx.di===5){p.etd=normDate(val)||'—';}
+      if(_epCtx.di===6){p.eta=normDate(val)||'—';}
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
