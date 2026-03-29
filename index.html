@@ -723,6 +723,7 @@ let _activeTab='internal'; // FIX #8: track active tab
 // Auto-migração: garantir vínculo orders↔payments
 (function migrateLinks(){
   let changed=false;
+  console.log('[MIGRATE] orders:'+orders.length+' payments:'+payments.length);
   // 1) Para cada payment sem order vinculado, criar order automaticamente
   payments.forEach(p=>{
     const hasOrder=orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po));
@@ -735,16 +736,22 @@ let _activeTab='internal'; // FIX #8: track active tab
       if(p.eta&&p.eta!=='—')dates[6]=mkD(p.eta,true);
       orders.push({num:nn,po:p.po||'—',pi:p.pi,client:p.client||'—',supplier:p.supplier||'',container:'',status:'EM PRODUÇÃO',total:totalQty,product,dates,notes:''});
       changed=true;
+      console.log('[MIGRATE] Criado order #'+nn+' para payment PI:'+p.pi);
     }
   });
   // 2) Order com pi vazio mas PO que bate com payment → preencher pi
   orders.forEach(o=>{
     if(o.pi)return;
     const p=payments.find(x=>x.po&&x.po!=='—'&&x.po===o.po);
-    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;changed=true;}
+    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;changed=true;
+      console.log('[MIGRATE] Order #'+o.num+' recebeu PI:'+p.pi+' (via PO:'+o.po+')');}
   });
-  // Persistir vínculos criados
-  if(changed){sv('ord',orders);sv('pay',payments);}
+  // Listar vínculos finais
+  orders.forEach(o=>{
+    const p=payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po));
+    console.log('[LINK] order #'+o.num+' pi:"'+o.pi+'" po:"'+o.po+'" → pay:'+(p?p.pi:'NENHUM'));
+  });
+  if(changed){sv('ord',orders);sv('pay',payments);console.log('[MIGRATE] Salvo '+orders.length+' orders');}
 })();
 
 function saveAll(){
@@ -1607,25 +1614,27 @@ function epSave(){
     o.dates[_epCtx.di]=mkD(val||null,est);
     // Propagar Embarque→etd e ETA Brasil→eta para payments
     const p=linkPay(o);
+    console.log('[SYNC ms→pay] order #'+o.num+' pi:"'+o.pi+'" po:"'+o.po+'" → payment:',p?p.pi:'NÃO ENCONTRADO');
     if(p){
-      if(_epCtx.di===5) p.etd=normDate(val)||'—';
-      if(_epCtx.di===6) p.eta=normDate(val)||'—';
+      if(_epCtx.di===5){p.etd=normDate(val)||'—';console.log('[SYNC] ETD atualizado para',p.etd);}
+      if(_epCtx.di===6){p.eta=normDate(val)||'—';console.log('[SYNC] ETA atualizado para',p.eta);}
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     // Buscar payment ANTES de alterar o valor
     let p=linkPay(o);
     const oldPi=o.pi, oldPo=o.po;
+    console.log('[SYNC ord→pay] order #'+o.num+' pi:"'+oldPi+'" po:"'+oldPo+'" field:'+_epCtx.field+' → payment:',p?p.pi:'NÃO ENCONTRADO');
     if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
     // Se PI foi preenchido/alterado e não havia vínculo, tentar vincular pelo novo PI
     if(_epCtx.field==='pi'&&val&&!p){
       p=payments.find(x=>x.pi===val);
-      if(p) console.log('Auto-link: order #'+o.num+' → payment PI '+p.pi);
+      if(p) console.log('[SYNC] Auto-link criado: order #'+o.num+' → payment PI '+p.pi);
     }
     // Se PO foi alterado e não havia vínculo, tentar vincular pelo novo PO
     if(_epCtx.field==='po'&&val&&val!=='—'&&!p){
       p=payments.find(x=>x.po===val);
-      if(p){o.pi=o.pi||p.pi; console.log('Auto-link por PO: order #'+o.num+' → payment PI '+p.pi);}
+      if(p){o.pi=o.pi||p.pi; console.log('[SYNC] Auto-link por PO: order #'+o.num+' → payment PI '+p.pi);}
     }
     // Propagar para payments
     if(p){
@@ -1633,20 +1642,22 @@ function epSave(){
       if(_epCtx.field==='po')p.po=val;
       if(_epCtx.field==='client')p.client=val;
       if(_epCtx.field==='supplier')p.supplier=val;
+      console.log('[SYNC] Propagado para payment PI '+p.pi);
     }
   } else if(_epCtx.type==='pay'){
     const p=payments.find(x=>x.pi===_epCtx.pi);if(!p)return;
     if(_epCtx.field==='etd'||_epCtx.field==='eta'){p[_epCtx.field]=normDate(val)||val||'—';}
     else{p[_epCtx.field]=val;}
-    // FIX #1: propagar para orders
+    // Propagar para orders
     if(['client','supplier','etd','eta'].includes(_epCtx.field)){
       const o=linkOrd(p);
+      console.log('[SYNC pay→ord] payment PI:'+p.pi+' po:"'+p.po+'" field:'+_epCtx.field+' → order:',o?'#'+o.num:'NÃO ENCONTRADO');
       if(o){
         if(_epCtx.field==='client')o.client=val;
         if(_epCtx.field==='supplier')o.supplier=val;
         const nd=normDate(val);
-        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true);
-        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
+        if(_epCtx.field==='etd'&&nd){o.dates[5]=mkD(nd,o.dates[5]?.est??true);console.log('[SYNC] dates[5] atualizado para',nd);}
+        if(_epCtx.field==='eta'&&nd){o.dates[6]=mkD(nd,o.dates[6]?.est??true);console.log('[SYNC] dates[6] atualizado para',nd);}
       }
     }
   } else if(_epCtx.type==='led'){
