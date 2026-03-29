@@ -745,6 +745,11 @@ let FORNECEDORES=ld('forn',['Thuan','TMC','Toan','Shanghai']);
 let PRODUTOS=ld('prod',['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia']);
 let CONTEINERES=ld('cont',['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL']);
 
+// Helper: encontrar payment vinculado a um order (por pi OU po)
+function linkPay(o){if(!o)return null;return payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po))||null;}
+// Helper: encontrar order vinculado a um payment (por pi OU po)
+function linkOrd(p){if(!p)return null;return orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po))||null;}
+
 function statusSel(id,cur){
   const c=SC[cur]?.c||'pgr';
   const opts=SLST.map(s=>`<option value="${esc(s)}"${s===cur?' selected':''}>${esc(s)}</option>`).join('');
@@ -754,7 +759,7 @@ function changeSt(num,v){
   const o=orders.find(x=>x.num===num);if(!o)return;
   // FIX #1: propagar para payments também
   o.status=v;
-  const p=payments.find(x=>x.pi===o.pi||(x.po===o.po&&o.po!=='—'));
+  const p=linkPay(o);
   if(p){
     if(v==='FINALIZADO')p.status='Received';
     else if(v==='SUSPENSO')p.status='Cancelled';
@@ -863,7 +868,7 @@ function calcAlerts(){
     const etaV=o.dates[6]?.v||o.dates[7]?.v;
     if(etaV){const n=daysUntil(etaV);if(n!==null&&n<0)alerts.push({tipo:'danger',icn:'📦',msg:`ETA vencida há ${Math.abs(n)}d — PI ${o.pi||o.po} (${o.client})`});}
     if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque — PI ${o.pi||o.po}`});}
-    const p=payments.find(x=>x.pi===o.pi);
+    const p=linkPay(o);
     if(p&&p.etd&&p.etd!=='—'){
       const n=daysUntil(p.etd);const totF=pTotalForn(p);
       const pct=totF>0?Math.round((piPaid(p.pi)/totF)*100):0;
@@ -1024,7 +1029,7 @@ function renderFinanceiro(){
   const fsup=document.getElementById('fin-sup')?.value||'';
   const flt=payments.filter(p=>{
     const t=norm(`${p.pi} ${p.po} ${p.supplier} ${p.client||''}`);
-    const linkedO=orders.find(o=>o.pi===p.pi||(o.po===p.po&&o.po!=='—'));
+    const linkedO=linkOrd(p);
     const effStatus=linkedO?linkedO.status:p.status;
     return(!q||t.includes(q))&&(!st||effStatus===st)&&(!fsup||p.supplier===fsup)&&(!cl||p.client===cl);
   });
@@ -1068,7 +1073,7 @@ function renderFinanceiro(){
     const bcR=pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
     const etdDisp=p.etd&&p.etd!=='—'?(normDate(p.etd)||p.etd):'—';
     const etaDisp=p.eta&&p.eta!=='—'?(normDate(p.eta)||p.eta):'—';
-    const linkedOrd=orders.find(o=>o.pi===p.pi||(o.po===p.po&&o.po!=='—'));
+    const linkedOrd=linkOrd(p);
     const dispStatus=linkedOrd?statusSel(linkedOrd.num,linkedOrd.status):'<span class="pill pgr">—</span>';
     const rowBg=i%2===0?'background:#FAFCFE':'';
     const expanded=_finExp.has(p.pi);
@@ -1426,7 +1431,7 @@ function openOrderModal(num){
       document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-pi').value=o.pi||'';
       document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
       document.getElementById('mo-notes').value=o.notes||'';
-      const p=payments.find(x=>x.pi===o.pi||x.po===o.po);
+      const p=linkPay(o);
       if(p){
         document.getElementById('mo-cli-inv').value=p.clientInv||'';document.getElementById('mo-sup').value=p.supplier||'';
         document.getElementById('mo-sup-inv').value=p.inv||'';document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
@@ -1473,7 +1478,7 @@ function submitOrder(){
       if(totalQty>0)o.total=totalQty;
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
       if(o.pi){
-        let p=payments.find(x=>x.pi===o.pi);
+        let p=linkPay(o);
         if(p){p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=plates;p.sample=sample;if(prodRows.length)p.unitPrices=prodRows;}
       }
     }
@@ -1572,19 +1577,17 @@ function epSave(){
     const est=document.getElementById('ep-est')?.checked||false;
     o.dates[_epCtx.di]=mkD(val||null,est);
     // Propagar Embarque→etd e ETA Brasil→eta para payments
-    if(o.pi){
-      const p=payments.find(x=>x.pi===o.pi);
-      if(p){
-        if(_epCtx.di===5) p.etd=normDate(val)||'—'; // Embarque → ETD
-        if(_epCtx.di===6) p.eta=normDate(val)||'—'; // ETA Brasil → ETA
-      }
+    const p=linkPay(o);
+    if(p){
+      if(_epCtx.di===5) p.etd=normDate(val)||'—';
+      if(_epCtx.di===6) p.eta=normDate(val)||'—';
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     if(_epCtx.field==='total')o.total=parseInt(val)||0;else o[_epCtx.field]=val;
     // FIX #1: propagar client/supplier para payments
     if(_epCtx.field==='client'||_epCtx.field==='supplier'){
-      const p=payments.find(x=>x.pi===o.pi);if(p)p[_epCtx.field]=val;
+      const p=linkPay(o);if(p)p[_epCtx.field]=val;
     }
   } else if(_epCtx.type==='pay'){
     const p=payments.find(x=>x.pi===_epCtx.pi);if(!p)return;
@@ -1592,13 +1595,13 @@ function epSave(){
     else{p[_epCtx.field]=val;}
     // FIX #1: propagar para orders
     if(['client','supplier','etd','eta'].includes(_epCtx.field)){
-      const o=orders.find(x=>x.pi===_epCtx.pi);
+      const o=linkOrd(p);
       if(o){
         if(_epCtx.field==='client')o.client=val;
         if(_epCtx.field==='supplier')o.supplier=val;
         const nd=normDate(val);
-        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true); // ETD → Embarque
-        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true); // ETA → ETA Brasil
+        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true);
+        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
       }
     }
   } else if(_epCtx.type==='led'){
