@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FGL Tracker 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --ink:#0F1923;--ink2:#2D3A45;--ink3:#5A6A76;--ink4:#9AAAB8;
@@ -181,10 +180,8 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   </div>
   <div class="hdr-r">
     <span class="hdr-d" id="hdr-date"></span>
-    <button id="btn-drive" class="btn-bkp" onclick="driveConnect()" title="Conectar Google Drive" style="display:flex;align-items:center;gap:.35rem">
-      <span id="drive-dot" style="width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0"></span>
-      <span id="drive-lbl">Drive</span>
-    </button>
+    <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">⬇ Backup</button>
+    <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">⬆ Restaurar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
     <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
   </div>
@@ -721,46 +718,20 @@ let receipts=ld('rec',REC_DEF);
 let _activeTab='internal'; // FIX #8: track active tab
 
 // Auto-migração: garantir vínculo orders↔payments
-(function migrateLinks(){
+// Sync: garantir que orders↔payments vinculados tenham mesmos valores
+(function syncLinked(){
   let changed=false;
-  // 1) Payment sem order → criar order
-  payments.forEach(p=>{
-    const hasOrder=orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po));
-    if(!hasOrder&&p.pi){
-      const nn=Math.max(...orders.map(x=>x.num),0)+1;
-      const totalQty=(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0),0);
-      const product=(p.unitPrices||[]).map(r=>r.desc||'').filter(Boolean).join(' + ')||'—';
-      const dates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-      if(p.etd&&p.etd!=='—')dates[5]=mkD(p.etd,true);
-      if(p.eta&&p.eta!=='—')dates[6]=mkD(p.eta,true);
-      orders.push({num:nn,po:p.po||'—',pi:p.pi,client:p.client||'—',supplier:p.supplier||'',container:'',status:'EM PRODUÇÃO',total:totalQty,product,dates,notes:''});
-      changed=true;
-    }
-  });
-  // 2) Order sem pi + PO bate → preencher pi
-  orders.forEach(o=>{
-    if(o.pi)return;
-    const p=payments.find(x=>x.po&&x.po!=='—'&&x.po===o.po);
-    if(p){o.pi=p.pi;o.supplier=o.supplier||p.supplier;changed=true;}
-  });
-  // 3) Sincronizar valores entre orders↔payments vinculados
   orders.forEach(o=>{
     const p=payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po));
     if(!p)return;
-    // Embarque (dates[5]) ↔ ETD: o mais recente ganha
     const oEtd=o.dates[5]?.v, pEtd=normDate(p.etd);
     if(oEtd&&oEtd!==pEtd){p.etd=oEtd;changed=true;}
     else if(pEtd&&pEtd!==oEtd){o.dates[5]=mkD(pEtd,o.dates[5]?.est??true);changed=true;}
-    // ETA Brasil (dates[6]) ↔ ETA
     const oEta=o.dates[6]?.v, pEta=normDate(p.eta);
     if(oEta&&oEta!==pEta){p.eta=oEta;changed=true;}
     else if(pEta&&pEta!==oEta){o.dates[6]=mkD(pEta,o.dates[6]?.est??true);changed=true;}
-    // Client/supplier: order ganha se preenchido
     if(o.client&&p.client!==o.client){p.client=o.client;changed=true;}
     else if(p.client&&!o.client){o.client=p.client;changed=true;}
-    if(o.supplier&&p.supplier!==o.supplier){p.supplier=o.supplier;changed=true;}
-    else if(p.supplier&&!o.supplier){o.supplier=p.supplier;changed=true;}
-    // PO sync
     if(o.po&&o.po!=='—'&&p.po!==o.po){p.po=o.po;changed=true;}
   });
   if(changed){sv('ord',orders);sv('pay',payments);}
@@ -769,7 +740,6 @@ let _activeTab='internal'; // FIX #8: track active tab
 function saveAll(){
   sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);
   sv('cls',CLIENTES);sv('forn',FORNECEDORES);sv('prod',PRODUTOS);sv('cont',CONTEINERES);
-  driveSaveDebounced();
 }
 
 /* ══════════════════════════════════════
@@ -1833,65 +1803,34 @@ function datePickerSync(targetId,isoVal){
 }
 
 /* ══════════════════════════════════════
-   GOOGLE DRIVE SYNC
+   BACKUP / RESTORE
 ══════════════════════════════════════ */
-const GIS_CLIENT_ID='696181362065-i6ktbnctvafdac879ml8s7lkcp7jgvr0.apps.googleusercontent.com';
-const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
-const DRIVE_FILE='fgl_tracker_data.json';
-let _driveToken=null,_driveFileId=localStorage.getItem('fgl8_driveFileId')||null,_driveSaveTimer=null,_driveReady=false;
-
-function driveInit(){
-  if(!window.google?.accounts?.oauth2)return;
-  if(localStorage.getItem('fgl8_driveAuth')){
-    google.accounts.oauth2.initTokenClient({client_id:GIS_CLIENT_ID,scope:DRIVE_SCOPE,prompt:'',
-      callback:r=>{if(r.access_token){_driveToken=r.access_token;_driveReady=true;driveSetStatus('ok');driveLoadOrCreate();}}
-    }).requestAccessToken({prompt:''});
-  }
+function exportBackup(){
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Backup exportado ✓');
 }
-function driveConnect(){
-  google.accounts.oauth2.initTokenClient({client_id:GIS_CLIENT_ID,scope:DRIVE_SCOPE,
-    callback:r=>{if(r.access_token){_driveToken=r.access_token;_driveReady=true;localStorage.setItem('fgl8_driveAuth','1');driveSetStatus('ok');driveLoadOrCreate();toast('Drive conectado ✓');}}
-  }).requestAccessToken();
+function importBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.orders)throw new Error('Formato inválido');
+      if(!confirm('Restaurar backup de '+(data.exported?.slice(0,10)||'?')+'?\nIsso substituirá todos os dados atuais.'))return;
+      orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
+      if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
+      if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
+      if(data.conteineres)CONTEINERES=data.conteineres;
+      saveAll();renderAll();renderFinanceiro();
+      toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
+    }catch(err){alert('Erro ao ler backup: '+err.message);}
+  };
+  reader.readAsText(file);e.target.value='';
 }
-function driveSetStatus(s){
-  const dot=document.getElementById('drive-dot'),lbl=document.getElementById('drive-lbl');if(!dot||!lbl)return;
-  if(s==='ok'){dot.style.background='#4ADE80';lbl.textContent='Drive ✓';}
-  else if(s==='saving'){dot.style.background='#F59E0B';lbl.textContent='Salvando…';}
-  else if(s==='err'){dot.style.background='#F87171';lbl.textContent='Drive ✗';}
-  else{dot.style.background='#666';lbl.textContent='Drive';}
-}
-async function driveLoadOrCreate(){
-  if(!_driveToken)return;
-  try{
-    if(!_driveFileId){
-      const r=await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22'+DRIVE_FILE+'%22&fields=files(id,name)',{headers:{Authorization:'Bearer '+_driveToken}});
-      const d=await r.json();if(d.files&&d.files.length>0){_driveFileId=d.files[0].id;localStorage.setItem('fgl8_driveFileId',_driveFileId);}
-    }
-    if(_driveFileId){
-      const r=await fetch('https://www.googleapis.com/drive/v3/files/'+_driveFileId+'?alt=media',{headers:{Authorization:'Bearer '+_driveToken}});
-      if(r.ok){
-        const data=await r.json();
-        if(data.orders&&data.orders.length>=orders.length){
-          orders=data.orders||orders;payments=data.payments||payments;ledger=data.ledger||ledger;receipts=data.receipts||receipts;
-          if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;if(data.conteineres)CONTEINERES=data.conteineres;
-          sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);sv('cls',CLIENTES);sv('forn',FORNECEDORES);
-          renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast('Drive carregado ✓');
-        } else driveSaveNow();
-      }
-    } else driveSaveNow();
-  }catch(e){console.error('Drive load error',e);driveSetStatus('err');}
-}
-function driveSaveDebounced(){if(!_driveReady)return;clearTimeout(_driveSaveTimer);_driveSaveTimer=setTimeout(driveSaveNow,1500);}
-async function driveSaveNow(){
-  if(!_driveToken)return;driveSetStatus('saving');
-  const payload=JSON.stringify({version:5,saved:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES});
-  try{
-    if(_driveFileId){await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{method:'PATCH',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:payload});}
-    else{const meta=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:JSON.stringify({name:DRIVE_FILE,parents:['appDataFolder']})});const mj=await meta.json();_driveFileId=mj.id;localStorage.setItem('fgl8_driveFileId',_driveFileId);await fetch('https://www.googleapis.com/upload/drive/v3/files/'+_driveFileId+'?uploadType=media',{method:'PATCH',headers:{Authorization:'Bearer '+_driveToken,'Content-Type':'application/json'},body:payload});}
-    driveSetStatus('ok');
-  }catch(e){console.error('Drive save error',e);driveSetStatus('err');}
-}
-window.addEventListener('load',()=>setTimeout(driveInit,800));
 </script>
 </body>
 </html>
