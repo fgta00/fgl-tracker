@@ -215,7 +215,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
-          <th class="L" style="min-width:80px">PI / PO</th>
+          <th class="L" style="min-width:80px">IP / PO</th>
           <th class="L" style="min-width:95px">Cliente</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
@@ -274,7 +274,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     <div class="sh" style="margin-bottom:0;flex:1">Pedidos Ativos</div>
   </div>
   <div class="tb">
-    <input id="fin-q" placeholder="🔍 PI, PO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
+    <input id="fin-q" placeholder="🔍 IP, PO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
     <select id="fin-st" onchange="renderFinanceiro()"><option value="">Todos Status</option></select>
     <select id="fin-sup" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
     <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
@@ -292,7 +292,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         </tr>
         <tr class="ch">
           <th style="width:28px;background:#0D2B45"></th>
-          <th class="L sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('pi')">PI / PO<span class="si"></span></th>
+          <th class="L sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('pi')">IP / PO<span class="si"></span></th>
           <th class="L sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('supplier')">Fornecedor<span class="si"></span></th>
           <th class="L sortable" style="min-width:70px;background:#0D2B45" onclick="sortPay('client')">Cliente<span class="si"></span></th>
           <th class="sortable" style="min-width:105px;background:#0D2B45" onclick="sortPay('status')">Status<span class="si"></span></th>
@@ -325,7 +325,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             </div>
           </div>
           <div class="ff"><label>Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01"></div>
-          <div class="ff"><label>PI</label><select id="l-pi" onchange="onPiChange()"><option value="">— PI —</option></select></div>
+          <div class="ff"><label>IP</label><select id="l-pi" onchange="onPiChange()"><option value="">— IP —</option></select></div>
           <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:#F0F7FF;cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC…"></div>
           <div class="ff"><label>Notas</label><input id="l-notes" placeholder="Notas…"></div>
@@ -335,7 +335,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="tb" style="margin-bottom:.6rem">
         <input id="led-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
         <select id="led-sup-f" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
-        <select id="led-pi-f" onchange="renderFinanceiro()"><option value="">Todos PI</option></select>
+        <select id="led-pi-f" onchange="renderFinanceiro()"><option value="">Todos IP</option></select>
         <input id="led-from" type="date" oninput="renderFinanceiro()">
         <span style="font-size:.72rem;color:var(--ink4)">até</span>
         <input id="led-to" type="date" oninput="renderFinanceiro()">
@@ -348,7 +348,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <th class="sortable" onclick="sortLed('n')">#<span class="si"></span></th>
             <th class="sortable" onclick="sortLed('date')">Data<span class="si"></span></th>
             <th class="sortable" onclick="sortLed('amount')">Valor USD<span class="si"></span></th>
-            <th class="L sortable" onclick="sortLed('pi')">PI<span class="si"></span></th>
+            <th class="L sortable" onclick="sortLed('pi')">IP<span class="si"></span></th>
             <th class="L sortable" onclick="sortLed('supplier')">Fornecedor<span class="si"></span></th>
             <th class="L">Ref.</th><th class="L">Notas</th><th></th>
           </tr></thead>
@@ -370,7 +370,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             </div>
           </div>
           <div class="ff"><label>Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
-          <div class="ff"><label>PI</label><select id="r-pi" onchange="onRpiChange()"><option value="">— PI —</option></select></div>
+          <div class="ff"><label>IP</label><select id="r-pi" onchange="onRpiChange()"><option value="">— IP —</option></select></div>
           <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:#F0FAF5;cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC…"></div>
           <div class="ff"><label>Notas</label><input id="r-notes" placeholder="Notas…"></div>
@@ -380,7 +380,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="tb" style="margin-bottom:.6rem">
         <input id="rec-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
         <select id="rec-cli-f" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
-        <select id="rec-pi-f" onchange="renderFinanceiro()"><option value="">Todos PI</option></select>
+        <select id="rec-pi-f" onchange="renderFinanceiro()"><option value="">Todos IP</option></select>
         <input id="rec-from" type="date" oninput="renderFinanceiro()">
         <span style="font-size:.72rem;color:var(--ink4)">até</span>
         <input id="rec-to" type="date" oninput="renderFinanceiro()">
@@ -393,7 +393,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <th class="sortable" onclick="sortRec('n')">#<span class="si"></span></th>
             <th class="sortable" onclick="sortRec('date')">Data<span class="si"></span></th>
             <th class="sortable" onclick="sortRec('amount')">Valor USD<span class="si"></span></th>
-            <th class="L sortable" onclick="sortRec('pi')">PI<span class="si"></span></th>
+            <th class="L sortable" onclick="sortRec('pi')">IP<span class="si"></span></th>
             <th class="L sortable" onclick="sortRec('client')">Cliente<span class="si"></span></th>
             <th class="L">Ref.</th><th class="L">Notas</th><th></th>
           </tr></thead>
@@ -416,7 +416,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="fg">
         <div class="fsep">Identificação</div>
         <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
-        <div class="ff"><label>PI (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
+        <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
         <div class="ff"><label>ETD (DD/MM/AA)</label>
           <div class="date-wrap">
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
@@ -546,7 +546,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     <div class="mhdr"><h2 id="pr-ttl">Editar Qtd / Preços</h2><button class="mcls" onclick="closeOvl('prices')">✕</button></div>
     <div class="mbody">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.6rem">
-        <div style="font-size:.72rem;color:var(--ink3)"><b>PI:</b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
+        <div style="font-size:.72rem;color:var(--ink3)"><b>IP:/b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
         <div style="font-size:.72rem;color:var(--ink3)"><b>Fornecedor:</b> <span id="pr-sup-lbl"></span></div>
       </div>
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.3rem;margin-bottom:.3rem">
@@ -882,13 +882,13 @@ function calcAlerts(){
   orders.forEach(o=>{
     if(o.status==='FINALIZADO'||o.status==='SUSPENSO')return;
     const etaV=o.dates[6]?.v||o.dates[7]?.v;
-    if(etaV){const n=daysUntil(etaV);if(n!==null&&n<0)alerts.push({tipo:'danger',icn:'📦',msg:`ETA vencida há ${Math.abs(n)}d — PI ${o.pi||o.po} (${o.client})`});}
-    if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque — PI ${o.pi||o.po}`});}
+    if(etaV){const n=daysUntil(etaV);if(n!==null&&n<0)alerts.push({tipo:'danger',icn:'📦',msg:`ETA vencida há ${Math.abs(n)}d — IP ${o.pi||o.po} (${o.client})`});}
+    if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque — IP ${o.pi||o.po}`});}
     const p=linkPay(o);
     if(p&&p.etd&&p.etd!=='—'){
       const n=daysUntil(p.etd);const totF=pTotalForn(p);
       const pct=totF>0?Math.round((piPaid(p.pi)/totF)*100):0;
-      if(n!==null&&n>=0&&n<=30&&pct<50)alerts.push({tipo:'warn',icn:'💳',msg:`ETD em ${n}d com ${pct}% pago — PI ${p.pi}`});
+      if(n!==null&&n>=0&&n<=30&&pct<50)alerts.push({tipo:'warn',icn:'💳',msg:`ETD em ${n}d com ${pct}% pago — IP ${p.pi}`});
     }
   });
   return alerts;
@@ -949,7 +949,7 @@ function renderInternal(){
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L">
-        <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ PI'}</b>
+        <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
         <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
@@ -1146,6 +1146,8 @@ function renderFinanceiro(){
               <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Produto</th><th>Qtd</th><th>Forn.</th><th>Cli.</th><th>Mg%</th></tr>
               ${p.unitPrices.map(r=>{const mR=r.priceCli>0&&r.priceForn>0?Math.round(((r.priceCli-r.priceForn)/r.priceCli)*100):null;
                 return`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td><td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td><td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:${mR!==null&&mR>=0?'var(--green)':'var(--red)'}">${mR!==null?mR+'%':'—'}</td></tr>`}).join('')}
+              ${(p.plates||p.sample)?`<tr style="border-top:1px solid var(--bdr);color:var(--ink3)"><td class="L" style="padding:.2rem 0;font-size:.63rem">${[p.plates?'Plates '+fUSD(p.plates):'',p.sample?'Sample '+fUSD(p.sample):''].filter(Boolean).join(' + ')}</td><td colspan="3"></td><td style="font-family:'IBM Plex Mono';font-size:.65rem">${fUSD((p.plates||0)+(p.sample||0))}</td></tr>`:''}
+              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td class="L" style="font-weight:700;padding:.22rem 0;font-size:.65rem">TOTAL COMPRA</td><td style="font-family:'IBM Plex Mono';font-weight:700">${fN(p.unitPrices.reduce((a,r)=>a+(r.qty||0),0))}</td><td colspan="2" style="font-family:'IBM Plex Mono';font-weight:700;color:var(--red)">${fUSD(totF)}</td><td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--teal)">${fUSD(totV)}</td></tr>
             </table>`:'—'}
             <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="editOrderPrices('${esc(p.pi)}',event)">✏ Preços</button></div>
           </div>
@@ -1188,9 +1190,9 @@ function renderFinanceiro(){
 
   // PI selectors
   const selLP=document.getElementById('l-pi');const curLP=selLP.value;
-  selLP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curLP?' selected':''}>${esc(p.pi)} — ${esc(p.supplier)}</option>`).join('');
+  selLP.innerHTML='<option value="">— IP —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curLP?' selected':''}>${esc(p.pi)} — ${esc(p.supplier)}</option>`).join('');
   const selRP=document.getElementById('r-pi');const curRP=selRP.value;
-  selRP.innerHTML='<option value="">— PI —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curRP?' selected':''}>${esc(p.pi)} — ${esc(p.client||p.supplier)}</option>`).join('');
+  selRP.innerHTML='<option value="">— IP —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curRP?' selected':''}>${esc(p.pi)} — ${esc(p.client||p.supplier)}</option>`).join('');
   updateSortHeaders();
 }
 
@@ -1198,7 +1200,7 @@ function renderLedger(){
   const supSel=document.getElementById('led-sup-f'),piSel2=document.getElementById('led-pi-f');
   const curSup=supSel?.value||'',curPi2=piSel2?.value||'';
   if(supSel){const sups=[...new Set(ledger.map(l=>l.supplier))].sort();supSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===curSup?' selected':''}>${esc(s)}</option>`).join('');}
-  if(piSel2){const pis=[...new Set(ledger.map(l=>l.pi))].sort();piSel2.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi2?' selected':''}>${esc(p)}</option>`).join('');}
+  if(piSel2){const pis=[...new Set(ledger.map(l=>l.pi))].sort();piSel2.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi2?' selected':''}>${esc(p)}</option>`).join('');}
   const ledQ=norm(document.getElementById('led-q')?.value);
   const ledSup=supSel?.value||'',ledPi=piSel2?.value||'';
   const ledFrom=document.getElementById('led-from')?.value||'',ledTo=document.getElementById('led-to')?.value||'';
@@ -1237,7 +1239,7 @@ function renderReceipts(){
   const recCliSel=document.getElementById('rec-cli-f'),recPiSel=document.getElementById('rec-pi-f');
   const curRC=recCliSel?.value||'',curRP2=recPiSel?.value||'';
   if(recCliSel){const clis=[...new Set(receipts.map(r=>r.client||'').filter(Boolean))].sort();recCliSel.innerHTML='<option value="">Todos Clientes</option>'+clis.map(c=>`<option value="${esc(c)}"${c===curRC?' selected':''}>${esc(c)}</option>`).join('');}
-  if(recPiSel){const pis=[...new Set(receipts.map(r=>r.pi))].sort();recPiSel.innerHTML='<option value="">Todos PI</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curRP2?' selected':''}>${esc(p)}</option>`).join('');}
+  if(recPiSel){const pis=[...new Set(receipts.map(r=>r.pi))].sort();recPiSel.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curRP2?' selected':''}>${esc(p)}</option>`).join('');}
   const recQ=norm(document.getElementById('rec-q')?.value);
   const recCli=recCliSel?.value||'',recPi=recPiSel?.value||'';
   const recFrom=document.getElementById('rec-from')?.value||'',recTo=document.getElementById('rec-to')?.value||'';
@@ -1290,7 +1292,7 @@ function addLedger(){
   const dateDisp=normDate(rawDate);
   if(!dateDisp){toast('⚠ Data inválida','err');return;}
   if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
-  if(!pi){toast('⚠ Selecione um PI','err');return;}
+  if(!pi){toast('⚠ Selecione um IP','err');return;}
   const n=Math.max(...ledger.map(l=>l.n),190)+1;
   ledger.push({n,date:dateDisp,amount:amt,pi,supplier:sup||pi,ref:ref||'—',notes:notes||''});
   saveAll();renderFinanceiro();toast(`Lançamento #${n} ✓`);
@@ -1308,7 +1310,7 @@ function addReceipt(){
   const dateDisp=normDate(rawDate);
   if(!dateDisp){toast('⚠ Data inválida','err');return;}
   if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
-  if(!pi){toast('⚠ Selecione um PI','err');return;}
+  if(!pi){toast('⚠ Selecione um IP','err');return;}
   const n=Math.max(...receipts.map(r=>r.n),0)+1;
   receipts.push({n,date:dateDisp,amount:amt,pi,client:cli||'',ref:ref||'—',notes:notes||''});
   saveAll();renderFinanceiro();toast(`Recebimento #${n} ✓`);
@@ -1338,7 +1340,7 @@ function focusLancar(tipo,pi){
 }
 function delPayment(pi){
   if(!confirm(`Apagar financeiro ${pi}?`))return;
-  pushUndo('Apagar PI '+pi);
+  pushUndo('Apagar IP '+pi);
   ledger=ledger.filter(x=>x.pi!==pi);receipts=receipts.filter(x=>x.pi!==pi);
   payments=payments.filter(x=>x.pi!==pi);
   saveAll();renderFinanceiro();toast(`${pi} apagado`,'ok',true);
@@ -1360,9 +1362,9 @@ let _prPi=null;
 function editOrderPrices(pi,e){
   if(e)e.stopPropagation();
   const p=payments.find(x=>x.pi===pi);
-  if(!p){toast('PI não vinculado ao Financeiro','err');return;}
+  if(!p){toast('IP não vinculado ao Financeiro','err');return;}
   _prPi=pi;
-  document.getElementById('pr-ttl').textContent=`Editar — PI ${pi}`;
+  document.getElementById('pr-ttl').textContent=`Editar — IP ${pi}`;
   document.getElementById('pr-pi-lbl').textContent=pi;
   document.getElementById('pr-sup-lbl').textContent=p.supplier||'—';
   document.getElementById('pr-plates').value=p.plates||0;
@@ -1407,7 +1409,7 @@ function savePrices(){
   p.unitPrices=rows;p.plates=parseFloat(document.getElementById('pr-plates').value)||0;p.sample=parseFloat(document.getElementById('pr-sample').value)||0;
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const o=orders.find(x=>x.pi===_prPi);if(o&&totQty>0)o.total=totQty;
-  saveAll();renderAll();closeOvl('prices');toast(`PI ${_prPi} atualizado ✓`);
+  saveAll();renderAll();closeOvl('prices');toast(`IP ${_prPi} atualizado ✓`);
 }
 
 /* ══════════════════════════════════════
@@ -1536,7 +1538,7 @@ function submitOrder(){
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={pi:'PI',po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
+  const lbls={pi:'IP',po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
   showEp(e,lbls[field]||field,String(o[field]||''),field==='total',false);
   const ep=document.getElementById('ep-val');
@@ -1544,7 +1546,7 @@ function editField(num,field,e){
 }
 function editFinField(pi,field,e){
   e.stopPropagation();const p=payments.find(x=>x.pi===pi);if(!p)return;
-  const lbls={pi:'PI',po:'PO',inv:'Invoice Forn.',supplier:'Fornecedor',client:'Cliente',clientInv:'Invoice Cli.',etd:'ETD',eta:'ETA'};
+  const lbls={pi:'IP',po:'PO',inv:'Invoice Forn.',supplier:'Fornecedor',client:'Cliente',clientInv:'Invoice Cli.',etd:'ETD',eta:'ETA'};
   _epCtx={type:'pay',pi,field};
   showEp(e,lbls[field]||field,String(p[field]||''),false,false);
 }
@@ -1683,7 +1685,7 @@ function closeOvl(id){document.getElementById(`ovl-${id}`).classList.remove('ope
 ══════════════════════════════════════ */
 function csvEsc(v){const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;}
 function exportCSV(){
-  const hdr=['Num','PO','PI','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
+  const hdr=['Num','PO','IP','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
   const rows=orders.map(o=>[o.num,csvEsc(o.po),csvEsc(o.pi||''),csvEsc(o.client),csvEsc(o.product),csvEsc(o.container||''),o.total,csvEsc(o.status),
     csvEsc(o.dates[0]?.v||''),csvEsc(o.dates[1]?.v||''),csvEsc(o.dates[2]?.v||''),csvEsc(o.dates[3]?.v||''),csvEsc(o.dates[4]?.v||''),csvEsc(o.dates[5]?.v||''),csvEsc(o.dates[6]?.v||''),csvEsc(o.dates[7]?.v||''),csvEsc(o.notes||'')]);
   dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].map(r=>r.join(',')).join('\n')),`fgl_${todayDisp().replace(/\//g,'-')}.csv`);
