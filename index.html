@@ -455,7 +455,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <option>At sea</option><option>Received</option><option>Cancelled</option>
           </select>
         </div>
-        <div class="fsep">Produtos — Qtd × Preço Fornecedor × Preço Cliente (USD)</div>
+        <div class="fsep">Produtos — Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
         <div class="ff full">
           <div id="mo-prod-rows"></div>
           <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
@@ -1430,20 +1430,22 @@ function savePrices(){
    ORDER MODAL
 ══════════════════════════════════════ */
 let _editNum=null;
-function addProdRow(desc='',qty=0,pForn=0,pCli=0){
+function addProdRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
   row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" autocomplete="off" oninput="updatePreview()" style="flex:2">
-    <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1">
-    <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1">
-    <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1">
+    <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:.8">
+    <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
+    <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
+    <span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="flex:.6">
+    <span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="flex:.6">
     <button class="rm" onclick="this.parentElement.remove();updatePreview()">✕</button>`;
   container.appendChild(row);updatePreview();
 }
 function readProdRows(){
   return[...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0};
+    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0,plates:parseFloat(ins[4].value)||0,sample:parseFloat(ins[5].value)||0};
   }).filter(r=>r.qty>0);
 }
 function updatePreview(){
