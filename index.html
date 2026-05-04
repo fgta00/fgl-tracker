@@ -460,8 +460,6 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <div id="mo-prod-rows"></div>
           <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
         </div>
-        <div class="ff"><label>Plates USD</label><input id="mo-plates" type="number" placeholder="0" step="0.01" oninput="updatePreview()"></div>
-        <div class="ff"><label>Sample USD</label><input id="mo-sample" type="number" placeholder="0" step="0.01" oninput="updatePreview()"></div>
         <div class="preview-box" id="mo-preview"></div>
         <div class="fsep">Notas</div>
         <div class="ff full"><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div>
@@ -549,19 +547,17 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         <div style="font-size:.72rem;color:var(--ink3)"><b>IP:/b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
         <div style="font-size:.72rem;color:var(--ink3)"><b>Fornecedor:</b> <span id="pr-sup-lbl"></span></div>
       </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.3rem;margin-bottom:.3rem">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.3rem">
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Descrição</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Qtd</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em">Preço Forn.</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em">Preço Cliente</span>
+        <span style="font-size:.6rem;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em">Plates</span>
+        <span style="font-size:.6rem;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em">Sample</span>
         <span></span>
       </div>
       <div id="pr-rows"></div>
       <button class="addup" onclick="addPriceRow()">＋ Adicionar linha</button>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.6rem">
-        <div class="ff"><label>Plates USD</label><input id="pr-plates" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
-        <div class="ff"><label>Sample USD</label><input id="pr-sample" type="number" placeholder="0" step="0.01" oninput="updatePricePreview()"></div>
-      </div>
       <div id="pr-preview" style="display:none;background:var(--ltblue);border:1.5px solid #B0D4F4;border-radius:8px;padding:.6rem .9rem;font-size:.75rem;margin-top:.65rem;color:var(--blue)"></div>
       <div class="brow">
         <button class="btn btns" onclick="closeOvl('prices')">Cancelar</button>
@@ -745,7 +741,7 @@ function saveAll(){
 /* ══════════════════════════════════════
    FINANCE CALCS
 ══════════════════════════════════════ */
-function pTotalForn(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceForn||0),0)+(p.plates||0)+(p.sample||0);}
+function pTotalForn(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceForn||0)+(r.plates||0)+(r.sample||0),0)+(p.plates||0)+(p.sample||0);}
 function pTotalVenda(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceCli||0),0);}
 function piPaid(pi){return ledger.filter(l=>l.pi===pi).reduce((a,l)=>a+l.amount,0);}
 function piReceived(pi){return receipts.filter(r=>r.pi===pi).reduce((a,r)=>a+r.amount,0);}
@@ -1143,11 +1139,31 @@ function renderFinanceiro(){
           <div>
             <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">📦 Produtos</div>
             ${p.unitPrices.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Produto</th><th>Qtd</th><th>Forn.</th><th>Cli.</th><th>Mg%</th></tr>
-              ${p.unitPrices.map(r=>{const mR=r.priceCli>0&&r.priceForn>0?Math.round(((r.priceCli-r.priceForn)/r.priceCli)*100):null;
-                return`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td><td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td><td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td><td style="font-family:'IBM Plex Mono';color:${mR!==null&&mR>=0?'var(--green)':'var(--red)'}">${mR!==null?mR+'%':'—'}</td></tr>`}).join('')}
-              ${(p.plates||p.sample)?`<tr style="border-top:1px solid var(--bdr);color:var(--ink3)"><td class="L" style="padding:.2rem 0;font-size:.63rem">${[p.plates?'Plates '+fUSD(p.plates):'',p.sample?'Sample '+fUSD(p.sample):''].filter(Boolean).join(' + ')}</td><td colspan="3"></td><td style="font-family:'IBM Plex Mono';font-size:.65rem">${fUSD((p.plates||0)+(p.sample||0))}</td></tr>`:''}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td class="L" style="font-weight:700;padding:.22rem 0;font-size:.65rem">TOTAL COMPRA</td><td style="font-family:'IBM Plex Mono';font-weight:700">${fN(p.unitPrices.reduce((a,r)=>a+(r.qty||0),0))}</td><td colspan="2" style="font-family:'IBM Plex Mono';font-weight:700;color:var(--red)">${fUSD(totF)}</td><td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--teal)">${fUSD(totV)}</td></tr>
+              <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Produto</th><th>Qtd</th><th>Forn.</th><th>Arte</th><th>Cli.</th><th>Sub.Forn</th><th>Sub.Cli</th><th>Mg%</th></tr>
+              ${p.unitPrices.map(r=>{
+                const arte=(r.plates||0)+(r.sample||0);
+                const arteUnit=r.qty>0?arte/r.qty:0;
+                const fornTotal=(r.qty||0)*(r.priceForn||0)+arte;
+                const cliTotal=(r.qty||0)*(r.priceCli||0);
+                const mg=cliTotal>0?Math.round(((cliTotal-fornTotal)/cliTotal)*100):null;
+                return`<tr style="border-top:1px solid var(--bdr)">
+                  <td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td>
+                  <td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td>
+                  <td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td>
+                  <td style="font-family:'IBM Plex Mono';color:var(--amber);font-size:.62rem">${arte>0?arteUnit.toFixed(3):'—'}</td>
+                  <td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td>
+                  <td style="font-family:'IBM Plex Mono';color:var(--red);font-size:.62rem">${fUSD(fornTotal)}</td>
+                  <td style="font-family:'IBM Plex Mono';color:var(--teal);font-size:.62rem">${fUSD(cliTotal)}</td>
+                  <td style="font-family:'IBM Plex Mono';color:${mg!==null&&mg>=0?'var(--green)':'var(--red)'}">${mg!==null?mg+'%':'—'}</td>
+                </tr>`}).join('')}
+              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)">
+                <td class="L" style="font-weight:700;padding:.22rem 0;font-size:.65rem">TOTAL</td>
+                <td style="font-family:'IBM Plex Mono';font-weight:700">${fN(p.unitPrices.reduce((a,r)=>a+(r.qty||0),0))}</td>
+                <td colspan="3"></td>
+                <td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--red);font-size:.63rem">${fUSD(totF)}</td>
+                <td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--teal);font-size:.63rem">${fUSD(totV)}</td>
+                <td style="font-family:'IBM Plex Mono';font-weight:700;color:${totV-totF>=0?'var(--green)':'var(--red)'}">${totV>0?Math.round(((totV-totF)/totV)*100)+'%':'—'}</td>
+              </tr>
             </table>`:'—'}
             <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="editOrderPrices('${esc(p.pi)}',event)">✏ Preços</button></div>
           </div>
@@ -1367,35 +1383,33 @@ function editOrderPrices(pi,e){
   document.getElementById('pr-ttl').textContent=`Editar — IP ${pi}`;
   document.getElementById('pr-pi-lbl').textContent=pi;
   document.getElementById('pr-sup-lbl').textContent=p.supplier||'—';
-  document.getElementById('pr-plates').value=p.plates||0;
-  document.getElementById('pr-sample').value=p.sample||0;
   const cont=document.getElementById('pr-rows');cont.innerHTML='';
-  (p.unitPrices||[{desc:'',qty:0,priceForn:0,priceCli:0}]).forEach(r=>addPriceRow(r.desc||'',r.qty,r.priceForn,r.priceCli));
+  (p.unitPrices||[{desc:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
   updatePricePreview();
   document.getElementById('ovl-prices').classList.add('open');
 }
-function addPriceRow(desc='',qty=0,pForn=0,pCli=0){
+function addPriceRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const cont=document.getElementById('pr-rows');
   const row=document.createElement('div');
-  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
+  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
   row.innerHTML=`<input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #fca5a5;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #6EE7B7;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
+    <input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePricePreview()" style="border:1.5px solid #FCD34D;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.72rem;outline:none;width:100%">
+    <input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePricePreview()" style="border:1.5px solid #FCD34D;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.72rem;outline:none;width:100%">
     <button onclick="this.parentElement.remove();updatePricePreview()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem;padding:0 .2rem">✕</button>`;
   cont.appendChild(row);
 }
 function readPriceRows(){
   return[...document.querySelectorAll('#pr-rows>div')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0};
+    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0,plates:parseFloat(ins[4].value)||0,sample:parseFloat(ins[5].value)||0};
   }).filter(r=>r.qty>0||r.desc);
 }
 function updatePricePreview(){
   const rows=readPriceRows();
-  const plates=parseFloat(document.getElementById('pr-plates')?.value)||0;
-  const sample=parseFloat(document.getElementById('pr-sample')?.value)||0;
-  const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn,0)+plates+sample;
+  const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn+(r.plates||0)+(r.sample||0),0);
   const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
@@ -1406,7 +1420,7 @@ function updatePricePreview(){
 function savePrices(){
   if(!_prPi)return;const p=payments.find(x=>x.pi===_prPi);if(!p)return;
   const rows=readPriceRows();if(!rows.length){toast('⚠ Adicione ao menos uma linha','err');return;}
-  p.unitPrices=rows;p.plates=parseFloat(document.getElementById('pr-plates').value)||0;p.sample=parseFloat(document.getElementById('pr-sample').value)||0;
+  p.unitPrices=rows;p.plates=0;p.sample=0;
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const o=orders.find(x=>x.pi===_prPi);if(o&&totQty>0)o.total=totQty;
   saveAll();renderAll();closeOvl('prices');toast(`IP ${_prPi} atualizado ✓`);
@@ -1434,9 +1448,7 @@ function readProdRows(){
 }
 function updatePreview(){
   const rows=readProdRows();
-  const plates=parseFloat(document.getElementById('mo-plates').value)||0;
-  const sample=parseFloat(document.getElementById('mo-sample').value)||0;
-  const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn,0)+plates+sample;
+  const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn+(r.plates||0)+(r.sample||0),0);
   const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
@@ -1453,7 +1465,7 @@ function openOrderModal(num){
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
   document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
-  ['po','pi','cli-inv','sup','sup-inv','cont','etd','eta','plates','sample','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  ['po','pi','cli-inv','sup','sup-inv','cont','etd','eta','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
@@ -1465,8 +1477,7 @@ function openOrderModal(num){
         document.getElementById('mo-cli-inv').value=p.clientInv||'';document.getElementById('mo-sup').value=p.supplier||'';
         document.getElementById('mo-sup-inv').value=p.inv||'';document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
         document.getElementById('mo-etd').value=p.etd||'';document.getElementById('mo-eta').value=p.eta||'';
-        document.getElementById('mo-plates').value=p.plates||0;document.getElementById('mo-sample').value=p.sample||0;
-        (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.qty,r.priceForn,r.priceCli));
+        (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
       }
     }
   } else addProdRow();
@@ -1489,8 +1500,6 @@ function submitOrder(){
   const paySt=document.getElementById('mo-pay-st')?.value||'Mass P contracted';
   const etd=normDate(document.getElementById('mo-etd').value.trim())||'—';
   const eta=normDate(document.getElementById('mo-eta').value.trim())||'—';
-  const plates=parseFloat(document.getElementById('mo-plates').value)||0;
-  const sample=parseFloat(document.getElementById('mo-sample').value)||0;
   const notes=document.getElementById('mo-notes').value.trim();
   const prodRows=readProdRows();const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
 
@@ -1510,7 +1519,7 @@ function submitOrder(){
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
       if(p){
         if(pi&&pi!==oldPi){p.pi=pi; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
-        p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=plates;p.sample=sample;if(prodRows.length)p.unitPrices=prodRows;
+        p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
       }
     }
     saveAll();renderAll();renderFinanceiro();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
@@ -1526,8 +1535,8 @@ function submitOrder(){
   orders.unshift(newOrder);
   if(pi&&prodRows.length>0){
     const existing=payments.find(x=>x.pi===pi);
-    if(!existing)payments.unshift({pi,po,inv,client,clientInv,supplier:supplier||'—',status:paySt,etd,eta,unitPrices:prodRows,plates,sample,vnotes:''});
-    else{existing.po=po;existing.inv=inv;existing.client=client;existing.clientInv=clientInv;existing.supplier=supplier||existing.supplier;existing.status=paySt;existing.etd=etd;existing.eta=eta;existing.plates=plates;existing.sample=sample;existing.unitPrices=prodRows;}
+    if(!existing)payments.unshift({pi,po,inv,client,clientInv,supplier:supplier||'—',status:paySt,etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
+    else{existing.po=po;existing.inv=inv;existing.client=client;existing.clientInv=clientInv;existing.supplier=supplier||existing.supplier;existing.status=paySt;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
   }
   saveAll();renderAll();closeOvl('order');toast(`Pedido #${nn} criado ✓`);
 }
