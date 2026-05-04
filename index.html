@@ -455,7 +455,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
             <option>At sea</option><option>Received</option><option>Cancelled</option>
           </select>
         </div>
-        <div class="fsep">Produtos — Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
+        <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
         <div class="ff full">
           <div id="mo-prod-rows"></div>
           <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
@@ -547,8 +547,9 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         <div style="font-size:.72rem;color:var(--ink3)"><b>IP:/b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
         <div style="font-size:.72rem;color:var(--ink3)"><b>Fornecedor:</b> <span id="pr-sup-lbl"></span></div>
       </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.3rem">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.3rem">
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Descrição</span>
+        <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Ref.</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">Qtd</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em">Preço Forn.</span>
         <span style="font-size:.6rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em">Preço Cliente</span>
@@ -1384,15 +1385,16 @@ function editOrderPrices(pi,e){
   document.getElementById('pr-pi-lbl').textContent=pi;
   document.getElementById('pr-sup-lbl').textContent=p.supplier||'—';
   const cont=document.getElementById('pr-rows');cont.innerHTML='';
-  (p.unitPrices||[{desc:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
+  (p.unitPrices||[{desc:'',ref:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
   updatePricePreview();
   document.getElementById('ovl-prices').classList.add('open');
 }
-function addPriceRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
+function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const cont=document.getElementById('pr-rows');
   const row=document.createElement('div');
-  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
+  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
   row.innerHTML=`<input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
+    <input type="text" placeholder="Ref." value="${esc(ref)}" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #fca5a5;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #6EE7B7;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
@@ -1404,7 +1406,7 @@ function addPriceRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
 function readPriceRows(){
   return[...document.querySelectorAll('#pr-rows>div')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0,plates:parseFloat(ins[4].value)||0,sample:parseFloat(ins[5].value)||0};
+    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0};
   }).filter(r=>r.qty>0||r.desc);
 }
 function updatePricePreview(){
@@ -1430,10 +1432,11 @@ function savePrices(){
    ORDER MODAL
 ══════════════════════════════════════ */
 let _editNum=null;
-function addProdRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
+function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
   row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" autocomplete="off" oninput="updatePreview()" style="flex:2">
+    <span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="flex:1">
     <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:.8">
     <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
     <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
@@ -1445,7 +1448,7 @@ function addProdRow(desc='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
 function readProdRows(){
   return[...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),qty:parseInt(ins[1].value)||0,priceForn:parseFloat(ins[2].value)||0,priceCli:parseFloat(ins[3].value)||0,plates:parseFloat(ins[4].value)||0,sample:parseFloat(ins[5].value)||0};
+    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0};
   }).filter(r=>r.qty>0);
 }
 function updatePreview(){
@@ -1479,7 +1482,7 @@ function openOrderModal(num){
         document.getElementById('mo-cli-inv').value=p.clientInv||'';document.getElementById('mo-sup').value=p.supplier||'';
         document.getElementById('mo-sup-inv').value=p.inv||'';document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
         document.getElementById('mo-etd').value=p.etd||'';document.getElementById('mo-eta').value=p.eta||'';
-        (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
+        (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
       }
     }
   } else addProdRow();
