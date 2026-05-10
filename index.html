@@ -208,10 +208,8 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <thead>
         <tr class="grp">
           <th colspan="5" style="background:var(--navy);text-align:center">PEDIDOS</th>
-          <th colspan="3" style="background:#163D5C">PROGRESSO</th>
-          <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
-          <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
-          <th colspan="3" style="background:var(--del)">ENTREGA</th>
+          <th colspan="2" style="background:#163D5C">PROGRESSO</th>
+          <th style="background:var(--pre)">TIMELINE</th>
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
@@ -221,15 +219,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:140px">Status</th>
           <th style="min-width:58px">Dias ETA</th>
-          <th style="min-width:238px">Milestone</th>
-          <th style="min-width:74px">Arte</th>
-          <th style="min-width:74px">Pedido</th>
-          <th style="min-width:74px">Amostras</th>
-          <th style="min-width:74px">Prod. Lançada</th>
-          <th style="min-width:74px">Prontidão</th>
-          <th style="min-width:74px">Embarque</th>
-          <th style="min-width:74px">ETA Brasil</th>
-          <th style="min-width:74px">Entrada CD</th>
+          <th style="min-width:520px">Milestones</th>
           <th></th>
         </tr>
       </thead>
@@ -795,12 +785,14 @@ function msCompact(dates,num){
   return h+'</div>';
 }
 function msHTML(dates,num){
-  let h='<div class="ms">';
+  let h='<div class="ms" style="gap:2px">';
   dates.forEach((d,i)=>{
     const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
     const icon=cls==='done'?'✓':cls==='est'?'●':'';
     if(i>0){const prev=dates[i-1];const lc=prev.v&&!prev.est?'done':prev.v&&prev.est?'est':'pending';h+=`<div class="ml2 ${lc}"></div>`;}
-    h+=`<div class="mst"><div class="mc ${cls}" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl">${MLBL[i]}</span></div>`;
+    const dateDisp=d.v?d.v.replace(/\/\d{2}$/,''):'';
+    const dateClass=d.v?(d.est?'dest':'dok'):'dnil';
+    h+=`<div class="mst" style="min-width:52px"><div class="mc ${cls}" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl">${MLBL[i]}</span><span class="${dateClass}" style="font-size:.55rem;line-height:1;margin-top:1px;cursor:pointer" onclick="editMS(${num},${i},event)">${dateDisp||'—'}</span></div>`;
   });
   return h+'</div>';
 }
@@ -964,7 +956,6 @@ function renderInternal(){
         ${msHTML(o.dates,o.num)}
         ${o.notes?`<div class="ec" style="font-size:.65rem;color:${o.notes.includes('⚠')?'var(--red)':'var(--ink3)'};font-style:italic;margin-top:3px;max-width:220px;white-space:normal;line-height:1.3;cursor:pointer" onclick="editField(${o.num},'notes',event)">${esc(o.notes)}</div>`:`<div class="ec" style="font-size:.62rem;color:var(--ink4);margin-top:3px;cursor:pointer" onclick="editField(${o.num},'notes',event)">＋ nota</div>`}
       </td>
-      ${o.dates.map((d,di)=>`<td class="ec" onclick="editMS(${o.num},${di},event)">${dCell(d)}</td>`).join('')}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
   }).join('');
