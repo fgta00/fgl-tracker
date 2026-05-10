@@ -209,7 +209,9 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
         <tr class="grp">
           <th colspan="5" style="background:var(--navy);text-align:center">PEDIDOS</th>
           <th colspan="2" style="background:#163D5C">PROGRESSO</th>
-          <th style="background:var(--pre)">TIMELINE</th>
+          <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
+          <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
+          <th colspan="3" style="background:var(--del)">ENTREGA</th>
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
@@ -219,7 +221,14 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:140px">Status</th>
           <th style="min-width:58px">Dias ETA</th>
-          <th style="min-width:520px">Milestones</th>
+          <th style="min-width:58px">Arte</th>
+          <th style="min-width:58px">Pedido</th>
+          <th style="min-width:58px">Amostras</th>
+          <th style="min-width:58px">Prod.</th>
+          <th style="min-width:58px">Pronto</th>
+          <th style="min-width:58px">Embarq.</th>
+          <th style="min-width:58px">ETA</th>
+          <th style="min-width:58px">CD</th>
           <th></th>
         </tr>
       </thead>
@@ -406,6 +415,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
       <div class="fg">
         <div class="fsep">Identificação</div>
         <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
+        <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
         <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
         <div class="ff"><label>ETD (DD/MM/AA)</label>
           <div class="date-wrap">
@@ -785,16 +795,13 @@ function msCompact(dates,num){
   return h+'</div>';
 }
 function msHTML(dates,num){
-  let h='<div class="ms" style="gap:2px">';
-  dates.forEach((d,i)=>{
+  return dates.map((d,i)=>{
     const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
     const icon=cls==='done'?'✓':cls==='est'?'●':'';
-    if(i>0){const prev=dates[i-1];const lc=prev.v&&!prev.est?'done':prev.v&&prev.est?'est':'pending';h+=`<div class="ml2 ${lc}"></div>`;}
     const dateDisp=d.v?d.v.replace(/\/\d{2}$/,''):'';
     const dateClass=d.v?(d.est?'dest':'dok'):'dnil';
-    h+=`<div class="mst" style="min-width:52px"><div class="mc ${cls}" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl">${MLBL[i]}</span><span class="${dateClass}" style="font-size:.55rem;line-height:1;margin-top:1px;cursor:pointer" onclick="editMS(${num},${i},event)">${dateDisp||'—'}</span></div>`;
-  });
-  return h+'</div>';
+    return`<td style="padding:.3rem .2rem;cursor:pointer" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
+  }).join('');
 }
 function dCell(d){
   if(!d||!d.v)return'<span class="dnil">—</span>';
@@ -940,6 +947,7 @@ function renderInternal(){
       <td class="L">
         <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
         <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
+        ${o.colecao?`<div class="ec" style="font-size:.58rem;color:var(--ink3);font-style:italic;margin-top:1px" onclick="editField(${o.num},'colecao',event)">${esc(o.colecao)}</div>`:''}
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
       <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
@@ -952,12 +960,10 @@ function renderInternal(){
       </td>
       <td>${statusSel(o.num,o.status)}</td>
       <td>${daysCell(o.dates,o.status)}</td>
-      <td>
-        ${msHTML(o.dates,o.num)}
-        ${o.notes?`<div class="ec" style="font-size:.65rem;color:${o.notes.includes('⚠')?'var(--red)':'var(--ink3)'};font-style:italic;margin-top:3px;max-width:220px;white-space:normal;line-height:1.3;cursor:pointer" onclick="editField(${o.num},'notes',event)">${esc(o.notes)}</div>`:`<div class="ec" style="font-size:.62rem;color:var(--ink4);margin-top:3px;cursor:pointer" onclick="editField(${o.num},'notes',event)">＋ nota</div>`}
-      </td>
+      ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
-    </tr>`;
+    </tr>
+    ${o.notes?`<tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="15" style="padding:.1rem .5rem .3rem 5.5rem;border-bottom:1px solid var(--bdr)"><span class="ec" style="font-size:.65rem;color:${o.notes.includes('⚠')?'var(--red)':'var(--ink3)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${esc(o.notes)}</span></td></tr>`:''}`;
   }).join('');
 }
 
@@ -1461,11 +1467,11 @@ function openOrderModal(num){
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
   document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
-  ['po','pi','cli-inv','sup','sup-inv','cont','etd','eta','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  ['po','colecao','pi','cli-inv','sup','sup-inv','cont','etd','eta','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
-      document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-pi').value=o.pi||'';
+      document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-colecao').value=o.colecao||'';document.getElementById('mo-pi').value=o.pi||'';
       document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
       document.getElementById('mo-notes').value=o.notes||'';
       const p=linkPay(o);
@@ -1487,6 +1493,7 @@ function openOrderModal(num){
 }
 function submitOrder(){
   const po=document.getElementById('mo-po').value.trim()||'—';
+  const colecao=document.getElementById('mo-colecao').value.trim();
   const pi=document.getElementById('mo-pi').value.trim();
   const client=document.getElementById('mo-cl').value.trim();
   const clientInv=document.getElementById('mo-cli-inv').value.trim();
@@ -1510,7 +1517,7 @@ function submitOrder(){
       // Buscar payment ANTES de alterar pi/po
       const p=linkPay(o);
       const oldPi=o.pi;
-      o.po=po;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
+      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
       if(totalQty>0)o.total=totalQty;
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
       if(p){
@@ -1525,7 +1532,7 @@ function submitOrder(){
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
   if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
   if(eta&&eta!=='—')emptyDates[6]=mkD(eta,true);
-  const newOrder={num:nn,po,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
+  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
   const wasDemo=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
   if(wasDemo){orders=[];payments=[];ledger=[];receipts=[];}
   orders.unshift(newOrder);
@@ -1543,7 +1550,7 @@ function submitOrder(){
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={pi:'IP',po:'PO#',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
+  const lbls={pi:'IP',po:'PO#',colecao:'Coleção',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
   showEp(e,lbls[field]||field,String(o[field]||''),field==='total',false);
   const ep=document.getElementById('ep-val');
