@@ -313,7 +313,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   <div class="fin-2col">
     <!-- PAGAMENTOS -->
     <div>
-      <div class="sh">Lançar Pagamento ao Fornecedor</div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--red);margin-bottom:.7rem;padding:.5rem .7rem;background:var(--ltred);border-left:4px solid var(--red);border-radius:0 8px 8px 0">💳 Lançar Pagamento ao Fornecedor</div>
       <div class="lf">
         <div class="lfg">
           <div class="ff"><label>Data</label>
@@ -358,7 +358,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
     </div>
     <!-- RECEBIMENTOS -->
     <div>
-      <div class="sh">Lançar Recebimento do Cliente</div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:.7rem;padding:.5rem .7rem;background:var(--ltgrn);border-left:4px solid var(--green);border-radius:0 8px 8px 0">📥 Lançar Recebimento do Cliente</div>
       <div class="lf grn">
         <div class="lfg">
           <div class="ff"><label>Data</label>
@@ -800,7 +800,13 @@ function msHTML(dates,num){
     const icon=cls==='done'?'✓':cls==='est'?'●':'';
     const dateDisp=d.v?d.v.replace(/\/\d{2}$/,''):'';
     const dateClass=d.v?(d.est?'dest':'dok'):'dnil';
-    return`<td style="padding:.3rem .2rem;cursor:pointer" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
+    // Days from previous milestone
+    let gap='';
+    if(i>0&&dates[i-1].v&&d.v){
+      const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
+      if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
+        gap=`<span style="font-size:.5rem;color:var(--ink4);font-family:'IBM Plex Mono';line-height:1">${dd}d</span>`;}}
+    return`<td style="padding:.25rem .15rem;cursor:pointer" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
   }).join('');
 }
 function dCell(d){
@@ -947,7 +953,7 @@ function renderInternal(){
       <td class="L">
         <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
         <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
-        ${o.colecao?`<div class="ec" style="font-size:.58rem;color:var(--ink3);font-style:italic;margin-top:1px" onclick="editField(${o.num},'colecao',event)">${esc(o.colecao)}</div>`:''}
+        <div class="ec" style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px;cursor:pointer" onclick="editField(${o.num},'colecao',event)">${o.colecao?esc(o.colecao):'＋ coleção'}</div>
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
       <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
@@ -963,7 +969,7 @@ function renderInternal(){
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>
-    ${o.notes?`<tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="15" style="padding:.1rem .5rem .3rem 5.5rem;border-bottom:1px solid var(--bdr)"><span class="ec" style="font-size:.65rem;color:${o.notes.includes('⚠')?'var(--red)':'var(--ink3)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${esc(o.notes)}</span></td></tr>`:''}`;
+    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="15" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
   }).join('');
 }
 
@@ -1127,7 +1133,7 @@ function renderFinanceiro(){
       <td><div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctPago}%;background:${bcP}"></div></div><span class="ppct" style="font-size:.62rem">${pctPago}%</span></div></td>
       <td class="mono" style="color:var(--teal);font-weight:600">${totV>0?fUSD(totV):'—'}<div style="font-size:.6rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'−'+fUSD(aReceber):'✓'):'—'}</div></td>
       <td>${totV>0?`<div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctReceb}%;background:${bcR}"></div></div><span class="ppct" style="font-size:.62rem">${pctReceb}%</span></div>`:'—'}</td>
-      <td class="mono" style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:700">${totV>0?fUSD(mg)+(pctMg!==null?'<br><span style="font-size:.6rem;opacity:.75">('+pctMg+'%)</span>':''):'—'}</td>
+      <td class="mono" style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:700">${totV>0?`${fUSD(mg)} ${pctMg!==null?'<span style="font-size:.6rem;opacity:.75">('+pctMg+'%)</span>':''}<div style="font-size:.58rem;color:var(--ink3)">saldo: <span style="color:${(aReceber-aPagar)>=0?'var(--green)':'var(--red)'}"> ${fUSD(aReceber-aPagar)}</span></div>`:'—'}</td>
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delPayment('${esc(p.pi)}')" title="Apagar">✕</button></td>
     </tr>`;
 
@@ -1432,13 +1438,14 @@ let _editNum=null;
 function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
-  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" autocomplete="off" oninput="updatePreview()" style="flex:2">
-    <span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="flex:1">
-    <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:.8">
-    <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
-    <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:.8">
-    <span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="flex:.6">
-    <span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="flex:.6">
+  row.style.cssText='flex-wrap:wrap;gap:.25rem .35rem';
+  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="flex:3;min-width:160px">
+    <span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="flex:1.5;min-width:80px">
+    <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1;min-width:65px">
+    <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1;min-width:65px">
+    <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1;min-width:65px">
+    <span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="flex:.8;min-width:55px">
+    <span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="flex:.8;min-width:55px">
     <button class="rm" onclick="this.parentElement.remove();updatePreview()">✕</button>`;
   container.appendChild(row);updatePreview();
 }
