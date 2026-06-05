@@ -963,6 +963,17 @@ function renderInternal(){
       <td style="white-space:nowrap">
         <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem" onclick="editField(${o.num},'total',event)">${fN(o.total)}</span>
         ${o.pi?`<span class="ec" style="font-size:.56rem;color:var(--blue);cursor:pointer;border:1px solid var(--blue);border-radius:3px;padding:.04rem .22rem;margin-left:.2rem" onclick="editOrderPrices('${esc(o.pi)}',event)" title="Editar qtd/preços">$</span>`:''}
+        ${(()=>{
+          const fp=linkPay(o);if(!fp)return'';
+          const tF=pTotalForn(fp),tV=pTotalVenda(fp),pd=piPaid(fp.pi),rv=piReceived(fp.pi);
+          const pP=tF>0?Math.round(pd/tF*100):0,pR=tV>0?Math.round(rv/tV*100):0;
+          const mg=tV-tF,pM=tV>0?Math.round(mg/tV*100):0;
+          return`<div style="margin-top:3px;font-size:.55rem;line-height:1.4;color:var(--ink3);cursor:pointer" onclick="showTab('financeiro')" title="Ver financeiro">
+            <div style="display:flex;align-items:center;gap:3px">P <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pP}%;background:${pP>=80?'var(--green)':pP>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pP}%</b></div>
+            <div style="display:flex;align-items:center;gap:3px">R <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pR}%;background:${pR>=80?'var(--green)':pR>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pR}%</b></div>
+            <div style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:600">Mg ${pM}%</div>
+          </div>`;
+        })()}
       </td>
       <td>${statusSel(o.num,o.status)}</td>
       <td>${daysCell(o.dates,o.status)}</td>
@@ -1114,6 +1125,7 @@ function renderFinanceiro(){
       <td class="L">
         <b class="ec" style="font-family:'IBM Plex Mono';color:var(--navy);font-size:.78rem" onclick="editFinField('${esc(p.pi)}','pi',event)">${esc(p.pi)}</b>
         <div style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)">${esc(p.po)}</div>
+        ${linkedOrd?.colecao?`<div style="font-size:.56rem;color:var(--ink3);font-style:italic">${esc(linkedOrd.colecao)}</div>`:''}
       </td>
       <td class="L">
         <b class="ec" style="font-size:.78rem" onclick="editFinField('${esc(p.pi)}','supplier',event)">${esc(p.supplier)}</b>
