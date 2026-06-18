@@ -18,6 +18,31 @@
   --teal:#0D6E6E;--ltteal:#CCEFEF;
   --pre:#1D4ED8;--prod:#065F46;--del:#7C3400;
 }
+body.dark{
+  --ink:#E2E8F0;--ink2:#CBD5E1;--ink3:#94A3B8;--ink4:#64748B;
+  --bg:#0F172A;--card:#1E293B;--bdr:#334155;--bdr2:#475569;
+  --navy:#0F172A;--ltblue:#1E3A5F;
+  --ltgrn:#14532D;--ltamb:#78350F;--ltred:#7F1D1D;
+  --ltgry:#1E293B;--ltpur:#2E1065;--ltteal:#134E4A;
+}
+body.dark header{background:#020617}
+body.dark .sc{box-shadow:0 1px 3px rgba(0,0,0,.3)}
+body.dark .tw{box-shadow:0 1px 4px rgba(0,0,0,.3)}
+body.dark thead .ch th{background:#020617;border-bottom-color:#334155}
+body.dark thead .grp th{border-right-color:rgba(255,255,255,.08)}
+body.dark tbody tr:hover{background:#263548}
+body.dark tbody tr.alt{background:#172033}
+body.dark tbody tr.alt:hover{background:#1E3048}
+body.dark td.ec:hover{background:#2D4A6A !important;outline-color:#4A6A8A}
+body.dark .modal{background:#1E293B}
+body.dark .ff input,body.dark .ff select,body.dark .ff textarea{background:#0F172A;border-color:#475569;color:#E2E8F0}
+body.dark .epop{background:#1E293B;border-color:#3B82F6}
+body.dark .epop input,body.dark .epop select{background:#0F172A;border-color:#475569;color:#E2E8F0}
+body.dark .prodrow{background:#172033;border-color:#334155}
+body.dark .prodrow input{background:#0F172A;border-color:#475569;color:#E2E8F0}
+body.dark .lf{background:#1E3A5F;border-color:#2563EB}
+body.dark .lf.grn{background:#14532D;border-color:#16A34A}
+body.dark .tb input,body.dark .tb select{background:#1E293B;border-color:#475569;color:#E2E8F0}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
 header{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;position:sticky;top:0;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4)}
@@ -168,9 +193,42 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 #mcal .mc-day.selected{background:var(--blue);color:#fff}
 #mcal .mc-day.other{color:var(--ink4)}
 #mcal .mc-day.empty{cursor:default}
+/* Login screen */
+#login-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0D2B45 0%,#1A4A70 50%,#0D2B45 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
+body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%,#020617 100%)}
+#login-screen .login-box{background:rgba(255,255,255,.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:2.5rem;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#login-screen .login-logo{font-size:2.2rem;margin-bottom:.5rem}
+#login-screen h1{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:.3rem;font-family:'IBM Plex Sans'}
+#login-screen .login-sub{color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:1.5rem}
+#login-screen input{width:100%;padding:.6rem .8rem;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.25);color:#fff;font-family:'IBM Plex Mono';font-size:1rem;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:.8rem}
+#login-screen input:focus{border-color:#4DB8FF}
+#login-screen input::placeholder{color:rgba(255,255,255,.25);letter-spacing:normal}
+#login-screen button{width:100%;padding:.55rem;background:linear-gradient(135deg,#2E9E6A,#1A7A45);color:#fff;border:none;border-radius:8px;font-family:'IBM Plex Sans';font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s}
+#login-screen button:hover{opacity:.85}
+#login-screen .login-err{color:#F87171;font-size:.72rem;margin-top:.5rem;min-height:1rem}
+/* Dark mode toggle */
+.dm-toggle{background:none;border:1.5px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.dm-toggle:hover{border-color:rgba(255,255,255,.5);color:#fff}
+/* Hide app until authenticated */
+#app-wrap{display:none}
+#app-wrap.authed{display:block}
 </style>
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🌿</div>
+    <h1>FGL Tracker</h1>
+    <div class="login-sub">Acesso restrito</div>
+    <input type="password" id="login-pw" placeholder="Senha" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP (hidden until auth) -->
+<div id="app-wrap">
 <header>
   <div class="logo"><div class="logo-i">🌿</div>FGL</div>
   <div class="tabs">
@@ -180,6 +238,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   </div>
   <div class="hdr-r">
     <span class="hdr-d" id="hdr-date"></span>
+    <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
     <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">⬇ Backup</button>
     <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">⬆ Restaurar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
@@ -568,19 +627,44 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
   </div>
 </div>
 <div id="mcal" style="display:none"></div>
+</div><!-- /app-wrap -->
 
 <script>
 /* ══════════════════════════════════════
-   UTILS
+   CRYPTO + STORAGE (AES-256-GCM)
 ══════════════════════════════════════ */
 const SK='fgl8_';
-const ld=(k,d)=>{try{const s=localStorage.getItem(SK+k);return s?JSON.parse(s):d}catch{return d}};
-const sv=(k,v)=>{try{localStorage.setItem(SK+k,JSON.stringify(v))}catch{}};
+async function deriveKey(pw,salt){
+  const enc=new TextEncoder();
+  const keyMat=await crypto.subtle.importKey('raw',enc.encode(pw),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},keyMat,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptData(key,data){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const enc=new TextEncoder().encode(JSON.stringify(data));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc);
+  const buf=new Uint8Array(iv.length+ct.byteLength);
+  buf.set(iv);buf.set(new Uint8Array(ct),iv.length);
+  return btoa(String.fromCharCode(...buf));
+}
+async function decryptData(key,b64){
+  const buf=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const iv=buf.slice(0,12),ct=buf.slice(12);
+  const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+  return JSON.parse(new TextDecoder().decode(dec));
+}
+let _cryptoKey=null;
+function getSalt(){
+  let s=localStorage.getItem(SK+'salt');
+  if(s)return Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  const ns=crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem(SK+'salt',btoa(String.fromCharCode(...ns)));
+  return ns;
+}
 
-// FIX #5: Busca normalizada sem acentos
+// Busca normalizada sem acentos
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 
-// FIX #7: escape consistente
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -602,9 +686,7 @@ function daysUntil(disp){const iso=dispToISO(disp);if(!iso)return null;return Ma
 const fN=n=>(n||0).toLocaleString('pt-BR');
 const fUSD=n=>'USD '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-/* ══════════════════════════════════════
-   FIX #2: UNDO STACK
-══════════════════════════════════════ */
+/* UNDO */
 let _undoStack=[];
 const MAX_UNDO=5;
 function pushUndo(label){
@@ -621,9 +703,7 @@ function popUndo(){
   return true;
 }
 
-/* ══════════════════════════════════════
-   FIX #6: TOAST MELHORADO
-══════════════════════════════════════ */
+/* TOAST */
 let _toastTimer=null;
 function toast(msg,type='ok',undoable=false){
   clearTimeout(_toastTimer);
@@ -636,87 +716,81 @@ function toast(msg,type='ok',undoable=false){
 }
 
 /* ══════════════════════════════════════
-   DEFAULT DATA
+   DARK MODE
 ══════════════════════════════════════ */
-const ORDERS_DEF=[
-  {num:14,po:'—',pi:'',client:'Zona Sul',supplier:'',container:'40" HC VIETNÃ',status:'PRÉ-PRODUÇÃO',total:157500,product:'Ecobags Raffia Mix',dates:[mkD('10/Jul/25',true),mkD(null,true),mkD(null,true),mkD(null,true),mkD(null,true),mkD(null,true),mkD('30/Nov/25',true),mkD(null)],notes:'Arte pendente aprovação.'},
-  {num:13,po:'153/25',pi:'',client:'Coca-Cola',supplier:'',container:'40" HC VIETNÃ',status:'EMBARCADO',total:999000,product:'Copo Bambu',dates:[mkD('12/Fev/25'),mkD('25/Fev/25'),mkD('02/Abr/25'),mkD('09/Abr/25'),mkD('28/Mai/25'),mkD('07/Jun/25'),mkD('13/Jul/25',true),mkD(null)],notes:''},
-  {num:12,po:'152/25',pi:'',client:'Coca-Cola',supplier:'',container:'40" NOR CHINA',status:'SUSPENSO',total:2600,product:'Carrinho',dates:[mkD('10/Fev/25'),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null)],notes:'⚠ Greve RF — reamostrar 2x.'},
-  {num:11,po:'151/25',pi:'',client:'Maria Filó',supplier:'',container:'20" DRY CHINA',status:'EMBARCADO',total:157500,product:'Ecobags Raffia',dates:[mkD('10/Fev/25'),mkD('25/Fev/25'),mkD('16/Abr/25'),mkD('30/Abr/25'),mkD('18/Jun/25'),mkD('20/Jun/25'),mkD('10/Ago/25',true),mkD(null)],notes:''},
-  {num:10,po:'33/25',pi:'',client:'Maria Filó',supplier:'',container:'40" HC VIETNÃ',status:'FINALIZADO',total:157500,product:'Ecobags Raffia + Térmica',dates:[mkD('03/Nov/24'),mkD('03/Nov/24'),mkD(null),mkD('03/Nov/24'),mkD('10/Jan/25'),mkD('20/Jan/25'),mkD('03/Mar/25'),mkD('05/Mar/25')],notes:''},
-  {num:9,po:'21/25',pi:'',client:'Zona Sul',supplier:'',container:'20" DRY CHINA',status:'FINALIZADO',total:2500,product:'Carrinho',dates:[mkD('16/Out/24'),mkD('29/Out/24'),mkD('14/Nov/24'),mkD('02/Dez/24'),mkD('23/Dez/24'),mkD('04/Jan/25'),mkD('28/Jan/25'),mkD('05/Fev/25')],notes:''},
-  {num:8,po:'20/25',pi:'',client:'Zona Sul',supplier:'',container:'40" NOR CHINA',status:'FINALIZADO',total:999000,product:'Copo Bambu',dates:[mkD('17/Out/24'),mkD('29/Out/24'),mkD('20/Nov/24'),mkD('02/Dez/24'),mkD('20/Jan/25'),mkD('02/Fev/25'),mkD('09/Mar/25'),mkD('10/Mar/25')],notes:''},
-  {num:7,po:'435/24',pi:'',client:'Zona Sul',supplier:'',container:'20" DRY VIETNÃ',status:'FINALIZADO',total:27192,product:'Frutas em Calda',dates:[mkD(null),mkD('06/Set/24'),mkD(null),mkD('06/Set/24'),mkD('11/Out/24'),mkD('22/Out/24'),mkD('10/Dez/24'),mkD('10/Dez/24')],notes:''},
-  {num:6,po:'286/24',pi:'',client:'Zona Sul',supplier:'',container:'40" HC VIETNÃ',status:'FINALIZADO',total:157500,product:'Ecobags Raffia + Térmica',dates:[mkD('08/Mai/24'),mkD('18/Mai/24'),mkD('28/Jun/24'),mkD('13/Jul/24'),mkD('20/Set/24'),mkD('04/Out/24'),mkD('22/Nov/24'),mkD('22/Nov/24')],notes:''},
-  {num:5,po:'64/24',pi:'',client:'Zona Sul',supplier:'',container:'40" NOR CHINA',status:'FINALIZADO',total:990000,product:'Copo Bambu',dates:[mkD('25/Jan/24'),mkD('29/Jan/24'),mkD('16/Fev/24'),mkD('29/Fev/24'),mkD('10/Abr/24'),mkD('11/Mai/24'),mkD('15/Jun/24'),mkD('15/Jun/24')],notes:''},
-  {num:4,po:'164/24',pi:'',client:'Zona Sul',supplier:'',container:'40" HC VIETNÃ',status:'FINALIZADO',total:162500,product:'Ecobags Raffia + Térmica + PG',dates:[mkD('06/Fev/24'),mkD('15/Fev/24'),mkD(null),mkD('23/Fev/24'),mkD('23/Abr/24'),mkD('19/Mai/24'),mkD('25/Jun/24'),mkD('25/Jun/24')],notes:''},
-  {num:3,po:'037/24',pi:'',client:'Zona Sul',supplier:'',container:'20" DRY CHINA',status:'FINALIZADO',total:2500,product:'Carrinho',dates:[mkD('20/Ago/23'),mkD('25/Out/23'),mkD('15/Dez/23'),mkD('28/Dez/23'),mkD('12/Mar/24'),mkD('28/Mar/24'),mkD('05/Mai/24'),mkD('05/Mai/24')],notes:''},
-  {num:2,po:'413/23',pi:'',client:'Zona Sul',supplier:'',container:'40" HC VIETNÃ',status:'FINALIZADO',total:151150,product:'Ecobags Raffia + Térmica',dates:[mkD('14/Ago/23'),mkD('15/Set/23'),mkD('25/Out/23'),mkD('30/Nov/23'),mkD('05/Fev/24'),mkD('09/Fev/24'),mkD('29/Mar/24'),mkD('29/Mar/24')],notes:''},
-  {num:1,po:'335/23',pi:'',client:'Zona Sul',supplier:'',container:'40" HC VIETNÃ',status:'FINALIZADO',total:142000,product:'Ecobags Raffia + Térmica',dates:[mkD('26/Mai/23'),mkD('27/Jun/23'),mkD('25/Jul/23'),mkD('11/Ago/23'),mkD('22/Set/23'),mkD('06/Nov/23'),mkD('18/Dez/23'),mkD('18/Dez/23')],notes:''},
-];
-const PAY_DEF=[
-  {pi:'81F',po:'393/25',inv:'TD&FG2503',client:'Zona Sul',clientInv:'',supplier:'Thuan',status:'Received',etd:'23/Out/25',eta:'04/Dez/25',unitPrices:[{desc:'Ecobag Raffia',qty:120000,priceForn:0.345,priceCli:0.416},{desc:'Ecobag TNT',qty:30000,priceForn:0.237,priceCli:0.295},{desc:'Ecobag Térmica',qty:7500,priceForn:0.605,priceCli:0.73}],plates:2000,sample:0,vnotes:''},
-  {pi:'82F',po:'392/25',inv:'TMCORPBRFG01',client:'Zona Sul',clientInv:'',supplier:'TMC',status:'Received',etd:'19/Nov/25',eta:'11/Jan/26',unitPrices:[{desc:'Carrinho',qty:1200,priceForn:18.5,priceCli:22},{desc:'Carrinho Mini',qty:500,priceForn:11.5,priceCli:14}],plates:0,sample:0,vnotes:''},
-  {pi:'03R',po:'SAR02',inv:'',client:'Maria Filó',clientInv:'',supplier:'Interpak',status:'Received',etd:'16/Nov/25',eta:'27/Dez/25',unitPrices:[{desc:'Saco Ráfia',qty:150000,priceForn:0.07,priceCli:0.09}],plates:0,sample:120,vnotes:''},
-  {pi:'83F',po:'016/26',inv:'TD&FG2503',client:'Zona Sul',clientInv:'',supplier:'Thuan',status:'At sea',etd:'12/Jan/26',eta:'10/Mar/26',unitPrices:[{desc:'Ecobag Raffia',qty:120000,priceForn:0.345,priceCli:0.416},{desc:'Ecobag TNT',qty:25000,priceForn:0.24,priceCli:0.295},{desc:'Ecobag Térmica',qty:7000,priceForn:0.605,priceCli:0.73}],plates:400,sample:0,vnotes:''},
-  {pi:'84F',po:'027/26',inv:'YQ25170111402D',client:'Zona Sul',clientInv:'',supplier:'Anhui',status:'Mass P',etd:'03/Mar/26',eta:'—',unitPrices:[{desc:'Copo Bambu',qty:999000,priceForn:0.0167,priceCli:0.022}],plates:0,sample:300,vnotes:'desc -300'},
-  {pi:'69C',po:'LAVO01',inv:'',client:'Coca-Cola',clientInv:'',supplier:'Thuan',status:'At sea',etd:'22/Jan/26',eta:'01/Abr/26',unitPrices:[{desc:'Ecobag Personalizada',qty:32000,priceForn:0.267,priceCli:0.33}],plates:1260,sample:0,vnotes:''},
-  {pi:'85F',po:'055/26',inv:'',client:'Zona Sul',clientInv:'',supplier:'Thuan',status:'Mass P',etd:'28/Mar/26',eta:'—',unitPrices:[{desc:'Ecobag Raffia',qty:120000,priceForn:0.345,priceCli:0.416},{desc:'Ecobag TNT',qty:25000,priceForn:0.24,priceCli:0.295},{desc:'Ecobag Térmica',qty:7000,priceForn:0.605,priceCli:0.73}],plates:6840,sample:2100,vnotes:''},
-  {pi:'86F',po:'113/26',inv:'TDFG2601',client:'Zona Sul',clientInv:'FGL2601ZSU',supplier:'Thuan',status:'Mass P contracted',etd:'28/Mai/26',eta:'—',unitPrices:[{desc:'Ecobag Raffia',qty:120000,priceForn:0.326,priceCli:0.395},{desc:'Ecobag TNT',qty:25000,priceForn:0.228,priceCli:0.278},{desc:'Ecobag Térmica',qty:7000,priceForn:0.575,priceCli:0.695}],plates:0,sample:0,vnotes:''},
-  {pi:'87F',po:'114/26',inv:'TDFG2601',client:'Zona Sul',clientInv:'',supplier:'Thuan',status:'Mass P contracted',etd:'28/Jul/26',eta:'—',unitPrices:[{desc:'Ecobag Raffia',qty:120000,priceForn:0.326,priceCli:0.395},{desc:'Ecobag TNT',qty:25000,priceForn:0.228,priceCli:0.278},{desc:'Ecobag Térmica',qty:7000,priceForn:0.575,priceCli:0.695}],plates:0,sample:0,vnotes:''},
-  {pi:'88F',po:'—',inv:'',client:'Zona Sul',clientInv:'',supplier:'Yilla',status:'Sample',etd:'—',eta:'—',unitPrices:[{desc:'Bag Yilla',qty:2600,priceForn:4.3,priceCli:0}],plates:0,sample:0,vnotes:''},
-];
-const LED_DEF=[
-  {n:158,date:'13/Jan/25',amount:7644,pi:'75F',supplier:'Yilla',ref:'70%',notes:'ZSU 9.426,63'},
-  {n:159,date:'28/Jan/25',amount:6984.1,pi:'66C',supplier:'Casablanca',ref:'70%',notes:'FC Power'},
-  {n:160,date:'10/Fev/25',amount:35300.2,pi:'76F',supplier:'Thuan',ref:'70%',notes:'ZSU 44.434,50'},
-  {n:161,date:'23/Fev/25',amount:8672.9,pi:'74F',supplier:'Anhui',ref:'70%',notes:'ZSU 9.641,50'},
-  {n:162,date:'26/Fev/25',amount:300,pi:'84F',supplier:'Anhui',ref:'sample',notes:'ZSU sample'},
-  {n:163,date:'03/Mar/25',amount:8500,pi:'77F',supplier:'Thuan',ref:'Plates+Samp',notes:'ZSU 11.058'},
-  {n:164,date:'11/Mar/25',amount:800,pi:'67C',supplier:'Casablanca',ref:'Plates',notes:'lccRev'},
-  {n:165,date:'18/Mar/25',amount:2952,pi:'67C',supplier:'Casablanca',ref:'30%',notes:'FC Power'},
-  {n:166,date:'28/Mar/25',amount:100,pi:'01R',supplier:'Interpak',ref:'sample',notes:'FY'},
-  {n:167,date:'11/Abr/25',amount:5005,pi:'79F',supplier:'Anhui',ref:'30%',notes:'ZSU 7.167'},
-  {n:168,date:'11/Abr/25',amount:6253.8,pi:'80F',supplier:'Casablanca',ref:'plates+30%',notes:'CER 50%'},
-  {n:169,date:'30/Abr/25',amount:3150,pi:'01R-02R',supplier:'Interpak',ref:'30%',notes:'R4U SAR 50%'},
-  {n:170,date:'30/Abr/25',amount:19507.75,pi:'77F',supplier:'Thuan',ref:'30%',notes:'ZSU 18.431'},
-  {n:171,date:'26/Jun/25',amount:11244.7,pi:'79F',supplier:'Anhui',ref:'70%',notes:'ZSU 12.798,50'},
-  {n:172,date:'27/Jun/25',amount:32489.25,pi:'77F',supplier:'Thuan',ref:'70%',notes:'ZSU 42.107,70'},
-  {n:173,date:'01/Jul/25',amount:9431.2,pi:'67C',supplier:'Casablanca',ref:'70%',notes:'FC Power'},
-  {n:174,date:'01/Ago/25',amount:7387,pi:'02R',supplier:'Interpak',ref:'70%',notes:'R4U SAR 50%'},
-  {n:175,date:'01/Ago/25',amount:7729.8,pi:'80C',supplier:'Casablanca',ref:'70%',notes:'CER 50%'},
-  {n:176,date:'13/Ago/25',amount:11270,pi:'82F',supplier:'Toan',ref:'50%',notes:'ZSU 34.597'},
-  {n:177,date:'15/Ago/25',amount:17914.25,pi:'81F',supplier:'Thuan',ref:'30%+plates',notes:'ZSU 34.597'},
-  {n:178,date:'22/Ago/25',amount:950.4,pi:'68C',supplier:'Casablanca',ref:'30%',notes:'FC AV'},
-  {n:179,date:'15/Out/25',amount:3186,pi:'03R',supplier:'Interpak',ref:'30%+plates',notes:'R4U SAR 50%'},
-  {n:180,date:'10/Nov/25',amount:15890.5,pi:'83F',supplier:'Thuan',ref:'30%+plates',notes:'ZSU 19.833'},
-  {n:181,date:'13/Nov/25',amount:35458.35,pi:'81F',supplier:'Thuan',ref:'70%',notes:'ZSU 19.833'},
-  {n:182,date:'25/Nov/25',amount:1260,pi:'69C',supplier:'Thuan',ref:'Plates',notes:'lccRev'},
-  {n:183,date:'28/Nov/25',amount:2563.2,pi:'69C',supplier:'Thuan',ref:'30%',notes:'FC Power'},
-  {n:184,date:'04/Dez/25',amount:300,pi:'84F',supplier:'Anhui',ref:'sample',notes:'ZSU sample 350'},
-  {n:185,date:'15/Dez/25',amount:2191.2,pi:'68C',supplier:'Casablanca',ref:'70%',notes:'FC AV'},
-  {n:186,date:'15/Dez/25',amount:7082,pi:'03R',supplier:'Interpak',ref:'70%',notes:'R4U SAR 50%'},
-  {n:187,date:'18/Dez/25',amount:8940,pi:'85F',supplier:'Thuan',ref:'Plates',notes:'ZSU 12.732'},
-  {n:188,date:'22/Dez/25',amount:12480,pi:'82F',supplier:'Toan',ref:'70%',notes:'ZSU 14.190'},
-  {n:189,date:'10/Jan/26',amount:5005,pi:'84F',supplier:'Anhui',ref:'30%+plates',notes:'ZSU 7.167'},
-  {n:190,date:'09/Fev/26',amount:29307,pi:'86F',supplier:'Thuan',ref:'30%',notes:'ZSU 37.684'},
-];
-const REC_DEF=[];
+function toggleDark(){
+  const isDark=document.body.classList.toggle('dark');
+  localStorage.setItem(SK+'dark',isDark?'1':'0');
+  document.getElementById('dm-btn').textContent=isDark?'☀':'🌙';
+}
+// Restore dark mode preference (before auth, not sensitive)
+if(localStorage.getItem(SK+'dark')==='1'){document.body.classList.add('dark');document.getElementById('dm-btn').textContent='☀';}
 
 /* ══════════════════════════════════════
-   STATE
+   STATE (loaded after auth)
 ══════════════════════════════════════ */
-const _hasOrd=localStorage.getItem('fgl8_ord');
-const _hasPay=localStorage.getItem('fgl8_pay');
-let orders=_hasOrd?JSON.parse(_hasOrd):JSON.parse(JSON.stringify(ORDERS_DEF));
-let payments=_hasPay?JSON.parse(_hasPay):JSON.parse(JSON.stringify(PAY_DEF));
-let ledger=ld('led',LED_DEF);
-let receipts=ld('rec',REC_DEF);
-let _activeTab='internal'; // FIX #8: track active tab
+let orders=[],payments=[],ledger=[],receipts=[];
+let _activeTab='internal';
+let SLST=['PRÉ-PRODUÇÃO','EM PRODUÇÃO','EMBARCADO','FINALIZADO','SUSPENSO'];
+let CLIENTES=['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart'];
+let FORNECEDORES=['Thuan','TMC','Toan','Shanghai'];
+let PRODUTOS=['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia'];
+let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL'];
 
-// Auto-migração: garantir vínculo orders↔payments
-// Sync: garantir que orders↔payments vinculados tenham mesmos valores
-(function syncLinked(){
+/* ══════════════════════════════════════
+   LOGIN + ENCRYPTED SAVE/LOAD
+══════════════════════════════════════ */
+async function doLogin(){
+  const pw=document.getElementById('login-pw').value;
+  if(!pw){document.getElementById('login-err').textContent='Digite a senha';return;}
+  const salt=getSalt();
+  try{
+    _cryptoKey=await deriveKey(pw,salt);
+    const vault=localStorage.getItem(SK+'vault');
+    if(vault){
+      // Decrypt existing data
+      const data=await decryptData(_cryptoKey,vault);
+      orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
+      if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
+      if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
+      if(data.conteineres)CONTEINERES=data.conteineres;
+    } else {
+      // First time or migrating from unencrypted — check old keys
+      const oldOrd=localStorage.getItem(SK+'ord');
+      if(oldOrd){
+        orders=JSON.parse(oldOrd);
+        payments=JSON.parse(localStorage.getItem(SK+'pay')||'[]');
+        ledger=JSON.parse(localStorage.getItem(SK+'led')||'[]');
+        receipts=JSON.parse(localStorage.getItem(SK+'rec')||'[]');
+        const s=localStorage.getItem(SK+'slst');if(s)SLST=JSON.parse(s);
+        const c=localStorage.getItem(SK+'cls');if(c)CLIENTES=JSON.parse(c);
+        const f=localStorage.getItem(SK+'forn');if(f)FORNECEDORES=JSON.parse(f);
+        const p=localStorage.getItem(SK+'prod');if(p)PRODUTOS=JSON.parse(p);
+        const ct=localStorage.getItem(SK+'cont');if(ct)CONTEINERES=JSON.parse(ct);
+        // Migrate: encrypt and remove old keys
+        await saveAll();
+        [SK+'ord',SK+'pay',SK+'led',SK+'rec',SK+'slst',SK+'cls',SK+'forn',SK+'prod',SK+'cont'].forEach(k=>localStorage.removeItem(k));
+      } else {
+        // Brand new — save empty encrypted vault
+        await saveAll();
+      }
+    }
+    // Sync linked orders↔payments
+    syncLinked();
+    // Show app
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-wrap').classList.add('authed');
+    document.getElementById('hdr-date').textContent=todayDisp();
+    renderAll();
+  }catch(e){
+    document.getElementById('login-err').textContent='Senha incorreta';
+    document.getElementById('login-pw').value='';
+    document.getElementById('login-pw').focus();
+    _cryptoKey=null;
+  }
+}
+
+function syncLinked(){
   let changed=false;
   orders.forEach(o=>{
     const p=payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po));
@@ -731,12 +805,14 @@ let _activeTab='internal'; // FIX #8: track active tab
     else if(p.client&&!o.client){o.client=p.client;changed=true;}
     if(o.po&&o.po!=='—'&&p.po!==o.po){p.po=o.po;changed=true;}
   });
-  if(changed){sv('ord',orders);sv('pay',payments);}
-})();
+  if(changed)saveAll();
+}
 
-function saveAll(){
-  sv('ord',orders);sv('pay',payments);sv('led',ledger);sv('rec',receipts);sv('slst',SLST);
-  sv('cls',CLIENTES);sv('forn',FORNECEDORES);sv('prod',PRODUTOS);sv('cont',CONTEINERES);
+async function saveAll(){
+  if(!_cryptoKey)return;
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES};
+  const encrypted=await encryptData(_cryptoKey,data);
+  localStorage.setItem(SK+'vault',encrypted);
 }
 
 /* ══════════════════════════════════════
@@ -751,12 +827,7 @@ function piReceived(pi){return receipts.filter(r=>r.pi===pi).reduce((a,r)=>a+r.a
    STATUS
 ══════════════════════════════════════ */
 const SC={'PRÉ-PRODUÇÃO':{c:'pa'},'EM PRODUÇÃO':{c:'pp'},'EMBARCADO':{c:'pb'},'FINALIZADO':{c:'pg'},'SUSPENSO':{c:'pr'}};
-let SLST=ld('slst',['PRÉ-PRODUÇÃO','EM PRODUÇÃO','EMBARCADO','FINALIZADO','SUSPENSO']);
 const _finExp=new Set();
-let CLIENTES=ld('cls',['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart']);
-let FORNECEDORES=ld('forn',['Thuan','TMC','Toan','Shanghai']);
-let PRODUTOS=ld('prod',['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia']);
-let CONTEINERES=ld('cont',['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL']);
 
 // Helper: encontrar payment vinculado a um order (por pi OU po)
 function linkPay(o){if(!o)return null;return payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po))||null;}
@@ -1782,9 +1853,7 @@ function clearDemoData(){
   saveAll();renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast('Demo removido ✓');
 }
 
-document.getElementById('hdr-date').textContent=todayDisp();
-
-// FIX #3: Enter salva, Escape fecha
+// Enter salva, Escape fecha
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeEp();document.getElementById('mcal').style.display='none';
     document.querySelectorAll('.ovl.open').forEach(o=>{const id=o.id.replace('ovl-','');closeOvl(id);});}
@@ -1795,7 +1864,8 @@ document.addEventListener('click',e=>{
   if(ep.contains(e.target))return;if(Date.now()-(_epOpenedAt||0)<100)return;closeEp();
 });
 
-renderAll();
+// Focus login input on load
+document.getElementById('login-pw').focus();
 
 /* ══════════════════════════════════════
    MINI CALENDAR
