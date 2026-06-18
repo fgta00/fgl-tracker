@@ -19,30 +19,38 @@
   --pre:#1D4ED8;--prod:#065F46;--del:#7C3400;
 }
 body.dark{
-  --ink:#E2E8F0;--ink2:#CBD5E1;--ink3:#94A3B8;--ink4:#64748B;
-  --bg:#0F172A;--card:#1E293B;--bdr:#334155;--bdr2:#475569;
-  --navy:#0F172A;--ltblue:#1E3A5F;
-  --ltgrn:#14532D;--ltamb:#78350F;--ltred:#7F1D1D;
-  --ltgry:#1E293B;--ltpur:#2E1065;--ltteal:#134E4A;
+  --ink:#E8EDF2;--ink2:#D0D8E0;--ink3:#A0B0C0;--ink4:#708090;
+  --bg:#111827;--card:#1B2535;--bdr:#2A3A4E;--bdr2:#3A4E65;
+  --navy:#0F172A;--ltblue:#1A2E48;
+  --ltgrn:#0F3026;--ltamb:#3D2800;--ltred:#3D1218;
+  --ltgry:#1B2535;--ltpur:#1E1040;--ltteal:#0D3230;
 }
-body.dark header{background:#020617}
-body.dark .sc{box-shadow:0 1px 3px rgba(0,0,0,.3)}
-body.dark .tw{box-shadow:0 1px 4px rgba(0,0,0,.3)}
-body.dark thead .ch th{background:#020617;border-bottom-color:#334155}
-body.dark thead .grp th{border-right-color:rgba(255,255,255,.08)}
-body.dark tbody tr:hover{background:#263548}
-body.dark tbody tr.alt{background:#172033}
-body.dark tbody tr.alt:hover{background:#1E3048}
-body.dark td.ec:hover{background:#2D4A6A !important;outline-color:#4A6A8A}
-body.dark .modal{background:#1E293B}
-body.dark .ff input,body.dark .ff select,body.dark .ff textarea{background:#0F172A;border-color:#475569;color:#E2E8F0}
-body.dark .epop{background:#1E293B;border-color:#3B82F6}
-body.dark .epop input,body.dark .epop select{background:#0F172A;border-color:#475569;color:#E2E8F0}
-body.dark .prodrow{background:#172033;border-color:#334155}
-body.dark .prodrow input{background:#0F172A;border-color:#475569;color:#E2E8F0}
-body.dark .lf{background:#1E3A5F;border-color:#2563EB}
-body.dark .lf.grn{background:#14532D;border-color:#16A34A}
-body.dark .tb input,body.dark .tb select{background:#1E293B;border-color:#475569;color:#E2E8F0}
+body.dark header{background:#0A0F1A}
+body.dark .sc{box-shadow:0 1px 3px rgba(0,0,0,.25)}
+body.dark .tw{box-shadow:0 1px 4px rgba(0,0,0,.25)}
+body.dark thead .ch th{background:#0A0F1A;border-bottom-color:#2A3A4E;color:#A0B0C0}
+body.dark thead .grp th{border-right-color:rgba(255,255,255,.06)}
+body.dark tbody tr:hover{background:#1E2D42}
+body.dark tbody tr.alt{background:#141E30}
+body.dark tbody tr.alt:hover{background:#1A2940}
+body.dark td{border-bottom-color:#2A3A4E}
+body.dark .modal{background:#1B2535;color:#E8EDF2}
+body.dark .ff input,body.dark .ff select,body.dark .ff textarea{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .epop{background:#1B2535;border-color:#3B82F6;color:#E8EDF2}
+body.dark .epop input,body.dark .epop select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .prodrow{background:#141E30;border-color:#2A3A4E}
+body.dark .prodrow input{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .lf{background:#1A2E48;border-color:#2563EB}
+body.dark .lf.grn{background:#0F3026;border-color:#16A34A}
+body.dark .tb input,body.dark .tb select{background:#1B2535;border-color:#3A4E65;color:#E8EDF2}
+body.dark .dest{color:#F0A030}
+body.dark .dok{color:#6EE7B7}
+body.dark .dnil{color:#506070}
+body.dark .mc.done{background:#16A34A;border-color:#16A34A}
+body.dark .mc.est{background:#D97706;border-color:#D97706}
+body.dark .pill{color:#E8EDF2}
+body.dark .btn-bkp{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+body.dark .btn-add{background:#16A34A}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
 header{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;position:sticky;top:0;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4)}
@@ -249,10 +257,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 
 <!-- ═══ CONTROLE INTERNO ═══ -->
 <div id="view-internal" class="view active">
-  <div id="demo-banner" style="display:none;background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:8px;padding:.55rem 1rem;margin-bottom:.7rem;display:flex;align-items:center;justify-content:space-between;gap:1rem">
-    <span style="font-size:.74rem;color:#92400E;font-weight:600">⚠ Mostrando <b>dados de exemplo</b>. Crie o seu primeiro pedido para começar.</span>
-    <button onclick="clearDemoData()" style="background:#F59E0B;color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.7rem;padding:.3rem .75rem;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">Limpar Demo</button>
-  </div>
   <div class="sbar" id="int-sum"></div>
   <div id="int-alerts" style="display:none;background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:9px;padding:.65rem .95rem;margin-bottom:.75rem"></div>
   <div class="tb">
@@ -592,6 +596,11 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           </div>
         </div>
       </div>
+      <div style="margin-top:1.2rem">
+        <div class="sh">⏱ Intervalos Padrão entre Milestones (dias)</div>
+        <div id="ms-gaps-list" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-bottom:.5rem"></div>
+        <div style="font-size:.6rem;color:var(--ink4)">Usado para auto-preenchimento de datas estimadas na cascata</div>
+      </div>
       <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
     </div>
   </div>
@@ -736,6 +745,50 @@ let CLIENTES=['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart'];
 let FORNECEDORES=['Thuan','TMC','Toan','Shanghai'];
 let PRODUTOS=['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia'];
 let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL'];
+// Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→emb, emb→eta, eta→cd]
+let MS_GAPS=[20,20,10,50,10,45,5];
+const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Embarque','Embarque → ETA','ETA → No CD'];
+
+/* ══════════════════════════════════════
+   AUTO-FILL CASCADE + AUTO-STATUS
+══════════════════════════════════════ */
+function addDaysToDisp(disp,days){
+  const iso=dispToISO(disp);if(!iso)return null;
+  const d=new Date(iso+'T00:00');d.setDate(d.getDate()+days);
+  return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;
+}
+// Auto-fill: a partir do milestone index `fromIdx`, preenche os seguintes como estimados
+function autoCascade(o,fromIdx){
+  if(!o||!o.dates||fromIdx<0||fromIdx>=7)return;
+  const base=o.dates[fromIdx];
+  if(!base||!base.v)return;
+  let cur=base.v;
+  for(let i=fromIdx;i<7;i++){
+    const next=addDaysToDisp(cur,MS_GAPS[i]);
+    if(!next)break;
+    const existing=o.dates[i+1];
+    // Só preenche se vazio ou estimado (nunca toca confirmado)
+    if(!existing||!existing.v||existing.est){
+      o.dates[i+1]=mkD(next,true);
+    }
+    cur=o.dates[i+1].v||next;
+  }
+}
+// Auto-status: determina status baseado nos milestones
+function autoStatus(o){
+  if(!o||!o.dates)return;
+  const d=o.dates;
+  const has=i=>d[i]&&d[i].v&&!d[i].est; // tem data confirmada
+  const hasAny=i=>d[i]&&d[i].v; // tem data (confirmada ou estimada)
+  // CD confirmado → FINALIZADO
+  if(has(7)){o.status='FINALIZADO';return;}
+  // Embarque confirmado → EMBARCADO
+  if(has(5)){o.status='EMBARCADO';return;}
+  // Produção lançada confirmada → EM PRODUÇÃO
+  if(has(3)){o.status='EM PRODUÇÃO';return;}
+  // Tem algum milestone confirmado → PRÉ-PRODUÇÃO
+  if(has(0)||has(1)||has(2)){o.status='PRÉ-PRODUÇÃO';return;}
+}
 
 /* ══════════════════════════════════════
    LOGIN + ENCRYPTED SAVE/LOAD
@@ -754,6 +807,7 @@ async function doLogin(){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
+      if(data.msGaps)MS_GAPS=data.msGaps;
     } else {
       // First time or migrating from unencrypted — check old keys
       const oldOrd=localStorage.getItem(SK+'ord');
@@ -810,7 +864,7 @@ function syncLinked(){
 
 async function saveAll(){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS};
   const encrypted=await encryptData(_cryptoKey,data);
   localStorage.setItem(SK+'vault',encrypted);
 }
@@ -1117,10 +1171,6 @@ function renderClient(){
    RENDER FINANCEIRO (kept compact — same logic, with fixes applied)
 ══════════════════════════════════════ */
 function renderFinanceiro(){
-  const isDemo2=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
-  const banner2=document.getElementById('demo-banner');
-  if(banner2)banner2.style.display=isDemo2?'flex':'none';
-
   const q=norm(document.getElementById('fin-q')?.value);
   const st=document.getElementById('fin-st')?.value||'';
   const cl=document.getElementById('fin-cl')?.value||'';
@@ -1623,8 +1673,13 @@ function submitOrder(){
   if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
   if(eta&&eta!=='—')emptyDates[6]=mkD(eta,true);
   const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
-  const wasDemo=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
-  if(wasDemo){orders=[];payments=[];ledger=[];receipts=[];}
+  // Auto-cascade: se tem ETD, cascatear ETA. Se tem Arte, cascatear tudo.
+  if(emptyDates[5]&&emptyDates[5].v) autoCascade(newOrder,5);
+  if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
+  // Restaurar ETD/ETA se usuário informou explicitamente (não sobrescrever)
+  if(etd&&etd!=='—')newOrder.dates[5]=mkD(etd,true);
+  if(eta&&eta!=='—')newOrder.dates[6]=mkD(eta,true);
+  autoStatus(newOrder);
   orders.unshift(newOrder);
   if(pi&&prodRows.length>0){
     const existing=payments.find(x=>x.pi===pi);
@@ -1709,10 +1764,15 @@ function epSave(){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     const est=document.getElementById('ep-est')?.checked||false;
     o.dates[_epCtx.di]=mkD(val||null,est);
+    // Auto-fill cascata: preenche datas seguintes como estimadas
+    if(val) autoCascade(o,_epCtx.di);
+    // Auto-status baseado nos milestones
+    autoStatus(o);
+    // Propagar ETD/ETA para payments
     const p=linkPay(o);
     if(p){
-      if(_epCtx.di===5){p.etd=normDate(val)||'—';}
-      if(_epCtx.di===6){p.eta=normDate(val)||'—';}
+      if(_epCtx.di===5) p.etd=normDate(val)||'—';
+      if(_epCtx.di===6) p.eta=normDate(val)||'—';
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
@@ -1810,6 +1870,8 @@ function renderStatusLists(){
     const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
     document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
   });
+  // Render milestone gaps editor
+  document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"></div>`).join('');
 }
 function addMestre(tipo){
   const id='st-'+tipo+'-new';const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
@@ -1844,13 +1906,6 @@ function renderAll(){
   const nAlerts=calcAlerts().length;
   const tabInt=document.querySelectorAll('.tab')[0];
   if(tabInt)tabInt.innerHTML=nAlerts>0?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`:'Controle Interno';
-  const isDemo=!localStorage.getItem('fgl8_ord')&&!localStorage.getItem('fgl8_pay');
-  const banner=document.getElementById('demo-banner');if(banner)banner.style.display=isDemo?'flex':'none';
-}
-function clearDemoData(){
-  if(!confirm('Limpar dados demo?'))return;
-  orders=[];payments=[];ledger=[];receipts=[];
-  saveAll();renderAll();if(_activeTab==='financeiro')renderFinanceiro();toast('Demo removido ✓');
 }
 
 // Enter salva, Escape fecha
@@ -1909,7 +1964,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
@@ -1928,6 +1983,7 @@ function importBackup(e){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
+      if(data.msGaps)MS_GAPS=data.msGaps;
       saveAll();renderAll();renderFinanceiro();
       toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
     }catch(err){alert('Erro ao ler backup: '+err.message);}
