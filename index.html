@@ -243,11 +243,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <button class="tab active" onclick="showTab('internal')">Controle Interno</button>
     <button class="tab" onclick="showTab('client')">Visão Cliente</button>
     <button class="tab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
-    <button class="tab" onclick="showTab('calendario')">Calendário</button>
+    <button class="tab" onclick="showTab('timeline')">Timeline</button>
   </div>
   <div class="hdr-r">
     <span class="hdr-d" id="hdr-date"></span>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
+    <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones">📅</button>
     <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">⬇ Backup</button>
     <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">⬆ Restaurar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
@@ -273,8 +274,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         <tr class="grp">
           <th colspan="5" style="background:#091A2A;text-align:center">PEDIDOS</th>
           <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
-          <th style="background:#1A365D">TIMELINE</th>
-          <th style="background:#091A2A"></th>
+          <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
+          <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
+          <th colspan="3" style="background:var(--del)">ENTREGA</th>
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
@@ -284,7 +286,14 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:140px">Status</th>
           <th style="min-width:58px">Dias ETA</th>
-          <th id="gantt-hdr" style="min-width:420px"></th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Arte<br>Recebida</th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Amostras<br>Em Mãos</th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Produção<br>Lançada</th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Prontidão<br>(CRD)</th>
+          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Embarque<br>On Board</th>
+          <th style="min-width:58px">ETA</th>
+          <th style="min-width:58px">No CD</th>
           <th></th>
         </tr>
       </thead>
@@ -630,17 +639,32 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 </div>
 <div id="mcal" style="display:none"></div>
 
-<!-- ═══ CALENDÁRIO ═══ -->
-<div id="view-calendario" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
-    <button class="btn-bkp" onclick="calNav(-1)">◀ Mês anterior</button>
-    <h2 id="cal-title" style="font-size:1rem;font-weight:700;color:var(--ink)"></h2>
-    <button class="btn-bkp" onclick="calNav(1)">Próximo mês ▶</button>
-  </div>
-  <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:8px;overflow:hidden"></div>
-  <div style="display:flex;gap:14px;margin-top:.7rem;font-size:.65rem;color:var(--ink3)">
+<!-- ═══ TIMELINE (Gantt) ═══ -->
+<div id="view-timeline" class="view">
+  <div style="display:flex;gap:14px;margin-bottom:10px;font-size:.65rem;color:var(--ink3)">
     <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#16A34A;margin-right:3px"></span>Confirmado</span>
     <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D97706;margin-right:3px"></span>Estimado</span>
+    <span><span style="display:inline-block;width:2px;height:10px;background:#DC2626;margin-right:3px"></span>Hoje</span>
+  </div>
+  <div id="gantt-container" style="overflow-x:auto;background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:.5rem"></div>
+</div>
+
+<!-- CALENDAR POPUP -->
+<div class="ovl" id="ovl-calendar" onclick="ovlOut(event,'calendar')">
+  <div class="modal" style="width:720px">
+    <div class="mhdr"><h2>Calendário de Milestones</h2><button class="mcls" onclick="closeOvl('calendar')">✕</button></div>
+    <div class="mbody">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+        <button class="btn-bkp" onclick="calNav(-1)">◀</button>
+        <h3 id="cal-title" style="font-size:.95rem;font-weight:700;color:var(--ink);margin:0"></h3>
+        <button class="btn-bkp" onclick="calNav(1)">▶</button>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:6px;overflow:hidden"></div>
+      <div style="display:flex;gap:14px;margin-top:.6rem;font-size:.6rem;color:var(--ink3)">
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16A34A;margin-right:3px"></span>Confirmado</span>
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D97706;margin-right:3px"></span>Estimado</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -917,6 +941,31 @@ function changeSt(num,v){
    MILESTONES
 ══════════════════════════════════════ */
 const MLBL=['Art','Ped','Amo','Prod','Prn','Emb','ETA','CD'];
+function msCompact(dates,num){
+  let h='<div class="ms" style="gap:0">';
+  dates.forEach((d,i)=>{
+    const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
+    const icon=cls==='done'?'✓':cls==='est'?'●':'';
+    if(i>0){const prev=dates[i-1];const lc=prev.v&&!prev.est?'done':prev.v&&prev.est?'est':'pending';h+=`<div class="ml2 ${lc}" style="width:10px"></div>`;}
+    h+=`<div class="mst"><div class="mc ${cls}" style="width:22px;height:22px;font-size:.65rem;border-width:2px" onclick="editMS(${num},${i},event)" title="${MLBL[i]}${d.v?' — '+esc(d.v):''}">${icon}</div><span class="mlbl" style="font-size:.5rem">${MLBL[i]}</span></div>`;
+  });
+  return h+'</div>';
+}
+function msHTML(dates,num){
+  return dates.map((d,i)=>{
+    const cls=d.v&&!d.est?'done':d.v&&d.est?'est':'pending';
+    const icon=cls==='done'?'✓':cls==='est'?'●':'';
+    const dateDisp=d.v?d.v.replace(/\/\d{2}$/,''):'';
+    const dateClass=d.v?(d.est?'dest':'dok'):'dnil';
+    let gap='';
+    if(i>0&&dates[i-1].v&&d.v){
+      const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
+      if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
+        gap=`<span style="font-size:.5rem;color:var(--ink4);font-family:'IBM Plex Mono';line-height:1">${dd}d</span>`;}}
+    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
+  }).join('');
+}
+/* Gantt functions for Timeline tab */
 let _ganttRange={min:null,max:null,span:1};
 function computeGanttRange(ordersList){
   let allDates=[];
@@ -925,56 +974,7 @@ function computeGanttRange(ordersList){
   let mn=new Date(Math.min(...allDates)),mx=new Date(Math.max(...allDates));
   mn=new Date(mn.getFullYear(),mn.getMonth(),1);
   mx=new Date(mx.getFullYear(),mx.getMonth()+2,1);
-  const span=Math.max(1,Math.round((mx-mn)/864e5));
-  _ganttRange={min:mn,max:mx,span};
-  const hdr=document.getElementById('gantt-hdr');
-  if(hdr){
-    const W=420;let h='<div style="display:flex;height:100%;align-items:flex-end">';
-    let cur=new Date(mn);
-    while(cur<mx){
-      const next=new Date(cur.getFullYear(),cur.getMonth()+1,1);
-      const x1=Math.round((cur-mn)/864e5/span*W);
-      const x2=Math.round(((next<mx?next:mx)-mn)/864e5/span*W);
-      const w=Math.max(1,x2-x1);
-      const today=new Date();const isNow=cur.getMonth()===today.getMonth()&&cur.getFullYear()===today.getFullYear();
-      h+=`<div style="width:${w}px;text-align:center;font-size:.5rem;color:${isNow?'var(--blue)':'var(--ink4)'};font-weight:${isNow?'700':'500'};border-left:.5px solid var(--bdr);padding:1px 0;line-height:1.15">${MO[cur.getMonth()]}<br>${String(cur.getFullYear()).slice(2)}</div>`;
-      cur=next;
-    }
-    hdr.innerHTML=h+'</div>';
-  }
-}
-function msCompact(dates,num){return msHTML(dates,num);}
-function msHTML(dates,num){
-  const W=420,H=42;
-  const mn=_ganttRange.min,span=_ganttRange.span;
-  const xOf=d=>{const iso=dispToISO(d);if(!iso)return null;return Math.round((new Date(iso+'T00:00')-mn)/864e5/span*W);};
-  const isDark=document.body.classList.contains('dark');
-  const bg=isDark?'#1B2535':'#fff';
-  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`;
-  // Today line
-  const todayX=Math.round((new Date()-mn)/864e5/span*W);
-  if(todayX>0&&todayX<W) svg+=`<line x1="${todayX}" y1="0" x2="${todayX}" y2="${H}" stroke="#DC2626" stroke-width="1" opacity="0.2"/>`;
-  // Month grid
-  let cur=new Date(mn);
-  while(cur<_ganttRange.max){const x=Math.round((cur-mn)/864e5/span*W);svg+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="${isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)'}" stroke-width="0.5"/>`;cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  // Collect positioned milestones
-  const pts=[];
-  dates.forEach((d,i)=>{if(!d||!d.v)return;const x=xOf(d.v);if(x===null||x<0||x>W)return;pts.push({x,i,confirmed:!d.est,label:MLBL[i],date:d.v});});
-  // Bar
-  if(pts.length>=2) svg+=`<line x1="${pts[0].x}" y1="16" x2="${pts[pts.length-1].x}" y2="16" stroke="${isDark?'#3A5068':'#C0D0E0'}" stroke-width="2.5" stroke-linecap="round"/>`;
-  // Days between
-  for(let j=1;j<pts.length;j++){const dx=pts[j].x-pts[j-1].x;if(dx>20){const d1=dispToISO(pts[j-1].date),d2=dispToISO(pts[j].date);if(d1&&d2){const dd=Math.round((new Date(d2+'T00:00')-new Date(d1+'T00:00'))/864e5);svg+=`<text x="${pts[j-1].x+dx/2}" y="7" text-anchor="middle" font-size="7" fill="${isDark?'#607080':'#9AAAB8'}" font-family="'IBM Plex Mono'">${dd}d</text>`;}}}
-  // Dots + labels
-  pts.forEach(p=>{
-    const col=p.confirmed?'#16A34A':'#D97706';
-    svg+=`<circle cx="${p.x}" cy="16" r="5" fill="${col}" stroke="${bg}" stroke-width="1.5" style="cursor:pointer" onclick="editMS(${num},${p.i},event)"/>`;
-    svg+=`<text x="${p.x}" y="29" text-anchor="middle" font-size="6.5" fill="${isDark?'#607080':'#9AAAB8'}" font-family="'IBM Plex Sans'">${p.label}</text>`;
-    const shortDate=p.date.replace(/\/\d{2}$/,'');
-    const dateCol=p.confirmed?(isDark?'#6EE7B7':'#0F6E4A'):(isDark?'#F0A030':'#B85C00');
-    svg+=`<text x="${p.x}" y="38" text-anchor="middle" font-size="6" fill="${dateCol}" font-family="'IBM Plex Mono'" style="cursor:pointer" onclick="editMS(${num},${p.i},event)">${shortDate}</text>`;
-  });
-  svg+='</svg>';
-  return`<td style="padding:2px 0">${svg}</td>`;
+  _ganttRange={min:mn,max:mx,span:Math.max(1,Math.round((mx-mn)/864e5))};
 }
 function dCell(d){
   if(!d||!d.v)return'<span class="dnil">—</span>';
@@ -1108,7 +1108,6 @@ function renderInternal(){
     return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);
   });
   const fltS=applySortOrd(flt);
-  computeGanttRange(orders);
   document.getElementById('int-cnt').textContent=`${flt.length} pedidos`;
   updateSortHeaders();
   const clSel=document.getElementById('int-cl');
@@ -1148,7 +1147,7 @@ function renderInternal(){
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>
-    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="9" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
+    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="15" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
   }).join('');
 }
 
@@ -1878,16 +1877,77 @@ function showTab(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
-  const tabs={internal:0,client:1,financeiro:2,calendario:3};
+  const tabs={internal:0,client:1,financeiro:2,timeline:3};
   document.querySelectorAll('.tab')[tabs[id]]?.classList.add('active');
   if(id==='financeiro')renderFinanceiro();
-  if(id==='calendario')renderCalendar();
+  if(id==='timeline')renderGantt();
 }
 
 /* ══════════════════════════════════════
-   CALENDÁRIO
+   GANTT (Timeline tab — full width)
+══════════════════════════════════════ */
+function renderGantt(){
+  computeGanttRange(orders);
+  const mn=_ganttRange.min,mx=_ganttRange.max,span=_ganttRange.span;
+  const active=orders.filter(o=>o.status!=='FINALIZADO'&&o.status!=='SUSPENSO');
+  const all=[...active,...orders.filter(o=>o.status==='FINALIZADO'||o.status==='SUSPENSO')];
+  const leftW=120,rowH=48,topH=28;
+  const W=Math.max(800,span*3); // ~3px per day
+  const H=topH+all.length*rowH+10;
+  const isDark=document.body.classList.contains('dark');
+  const xOf=d=>{const iso=dispToISO(d);if(!iso)return null;return leftW+Math.round((new Date(iso+'T00:00')-mn)/864e5/span*(W-leftW));};
+  const bg=isDark?'#1B2535':'#fff';
+  const textCol=isDark?'#E8EDF2':'#0F1923';
+  const mutedCol=isDark?'#708090':'#5A6A76';
+  const lineCol=isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
+  const barBg=isDark?'rgba(255,255,255,.03)':'rgba(0,0,0,.02)';
+  const statusCol={'PRÉ-PRODUÇÃO':'#3B82F6','EM PRODUÇÃO':'#D97706','EMBARCADO':'#8B5CF6','FINALIZADO':'#16A34A','SUSPENSO':'#888'};
+
+  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="font-family:'IBM Plex Sans',sans-serif">`;
+  // Month headers + grid
+  let cur=new Date(mn);
+  while(cur<mx){
+    const next=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+    const x=leftW+Math.round((cur-mn)/864e5/span*(W-leftW));
+    const xn=leftW+Math.round((next-mn)/864e5/span*(W-leftW));
+    svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${lineCol}" stroke-width="0.5"/>`;
+    const today=new Date();const isNow=cur.getMonth()===today.getMonth()&&cur.getFullYear()===today.getFullYear();
+    svg+=`<text x="${(x+Math.min(xn,W))/2}" y="${topH-8}" text-anchor="middle" font-size="10" fill="${isNow?'#2563EB':mutedCol}" font-weight="${isNow?'700':'400'}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
+    cur=next;
+  }
+  // Today line
+  const todayX=leftW+Math.round((new Date()-mn)/864e5/span*(W-leftW));
+  if(todayX>leftW&&todayX<W) svg+=`<line x1="${todayX}" y1="${topH}" x2="${todayX}" y2="${H}" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>`;
+
+  all.forEach((o,i)=>{
+    const y=topH+i*rowH;
+    if(i%2===0) svg+=`<rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${barBg}"/>`;
+    svg+=`<text x="6" y="${y+20}" font-size="12" font-weight="600" fill="${textCol}">${esc(o.pi||'#'+o.num)}</text>`;
+    svg+=`<text x="6" y="${y+33}" font-size="8.5" fill="${mutedCol}">${esc(o.po).substring(0,15)}</text>`;
+    const sc=statusCol[o.status]||'#888';
+    svg+=`<rect x="${leftW-50}" y="${y+24}" width="${48}" height="13" rx="3" fill="${sc}" opacity="0.12"/>`;
+    svg+=`<text x="${leftW-26}" y="${y+33}" text-anchor="middle" font-size="7" fill="${sc}" font-weight="600">${o.status==='PRÉ-PRODUÇÃO'?'PRÉ-PROD':o.status==='EM PRODUÇÃO'?'PRODUÇÃO':o.status}</text>`;
+
+    const pts=[];
+    (o.dates||[]).forEach((d,mi)=>{if(!d||!d.v)return;const x=xOf(d.v);if(x===null)return;pts.push({x:Math.max(leftW,Math.min(W-5,x)),mi,confirmed:!d.est,date:d.v});});
+    if(pts.length>=2) svg+=`<line x1="${pts[0].x}" y1="${y+18}" x2="${pts[pts.length-1].x}" y2="${y+18}" stroke="${sc}" stroke-width="3" opacity="0.2" stroke-linecap="round"/>`;
+    // Days between
+    for(let j=1;j<pts.length;j++){const dx=pts[j].x-pts[j-1].x;if(dx>25){const d1=dispToISO(pts[j-1].date),d2=dispToISO(pts[j].date);if(d1&&d2){const dd=Math.round((new Date(d2+'T00:00')-new Date(d1+'T00:00'))/864e5);svg+=`<text x="${pts[j-1].x+dx/2}" y="${y+10}" text-anchor="middle" font-size="7" fill="${mutedCol}" font-family="'IBM Plex Mono'">${dd}d</text>`;}}}
+    pts.forEach(p=>{
+      const col=p.confirmed?'#16A34A':'#D97706';
+      svg+=`<circle cx="${p.x}" cy="${y+18}" r="5.5" fill="${col}" stroke="${bg}" stroke-width="1.5" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)"/>`;
+      svg+=`<text x="${p.x}" y="${y+40}" text-anchor="middle" font-size="7" fill="${mutedCol}">${MLBL[p.mi]}</text>`;
+    });
+  });
+  svg+='</svg>';
+  document.getElementById('gantt-container').innerHTML=svg;
+}
+
+/* ══════════════════════════════════════
+   CALENDÁRIO (popup modal)
 ══════════════════════════════════════ */
 let _calMonth=new Date().getMonth(),_calYear=new Date().getFullYear();
+function openCalPopup(){renderCalendar();document.getElementById('ovl-calendar').classList.add('open');}
 function calNav(dir){_calMonth+=dir;if(_calMonth>11){_calMonth=0;_calYear++;}if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
 function renderCalendar(){
   document.getElementById('cal-title').textContent=MO[_calMonth]+' '+_calYear;
@@ -1895,9 +1955,7 @@ function renderCalendar(){
   const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
   const isDark=document.body.classList.contains('dark');
   const bgCell=isDark?'#1B2535':'#fff';const bgOther=isDark?'#111827':'#F8FAFC';
-  const dayNames=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-
-  // Collect all milestones for this month
+  const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
   const events={};
   orders.forEach(o=>{if(!o.dates)return;o.dates.forEach((d,mi)=>{
     if(!d||!d.v)return;const iso=dispToISO(d.v);if(!iso)return;
@@ -1907,30 +1965,25 @@ function renderCalendar(){
       events[day].push({ip:o.pi||'#'+o.num,label:MLBL[mi],confirmed:!d.est,num:o.num,mi});
     }
   });});
-
   let h='';
-  // Day name headers
-  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:6px 4px;text-align:center;font-size:.6rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
-  // Empty cells before first day
-  const startOff=(firstDay===0?6:firstDay-1); // Monday-first
-  for(let i=0;i<startOff;i++) h+=`<div style="background:${bgOther};padding:6px 4px;min-height:70px"></div>`;
-  // Day cells
+  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
+  const startOff=(firstDay===0?6:firstDay-1);
+  for(let i=0;i<startOff;i++) h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
   const today=new Date();
   for(let d=1;d<=daysInMonth;d++){
     const isToday=d===today.getDate()&&_calMonth===today.getMonth()&&_calYear===today.getFullYear();
     const evts=events[d]||[];
-    h+=`<div style="background:${bgCell};padding:4px 5px;min-height:70px;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;border-radius:0;':''}">`;
-    h+=`<div style="font-size:.68rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:3px">${d}</div>`;
+    h+=`<div style="background:${bgCell};padding:3px 4px;min-height:60px;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
+    h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px">${d}</div>`;
     evts.forEach(e=>{
       const col=e.confirmed?'#16A34A':'#D97706';
-      h+=`<div style="font-size:.52rem;padding:1px 3px;margin-bottom:1px;border-radius:3px;background:${col}15;color:${col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" onclick="editMS(${e.num},${e.mi},event)"><b>${esc(e.ip)}</b> ${e.label}</div>`;
+      h+=`<div style="font-size:.55rem;padding:1px 3px;margin-bottom:1px;border-radius:3px;background:${col}18;color:${col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" onclick="closeOvl('calendar');editMS(${e.num},${e.mi},event)"><b>${esc(e.ip)}</b> ${e.label}</div>`;
     });
     h+='</div>';
   }
-  // Fill remaining cells
   const totalCells=startOff+daysInMonth;
   const rem=totalCells%7===0?0:7-totalCells%7;
-  for(let i=0;i<rem;i++) h+=`<div style="background:${bgOther};padding:6px 4px;min-height:70px"></div>`;
+  for(let i=0;i<rem;i++) h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
   document.getElementById('cal-grid').innerHTML=h;
 }
 function ovlOut(e,id){if(e.target===document.getElementById(`ovl-${id}`))closeOvl(id);}
