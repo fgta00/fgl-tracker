@@ -647,10 +647,10 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D97706;margin-right:3px"></span>Estimado</span>
       <span><span style="display:inline-block;width:2px;height:10px;background:#DC2626;margin-right:3px"></span>Hoje</span>
     </div>
-    <div style="display:flex;gap:4px">
-      <button class="btn-bkp" style="font-size:.65rem;padding:.2rem .5rem" onclick="setGanttZoom('months')">Meses</button>
-      <button class="btn-bkp" style="font-size:.65rem;padding:.2rem .5rem" onclick="setGanttZoom('weeks')">Semanas</button>
-      <button class="btn-bkp" style="font-size:.65rem;padding:.2rem .5rem" onclick="setGanttZoom('days')">Dias</button>
+    <div style="display:flex;gap:2px;background:var(--bdr);border-radius:6px;padding:2px">
+      <button id="z-months" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:var(--blue);color:#fff" onclick="setGanttZoom('months')">Meses</button>
+      <button id="z-weeks" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--ink)" onclick="setGanttZoom('weeks')">Semanas</button>
+      <button id="z-days" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--ink)" onclick="setGanttZoom('days')">Dias</button>
     </div>
   </div>
   <div id="gantt-container" style="overflow-x:auto;background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:1rem 1.5rem"></div>
@@ -1894,7 +1894,14 @@ function showTab(id){
    GANTT (Timeline tab — full width)
 ══════════════════════════════════════ */
 let _ganttZoom='months';
-function setGanttZoom(z){_ganttZoom=z;renderGantt();}
+function setGanttZoom(z){
+  _ganttZoom=z;
+  ['months','weeks','days'].forEach(k=>{
+    const b=document.getElementById('z-'+k);
+    if(b){b.style.background=k===z?'var(--blue)':'transparent';b.style.color=k===z?'#fff':'var(--ink)';}
+  });
+  renderGantt();
+}
 function renderGantt(){
   computeGanttRange(orders);
   const mn=_ganttRange.min,mx=_ganttRange.max,span=_ganttRange.span;
@@ -1903,10 +1910,10 @@ function renderGantt(){
   const all=[...active,...finished];
   if(!all.length){document.getElementById('gantt-container').innerHTML='<p style="color:var(--ink3);text-align:center;padding:2rem">Nenhum pedido</p>';return;}
 
-  const leftW=140,rowH=56,topH=36;
-  const pxPerDay=_ganttZoom==='days'?12:_ganttZoom==='weeks'?5:3;
+  const leftW=170,rowH=64,topH=40;
+  const pxPerDay=_ganttZoom==='days'?16:_ganttZoom==='weeks'?7:4;
   const chartW=span*pxPerDay;
-  const W=leftW+chartW+20;
+  const W=leftW+chartW+30;
   const H=topH+all.length*rowH+10;
   const isDark=document.body.classList.contains('dark');
   const xOf=d=>{const iso=dispToISO(d);if(!iso)return null;return leftW+Math.round((new Date(iso+'T00:00')-mn)/864e5*pxPerDay);};
@@ -1920,14 +1927,19 @@ function renderGantt(){
 
   let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="font-family:'IBM Plex Sans',sans-serif">`;
 
+  // Left panel separator
+  svg+=`<line x1="${leftW-10}" y1="${topH}" x2="${leftW-10}" y2="${H}" stroke="${faintCol}" stroke-width="1"/>`;
+
   // Grid lines based on zoom
   let cur=new Date(mn);
   if(_ganttZoom==='days'){
     while(cur<mx){
       const x=leftW+Math.round((cur-mn)/864e5*pxPerDay);
       const isMonday=cur.getDay()===1;
-      svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="${isMonday?'1':'0.3'}"/>`;
-      if(isMonday) svg+=`<text x="${x+2}" y="${topH-6}" font-size="8" fill="${mutedCol}">${cur.getDate()}/${MO[cur.getMonth()]}</text>`;
+      const isFirst=cur.getDate()===1;
+      svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="${isFirst?'1.5':isMonday?'0.8':'0.3'}"/>`;
+      if(isFirst) svg+=`<text x="${x+3}" y="${topH-10}" font-size="11" font-weight="700" fill="${mutedCol}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
+      else if(isMonday) svg+=`<text x="${x+2}" y="${topH-10}" font-size="8.5" fill="${isDark?'#506070':'#B0BEC5'}">${cur.getDate()}</text>`;
       cur=new Date(cur.getTime()+864e5);
     }
   } else if(_ganttZoom==='weeks'){
@@ -1936,8 +1948,8 @@ function renderGantt(){
       const isFirst=cur.getDate()===1;
       if(cur.getDay()===1||isFirst){
         svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="${isFirst?'1.5':'0.5'}"/>`;
-        if(isFirst) svg+=`<text x="${x+3}" y="${topH-6}" font-size="10" font-weight="600" fill="${mutedCol}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
-        else svg+=`<text x="${x+2}" y="${topH-6}" font-size="7.5" fill="${isDark?'#506070':'#B0BEC5'}">${cur.getDate()}</text>`;
+        if(isFirst) svg+=`<text x="${x+3}" y="${topH-10}" font-size="11" font-weight="700" fill="${mutedCol}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
+        else svg+=`<text x="${x+2}" y="${topH-10}" font-size="8" fill="${isDark?'#506070':'#B0BEC5'}">${cur.getDate()}</text>`;
       }
       cur=new Date(cur.getTime()+864e5);
     }
@@ -1948,7 +1960,7 @@ function renderGantt(){
       const xn=leftW+Math.round((next-mn)/864e5*pxPerDay);
       svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="1"/>`;
       const today=new Date();const isNow=cur.getMonth()===today.getMonth()&&cur.getFullYear()===today.getFullYear();
-      svg+=`<text x="${(x+Math.min(xn,W))/2}" y="${topH-8}" text-anchor="middle" font-size="11" fill="${isNow?'#2563EB':mutedCol}" font-weight="${isNow?'700':'400'}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
+      svg+=`<text x="${(x+Math.min(xn,W))/2}" y="${topH-10}" text-anchor="middle" font-size="12" fill="${isNow?'#2563EB':mutedCol}" font-weight="${isNow?'700':'400'}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
       cur=next;
     }
   }
@@ -1966,38 +1978,38 @@ function renderGantt(){
     if(i%2===0) svg+=`<rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${barBg}"/>`;
 
     // Left label
-    svg+=`<text x="8" y="${y+22}" font-size="13" font-weight="600" fill="${textCol}">${esc(o.pi||'#'+o.num)}</text>`;
-    svg+=`<text x="8" y="${y+36}" font-size="9" fill="${mutedCol}">${esc((o.po||'').substring(0,16))}</text>`;
+    svg+=`<text x="10" y="${y+24}" font-size="14" font-weight="700" fill="${textCol}">${esc(o.pi||'#'+o.num)}</text>`;
+    svg+=`<text x="10" y="${y+40}" font-size="9.5" fill="${mutedCol}">${esc((o.po||'').substring(0,18))}</text>`;
     const sc=statusCol[o.status]||'#888';
     const sn=statusShort[o.status]||o.status;
-    svg+=`<rect x="78" y="${y+25}" width="${sn.length*5.5+8}" height="14" rx="3" fill="${sc}" opacity="0.12"/>`;
-    svg+=`<text x="82" y="${y+35}" font-size="7.5" fill="${sc}" font-weight="600">${sn}</text>`;
+    svg+=`<rect x="85" y="${y+28}" width="${sn.length*5.8+10}" height="15" rx="3" fill="${sc}" opacity="0.14"/>`;
+    svg+=`<text x="90" y="${y+39}" font-size="8" fill="${sc}" font-weight="600">${sn}</text>`;
 
-    // Collect milestone points
+    // Milestone points
     const pts=[];
     (o.dates||[]).forEach((d,mi)=>{if(!d||!d.v)return;const x=xOf(d.v);if(x===null)return;pts.push({x:Math.max(leftW,Math.min(W-10,x)),mi,confirmed:!d.est,date:d.v});});
 
-    // Connecting bar
-    if(pts.length>=2) svg+=`<line x1="${pts[0].x}" y1="${y+20}" x2="${pts[pts.length-1].x}" y2="${y+20}" stroke="${sc}" stroke-width="3.5" opacity="0.18" stroke-linecap="round"/>`;
+    // Bar
+    if(pts.length>=2) svg+=`<line x1="${pts[0].x}" y1="${y+22}" x2="${pts[pts.length-1].x}" y2="${y+22}" stroke="${sc}" stroke-width="4" opacity="0.16" stroke-linecap="round"/>`;
 
-    // Days between milestones
+    // Days between
     for(let j=1;j<pts.length;j++){
       const dx=pts[j].x-pts[j-1].x;
-      if(dx>30){
+      if(dx>35){
         const d1=dispToISO(pts[j-1].date),d2=dispToISO(pts[j].date);
         if(d1&&d2){const dd=Math.round((new Date(d2+'T00:00')-new Date(d1+'T00:00'))/864e5);
-          svg+=`<text x="${pts[j-1].x+dx/2}" y="${y+12}" text-anchor="middle" font-size="8" fill="${mutedCol}" font-family="'IBM Plex Mono'">${dd}d</text>`;}
+          svg+=`<text x="${pts[j-1].x+dx/2}" y="${y+13}" text-anchor="middle" font-size="8.5" fill="${mutedCol}" font-family="'IBM Plex Mono'">${dd}d</text>`;}
       }
     }
 
     // Dots + labels + dates
     pts.forEach(p=>{
       const col=p.confirmed?'#16A34A':'#D97706';
-      svg+=`<circle cx="${p.x}" cy="${y+20}" r="6" fill="${col}" stroke="${bg}" stroke-width="2" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)"/>`;
-      svg+=`<text x="${p.x}" y="${y+34}" text-anchor="middle" font-size="7.5" fill="${mutedCol}" font-family="'IBM Plex Sans'">${MLBL[p.mi]}</text>`;
+      svg+=`<circle cx="${p.x}" cy="${y+22}" r="6.5" fill="${col}" stroke="${bg}" stroke-width="2" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)"/>`;
+      svg+=`<text x="${p.x}" y="${y+38}" text-anchor="middle" font-size="8" fill="${mutedCol}" font-family="'IBM Plex Sans'">${MLBL[p.mi]}</text>`;
       const shortDate=p.date.replace(/\/\d{2}$/,'');
       const dateCol=p.confirmed?(isDark?'#6EE7B7':'#0F6E4A'):(isDark?'#F0A030':'#B85C00');
-      svg+=`<text x="${p.x}" y="${y+44}" text-anchor="middle" font-size="7" fill="${dateCol}" font-family="'IBM Plex Mono'" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)">${shortDate}</text>`;
+      svg+=`<text x="${p.x}" y="${y+49}" text-anchor="middle" font-size="7.5" fill="${dateCol}" font-family="'IBM Plex Mono'" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)">${shortDate}</text>`;
     });
   });
   svg+='</svg>';
