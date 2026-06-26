@@ -243,7 +243,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <button class="tab active" onclick="showTab('internal')">Controle Interno</button>
     <button class="tab" onclick="showTab('client')">Visão Cliente</button>
     <button class="tab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
-    <button class="tab" onclick="showTab('timeline')">Timeline</button>
   </div>
   <div class="hdr-r">
     <span class="hdr-d" id="hdr-date"></span>
@@ -273,7 +272,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <thead>
         <tr class="grp">
           <th colspan="5" style="background:#091A2A;text-align:center">PEDIDOS</th>
-          <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
+          <th colspan="3" style="background:#1A4A70">PROGRESSO</th>
           <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
           <th colspan="3" style="background:var(--del)">ENTREGA</th>
@@ -285,6 +284,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:140px">Status</th>
+          <th style="min-width:160px">Próxima Ação</th>
           <th style="min-width:58px">Dias ETA</th>
           <th style="min-width:68px;font-size:.55rem;line-height:1.2">Arte<br>Recebida</th>
           <th style="min-width:68px;font-size:.55rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
@@ -640,20 +640,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <div id="mcal" style="display:none"></div>
 
 <!-- ═══ TIMELINE (Gantt) ═══ -->
-<div id="view-timeline" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <div style="display:flex;gap:14px;font-size:.65rem;color:var(--ink3)">
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#16A34A;margin-right:3px"></span>Confirmado</span>
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#D97706;margin-right:3px"></span>Estimado</span>
-      <span><span style="display:inline-block;width:2px;height:10px;background:#DC2626;margin-right:3px"></span>Hoje</span>
-    </div>
-    <div style="display:flex;gap:2px;background:var(--bdr);border-radius:6px;padding:2px">
-      <button id="z-months" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:var(--blue);color:#fff" onclick="setGanttZoom('months')">Meses</button>
-      <button id="z-weeks" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--ink)" onclick="setGanttZoom('weeks')">Semanas</button>
-      <button id="z-days" style="padding:.3rem .7rem;font-size:.72rem;font-weight:600;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--ink)" onclick="setGanttZoom('days')">Dias</button>
-    </div>
+<!-- FINANCEIRO POR IP POPUP -->
+<div class="ovl" id="ovl-finpop" onclick="ovlOut(event,'finpop')">
+  <div class="modal" style="width:680px;max-width:95vw">
+    <div class="mhdr"><h2 id="finpop-title">Financeiro</h2><button class="mcls" onclick="closeOvl('finpop')">✕</button></div>
+    <div class="mbody" id="finpop-body"></div>
   </div>
-  <div id="gantt-container" style="overflow-x:auto;background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:1rem 1.5rem"></div>
 </div>
 
 <!-- CALENDAR POPUP -->
@@ -787,6 +779,7 @@ let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETN�
 // Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→emb, emb→eta, eta→cd]
 let MS_GAPS=[20,20,10,50,10,45,5];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Embarque','Embarque → ETA','ETA → No CD'];
+let DISMISSED=[]; // alertas dispensados: array de strings "pi:tipo"
 
 /* ══════════════════════════════════════
    AUTO-FILL CASCADE + AUTO-STATUS
@@ -830,6 +823,59 @@ function autoStatus(o){
 }
 
 /* ══════════════════════════════════════
+   MOTOR DE PRÓXIMA AÇÃO / GARGALO
+══════════════════════════════════════ */
+// Retorna {level:'ok'|'warn'|'crit', text, suggestion, key} ou null
+function nextAction(o){
+  if(!o||!o.dates)return null;
+  if(o.status==='FINALIZADO'||o.status==='SUSPENSO')return null;
+  const d=o.dates;
+  const today=new Date();today.setHours(0,0,0,0);
+  // Achar a primeira etapa não confirmada (próxima a concluir)
+  let nextIdx=-1;
+  for(let i=0;i<8;i++){if(!d[i]||!d[i].v||d[i].est){nextIdx=i;break;}}
+  if(nextIdx===-1)return null; // tudo confirmado
+
+  const lbls=['Arte','Pedido','Amostras','Produção','Prontidão','Embarque','ETA','No CD'];
+  const fornName=o.supplier||'fornecedor';
+  // Sugestões por etapa
+  const sugg=['Cobrar arte do cliente','Confirmar pedido / sinal','Cobrar amostras do '+fornName,'Confirmar lançamento de produção','Cobrar prontidão (CRD) do '+fornName,'Confirmar embarque com '+fornName,'Acompanhar chegada','Confirmar entrada no CD'];
+
+  // Data estimada da próxima etapa (se houver)
+  const estDate=d[nextIdx]&&d[nextIdx].v?d[nextIdx].v:null;
+  let level='ok',text='',daysInfo='';
+  if(estDate){
+    const iso=dispToISO(estDate);
+    if(iso){
+      const dd=Math.round((new Date(iso+'T00:00')-today)/864e5);
+      if(dd<0){level='crit';text=`${lbls[nextIdx]} atrasada ${Math.abs(dd)}d`;}
+      else if(dd<=7){level='warn';text=`${lbls[nextIdx]} em ${dd}d`;}
+      else{level='ok';text=`${lbls[nextIdx]} em ${dd}d`;}
+    }
+  } else {
+    // Sem data estimada: comparar tempo desde última etapa confirmada vs MS_GAPS
+    let lastIdx=-1;for(let i=nextIdx-1;i>=0;i--){if(d[i]&&d[i].v&&!d[i].est){lastIdx=i;break;}}
+    if(lastIdx>=0){
+      const iso=dispToISO(d[lastIdx].v);
+      if(iso){
+        const elapsed=Math.round((today-new Date(iso+'T00:00'))/864e5);
+        const expected=MS_GAPS[lastIdx]||30;
+        if(elapsed>expected){level='crit';text=`${lbls[nextIdx]} pendente há ${elapsed}d (méd. ${expected}d)`;}
+        else{level='warn';text=`Aguardando ${lbls[nextIdx]} (${elapsed}/${expected}d)`;}
+      }
+    } else {
+      level='warn';text=`Definir ${lbls[nextIdx]}`;
+    }
+  }
+  return{level,text,suggestion:sugg[nextIdx],key:o.pi+':'+nextIdx};
+}
+function dismissAlert(key,e){
+  if(e)e.stopPropagation();
+  if(!DISMISSED.includes(key))DISMISSED.push(key);
+  saveAll();renderInternal();
+}
+
+/* ══════════════════════════════════════
    LOGIN + ENCRYPTED SAVE/LOAD
 ══════════════════════════════════════ */
 async function doLogin(){
@@ -846,7 +892,7 @@ async function doLogin(){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
-      if(data.msGaps)MS_GAPS=data.msGaps;
+      if(data.msGaps)MS_GAPS=data.msGaps;if(data.dismissed)DISMISSED=data.dismissed;
     } else {
       // First time or migrating from unencrypted — check old keys
       const oldOrd=localStorage.getItem(SK+'ord');
@@ -903,7 +949,7 @@ function syncLinked(){
 
 async function saveAll(){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,dismissed:DISMISSED};
   const encrypted=await encryptData(_cryptoKey,data);
   localStorage.setItem(SK+'vault',encrypted);
 }
@@ -973,16 +1019,6 @@ function msHTML(dates,num){
   }).join('');
 }
 /* Gantt functions for Timeline tab */
-let _ganttRange={min:null,max:null,span:1};
-function computeGanttRange(ordersList){
-  let allDates=[];
-  ordersList.forEach(o=>{if(!o.dates)return;o.dates.forEach(d=>{if(d&&d.v){const iso=dispToISO(d.v);if(iso)allDates.push(new Date(iso+'T00:00'));}});});
-  if(!allDates.length){const now=new Date();allDates=[new Date(now.getFullYear(),now.getMonth()-2,1),new Date(now.getFullYear(),now.getMonth()+6,1)];}
-  let mn=new Date(Math.min(...allDates)),mx=new Date(Math.max(...allDates));
-  mn=new Date(mn.getFullYear(),mn.getMonth(),1);
-  mx=new Date(mx.getFullYear(),mx.getMonth()+2,1);
-  _ganttRange={min:mn,max:mx,span:Math.max(1,Math.round((mx-mn)/864e5))};
-}
 function dCell(d){
   if(!d||!d.v)return'<span class="dnil">—</span>';
   return d.est?`<span class="dest">${esc(d.v)}</span>`:`<span class="dok">${esc(d.v)}</span>`;
@@ -1142,7 +1178,7 @@ function renderInternal(){
           const tF=pTotalForn(fp),tV=pTotalVenda(fp),pd=piPaid(fp.pi),rv=piReceived(fp.pi);
           const pP=tF>0?Math.round(pd/tF*100):0,pR=tV>0?Math.round(rv/tV*100):0;
           const mg=tV-tF,pM=tV>0?Math.round(mg/tV*100):0;
-          return`<div style="margin-top:3px;font-size:.55rem;line-height:1.4;color:var(--ink3);cursor:pointer" onclick="showTab('financeiro')" title="Ver financeiro">
+          return`<div style="margin-top:3px;font-size:.55rem;line-height:1.4;color:var(--ink3);cursor:pointer" onclick="openFinPopup('${esc(fp.pi)}')" title="Ver financeiro do IP">
             <div style="display:flex;align-items:center;gap:3px">P <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pP}%;background:${pP>=80?'var(--green)':pP>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pP}%</b></div>
             <div style="display:flex;align-items:center;gap:3px">R <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pR}%;background:${pR>=80?'var(--green)':pR>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pR}%</b></div>
             <div style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:600">Mg ${pM}%</div>
@@ -1150,11 +1186,27 @@ function renderInternal(){
         })()}
       </td>
       <td>${statusSel(o.num,o.status)}</td>
+      <td style="padding:.2rem .35rem">${(()=>{
+        const a=nextAction(o);
+        if(!a)return'<span style="font-size:.6rem;color:var(--ink4)">—</span>';
+        if(DISMISSED.includes(a.key))return'<span style="font-size:.58rem;color:var(--ink4);font-style:italic">dispensado</span>';
+        const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
+        const ic=a.level==='crit'?'🔴':a.level==='warn'?'🟠':'🟢';
+        return`<div style="display:flex;flex-direction:column;gap:1px">
+          <div style="display:flex;align-items:flex-start;gap:3px">
+            <span style="font-size:.62rem;font-weight:600;color:${col};line-height:1.25">${ic} ${esc(a.text)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:.56rem;color:var(--ink3);line-height:1.2">→ ${esc(a.suggestion)}</span>
+            <button onclick="dismissAlert('${esc(a.key)}',event)" title="Dispensar" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.6rem;padding:0;flex-shrink:0">✕</button>
+          </div>
+        </div>`;
+      })()}</td>
       <td>${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>
-    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="15" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
+    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="16" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
   }).join('');
 }
 
@@ -1884,142 +1936,92 @@ function showTab(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
-  const tabs={internal:0,client:1,financeiro:2,timeline:3};
+  const tabs={internal:0,client:1,financeiro:2};
   document.querySelectorAll('.tab')[tabs[id]]?.classList.add('active');
   if(id==='financeiro')renderFinanceiro();
-  if(id==='timeline')renderGantt();
 }
 
 /* ══════════════════════════════════════
    GANTT (Timeline tab — full width)
 ══════════════════════════════════════ */
-let _ganttZoom='months';
-function setGanttZoom(z){
-  _ganttZoom=z;
-  ['months','weeks','days'].forEach(k=>{
-    const b=document.getElementById('z-'+k);
-    if(b){b.style.background=k===z?'var(--blue)':'transparent';b.style.color=k===z?'#fff':'var(--ink)';}
-  });
-  renderGantt();
-}
-function renderGantt(){
-  computeGanttRange(orders);
-  const mn=_ganttRange.min,mx=_ganttRange.max,span=_ganttRange.span;
-  const active=orders.filter(o=>o.status!=='FINALIZADO'&&o.status!=='SUSPENSO');
-  const finished=orders.filter(o=>o.status==='FINALIZADO'||o.status==='SUSPENSO');
-  const all=[...active,...finished];
-  if(!all.length){document.getElementById('gantt-container').innerHTML='<p style="color:var(--ink3);text-align:center;padding:2rem">Nenhum pedido</p>';return;}
-
-  const leftW=170,rowH=64,topH=40;
-  const pxPerDay=_ganttZoom==='days'?16:_ganttZoom==='weeks'?7:4;
-  const chartW=span*pxPerDay;
-  const W=leftW+chartW+30;
-  const H=topH+all.length*rowH+10;
-  const isDark=document.body.classList.contains('dark');
-  const xOf=d=>{const iso=dispToISO(d);if(!iso)return null;return leftW+Math.round((new Date(iso+'T00:00')-mn)/864e5*pxPerDay);};
-  const bg=isDark?'#1B2535':'#fff';
-  const textCol=isDark?'#E8EDF2':'#0F1923';
-  const mutedCol=isDark?'#809BB0':'#5A6A76';
-  const faintCol=isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.04)';
-  const barBg=isDark?'rgba(255,255,255,.03)':'rgba(0,0,0,.015)';
-  const statusCol={'PRÉ-PRODUÇÃO':'#3B82F6','EM PRODUÇÃO':'#D97706','EMBARCADO':'#8B5CF6','FINALIZADO':'#16A34A','SUSPENSO':'#94A3B8'};
-  const statusShort={'PRÉ-PRODUÇÃO':'PRÉ-PROD','EM PRODUÇÃO':'PRODUÇÃO','EMBARCADO':'EMBARC.','FINALIZADO':'FINAL.','SUSPENSO':'SUSPENSO'};
-
-  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="font-family:'IBM Plex Sans',sans-serif">`;
-
-  // Left panel separator
-  svg+=`<line x1="${leftW-10}" y1="${topH}" x2="${leftW-10}" y2="${H}" stroke="${faintCol}" stroke-width="1"/>`;
-
-  // Grid lines based on zoom
-  let cur=new Date(mn);
-  if(_ganttZoom==='days'){
-    while(cur<mx){
-      const x=leftW+Math.round((cur-mn)/864e5*pxPerDay);
-      const isMonday=cur.getDay()===1;
-      const isFirst=cur.getDate()===1;
-      svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="${isFirst?'1.5':isMonday?'0.8':'0.3'}"/>`;
-      if(isFirst) svg+=`<text x="${x+3}" y="${topH-10}" font-size="11" font-weight="700" fill="${mutedCol}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
-      else if(isMonday) svg+=`<text x="${x+2}" y="${topH-10}" font-size="8.5" fill="${isDark?'#506070':'#B0BEC5'}">${cur.getDate()}</text>`;
-      cur=new Date(cur.getTime()+864e5);
-    }
-  } else if(_ganttZoom==='weeks'){
-    while(cur<mx){
-      const x=leftW+Math.round((cur-mn)/864e5*pxPerDay);
-      const isFirst=cur.getDate()===1;
-      if(cur.getDay()===1||isFirst){
-        svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="${isFirst?'1.5':'0.5'}"/>`;
-        if(isFirst) svg+=`<text x="${x+3}" y="${topH-10}" font-size="11" font-weight="700" fill="${mutedCol}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
-        else svg+=`<text x="${x+2}" y="${topH-10}" font-size="8" fill="${isDark?'#506070':'#B0BEC5'}">${cur.getDate()}</text>`;
-      }
-      cur=new Date(cur.getTime()+864e5);
-    }
-  } else {
-    while(cur<mx){
-      const next=new Date(cur.getFullYear(),cur.getMonth()+1,1);
-      const x=leftW+Math.round((cur-mn)/864e5*pxPerDay);
-      const xn=leftW+Math.round((next-mn)/864e5*pxPerDay);
-      svg+=`<line x1="${x}" y1="${topH}" x2="${x}" y2="${H}" stroke="${faintCol}" stroke-width="1"/>`;
-      const today=new Date();const isNow=cur.getMonth()===today.getMonth()&&cur.getFullYear()===today.getFullYear();
-      svg+=`<text x="${(x+Math.min(xn,W))/2}" y="${topH-10}" text-anchor="middle" font-size="12" fill="${isNow?'#2563EB':mutedCol}" font-weight="${isNow?'700':'400'}">${MO[cur.getMonth()]} ${String(cur.getFullYear()).slice(2)}</text>`;
-      cur=next;
-    }
-  }
-
-  // Today line
-  const todayX=leftW+Math.round((new Date()-mn)/864e5*pxPerDay);
-  if(todayX>leftW&&todayX<W) svg+=`<line x1="${todayX}" y1="${topH}" x2="${todayX}" y2="${H}" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.5"/>`;
-
-  // Separator between active and finished
-  const sepY=topH+active.length*rowH;
-  if(active.length&&finished.length) svg+=`<line x1="0" y1="${sepY}" x2="${W}" y2="${sepY}" stroke="${isDark?'#3A4E65':'#B8C8D8'}" stroke-width="1" stroke-dasharray="4,3"/>`;
-
-  all.forEach((o,i)=>{
-    const y=topH+i*rowH;
-    if(i%2===0) svg+=`<rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${barBg}"/>`;
-
-    // Left label
-    svg+=`<text x="10" y="${y+24}" font-size="14" font-weight="700" fill="${textCol}">${esc(o.pi||'#'+o.num)}</text>`;
-    svg+=`<text x="10" y="${y+40}" font-size="9.5" fill="${mutedCol}">${esc((o.po||'').substring(0,18))}</text>`;
-    const sc=statusCol[o.status]||'#888';
-    const sn=statusShort[o.status]||o.status;
-    svg+=`<rect x="85" y="${y+28}" width="${sn.length*5.8+10}" height="15" rx="3" fill="${sc}" opacity="0.14"/>`;
-    svg+=`<text x="90" y="${y+39}" font-size="8" fill="${sc}" font-weight="600">${sn}</text>`;
-
-    // Milestone points
-    const pts=[];
-    (o.dates||[]).forEach((d,mi)=>{if(!d||!d.v)return;const x=xOf(d.v);if(x===null)return;pts.push({x:Math.max(leftW,Math.min(W-10,x)),mi,confirmed:!d.est,date:d.v});});
-
-    // Bar
-    if(pts.length>=2) svg+=`<line x1="${pts[0].x}" y1="${y+22}" x2="${pts[pts.length-1].x}" y2="${y+22}" stroke="${sc}" stroke-width="4" opacity="0.16" stroke-linecap="round"/>`;
-
-    // Days between
-    for(let j=1;j<pts.length;j++){
-      const dx=pts[j].x-pts[j-1].x;
-      if(dx>35){
-        const d1=dispToISO(pts[j-1].date),d2=dispToISO(pts[j].date);
-        if(d1&&d2){const dd=Math.round((new Date(d2+'T00:00')-new Date(d1+'T00:00'))/864e5);
-          svg+=`<text x="${pts[j-1].x+dx/2}" y="${y+13}" text-anchor="middle" font-size="8.5" fill="${mutedCol}" font-family="'IBM Plex Mono'">${dd}d</text>`;}
-      }
-    }
-
-    // Dots + labels + dates
-    pts.forEach(p=>{
-      const col=p.confirmed?'#16A34A':'#D97706';
-      svg+=`<circle cx="${p.x}" cy="${y+22}" r="6.5" fill="${col}" stroke="${bg}" stroke-width="2" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)"/>`;
-      svg+=`<text x="${p.x}" y="${y+38}" text-anchor="middle" font-size="8" fill="${mutedCol}" font-family="'IBM Plex Sans'">${MLBL[p.mi]}</text>`;
-      const shortDate=p.date.replace(/\/\d{2}$/,'');
-      const dateCol=p.confirmed?(isDark?'#6EE7B7':'#0F6E4A'):(isDark?'#F0A030':'#B85C00');
-      svg+=`<text x="${p.x}" y="${y+49}" text-anchor="middle" font-size="7.5" fill="${dateCol}" font-family="'IBM Plex Mono'" style="cursor:pointer" onclick="editMS(${o.num},${p.mi},event)">${shortDate}</text>`;
-    });
-  });
-  svg+='</svg>';
-  document.getElementById('gantt-container').innerHTML=svg;
-}
 
 /* ══════════════════════════════════════
    CALENDÁRIO (popup modal)
 ══════════════════════════════════════ */
 let _calMonth=new Date().getMonth(),_calYear=new Date().getFullYear();
+function openFinPopup(pi){
+  const p=payments.find(x=>x.pi===pi);if(!p)return;
+  const o=orders.find(x=>x.pi===pi);
+  const tF=pTotalForn(p),tV=pTotalVenda(p),paid=piPaid(pi),recv=piReceived(pi);
+  const aPagar=tF-paid,aReceber=tV-recv;
+  const mg=tV-tF,pM=tV>0?Math.round(mg/tV*100):0;
+  const pP=tF>0?Math.round(paid/tF*100):0,pR=tV>0?Math.round(recv/tV*100):0;
+  const pays=ledger.filter(l=>l.pi===pi).sort((a,b)=>dispToISO(a.date)<dispToISO(b.date)?-1:1);
+  const recs=receipts.filter(r=>r.pi===pi).sort((a,b)=>dispToISO(a.date)<dispToISO(b.date)?-1:1);
+
+  document.getElementById('finpop-title').innerHTML=`Financeiro — <span style="font-family:'IBM Plex Mono'">${esc(pi)}</span> <span style="font-size:.7rem;color:var(--ink3);font-weight:400">${esc(o?.client||p.client||'')}</span>`;
+
+  // Top summary
+  let h=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem">
+    <div style="background:var(--ltgry);border-radius:8px;padding:.6rem .7rem">
+      <div style="font-size:.58rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">Compra (Forn.)</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--red);font-family:'IBM Plex Mono'">${fUSD(tF)}</div>
+    </div>
+    <div style="background:var(--ltgry);border-radius:8px;padding:.6rem .7rem">
+      <div style="font-size:.58rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">Venda (Cli.)</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--teal);font-family:'IBM Plex Mono'">${fUSD(tV)}</div>
+    </div>
+    <div style="background:${mg>=0?'var(--ltgrn)':'var(--ltred)'};border-radius:8px;padding:.6rem .7rem">
+      <div style="font-size:.58rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">Margem</div>
+      <div style="font-size:1rem;font-weight:700;color:${mg>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${fUSD(mg)} <span style="font-size:.7rem">(${pM}%)</span></div>
+    </div>
+  </div>`;
+
+  // Two columns: payments | receipts
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">`;
+
+  // Payments column
+  h+=`<div>
+    <div style="font-size:.7rem;font-weight:700;color:var(--red);padding:.4rem .6rem;background:var(--ltred);border-left:3px solid var(--red);border-radius:0 6px 6px 0;margin-bottom:.5rem">💳 Pago ao Fornecedor</div>
+    <div style="font-size:.62rem;color:var(--ink3);margin-bottom:.4rem">Total pago: <b style="color:var(--red)">${fUSD(paid)}</b> de ${fUSD(tF)} • falta <b>${fUSD(Math.max(0,aPagar))}</b></div>
+    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-bottom:.6rem"><div style="height:100%;width:${Math.min(100,pP)}%;background:var(--red)"></div></div>`;
+  if(pays.length){
+    pays.forEach(l=>{
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem .5rem;border:1px solid var(--bdr);border-radius:6px;margin-bottom:.35rem;background:var(--card)">
+        <div><div style="font-size:.7rem;font-weight:600">${esc(l.ref||'—')}</div><div style="font-size:.56rem;color:var(--ink4)">${esc(l.date)}${l.notes?' • '+esc(l.notes):''}</div></div>
+        <div style="font-family:'IBM Plex Mono';font-weight:700;color:var(--red);font-size:.78rem">${fUSD(l.amount)}</div>
+      </div>`;
+    });
+  } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum pagamento lançado</div>`;
+  h+=`</div>`;
+
+  // Receipts column
+  h+=`<div>
+    <div style="font-size:.7rem;font-weight:700;color:var(--green);padding:.4rem .6rem;background:var(--ltgrn);border-left:3px solid var(--green);border-radius:0 6px 6px 0;margin-bottom:.5rem">📥 Recebido do Cliente</div>
+    <div style="font-size:.62rem;color:var(--ink3);margin-bottom:.4rem">Total recebido: <b style="color:var(--green)">${fUSD(recv)}</b> de ${fUSD(tV)} • falta <b>${fUSD(Math.max(0,aReceber))}</b></div>
+    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-bottom:.6rem"><div style="height:100%;width:${Math.min(100,pR)}%;background:var(--green)"></div></div>`;
+  if(recs.length){
+    recs.forEach(r=>{
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem .5rem;border:1px solid var(--bdr);border-radius:6px;margin-bottom:.35rem;background:var(--card)">
+        <div><div style="font-size:.7rem;font-weight:600">${esc(r.ref||'—')}</div><div style="font-size:.56rem;color:var(--ink4)">${esc(r.date)}${r.notes?' • '+esc(r.notes):''}</div></div>
+        <div style="font-family:'IBM Plex Mono';font-weight:700;color:var(--green);font-size:.78rem">${fUSD(r.amount)}</div>
+      </div>`;
+    });
+  } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum recebimento lançado</div>`;
+  h+=`</div></div>`;
+
+  // Saldo line
+  h+=`<div style="margin-top:1rem;padding-top:.7rem;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:.7rem;color:var(--ink3)">Saldo líquido (a receber − a pagar)</span>
+    <span style="font-family:'IBM Plex Mono';font-weight:700;font-size:.9rem;color:${(aReceber-aPagar)>=0?'var(--green)':'var(--red)'}">${fUSD(aReceber-aPagar)}</span>
+  </div>`;
+
+  // Link to full financeiro
+  h+=`<div style="margin-top:.8rem;text-align:right"><button class="bsm" onclick="closeOvl('finpop');showTab('financeiro')" style="font-size:.65rem;padding:.3rem .7rem">Abrir aba Financeiro completa →</button></div>`;
+
+  document.getElementById('finpop-body').innerHTML=h;
+  document.getElementById('ovl-finpop').classList.add('open');
+}
 function openCalPopup(){renderCalendar();document.getElementById('ovl-calendar').classList.add('open');}
 function calNav(dir){_calMonth+=dir;if(_calMonth>11){_calMonth=0;_calYear++;}if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
 function renderCalendar(){
@@ -2050,7 +2052,7 @@ function renderCalendar(){
     h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px">${d}</div>`;
     evts.forEach(e=>{
       const col=e.confirmed?'#16A34A':'#D97706';
-      h+=`<div style="font-size:.55rem;padding:1px 3px;margin-bottom:1px;border-radius:3px;background:${col}18;color:${col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" onclick="closeOvl('calendar');editMS(${e.num},${e.mi},event)"><b>${esc(e.ip)}</b> ${e.label}</div>`;
+      h+=`<div style="font-size:.7rem;padding:2px 4px;margin-bottom:2px;border-radius:3px;background:${col}18;color:${col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" onclick="closeOvl('calendar');editMS(${e.num},${e.mi},event)"><b>${esc(e.ip)}</b> ${e.label}</div>`;
     });
     h+='</div>';
   }
@@ -2184,7 +2186,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,dismissed:DISMISSED};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
@@ -2203,7 +2205,7 @@ function importBackup(e){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
-      if(data.msGaps)MS_GAPS=data.msGaps;
+      if(data.msGaps)MS_GAPS=data.msGaps;if(data.dismissed)DISMISSED=data.dismissed;
       saveAll();renderAll();renderFinanceiro();
       toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
     }catch(err){alert('Erro ao ler backup: '+err.message);}
