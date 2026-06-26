@@ -332,8 +332,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 
 <!-- ═══ FINANCEIRO ═══ -->
 <div id="view-financeiro" class="view">
-  <div class="sbar" id="fin-sum"></div>
-  <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem">
+  <div id="fin-sum-hero"></div>
+  <div style="display:flex;align-items:center;gap:.7rem;margin:1rem 0 .55rem">
     <div class="sh" style="margin-bottom:0;flex:1">Pedidos Ativos</div>
   </div>
   <div class="tb">
@@ -343,36 +343,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
     <span class="finfo" id="fin-cnt"></span>
   </div>
-  <div class="tw" style="margin-bottom:1.4rem">
-    <table>
-      <thead>
-        <tr class="grp">
-          <th colspan="7" style="background:#0D2B45">IDENTIFICAÇÃO</th>
-          <th colspan="2" style="background:#0D3A7A">COMPRA</th>
-          <th colspan="2" style="background:#1B5E3A">VENDA</th>
-          <th colspan="1" style="background:#5B21B6">MARGEM</th>
-          <th style="background:#111827"></th>
-        </tr>
-        <tr class="ch">
-          <th style="width:28px;background:#0D2B45"></th>
-          <th class="L sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('pi')">IP / PO<span class="si"></span></th>
-          <th class="L sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('supplier')">Fornecedor<span class="si"></span></th>
-          <th class="L sortable" style="min-width:70px;background:#0D2B45" onclick="sortPay('client')">Cliente<span class="si"></span></th>
-          <th class="sortable" style="min-width:105px;background:#0D2B45" onclick="sortPay('status')">Status<span class="si"></span></th>
-          <th class="sortable" style="min-width:80px;background:#0D2B45" onclick="sortPay('etd')">ETD / ETA<span class="si"></span></th>
-          <th style="min-width:48px;background:#0D2B45">Qtd.</th>
-          <th class="sortable" style="min-width:85px;background:#0D3A7A" onclick="sortPay('totalfull')">Total<span class="si"></span></th>
-          <th style="min-width:58px;background:#0D3A7A">% Pago</th>
-          <th class="sortable" style="min-width:85px;background:#1B5E3A" onclick="sortPay('venda')">Total<span class="si"></span></th>
-          <th style="min-width:58px;background:#1B5E3A">% Receb.</th>
-          <th class="sortable" style="min-width:80px;background:#5B21B6" onclick="sortPay('margem')">Margem<span class="si"></span></th>
-          <th style="background:#111827;width:28px"></th>
-        </tr>
-      </thead>
-      <tbody id="fin-body"></tbody>
-      <tfoot id="fin-foot"></tfoot>
-    </table>
-  </div>
+  <div id="fin-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.7rem;margin-bottom:1.4rem"></div>
 
   <div class="fin-2col">
     <!-- PAGAMENTOS -->
@@ -395,6 +366,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <button class="lbtn" onclick="addLedger()">＋ Lançar</button>
         </div>
       </div>
+      <div id="l-ctx" style="font-size:.66rem;color:var(--ink3);margin:-.3rem 0 .7rem;padding:0 .3rem;min-height:1rem"></div>
       <div class="tb" style="margin-bottom:.6rem">
         <input id="led-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
         <select id="led-sup-f" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
@@ -440,6 +412,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <button class="lbtn grn" onclick="addReceipt()">＋ Lançar</button>
         </div>
       </div>
+      <div id="r-ctx" style="font-size:.66rem;color:var(--ink3);margin:-.3rem 0 .7rem;padding:0 .3rem;min-height:1rem"></div>
       <div class="tb" style="margin-bottom:.6rem">
         <input id="rec-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
         <select id="rec-cli-f" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
@@ -1292,24 +1265,34 @@ function renderFinanceiro(){
   const clSel=document.getElementById('fin-cl');
   if(clSel){const v=clSel.value;const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();clSel.innerHTML='<option value="">Todos Clientes</option>'+cls.map(c=>`<option value="${esc(c)}"${c===v?' selected':''}>${esc(c)}</option>`).join('');}
 
-  // summary
+  // summary — hero hierárquico
   const totForn=payments.reduce((a,p)=>a+pTotalForn(p),0);
   const totVenda=payments.reduce((a,p)=>a+pTotalVenda(p),0);
   const totPago=payments.reduce((a,p)=>a+piPaid(p.pi),0);
   const totReceb=payments.reduce((a,p)=>a+piReceived(p.pi),0);
   const margem=totVenda-totForn;
-  document.getElementById('fin-sum').innerHTML=[
-    {l:'Total Compra',v:fUSD(totForn),d:'var(--navy)',c:'var(--navy)'},
-    {l:'Total Venda',v:fUSD(totVenda),d:'var(--teal)',c:'var(--teal)'},
-    {l:'Margem Bruta',v:fUSD(margem),d:margem>=0?'var(--green)':'var(--red)',c:margem>=0?'var(--green)':'var(--red)'},
-    {l:'Pago Forn.',v:fUSD(totPago),d:'var(--amber)',c:'var(--amber)'},
-    {l:'A Pagar',v:fUSD(Math.max(0,totForn-totPago)),d:'var(--red)',c:'var(--red)'},
-    {l:'Recebido',v:fUSD(totReceb),d:'var(--green)',c:'var(--green)'},
-    {l:'A Receber',v:fUSD(Math.max(0,totVenda-totReceb)),d:'var(--purple)',c:'var(--purple)'},
-  ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
+  const aPagarT=Math.max(0,totForn-totPago);
+  const aReceberT=Math.max(0,totVenda-totReceb);
+  const saldoT=aReceberT-aPagarT;
+  const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.62rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.4rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
+  const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.25rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.65rem;color:var(--ink3)">${lbl}</span><span style="font-size:.7rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
+  document.getElementById('fin-sum-hero').innerHTML=`
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch">
+      <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1rem 1.2rem">
+        ${big('A Pagar',fUSD(aPagarT),'var(--red)')}
+        ${big('A Receber',fUSD(aReceberT),'var(--green)')}
+        ${big('Saldo Líquido',fUSD(saldoT),saldoT>=0?'var(--green)':'var(--red)')}
+      </div>
+      <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.7rem 1rem">
+        ${small('Total Compra',fUSD(totForn),'var(--ink2)')}
+        ${small('Total Venda',fUSD(totVenda),'var(--teal)')}
+        ${small('Margem Bruta',fUSD(margem)+(totVenda>0?' ('+Math.round(margem/totVenda*100)+'%)':''),margem>=0?'var(--green)':'var(--red)')}
+        ${small('Pago / Recebido',fUSD(totPago)+' / '+fUSD(totReceb),'var(--ink2)')}
+      </div>
+    </div>`;
 
-  // main table rows
-  document.getElementById('fin-body').innerHTML=fltS.map((p,i)=>{
+  // cards por IP
+  document.getElementById('fin-cards').innerHTML=fltS.map(p=>{
     const totF=pTotalForn(p),totV=pTotalVenda(p);
     const qtyCalc=p.unitPrices.reduce((a,r)=>a+(r.qty||0),0);
     const paid=piPaid(p.pi),recv=piReceived(p.pi);
@@ -1320,12 +1303,11 @@ function renderFinanceiro(){
     const bcP=pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
     const bcR=pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
     const linkedOrd=linkOrd(p);
-    // Fonte de verdade: order.dates[5]=Embarque/ETD, order.dates[6]=ETA Brasil
+    // Fonte de verdade: order.dates[5]=Embarque/ETD, order.dates[6]=ETA — PRESERVAR SYNC
     const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
     const etaVal=linkedOrd?.dates[6]?.v||p.eta||'—';
     const etdDisp=etdVal!=='—'?(normDate(etdVal)||etdVal):'—';
     const etaDisp=etaVal!=='—'?(normDate(etaVal)||etaVal):'—';
-    // Manter payment sincronizado com order vinculado
     if(etdDisp!=='—')p.etd=etdDisp;
     if(etaDisp!=='—')p.eta=etaDisp;
     if(linkedOrd){
@@ -1333,109 +1315,36 @@ function renderFinanceiro(){
       if(linkedOrd.supplier)p.supplier=linkedOrd.supplier;
       if(linkedOrd.po&&linkedOrd.po!=='—')p.po=linkedOrd.po;
     }
-    const dispStatus=linkedOrd?statusSel(linkedOrd.num,linkedOrd.status):'<span class="pill pgr">—</span>';
-    const rowBg=i%2===0?'background:#FAFCFE':'';
-    const expanded=_finExp.has(p.pi);
-    const piLed=ledger.filter(l=>l.pi===p.pi);
-    const piRec=receipts.filter(r=>r.pi===p.pi);
+    const stColor=linkedOrd?(SC[linkedOrd.status]?.c||''):'';
+    const stTxt=linkedOrd?linkedOrd.status:'—';
+    const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
 
-    const summaryRow=`<tr style="${rowBg}">
-      <td style="padding:0 .4rem;cursor:pointer;text-align:center" onclick="toggleFinDetail('${esc(p.pi)}')">
-        <span style="font-size:.75rem;display:inline-block;transition:transform .15s;transform:${expanded?'rotate(90deg)':'rotate(0deg)'}" id="fin-exp-icn-${esc(p.pi)}">▶</span>
-      </td>
-      <td class="L">
-        <b class="ec" style="font-family:'IBM Plex Mono';color:var(--navy);font-size:.78rem" onclick="editFinField('${esc(p.pi)}','pi',event)">${esc(p.pi)}</b>
-        <div style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)">${esc(p.po)}</div>
-        ${linkedOrd?.colecao?`<div style="font-size:.56rem;color:var(--ink3);font-style:italic">${esc(linkedOrd.colecao)}</div>`:''}
-      </td>
-      <td class="L">
-        <b class="ec" style="font-size:.78rem" onclick="editFinField('${esc(p.pi)}','supplier',event)">${esc(p.supplier)}</b>
-        <div class="ec" style="font-size:.62rem;color:var(--ink4)" onclick="editFinField('${esc(p.pi)}','inv',event)">${esc(p.inv||'— inv forn.')}</div>
-      </td>
-      <td class="L">
-        <b class="ec" style="font-size:.78rem" onclick="editFinField('${esc(p.pi)}','client',event)">${esc(p.client||'—')}</b>
-        <div class="ec" style="font-size:.62rem;color:var(--ink4)" onclick="editFinField('${esc(p.pi)}','clientInv',event)">${esc(p.clientInv||'— inv cli.')}</div>
-      </td>
-      <td>${dispStatus}</td>
-      <td style="font-size:.65rem;font-family:'IBM Plex Mono'">
-        <span class="ec" onclick="editFinField('${esc(p.pi)}','etd',event)" style="display:block;color:var(--ink3)">ETD: ${esc(etdDisp)}</span>
-        <span class="ec" onclick="editFinField('${esc(p.pi)}','eta',event)" style="display:block;color:var(--ink4)">ETA: ${esc(etaDisp)}</span>
-      </td>
-      <td class="mono">${fN(qtyCalc)}</td>
-      <td class="mono"><b>${fUSD(totF)}</b><div style="font-size:.6rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'−'+fUSD(aPagar):'✓'}</div></td>
-      <td><div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctPago}%;background:${bcP}"></div></div><span class="ppct" style="font-size:.62rem">${pctPago}%</span></div></td>
-      <td class="mono" style="color:var(--teal);font-weight:600">${totV>0?fUSD(totV):'—'}<div style="font-size:.6rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'−'+fUSD(aReceber):'✓'):'—'}</div></td>
-      <td>${totV>0?`<div class="ppw"><div class="ppb"><div class="ppf" style="width:${pctReceb}%;background:${bcR}"></div></div><span class="ppct" style="font-size:.62rem">${pctReceb}%</span></div>`:'—'}</td>
-      <td class="mono" style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:700">${totV>0?`${fUSD(mg)} ${pctMg!==null?'<span style="font-size:.6rem;opacity:.75">('+pctMg+'%)</span>':''}<div style="font-size:.58rem;color:var(--ink3)">saldo: <span style="color:${(aReceber-aPagar)>=0?'var(--green)':'var(--red)'}"> ${fUSD(aReceber-aPagar)}</span></div>`:'—'}</td>
-      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delPayment('${esc(p.pi)}')" title="Apagar">✕</button></td>
-    </tr>`;
-
-    const detailRow=`<tr id="fin-det-${esc(p.pi)}" style="display:${expanded?'table-row':'none'}">
-      <td colspan="13" style="padding:0;border-bottom:2px solid var(--bdr2)">
-        <div style="background:#F8FAFC;padding:.8rem 1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem">
-          <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">📦 Produtos</div>
-            ${p.unitPrices.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              <tr style="color:var(--ink4);font-size:.58rem"><th class="L">Produto</th><th>Qtd</th><th>Forn.</th><th>Arte</th><th>Cli.</th><th>Sub.Forn</th><th>Sub.Cli</th><th>Mg%</th></tr>
-              ${p.unitPrices.map(r=>{
-                const arte=(r.plates||0)+(r.sample||0);
-                const arteUnit=r.qty>0?arte/r.qty:0;
-                const fornTotal=(r.qty||0)*(r.priceForn||0)+arte;
-                const cliTotal=(r.qty||0)*(r.priceCli||0);
-                const mg=cliTotal>0?Math.round(((cliTotal-fornTotal)/cliTotal)*100):null;
-                return`<tr style="border-top:1px solid var(--bdr)">
-                  <td class="L" style="padding:.2rem 0">${esc(r.desc||'—')}</td>
-                  <td style="font-family:'IBM Plex Mono'">${fN(r.qty)}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--red)">${r.priceForn?r.priceForn.toFixed(3):'—'}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--amber);font-size:.62rem">${arte>0?arteUnit.toFixed(3):'—'}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--teal)">${r.priceCli?r.priceCli.toFixed(3):'—'}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--red);font-size:.62rem">${fUSD(fornTotal)}</td>
-                  <td style="font-family:'IBM Plex Mono';color:var(--teal);font-size:.62rem">${fUSD(cliTotal)}</td>
-                  <td style="font-family:'IBM Plex Mono';color:${mg!==null&&mg>=0?'var(--green)':'var(--red)'}">${mg!==null?mg+'%':'—'}</td>
-                </tr>`}).join('')}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)">
-                <td class="L" style="font-weight:700;padding:.22rem 0;font-size:.65rem">TOTAL</td>
-                <td style="font-family:'IBM Plex Mono';font-weight:700">${fN(p.unitPrices.reduce((a,r)=>a+(r.qty||0),0))}</td>
-                <td colspan="3"></td>
-                <td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--red);font-size:.63rem">${fUSD(totF)}</td>
-                <td style="font-family:'IBM Plex Mono';font-weight:700;color:var(--teal);font-size:.63rem">${fUSD(totV)}</td>
-                <td style="font-family:'IBM Plex Mono';font-weight:700;color:${totV-totF>=0?'var(--green)':'var(--red)'}">${totV>0?Math.round(((totV-totF)/totV)*100)+'%':'—'}</td>
-              </tr>
-            </table>`:'—'}
-            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="editOrderPrices('${esc(p.pi)}',event)">✏ Preços</button></div>
-          </div>
-          <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">💳 Pagamentos</div>
-            ${piLed.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              ${piLed.map(l=>`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem">${esc(l.date)}</td><td class="mono mpos" style="font-size:.7rem">${fUSD(l.amount)}</td><td class="L" style="font-size:.65rem;color:var(--ink3)">${esc(l.ref||'—')}</td></tr>`).join('')}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(paid)} / ${fUSD(totF)}</td><td style="font-size:.63rem;color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'falta '+fUSD(aPagar):'✓'}</td></tr>
-            </table>`:'<div style="color:var(--ink4);font-size:.7rem">Sem pagamentos</div>'}
-            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('led','${esc(p.pi)}')">＋ Pagar</button></div>
-          </div>
-          <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:.4rem">📥 Recebimentos</div>
-            ${piRec.length?`<table style="width:100%;font-size:.7rem;border-collapse:collapse">
-              ${piRec.map(r=>`<tr style="border-top:1px solid var(--bdr)"><td class="L" style="padding:.2rem 0;font-family:'IBM Plex Mono';font-size:.68rem">${esc(r.date)}</td><td class="mono mpos" style="font-size:.7rem;color:var(--teal)">${fUSD(r.amount)}</td><td class="L" style="font-size:.65rem;color:var(--ink3)">${esc(r.ref||'—')}</td></tr>`).join('')}
-              <tr style="border-top:2px solid var(--bdr2);background:var(--ltgry)"><td colspan="2" style="font-family:'IBM Plex Mono';font-size:.7rem;font-weight:700;padding:.22rem 0">${fUSD(recv)} / ${totV>0?fUSD(totV):'—'}</td><td style="font-size:.63rem;color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓'):'—'}</td></tr>
-            </table>`:'<div style="color:var(--ink4);font-size:.7rem">Sem recebimentos</div>'}
-            <div style="margin-top:.45rem;text-align:right"><button class="bsm" style="font-size:.63rem;padding:.2rem .55rem" onclick="focusLancar('rec','${esc(p.pi)}')">＋ Receber</button></div>
-          </div>
+    return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.75rem .85rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
+        <div>
+          <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy)">${esc(p.pi)}</div>
+          <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--blue)">${esc(p.po||'—')}</div>
         </div>
-      </td>
-    </tr>`;
-    return summaryRow+detailRow;
-  }).join('');
+        <span style="font-size:.55rem;font-weight:600;color:${stPillCol};background:${stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(stTxt)}</span>
+      </div>
+      <div style="font-size:.66rem;color:var(--ink2);margin-bottom:.1rem"><b>${esc(p.supplier||'—')}</b> <span style="color:var(--ink4)">→</span> ${esc(p.client||'—')}</div>
+      <div style="font-size:.58rem;color:var(--ink4);font-family:'IBM Plex Mono';margin-bottom:.55rem">${fN(qtyCalc)} un · ETD ${esc(etdDisp)}${etaDisp!=='—'?' · ETA '+esc(etaDisp):''}</div>
 
-  // footer
-  const aF=payments.reduce((a,p)=>a+pTotalForn(p),0),aV=payments.reduce((a,p)=>a+pTotalVenda(p),0);
-  const aP=payments.reduce((a,p)=>a+piPaid(p.pi),0),aR=payments.reduce((a,p)=>a+piReceived(p.pi),0);
-  const aMg=aV-aF;
-  document.getElementById('fin-foot').innerHTML=`<tr style="background:var(--ltgry);border-top:2px solid var(--bdr2)">
-    <td colspan="7" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAIS (${flt.length} PI)</td>
-    <td class="mono"><b>${fUSD(aF)}</b></td><td></td>
-    <td class="mono" style="color:var(--teal);font-weight:700">${fUSD(aV)}</td><td></td><td></td>
-    <td class="mono" style="color:${aMg>=0?'var(--green)':'var(--red)'};font-weight:700">${fUSD(aMg)}</td><td></td>
-  </tr>`;
+      <div style="margin-bottom:.35rem">
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>💳 Pago ${pctPago}%</span><span style="color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'falta '+fUSD(aPagar):'✓ quitado'}</span></div>
+        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctPago)}%;background:${bcP}"></div></div>
+      </div>
+      <div style="margin-bottom:.55rem">
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${pctReceb}%</span><span style="color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓ quitado'):'—'}</span></div>
+        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctReceb)}%;background:${bcR}"></div></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:.5rem;border-top:1px solid var(--bdr)">
+        <span style="font-size:.6rem;color:var(--ink3)">Margem</span>
+        <span style="font-family:'IBM Plex Mono';font-weight:700;font-size:.78rem;color:${mg>=0?'var(--green)':'var(--red)'}">${totV>0?fUSD(mg)+(pctMg!==null?` <span style="font-size:.6rem;opacity:.7">(${pctMg}%)</span>`:''):'—'}</span>
+      </div>
+    </div>`;
+  }).join('')||'<div style="grid-column:1/-1;text-align:center;color:var(--ink4);padding:2rem;font-size:.8rem">Nenhum pedido encontrado</div>';
 
   // ── LEDGER ──
   renderLedger();
@@ -1531,8 +1440,22 @@ function renderReceipts(){
 /* ══════════════════════════════════════
    ACTIONS (LEDGER/RECEIPT/DELETE)
 ══════════════════════════════════════ */
-function onPiChange(){const pi=document.getElementById('l-pi').value;const p=payments.find(x=>x.pi===pi);document.getElementById('l-sup').value=p?p.supplier:'';}
-function onRpiChange(){const pi=document.getElementById('r-pi').value;const p=payments.find(x=>x.pi===pi);document.getElementById('r-cli').value=p?(p.client||p.supplier):'';}
+function onPiChange(){
+  const pi=document.getElementById('l-pi').value;const p=payments.find(x=>x.pi===pi);
+  document.getElementById('l-sup').value=p?p.supplier:'';
+  const ctx=document.getElementById('l-ctx');
+  if(p&&ctx){const tF=pTotalForn(p),paid=piPaid(pi),falta=Math.max(0,tF-paid);
+    ctx.innerHTML=`Total compra <b>${fUSD(tF)}</b> · pago <b style="color:var(--green)">${fUSD(paid)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>`;
+  } else if(ctx) ctx.innerHTML='';
+}
+function onRpiChange(){
+  const pi=document.getElementById('r-pi').value;const p=payments.find(x=>x.pi===pi);
+  document.getElementById('r-cli').value=p?(p.client||p.supplier):'';
+  const ctx=document.getElementById('r-ctx');
+  if(p&&ctx){const tV=pTotalVenda(p),recv=piReceived(pi),falta=Math.max(0,tV-recv);
+    ctx.innerHTML=tV>0?`Total venda <b>${fUSD(tV)}</b> · recebido <b style="color:var(--green)">${fUSD(recv)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>`:'Sem preço de venda definido';
+  } else if(ctx) ctx.innerHTML='';
+}
 
 function addLedger(){
   const rawDate=document.getElementById('l-date').value.trim();
