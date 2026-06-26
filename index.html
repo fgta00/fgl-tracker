@@ -85,7 +85,7 @@ tr:hover .del-row{opacity:1}
 .tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:collapse;font-size:11.5px}
 thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14)}
-thead .ch th{background:var(--navy);color:rgba(255,255,255,.7);font-size:.62rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2)}
+thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2)}
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
@@ -285,12 +285,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:200px">Situação</th>
           <th style="min-width:58px">Dias ETA</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Arte<br>Recebida</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Amostras<br>Em Mãos</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Produção<br>Lançada</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Prontidão<br>(CRD)</th>
-          <th style="min-width:68px;font-size:.55rem;line-height:1.2">Embarque<br>On Board</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Arte<br>Recebida</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Amostras<br>Em Mãos</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Produção<br>Lançada</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Prontidão<br>(CRD)</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Embarque<br>On Board</th>
           <th style="min-width:58px">ETA</th>
           <th style="min-width:58px">No CD</th>
           <th></th>
@@ -1185,7 +1185,7 @@ function renderInternal(){
         const a=nextAction(o);
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.5rem .5rem .5rem .6rem">`;
+        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.5rem .5rem .5rem .6rem;align-items:flex-start;text-align:left">`;
         inner+=`<div>${statusSel(o.num,o.status)}</div>`;
         if(a&&!snoozed){
           const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
