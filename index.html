@@ -1021,7 +1021,7 @@ function msHTML(dates,num){
     if(i>0&&dates[i-1].v&&d.v){
       const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
       if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
-        gap=`<span style="font-size:.5rem;color:var(--ink4);font-family:'IBM Plex Mono';line-height:1">${dd}d</span>`;}}
+        gap=`<span style="font-size:.62rem;color:var(--ink3);font-family:'IBM Plex Mono';line-height:1;font-weight:500">${dd}d</span>`;}}
     return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
   }).join('');
 }
@@ -1154,14 +1154,16 @@ function renderInternal(){
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L">
-        <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
+        <div style="display:flex;align-items:center;gap:4px">
+          <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
+          <span class="note-icon" style="position:relative;cursor:pointer;font-size:.7rem;opacity:${o.notes?'1':'.35'}" onclick="editField(${o.num},'notes',event)" title="${o.notes?'':'Adicionar nota'}">${o.notes?'📝':'＋'}${o.notes?`<span class="note-tip" style="display:none;position:absolute;left:0;top:1.2rem;z-index:20;background:var(--ink);color:#fff;padding:.4rem .6rem;border-radius:6px;font-size:.66rem;font-style:normal;font-weight:400;white-space:normal;width:200px;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3)">${esc(o.notes)}</span>`:''}</span>
+        </div>
         <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
         <div class="ec" style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px;cursor:pointer" onclick="editField(${o.num},'colecao',event)">${o.colecao?esc(o.colecao):'＋ coleção'}</div>
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
-      <td class="L W" style="max-width:195px;position:relative">
-        <span class="ec" onclick="editField(${o.num},'product',event)">${esc(o.product)}</span>
-        <span class="note-icon" style="position:relative;cursor:pointer;margin-left:4px;font-size:.7rem;opacity:${o.notes?'1':'.35'}" onclick="editField(${o.num},'notes',event)" title="${o.notes?esc(o.notes):'Adicionar nota'}">${o.notes?'📝':'＋'}${o.notes?`<span class="note-tip" style="display:none;position:absolute;left:0;top:1.2rem;z-index:20;background:var(--ink);color:#fff;padding:.4rem .6rem;border-radius:6px;font-size:.66rem;font-style:normal;font-weight:400;white-space:normal;width:200px;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3)">${esc(o.notes)}</span>`:''}</span>
+      <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
+        ${esc(o.product)}
         <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${esc(o.container||'—')}</div>
       </td>
       <td style="white-space:nowrap">
@@ -1179,30 +1181,28 @@ function renderInternal(){
           </div>`;
         })()}
       </td>
-      <td style="padding:0">${(()=>{
+      <td style="padding:0;vertical-align:top">${(()=>{
         const a=nextAction(o);
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-        let inner=`<div style="display:flex;flex-direction:column;gap:4px;padding:.4rem .5rem .4rem .6rem">`;
-        // Status pill (editable)
+        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.5rem .5rem .5rem .6rem">`;
         inner+=`<div>${statusSel(o.num,o.status)}</div>`;
-        // Action
         if(a&&!snoozed){
           const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
           inner+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px">
             <div style="flex:1">
-              <div style="font-size:.7rem;font-weight:600;color:${col};line-height:1.3">${esc(a.text)}</div>
-              <div style="font-size:.62rem;color:var(--ink3);line-height:1.3;margin-top:1px">→ ${esc(a.suggestion)}</div>
+              <div style="font-size:.72rem;font-weight:600;color:${col};line-height:1.3">${esc(a.text)}</div>
+              <div style="font-size:.64rem;color:var(--ink3);line-height:1.3;margin-top:2px">→ ${esc(a.suggestion)}</div>
             </div>
-            <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
+            <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.72rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
           </div>`;
         } else if(snoozed){
-          inner+=`<div style="font-size:.6rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.58rem;padding:0">reativar</button></div>`;
+          inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
         }
         inner+=`</div>`;
-        return`<div style="display:flex;min-height:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:3px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
+        return`<div style="display:flex" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:3px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
-      <td>${daysCell(o.dates,o.status)}</td>
+      <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
