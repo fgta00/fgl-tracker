@@ -201,6 +201,7 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 #mcal .mc-day.selected{background:var(--blue);color:#fff}
 #mcal .mc-day.other{color:var(--ink4)}
 #mcal .mc-day.empty{cursor:default}
+.note-icon:hover .note-tip{display:block !important}
 /* Login screen */
 #login-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0D2B45 0%,#1A4A70 50%,#0D2B45 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
 body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%,#020617 100%)}
@@ -259,7 +260,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- ═══ CONTROLE INTERNO ═══ -->
 <div id="view-internal" class="view active">
   <div class="sbar" id="int-sum"></div>
-  <div id="int-alerts" style="display:none;background:#FFFBEB;border:1.5px solid #F59E0B;border-radius:9px;padding:.65rem .95rem;margin-bottom:.75rem"></div>
   <div class="tb">
     <input id="int-q" placeholder="🔍 Buscar PO, cliente, produto…" oninput="renderInternal()">
     <select id="int-st" onchange="renderInternal()"><option value="">Todos os Status</option></select>
@@ -272,7 +272,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <thead>
         <tr class="grp">
           <th colspan="5" style="background:#091A2A;text-align:center">PEDIDOS</th>
-          <th colspan="3" style="background:#1A4A70">PROGRESSO</th>
+          <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
           <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
           <th colspan="3" style="background:var(--del)">ENTREGA</th>
@@ -283,8 +283,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th class="L" style="min-width:95px">Cliente</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
-          <th style="min-width:140px">Status</th>
-          <th style="min-width:160px">Próxima Ação</th>
+          <th style="min-width:200px">Situação</th>
           <th style="min-width:58px">Dias ETA</th>
           <th style="min-width:68px;font-size:.55rem;line-height:1.2">Arte<br>Recebida</th>
           <th style="min-width:68px;font-size:.55rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
@@ -779,7 +778,7 @@ let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETN�
 // Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→emb, emb→eta, eta→cd]
 let MS_GAPS=[20,20,10,50,10,45,5];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Embarque','Embarque → ETA','ETA → No CD'];
-let DISMISSED=[]; // alertas dispensados: array de strings "pi:tipo"
+let SNOOZED={}; // alertas adiados: {"pi:idx": "2026-07-01" (ISO até quando fica oculto)}
 
 /* ══════════════════════════════════════
    AUTO-FILL CASCADE + AUTO-STATUS
@@ -869,10 +868,18 @@ function nextAction(o){
   }
   return{level,text,suggestion:sugg[nextIdx],key:o.pi+':'+nextIdx};
 }
-function dismissAlert(key,e){
+function snoozeAlert(key,e){
   if(e)e.stopPropagation();
-  if(!DISMISSED.includes(key))DISMISSED.push(key);
+  const until=new Date();until.setDate(until.getDate()+7);
+  SNOOZED[key]=until.toISOString().slice(0,10);
   saveAll();renderInternal();
+  toast('Adiado por 7 dias');
+}
+function isSnoozed(key){
+  const u=SNOOZED[key];if(!u)return false;
+  const today=new Date().toISOString().slice(0,10);
+  if(u<today){delete SNOOZED[key];return false;} // expirou, volta
+  return true;
 }
 
 /* ══════════════════════════════════════
@@ -892,7 +899,7 @@ async function doLogin(){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
-      if(data.msGaps)MS_GAPS=data.msGaps;if(data.dismissed)DISMISSED=data.dismissed;
+      if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
     } else {
       // First time or migrating from unencrypted — check old keys
       const oldOrd=localStorage.getItem(SK+'ord');
@@ -949,7 +956,7 @@ function syncLinked(){
 
 async function saveAll(){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,dismissed:DISMISSED};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
   const encrypted=await encryptData(_cryptoKey,data);
   localStorage.setItem(SK+'vault',encrypted);
 }
@@ -1092,16 +1099,8 @@ function updateSortHeaders(){
 function calcAlerts(){
   const alerts=[];
   orders.forEach(o=>{
-    if(o.status==='FINALIZADO'||o.status==='SUSPENSO')return;
-    const etaV=o.dates[6]?.v||o.dates[7]?.v;
-    if(etaV){const n=daysUntil(etaV);if(n!==null&&n<0)alerts.push({tipo:'danger',icn:'📦',msg:`ETA vencida há ${Math.abs(n)}d — IP ${o.pi||o.po} (${o.client})`});}
-    if(!o.dates[5]?.v&&o.dates[4]?.v){const n=daysUntil(o.dates[4].v);if(n!==null&&n<=7&&n>=0)alerts.push({tipo:'warn',icn:'🚢',msg:`Prontidão em ${n}d sem embarque — IP ${o.pi||o.po}`});}
-    const p=linkPay(o);
-    if(p&&p.etd&&p.etd!=='—'){
-      const n=daysUntil(p.etd);const totF=pTotalForn(p);
-      const pct=totF>0?Math.round((piPaid(p.pi)/totF)*100):0;
-      if(n!==null&&n>=0&&n<=30&&pct<50)alerts.push({tipo:'warn',icn:'💳',msg:`ETD em ${n}d com ${pct}% pago — IP ${p.pi}`});
-    }
+    const a=nextAction(o);
+    if(a&&!isSnoozed(a.key)&&(a.level==='crit'||a.level==='warn')) alerts.push(a);
   });
   return alerts;
 }
@@ -1124,12 +1123,6 @@ function renderSummary(){
     {l:'A Pagar Forn.',v:fUSD(totPagar),d:'var(--red)',c:'var(--red)'},
     {l:'A Receber Cli.',v:fUSD(totReceber),d:'var(--blue)',c:'var(--blue)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:${String(x.v).length>8?'.85rem':'1.18rem'}">${x.v}</div></div></div>`).join('');
-  const alerts=calcAlerts();
-  const alertBox=document.getElementById('int-alerts');
-  if(!alerts.length){alertBox.style.display='none';return;}
-  alertBox.style.display='block';
-  alertBox.innerHTML=`<div style="font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem">⚠ Ações Necessárias (${alerts.length})</div>`
-    +alerts.map(a=>`<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.32rem 0;border-bottom:1px solid var(--bdr);font-size:.73rem;color:${a.tipo==='danger'?'var(--red)':'var(--amber)'}"><span>${a.icn}</span><span>${esc(a.msg)}</span></div>`).join('');
 }
 
 /* ══════════════════════════════════════
@@ -1166,8 +1159,9 @@ function renderInternal(){
         <div class="ec" style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px;cursor:pointer" onclick="editField(${o.num},'colecao',event)">${o.colecao?esc(o.colecao):'＋ coleção'}</div>
       </td>
       <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
-      <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
-        ${esc(o.product)}
+      <td class="L W" style="max-width:195px;position:relative">
+        <span class="ec" onclick="editField(${o.num},'product',event)">${esc(o.product)}</span>
+        <span class="note-icon" style="position:relative;cursor:pointer;margin-left:4px;font-size:.7rem;opacity:${o.notes?'1':'.35'}" onclick="editField(${o.num},'notes',event)" title="${o.notes?esc(o.notes):'Adicionar nota'}">${o.notes?'📝':'＋'}${o.notes?`<span class="note-tip" style="display:none;position:absolute;left:0;top:1.2rem;z-index:20;background:var(--ink);color:#fff;padding:.4rem .6rem;border-radius:6px;font-size:.66rem;font-style:normal;font-weight:400;white-space:normal;width:200px;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3)">${esc(o.notes)}</span>`:''}</span>
         <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${esc(o.container||'—')}</div>
       </td>
       <td style="white-space:nowrap">
@@ -1185,28 +1179,33 @@ function renderInternal(){
           </div>`;
         })()}
       </td>
-      <td>${statusSel(o.num,o.status)}</td>
-      <td style="padding:.2rem .35rem">${(()=>{
+      <td style="padding:0">${(()=>{
         const a=nextAction(o);
-        if(!a)return'<span style="font-size:.6rem;color:var(--ink4)">—</span>';
-        if(DISMISSED.includes(a.key))return'<span style="font-size:.58rem;color:var(--ink4);font-style:italic">dispensado</span>';
-        const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-        const ic=a.level==='crit'?'🔴':a.level==='warn'?'🟠':'🟢';
-        return`<div style="display:flex;flex-direction:column;gap:1px">
-          <div style="display:flex;align-items:flex-start;gap:3px">
-            <span style="font-size:.62rem;font-weight:600;color:${col};line-height:1.25">${ic} ${esc(a.text)}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:4px">
-            <span style="font-size:.56rem;color:var(--ink3);line-height:1.2">→ ${esc(a.suggestion)}</span>
-            <button onclick="dismissAlert('${esc(a.key)}',event)" title="Dispensar" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.6rem;padding:0;flex-shrink:0">✕</button>
-          </div>
-        </div>`;
+        const snoozed=a&&isSnoozed(a.key);
+        const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
+        let inner=`<div style="display:flex;flex-direction:column;gap:4px;padding:.4rem .5rem .4rem .6rem">`;
+        // Status pill (editable)
+        inner+=`<div>${statusSel(o.num,o.status)}</div>`;
+        // Action
+        if(a&&!snoozed){
+          const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
+          inner+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px">
+            <div style="flex:1">
+              <div style="font-size:.7rem;font-weight:600;color:${col};line-height:1.3">${esc(a.text)}</div>
+              <div style="font-size:.62rem;color:var(--ink3);line-height:1.3;margin-top:1px">→ ${esc(a.suggestion)}</div>
+            </div>
+            <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
+          </div>`;
+        } else if(snoozed){
+          inner+=`<div style="font-size:.6rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.58rem;padding:0">reativar</button></div>`;
+        }
+        inner+=`</div>`;
+        return`<div style="display:flex;min-height:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:3px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
       <td>${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
-    </tr>
-    <tr style="background:${i%2?'#fff':'#FAFCFE'}"><td colspan="16" style="padding:0 .5rem .25rem 5.5rem"><span class="ec" style="font-size:.65rem;color:${o.notes?(o.notes.includes('⚠')?'var(--red)':'var(--ink3)'):'var(--ink4)'};font-style:italic;cursor:pointer" onclick="editField(${o.num},'notes',event)">${o.notes?esc(o.notes):'＋ nota'}</span></td></tr>`;
+    </tr>`;
   }).join('');
 }
 
@@ -2186,7 +2185,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,dismissed:DISMISSED};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
@@ -2205,7 +2204,7 @@ function importBackup(e){
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
-      if(data.msGaps)MS_GAPS=data.msGaps;if(data.dismissed)DISMISSED=data.dismissed;
+      if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
       saveAll();renderAll();renderFinanceiro();
       toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
     }catch(err){alert('Erro ao ler backup: '+err.message);}
