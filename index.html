@@ -670,20 +670,22 @@ try{
   if(window.supabase){_supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);_supaOK=true;}
 }catch(e){console.warn('Supabase init falhou:',e);_supaOK=false;}
 
-// Lê o blob criptografado da nuvem. Retorna {blob,updated_at} ou null.
+// Lê o blob criptografado da nuvem. Retorna {blob,salt,updated_at} ou null.
 async function cloudGet(){
   if(!_supaOK)return null;
   try{
-    const{data,error}=await _supa.from('vault').select('blob,updated_at').eq('id','main').maybeSingle();
+    const{data,error}=await _supa.from('vault').select('blob,salt,updated_at').eq('id','main').maybeSingle();
     if(error){console.warn('cloudGet error:',error.message);return null;}
     return data||null;
   }catch(e){console.warn('cloudGet falhou:',e);return null;}
 }
-// Grava o blob criptografado na nuvem.
-async function cloudSet(blob){
+// Grava o blob criptografado + salt na nuvem.
+async function cloudSet(blob,saltB64){
   if(!_supaOK)return false;
   try{
-    const{error}=await _supa.from('vault').upsert({id:'main',blob,updated_at:new Date().toISOString()});
+    const row={id:'main',blob,updated_at:new Date().toISOString()};
+    if(saltB64)row.salt=saltB64;
+    const{error}=await _supa.from('vault').upsert(row);
     if(error){console.warn('cloudSet error:',error.message);return false;}
     return true;
   }catch(e){console.warn('cloudSet falhou:',e);return false;}
@@ -719,6 +721,15 @@ function getSalt(){
   const ns=crypto.getRandomValues(new Uint8Array(16));
   localStorage.setItem(SK+'salt',btoa(String.fromCharCode(...ns)));
   return ns;
+}
+function getSaltB64(){
+  let s=localStorage.getItem(SK+'salt');
+  if(!s){const ns=crypto.getRandomValues(new Uint8Array(16));s=btoa(String.fromCharCode(...ns));localStorage.setItem(SK+'salt',s);}
+  return s;
+}
+function applyCloudSalt(saltB64){
+  // Adota o salt vindo da nuvem como o salt local (para todos os dispositivos usarem o mesmo)
+  if(saltB64)localStorage.setItem(SK+'salt',saltB64);
 }
 
 // Busca normalizada sem acentos
@@ -908,35 +919,36 @@ function isSnoozed(key){
 async function doLogin(){
   const pw=document.getElementById('login-pw').value;
   if(!pw){document.getElementById('login-err').textContent='Digite a senha';return;}
-  const salt=getSalt();
-  document.getElementById('login-err').textContent='';
+  document.getElementById('login-err').style.color='var(--ink4)';
+  document.getElementById('login-err').textContent='Conectando à nuvem…';
   try{
-    _cryptoKey=await deriveKey(pw,salt);
-
     const localVault=localStorage.getItem(SK+'vault');
     const localTs=localStorage.getItem(SK+'vault_ts')||'';
 
-    // Buscar vault da nuvem
-    document.getElementById('login-err').style.color='var(--ink4)';
-    document.getElementById('login-err').textContent='Conectando à nuvem…';
+    // 1. Buscar vault + salt da nuvem ANTES de derivar a chave
     const cloud=await cloudGet();
 
+    // 2. Decidir qual vault usar e qual salt aplicar
     let vaultToUse=null, source='';
     if(cloud&&cloud.blob){
-      // Há vault na nuvem. Comparar com local.
       if(!localVault){vaultToUse=cloud.blob;source='cloud';}
       else{
         const cloudTs=cloud.updated_at||'';
-        // Usa o mais recente
         if(cloudTs>=localTs){vaultToUse=cloud.blob;source='cloud';}
         else{vaultToUse=localVault;source='local';}
       }
+      // Se a nuvem tem salt, adotar ANTES de derivar a chave (crucial p/ multi-dispositivo)
+      if(cloud.salt&&source==='cloud')applyCloudSalt(cloud.salt);
     } else if(localVault){
       vaultToUse=localVault;source='local';
     }
 
     document.getElementById('login-err').textContent='';
     document.getElementById('login-err').style.color='';
+
+    // 3. Agora derivar a chave com o salt correto
+    const salt=getSalt();
+    _cryptoKey=await deriveKey(pw,salt);
 
     if(vaultToUse){
       // Tentar descriptografar (valida a senha)
@@ -948,8 +960,8 @@ async function doLogin(){
       if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
       // Se veio da nuvem, atualiza o espelho local
       if(source==='cloud'){localStorage.setItem(SK+'vault',vaultToUse);localStorage.setItem(SK+'vault_ts',cloud.updated_at||new Date().toISOString());}
-      // Se veio do local e a nuvem está atrás (ou vazia), empurra para a nuvem
-      if(source==='local'&&_supaOK){cloudSet(vaultToUse).then(ok=>setSyncStatus(ok?'ok':'local'));}
+      // Se veio do local e a nuvem está atrás (ou vazia), empurra para a nuvem COM o salt
+      if(source==='local'&&_supaOK){cloudSet(vaultToUse,getSaltB64()).then(ok=>setSyncStatus(ok?'ok':'local'));}
     } else {
       // Primeira vez — checar migração de chaves antigas não criptografadas
       const oldOrd=localStorage.getItem(SK+'ord');
@@ -1014,7 +1026,7 @@ async function saveAll(){
   setSyncStatus('saving');
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
-    const ok=await cloudSet(encrypted);
+    const ok=await cloudSet(encrypted,getSaltB64());
     setSyncStatus(ok?'ok':'local');
   },1200);
 }
