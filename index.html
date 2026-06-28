@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FGL Tracker 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --ink:#0F1923;--ink2:#2D3A45;--ink3:#5A6A76;--ink4:#9AAAB8;
@@ -262,6 +263,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <button class="tab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
   </div>
   <div class="hdr-r">
+    <span id="sync-status" style="font-size:.62rem;font-weight:600;margin-right:.5rem" title="Estado da sincronização com a nuvem"></span>
     <span class="hdr-d" id="hdr-date"></span>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
     <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones">📅</button>
@@ -659,6 +661,35 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 
 <script>
 /* ══════════════════════════════════════
+   SUPABASE (sincronização na nuvem)
+══════════════════════════════════════ */
+const SUPA_URL='https://zytlxglrzjzcybxhhgso.supabase.co';
+const SUPA_KEY='sb_publishable_R059JG4GGKZa2aacg3ceHQ_v9vgLSzD';
+let _supa=null, _supaOK=false;
+try{
+  if(window.supabase){_supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);_supaOK=true;}
+}catch(e){console.warn('Supabase init falhou:',e);_supaOK=false;}
+
+// Lê o blob criptografado da nuvem. Retorna {blob,updated_at} ou null.
+async function cloudGet(){
+  if(!_supaOK)return null;
+  try{
+    const{data,error}=await _supa.from('vault').select('blob,updated_at').eq('id','main').maybeSingle();
+    if(error){console.warn('cloudGet error:',error.message);return null;}
+    return data||null;
+  }catch(e){console.warn('cloudGet falhou:',e);return null;}
+}
+// Grava o blob criptografado na nuvem.
+async function cloudSet(blob){
+  if(!_supaOK)return false;
+  try{
+    const{error}=await _supa.from('vault').upsert({id:'main',blob,updated_at:new Date().toISOString()});
+    if(error){console.warn('cloudSet error:',error.message);return false;}
+    return true;
+  }catch(e){console.warn('cloudSet falhou:',e);return false;}
+}
+
+/* ══════════════════════════════════════
    CRYPTO + STORAGE (AES-256-GCM)
 ══════════════════════════════════════ */
 const SK='fgl8_';
@@ -878,19 +909,49 @@ async function doLogin(){
   const pw=document.getElementById('login-pw').value;
   if(!pw){document.getElementById('login-err').textContent='Digite a senha';return;}
   const salt=getSalt();
+  document.getElementById('login-err').textContent='';
   try{
     _cryptoKey=await deriveKey(pw,salt);
-    const vault=localStorage.getItem(SK+'vault');
-    if(vault){
-      // Decrypt existing data
-      const data=await decryptData(_cryptoKey,vault);
+
+    const localVault=localStorage.getItem(SK+'vault');
+    const localTs=localStorage.getItem(SK+'vault_ts')||'';
+
+    // Buscar vault da nuvem
+    document.getElementById('login-err').style.color='var(--ink4)';
+    document.getElementById('login-err').textContent='Conectando à nuvem…';
+    const cloud=await cloudGet();
+
+    let vaultToUse=null, source='';
+    if(cloud&&cloud.blob){
+      // Há vault na nuvem. Comparar com local.
+      if(!localVault){vaultToUse=cloud.blob;source='cloud';}
+      else{
+        const cloudTs=cloud.updated_at||'';
+        // Usa o mais recente
+        if(cloudTs>=localTs){vaultToUse=cloud.blob;source='cloud';}
+        else{vaultToUse=localVault;source='local';}
+      }
+    } else if(localVault){
+      vaultToUse=localVault;source='local';
+    }
+
+    document.getElementById('login-err').textContent='';
+    document.getElementById('login-err').style.color='';
+
+    if(vaultToUse){
+      // Tentar descriptografar (valida a senha)
+      const data=await decryptData(_cryptoKey,vaultToUse);
       orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
       if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
       if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+      // Se veio da nuvem, atualiza o espelho local
+      if(source==='cloud'){localStorage.setItem(SK+'vault',vaultToUse);localStorage.setItem(SK+'vault_ts',cloud.updated_at||new Date().toISOString());}
+      // Se veio do local e a nuvem está atrás (ou vazia), empurra para a nuvem
+      if(source==='local'&&_supaOK){cloudSet(vaultToUse).then(ok=>setSyncStatus(ok?'ok':'local'));}
     } else {
-      // First time or migrating from unencrypted — check old keys
+      // Primeira vez — checar migração de chaves antigas não criptografadas
       const oldOrd=localStorage.getItem(SK+'ord');
       if(oldOrd){
         orders=JSON.parse(oldOrd);
@@ -902,22 +963,20 @@ async function doLogin(){
         const f=localStorage.getItem(SK+'forn');if(f)FORNECEDORES=JSON.parse(f);
         const p=localStorage.getItem(SK+'prod');if(p)PRODUTOS=JSON.parse(p);
         const ct=localStorage.getItem(SK+'cont');if(ct)CONTEINERES=JSON.parse(ct);
-        // Migrate: encrypt and remove old keys
         await saveAll();
         [SK+'ord',SK+'pay',SK+'led',SK+'rec',SK+'slst',SK+'cls',SK+'forn',SK+'prod',SK+'cont'].forEach(k=>localStorage.removeItem(k));
       } else {
-        // Brand new — save empty encrypted vault
         await saveAll();
       }
     }
-    // Sync linked orders↔payments
     syncLinked();
-    // Show app
+    setSyncStatus(_supaOK?'ok':'offline');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app-wrap').classList.add('authed');
     document.getElementById('hdr-date').textContent=todayDisp();
     renderAll();
   }catch(e){
+    document.getElementById('login-err').style.color='';
     document.getElementById('login-err').textContent='Senha incorreta';
     document.getElementById('login-pw').value='';
     document.getElementById('login-pw').focus();
@@ -943,11 +1002,32 @@ function syncLinked(){
   if(changed)saveAll();
 }
 
+let _syncTimer=null;
 async function saveAll(){
   if(!_cryptoKey)return;
   const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
   const encrypted=await encryptData(_cryptoKey,data);
+  // 1. Sempre grava no localStorage (espelho local imediato)
   localStorage.setItem(SK+'vault',encrypted);
+  localStorage.setItem(SK+'vault_ts',new Date().toISOString());
+  // 2. Grava na nuvem (debounce de 1.2s para não floodar em edições rápidas)
+  setSyncStatus('saving');
+  clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(async()=>{
+    const ok=await cloudSet(encrypted);
+    setSyncStatus(ok?'ok':'local');
+  },1200);
+}
+function setSyncStatus(state){
+  const el=document.getElementById('sync-status');
+  if(!el)return;
+  const cfg={
+    saving:{t:'⟳ Salvando…',c:'var(--amber)'},
+    ok:{t:'☁ Sincronizado',c:'var(--green)'},
+    local:{t:'⚠ Só local',c:'var(--red)'},
+    offline:{t:'⚠ Offline',c:'var(--ink4)'}
+  }[state]||{t:'',c:''};
+  el.textContent=cfg.t;el.style.color=cfg.c;
 }
 
 /* ══════════════════════════════════════
