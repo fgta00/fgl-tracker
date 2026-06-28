@@ -158,11 +158,12 @@ td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-of
 .esave{background:var(--blue);color:#fff}.esave:hover{background:#1050A0}
 .ecancel{background:var(--ltgry);color:var(--ink2)}.ecancel:hover{background:var(--bdr2)}
 .eclear{background:var(--ltred);color:var(--red);font-size:.68rem !important}.eclear:hover{background:#fbd0d5}
-.lf{background:var(--ltblue);border:1.5px solid #B0D4F4;border-radius:9px;padding:.75rem .9rem;margin-bottom:.9rem}
-.lf.grn{background:#F0FAF5;border-color:#A8D8C0}
-.lfg{display:flex;flex-wrap:wrap;gap:.45rem;align-items:flex-end}
-.lfg .ff{min-width:110px;flex:1}
-.lbtn{background:var(--blue);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.74rem;padding:.38rem .85rem;border-radius:7px;cursor:pointer;height:33px;white-space:nowrap;flex-shrink:0}
+.lf{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--blue);border-radius:10px;padding:.85rem;margin-bottom:.9rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.lf.grn{border-left-color:var(--green)}
+.lfg{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .55rem;align-items:end}
+.lfg .ff{min-width:0}
+.lfg .lbtn{grid-column:1/-1;margin-top:.15rem}
+.lbtn{background:var(--blue);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.74rem;padding:.45rem .85rem;border-radius:7px;cursor:pointer;white-space:nowrap}
 .lbtn:hover{background:#1050A0}
 .lbtn.grn{background:var(--green)}.lbtn.grn:hover{background:#145F32}
 .prodrow{display:flex;align-items:center;gap:.35rem;margin-bottom:.28rem;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.32rem .55rem}
@@ -174,6 +175,21 @@ td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-of
 .addup:hover{border-color:var(--blue);color:var(--blue)}
 .preview-box{background:var(--ltblue);border:1.5px solid #B0D4F4;border-radius:8px;padding:.65rem .9rem;font-size:.75rem;grid-column:1/-1;display:none}
 .fin-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem}
+.fin-2col .tw{overflow-x:hidden}
+.fin-2col .tw table{font-size:10.5px;table-layout:fixed;width:100%}
+.fin-2col .tw td,.fin-2col .tw th{padding:.32rem .3rem;white-space:normal;word-break:break-word}
+.fin-2col .tw th:nth-child(1),.fin-2col .tw td:nth-child(1){width:8%}
+.fin-2col .tw th:nth-child(2),.fin-2col .tw td:nth-child(2){width:16%}
+.fin-2col .tw th:nth-child(3),.fin-2col .tw td:nth-child(3){width:18%}
+.fin-2col .tw th:nth-child(4),.fin-2col .tw td:nth-child(4){width:12%}
+.fin-2col .tw th:nth-child(5),.fin-2col .tw td:nth-child(5){width:16%}
+.fin-2col .tw th:nth-child(6),.fin-2col .tw td:nth-child(6){width:14%}
+.fin-2col .tw th:nth-child(7),.fin-2col .tw td:nth-child(7){width:12%}
+.fin-2col .tw th:nth-child(8),.fin-2col .tw td:nth-child(8){width:4%}
+@media(max-width:900px){.fin-2col{grid-template-columns:1fr}}
+.fin-2col .tb{gap:.3rem}
+.fin-2col .tb input,.fin-2col .tb select{font-size:.66rem;padding:.25rem .4rem;max-width:100px}
+.fin-2col .tb input[type=date]{max-width:120px}
 .toast{position:fixed;bottom:1.3rem;right:1.3rem;padding:.5rem .9rem;border-radius:8px;font-weight:600;font-size:.76rem;z-index:900;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;color:#fff;display:flex;align-items:center;gap:.5rem}
 .toast.show{opacity:1;transform:translateY(0);pointer-events:all}
 .toast .undo-btn{background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;font-family:'IBM Plex Sans';font-weight:700;font-size:.68rem;padding:.18rem .5rem;border-radius:5px;cursor:pointer;margin-left:.4rem}
@@ -1937,9 +1953,6 @@ function openFinPopup(pi){
     <span style="font-size:.7rem;color:var(--ink3)">Saldo líquido (a receber − a pagar)</span>
     <span style="font-family:'IBM Plex Mono';font-weight:700;font-size:.9rem;color:${(aReceber-aPagar)>=0?'var(--green)':'var(--red)'}">${fUSD(aReceber-aPagar)}</span>
   </div>`;
-
-  // Link to full financeiro
-  h+=`<div style="margin-top:.8rem;text-align:right"><button class="bsm" onclick="closeOvl('finpop');showTab('financeiro')" style="font-size:.65rem;padding:.3rem .7rem">Abrir aba Financeiro completa →</button></div>`;
 
   document.getElementById('finpop-body').innerHTML=h;
   document.getElementById('ovl-finpop').classList.add('open');
