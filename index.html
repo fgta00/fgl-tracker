@@ -58,8 +58,12 @@ header{background:var(--navy);height:52px;display:flex;align-items:center;justif
 .logo{display:flex;align-items:center;gap:.5rem;color:#fff;font-weight:700;font-size:.86rem;letter-spacing:.03em}
 .logo-i{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,#1A7A45);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .tabs{display:flex;gap:2px;height:100%}
-.tab{background:none;border:none;color:rgba(255,255,255,.48);font-family:'IBM Plex Sans';font-size:.73rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:100%;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
+.tab{background:none;border:none;color:rgba(255,255,255,.48);font-family:'IBM Plex Sans';font-size:.73rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:100%;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:inline-flex;align-items:center}
 .tab:hover{color:rgba(255,255,255,.82)}.tab.active{color:#fff;border-bottom-color:#4DB8FF}
+.subheader{background:var(--card);border-bottom:1px solid var(--bdr);display:flex;padding:0 1.4rem;position:sticky;top:52px;z-index:290}
+.stab{background:none;border:none;color:var(--ink3);font-family:'IBM Plex Sans';font-size:.72rem;font-weight:600;padding:.6rem 1rem;cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
+.stab:hover{color:var(--ink)}
+.stab.active{color:var(--green);border-bottom-color:var(--green)}
 .hdr-r{display:flex;align-items:center;gap:.7rem}
 .hdr-d{font-size:.68rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono'}
 .btn-add{background:var(--green);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;padding:.34rem .85rem;border-radius:7px;cursor:pointer;transition:background .15s}
@@ -227,9 +231,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 #login-screen h1{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:.3rem;font-family:'IBM Plex Sans'}
 #login-screen .login-sub{color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:1.5rem}
 #login-screen input{width:100%;padding:.6rem .8rem;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.25);color:#fff;font-family:'IBM Plex Mono';font-size:1rem;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:.8rem}
+#login-screen input.wide{letter-spacing:normal;font-size:.85rem}
 #login-screen input:focus{border-color:#4DB8FF}
 #login-screen input::placeholder{color:rgba(255,255,255,.25);letter-spacing:normal}
 #login-screen button{width:100%;padding:.55rem;background:linear-gradient(135deg,#2E9E6A,#1A7A45);color:#fff;border:none;border-radius:8px;font-family:'IBM Plex Sans';font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s}
+#login-screen button.sec{background:rgba(255,255,255,.12)}
+#login-screen .login-btn-row{display:flex;gap:.5rem}
 #login-screen button:hover{opacity:.85}
 #login-screen .login-err{color:#F87171;font-size:.72rem;margin-top:.5rem;min-height:1rem}
 /* Dark mode toggle */
@@ -245,10 +252,15 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">🌿</div>
-    <h1>FGL Tracker</h1>
-    <div class="login-sub">Acesso restrito</div>
-    <input type="password" id="login-pw" placeholder="Senha" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()">Entrar</button>
+    <h1>FGL</h1>
+    <div class="login-sub" id="login-sub">Acesso restrito</div>
+    <input class="wide" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+    <input class="wide" type="password" id="login-account-pw" placeholder="Senha da conta" autocomplete="current-password">
+    <input type="password" id="login-pw" placeholder="Senha do cofre" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-btn-row">
+      <button onclick="doLogin()">Entrar</button>
+      <button class="sec" id="login-signup-btn" onclick="doSignup()">Criar conta</button>
+    </div>
     <div class="login-err" id="login-err"></div>
   </div>
 </div>
@@ -258,22 +270,27 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <header>
   <div class="logo"><div class="logo-i">🌿</div>FGL</div>
   <div class="tabs">
-    <button class="tab active" onclick="showTab('internal')">Controle Interno</button>
-    <button class="tab" onclick="showTab('client')">Visão Cliente</button>
-    <button class="tab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
+    <a class="tab" id="tab-import" href="https://fgta00.github.io/fgl-precificacao/" style="display:none;text-decoration:none">Importação</a>
+    <a class="tab" id="tab-revenda" href="https://fgta00.github.io/fgl-precificacao/" style="text-decoration:none">Revenda</a>
+    <button class="tab active" id="tab-tracker">Tracker</button>
   </div>
   <div class="hdr-r">
     <span id="sync-status" style="font-size:.62rem;font-weight:600;margin-right:.5rem" title="Estado da sincronização com a nuvem"></span>
+    <span id="auth-status2" style="font-size:.66rem;color:rgba(255,255,255,.7);margin-right:.4rem"></span>
     <span class="hdr-d" id="hdr-date"></span>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
     <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones">📅</button>
     <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">⬇ Backup</button>
     <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">⬆ Restaurar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
-    <a class="btn-bkp" href="https://fgta00.github.io/fgl-precificacao/" style="text-decoration:none" title="Ir para o FGL Precificação Unificada">💰 Precificação</a>
     <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
   </div>
 </header>
+<div class="subheader">
+  <button class="stab active" onclick="showTab('internal')">Controle Interno</button>
+  <button class="stab" onclick="showTab('client')">Visão Cliente</button>
+  <button class="stab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
+</div>
 <main>
 
 <!-- ═══ CONTROLE INTERNO ═══ -->
@@ -298,8 +315,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
-          <th class="L" style="min-width:80px">IP / PO</th>
-          <th class="L" style="min-width:95px">Cliente</th>
+          <th class="L" style="min-width:80px">IP / PO / FO</th>
+          <th class="L" style="min-width:95px">Cliente / Fornecedor</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:200px">Situação</th>
@@ -356,7 +373,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <div class="sh" style="margin-bottom:0;flex:1">Pedidos Ativos</div>
   </div>
   <div class="tb">
-    <input id="fin-q" placeholder="🔍 IP, PO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
+    <input id="fin-q" placeholder="🔍 IP, PO, FO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
     <select id="fin-st" onchange="renderFinanceiro()"><option value="">Todos Status</option></select>
     <select id="fin-sup" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
     <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
@@ -470,21 +487,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <div class="mbody">
       <div class="fg">
         <div class="fsep">Identificação</div>
-        <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
         <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
         <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
-        <div class="ff"><label>ETD (DD/MM/AA)</label>
+        <div class="ff"><label>Data (DD/MM/AA)</label>
           <div class="date-wrap">
-            <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
-            <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
-            <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
-          </div>
-        </div>
-        <div class="ff"><label>ETA Brasil (DD/MM/AA)</label>
-          <div class="date-wrap">
-            <input type="text" id="mo-eta" placeholder="01/08/26" autocomplete="off">
-            <input type="date" id="mo-eta-cal" onchange="datePickerSync('mo-eta',this.value)">
-            <button class="date-cal-btn" type="button" onclick="openCal('mo-eta-cal')" tabindex="-1">📅</button>
+            <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
+            <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
+            <button class="date-cal-btn" type="button" onclick="openCal('mo-data-cal')" tabindex="-1">📅</button>
           </div>
         </div>
         <div class="fsep">Cliente</div>
@@ -492,7 +501,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
           <datalist id="mo-cl-list"></datalist>
         </div>
-        <div class="ff"><label>Invoice # Cliente</label><input id="mo-cli-inv" placeholder="ex: FGL2601ZSU"></div>
+        <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
         <div class="fsep">Fornecedor</div>
         <div class="ff"><label>Fornecedor</label>
           <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
@@ -504,12 +513,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <datalist id="dl-cont"></datalist>
           <datalist id="dl-prod"></datalist>
         </div>
-        <!-- FIX #4: campo pay-st que faltava -->
-        <div class="ff"><label>Status Financeiro</label>
-          <select id="mo-pay-st">
-            <option>Mass P contracted</option><option>Mass P</option><option>Sample</option>
-            <option>At sea</option><option>Received</option><option>Cancelled</option>
-          </select>
+        <div class="ff"><label>ETD (DD/MM/AA)</label>
+          <div class="date-wrap">
+            <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
+            <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
+            <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
+          </div>
         </div>
         <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
         <div class="ff full">
@@ -668,27 +677,46 @@ const SUPA_URL='https://zytlxglrzjzcybxhhgso.supabase.co';
 const SUPA_KEY='sb_publishable_R059JG4GGKZa2aacg3ceHQ_v9vgLSzD';
 let _supa=null, _supaOK=false;
 try{
-  if(window.supabase){_supa=window.supabase.createClient(SUPA_URL,SUPA_KEY);_supaOK=true;}
+  if(window.supabase){_supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true}});_supaOK=true;}
 }catch(e){console.warn('Supabase init falhou:',e);_supaOK=false;}
 
-// Lê o blob criptografado da nuvem. Retorna {blob,salt,updated_at} ou null.
-async function cloudGet(){
+// ── LEGADO (tabela antiga 'vault', senha única sem conta) — só usado 1x pra migrar dados existentes ──
+async function cloudGetLegacy(){
   if(!_supaOK)return null;
   try{
     const{data,error}=await _supa.from('vault').select('blob,salt,updated_at').eq('id','main').maybeSingle();
+    if(error){console.warn('cloudGetLegacy error:',error.message);return null;}
+    return data||null;
+  }catch(e){console.warn('cloudGetLegacy falhou:',e);return null;}
+}
+
+// ── NOVO: tracker_vault, dono único (Fred), com Auth real + revisão (evita sobrescrita silenciosa) ──
+const TRACKER_VAULT_ID='main';
+let _trackerRevision=0;
+async function cloudGet(){
+  if(!_supaOK||!authUser)return null;
+  try{
+    const{data,error}=await _supa.from('tracker_vault').select('blob,revision,updated_at')
+      .eq('user_id',authUser.id).eq('id',TRACKER_VAULT_ID).maybeSingle();
     if(error){console.warn('cloudGet error:',error.message);return null;}
     return data||null;
   }catch(e){console.warn('cloudGet falhou:',e);return null;}
 }
-// Grava o blob criptografado + salt na nuvem.
-async function cloudSet(blob,saltB64){
-  if(!_supaOK)return false;
+async function cloudSet(blob){
+  if(!_supaOK||!authUser)return false;
   try{
-    const row={id:'main',blob,updated_at:new Date().toISOString()};
-    if(saltB64)row.salt=saltB64;
-    const{error}=await _supa.from('vault').upsert(row);
-    if(error){console.warn('cloudSet error:',error.message);return false;}
-    return true;
+    if(_trackerRevision===0){
+      const{error}=await _supa.from('tracker_vault').insert({user_id:authUser.id,id:TRACKER_VAULT_ID,blob,revision:1});
+      if(error){if(error.code==='23505')return false;console.warn(error.message);return false;}
+      _trackerRevision=1;return true;
+    }
+    const nextRev=_trackerRevision+1;
+    const{data,error}=await _supa.from('tracker_vault')
+      .update({blob,revision:nextRev,updated_at:new Date().toISOString()})
+      .eq('user_id',authUser.id).eq('id',TRACKER_VAULT_ID).eq('revision',_trackerRevision).select();
+    if(error){console.warn(error.message);return false;}
+    if(!data||data.length===0){toast('⚠ Conflito: outra sessão salvou por cima. Recarregue a página.','warn');return false;}
+    _trackerRevision=nextRev;return true;
   }catch(e){console.warn('cloudSet falhou:',e);return false;}
 }
 
@@ -696,42 +724,49 @@ async function cloudSet(blob,saltB64){
    CRYPTO + STORAGE (AES-256-GCM)
 ══════════════════════════════════════ */
 const SK='fgl8_';
-async function deriveKey(pw,salt){
+// ── LEGADO — só usado 1x pra tentar migrar um vault antigo (formato iv+ciphertext cru) ──
+async function deriveKeyLegacy(pw,salt){
   const enc=new TextEncoder();
   const keyMat=await crypto.subtle.importKey('raw',enc.encode(pw),{name:'PBKDF2'},false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},keyMat,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-async function encryptData(key,data){
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const enc=new TextEncoder().encode(JSON.stringify(data));
-  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc);
-  const buf=new Uint8Array(iv.length+ct.byteLength);
-  buf.set(iv);buf.set(new Uint8Array(ct),iv.length);
-  return btoa(String.fromCharCode(...buf));
-}
-async function decryptData(key,b64){
+async function decryptDataLegacy(key,b64){
   const buf=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   const iv=buf.slice(0,12),ct=buf.slice(12);
   const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
   return JSON.parse(new TextDecoder().decode(dec));
 }
-let _cryptoKey=null;
-function getSalt(){
-  let s=localStorage.getItem(SK+'salt');
-  if(s)return Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-  const ns=crypto.getRandomValues(new Uint8Array(16));
-  localStorage.setItem(SK+'salt',btoa(String.fromCharCode(...ns)));
-  return ns;
+function getLegacySalt(){
+  const s=localStorage.getItem(SK+'salt');
+  if(!s)return null;
+  return Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 }
-function getSaltB64(){
-  let s=localStorage.getItem(SK+'salt');
-  if(!s){const ns=crypto.getRandomValues(new Uint8Array(16));s=btoa(String.fromCharCode(...ns));localStorage.setItem(SK+'salt',s);}
-  return s;
+
+// ── NOVO: envelope versionado (formatVersion/cryptoVersion/kdf/iterations/salt/iv/ciphertext),
+//    mesmo padrão do Precificação — chave nunca gravada em disco, salt/iv viajam junto no blob. ──
+function buf2b64(buf){let bin='';new Uint8Array(buf).forEach(b=>bin+=String.fromCharCode(b));return btoa(bin);}
+function b642buf(b64){const bin=atob(b64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf;}
+const PBKDF2_ITER=100000;
+async function deriveKey(password,salt,iterations){
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-function applyCloudSalt(saltB64){
-  // Adota o salt vindo da nuvem como o salt local (para todos os dispositivos usarem o mesmo)
-  if(saltB64)localStorage.setItem(SK+'salt',saltB64);
+async function encryptJSON(password,obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(password,salt,PBKDF2_ITER);
+  const pt=new TextEncoder().encode(JSON.stringify(obj));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,pt);
+  return{formatVersion:1,cryptoVersion:1,kdf:'PBKDF2-SHA256',iterations:PBKDF2_ITER,salt:buf2b64(salt),iv:buf2b64(iv),ciphertext:buf2b64(ct)};
 }
+async function decryptJSON(password,payload){
+  const iterations=payload.iterations||PBKDF2_ITER;
+  const salt=b642buf(payload.salt),iv=b642buf(payload.iv),ct=b642buf(payload.ciphertext||payload.data);
+  const key=await deriveKey(password,salt,iterations);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+let _cryptoKey=null; // guarda a SENHA do cofre (não a CryptoKey) — reusada a cada encryptJSON/decryptJSON
 
 // Busca normalizada sem acentos
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -796,6 +831,7 @@ function toggleDark(){
 }
 // Restore dark mode preference (before auth, not sensitive)
 if(localStorage.getItem(SK+'dark')==='1'){document.body.classList.add('dark');document.getElementById('dm-btn').textContent='☀';}
+initAuth();
 
 /* ══════════════════════════════════════
    STATE (loaded after auth)
@@ -915,86 +951,155 @@ function isSnoozed(key){
 }
 
 /* ══════════════════════════════════════
+   CONTA (Supabase Auth — mesma sessão do Precificação)
+══════════════════════════════════════ */
+const FRED_EMAIL='fred@animaverde.com.br';
+let authUser=null;
+async function initAuth(){
+  if(!_supaOK){prepareLoginScreen();return;}
+  const{data:{session}}=await _supa.auth.getSession();
+  if(session)authUser={id:session.user.id,email:session.user.email};
+  _supa.auth.onAuthStateChange((_evt,session)=>{
+    authUser=session?{id:session.user.id,email:session.user.email}:null;
+  });
+  prepareLoginScreen();
+}
+function prepareLoginScreen(){
+  const f1=document.getElementById('login-email'),f2=document.getElementById('login-account-pw');
+  const signupBtn=document.getElementById('login-signup-btn'),sub=document.getElementById('login-sub');
+  if(authUser){
+    f1.style.display='none';f2.style.display='none';signupBtn.style.display='none';
+    sub.textContent='Conectado como '+authUser.email+' — digite a senha do cofre.';
+    setTimeout(()=>document.getElementById('login-pw').focus(),50);
+  }else{
+    f1.style.display='';f2.style.display='';signupBtn.style.display='';
+    sub.textContent='Acesso restrito.';
+  }
+}
+function updateHeaderVisibility(){
+  const isFred=!!(authUser&&authUser.email&&authUser.email.toLowerCase()===FRED_EMAIL);
+  const tabImport=document.getElementById('tab-import');
+  if(tabImport)tabImport.style.display=isFred?'':'none';
+  const el=document.getElementById('auth-status2');
+  if(el)el.textContent=authUser?('🟢 '+authUser.email):'';
+}
+async function doSignup(){
+  const email=document.getElementById('login-email').value.trim();
+  const pw=document.getElementById('login-account-pw').value;
+  if(!email||!pw){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Preencha e-mail e senha da conta.';return;}
+  if(pw.length<6){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Senha da conta muito curta (mín. 6).';return;}
+  document.getElementById('login-err').style.color='var(--ink4)';
+  document.getElementById('login-err').textContent='Criando conta…';
+  const{data,error}=await _supa.auth.signUp({email,password:pw});
+  if(error){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Erro: '+error.message;return;}
+  if(data.session){
+    authUser={id:data.user.id,email:data.user.email};
+    updateHeaderVisibility();
+    document.getElementById('login-err').style.color='';
+    document.getElementById('login-err').textContent='Conta criada ✓ — agora digite a senha do cofre e clique Entrar.';
+    prepareLoginScreen();
+  }else{
+    document.getElementById('login-err').style.color='';
+    document.getElementById('login-err').textContent='Conta criada — confirme o e-mail (caixa de entrada) e entre de novo.';
+  }
+}
+
+/* ══════════════════════════════════════
    LOGIN + ENCRYPTED SAVE/LOAD
 ══════════════════════════════════════ */
+function applyLoadedData(data){
+  orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
+  if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
+  if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
+  if(data.conteineres)CONTEINERES=data.conteineres;
+  if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+}
 async function doLogin(){
-  const pw=document.getElementById('login-pw').value;
-  if(!pw){document.getElementById('login-err').textContent='Digite a senha';return;}
+  const vaultPw=document.getElementById('login-pw').value;
+  if(!vaultPw){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Digite a senha do cofre';return;}
+
+  if(!authUser){
+    const email=document.getElementById('login-email').value.trim();
+    const accountPw=document.getElementById('login-account-pw').value;
+    if(!email||!accountPw){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Preencha e-mail e senha da conta.';return;}
+    document.getElementById('login-err').style.color='var(--ink4)';
+    document.getElementById('login-err').textContent='Entrando…';
+    const{data,error}=await _supa.auth.signInWithPassword({email,password:accountPw});
+    if(error){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Erro na conta: '+error.message;return;}
+    authUser={id:data.user.id,email:data.user.email};
+  }
+  updateHeaderVisibility();
+
   document.getElementById('login-err').style.color='var(--ink4)';
-  document.getElementById('login-err').textContent='Conectando à nuvem…';
+  document.getElementById('login-err').textContent='Buscando dados…';
   try{
-    const localVault=localStorage.getItem(SK+'vault');
-    const localTs=localStorage.getItem(SK+'vault_ts')||'';
-
-    // 1. Buscar vault + salt da nuvem ANTES de derivar a chave
+    const localVault=localStorage.getItem(SK+'vault_v2');
+    const localTsV=localStorage.getItem(SK+'vault_v2_ts')||'';
     const cloud=await cloudGet();
-
-    // 2. Decidir qual vault usar e qual salt aplicar
-    let vaultToUse=null, source='';
+    let vaultToUse=null,fromCloud=false;
     if(cloud&&cloud.blob){
-      if(!localVault){vaultToUse=cloud.blob;source='cloud';}
-      else{
-        const cloudTs=cloud.updated_at||'';
-        if(cloudTs>=localTs){vaultToUse=cloud.blob;source='cloud';}
-        else{vaultToUse=localVault;source='local';}
-      }
-      // Se a nuvem tem salt, adotar ANTES de derivar a chave (crucial p/ multi-dispositivo)
-      if(cloud.salt&&source==='cloud')applyCloudSalt(cloud.salt);
-    } else if(localVault){
-      vaultToUse=localVault;source='local';
-    }
-
-    document.getElementById('login-err').textContent='';
-    document.getElementById('login-err').style.color='';
-
-    // 3. Agora derivar a chave com o salt correto
-    const salt=getSalt();
-    _cryptoKey=await deriveKey(pw,salt);
+      _trackerRevision=cloud.revision||1;
+      if(!localVault){vaultToUse=cloud.blob;fromCloud=true;}
+      else{const cloudTs=cloud.updated_at||'';fromCloud=cloudTs>=localTsV;vaultToUse=fromCloud?cloud.blob:localVault;}
+    }else if(localVault){vaultToUse=localVault;_trackerRevision=0;}
 
     if(vaultToUse){
-      // Tentar descriptografar (valida a senha)
-      const data=await decryptData(_cryptoKey,vaultToUse);
-      orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
-      if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
-      if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
-      if(data.conteineres)CONTEINERES=data.conteineres;
-      if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
-      // Se veio da nuvem, atualiza o espelho local
-      if(source==='cloud'){localStorage.setItem(SK+'vault',vaultToUse);localStorage.setItem(SK+'vault_ts',cloud.updated_at||new Date().toISOString());}
-      // Se veio do local e a nuvem está atrás (ou vazia), empurra para a nuvem COM o salt
-      if(source==='local'&&_supaOK){cloudSet(vaultToUse,getSaltB64()).then(ok=>setSyncStatus(ok?'ok':'local'));}
-    } else {
-      // Primeira vez — checar migração de chaves antigas não criptografadas
-      const oldOrd=localStorage.getItem(SK+'ord');
-      if(oldOrd){
-        orders=JSON.parse(oldOrd);
-        payments=JSON.parse(localStorage.getItem(SK+'pay')||'[]');
-        ledger=JSON.parse(localStorage.getItem(SK+'led')||'[]');
-        receipts=JSON.parse(localStorage.getItem(SK+'rec')||'[]');
-        const s=localStorage.getItem(SK+'slst');if(s)SLST=JSON.parse(s);
-        const c=localStorage.getItem(SK+'cls');if(c)CLIENTES=JSON.parse(c);
-        const f=localStorage.getItem(SK+'forn');if(f)FORNECEDORES=JSON.parse(f);
-        const p=localStorage.getItem(SK+'prod');if(p)PRODUTOS=JSON.parse(p);
-        const ct=localStorage.getItem(SK+'cont');if(ct)CONTEINERES=JSON.parse(ct);
-        await saveAll();
-        [SK+'ord',SK+'pay',SK+'led',SK+'rec',SK+'slst',SK+'cls',SK+'forn',SK+'prod',SK+'cont'].forEach(k=>localStorage.removeItem(k));
-      } else {
-        await saveAll();
+      const payload=JSON.parse(vaultToUse);
+      const data=await decryptJSON(vaultPw,payload); // valida a senha do cofre de verdade
+      _cryptoKey=vaultPw;
+      applyLoadedData(data);
+      if(fromCloud){localStorage.setItem(SK+'vault_v2',vaultToUse);localStorage.setItem(SK+'vault_v2_ts',new Date().toISOString());}
+      else if(_supaOK){await cloudSet(vaultToUse);}
+    }else{
+      // nada no formato novo ainda — tenta migrar do vault antigo (senha única, sem conta)
+      let migrated=false;
+      const legacy=await cloudGetLegacy();
+      if(legacy&&legacy.blob){
+        try{
+          const legacySalt=legacy.salt?Uint8Array.from(atob(legacy.salt),c=>c.charCodeAt(0)):getLegacySalt();
+          if(legacySalt){
+            const legacyKey=await deriveKeyLegacy(vaultPw,legacySalt);
+            applyLoadedData(await decryptDataLegacy(legacyKey,legacy.blob));
+            migrated=true;
+            toast('Dados migrados do vault antigo ✓');
+          }
+        }catch(e){/* essa senha não bate com o vault antigo — segue sem migrar */}
       }
+      if(!migrated){
+        const oldOrd=localStorage.getItem(SK+'ord'); // migração bem antiga (não criptografada)
+        if(oldOrd){
+          orders=JSON.parse(oldOrd);
+          payments=JSON.parse(localStorage.getItem(SK+'pay')||'[]');
+          ledger=JSON.parse(localStorage.getItem(SK+'led')||'[]');
+          receipts=JSON.parse(localStorage.getItem(SK+'rec')||'[]');
+          const s=localStorage.getItem(SK+'slst');if(s)SLST=JSON.parse(s);
+          const c=localStorage.getItem(SK+'cls');if(c)CLIENTES=JSON.parse(c);
+          const f=localStorage.getItem(SK+'forn');if(f)FORNECEDORES=JSON.parse(f);
+          const p=localStorage.getItem(SK+'prod');if(p)PRODUTOS=JSON.parse(p);
+          const ct=localStorage.getItem(SK+'cont');if(ct)CONTEINERES=JSON.parse(ct);
+          [SK+'ord',SK+'pay',SK+'led',SK+'rec',SK+'slst',SK+'cls',SK+'forn',SK+'prod',SK+'cont'].forEach(k=>localStorage.removeItem(k));
+        }
+        // senão, começa vazio mesmo (1º uso de verdade)
+      }
+      _cryptoKey=vaultPw;_trackerRevision=0;
+      await saveAll();
     }
-    syncLinked();
-    setSyncStatus(_supaOK?'ok':'offline');
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-wrap').classList.add('authed');
-    document.getElementById('hdr-date').textContent=todayDisp();
-    renderAll();
   }catch(e){
     document.getElementById('login-err').style.color='';
-    document.getElementById('login-err').textContent='Senha incorreta';
+    document.getElementById('login-err').textContent='Senha do cofre incorreta';
     document.getElementById('login-pw').value='';
     document.getElementById('login-pw').focus();
     _cryptoKey=null;
+    return;
   }
+  document.getElementById('login-err').textContent='';
+  document.getElementById('login-err').style.color='';
+  syncLinked();
+  setSyncStatus(_supaOK?'ok':'offline');
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-wrap').classList.add('authed');
+  document.getElementById('hdr-date').textContent=todayDisp();
+  renderAll();
 }
 
 function syncLinked(){
@@ -1019,15 +1124,16 @@ let _syncTimer=null;
 async function saveAll(){
   if(!_cryptoKey)return;
   const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
-  const encrypted=await encryptData(_cryptoKey,data);
+  const payload=await encryptJSON(_cryptoKey,data);
+  const encrypted=JSON.stringify(payload);
   // 1. Sempre grava no localStorage (espelho local imediato)
-  localStorage.setItem(SK+'vault',encrypted);
-  localStorage.setItem(SK+'vault_ts',new Date().toISOString());
+  localStorage.setItem(SK+'vault_v2',encrypted);
+  localStorage.setItem(SK+'vault_v2_ts',new Date().toISOString());
   // 2. Grava na nuvem (debounce de 1.2s para não floodar em edições rápidas)
   setSyncStatus('saving');
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
-    const ok=await cloudSet(encrypted,getSaltB64());
+    const ok=await cloudSet(encrypted);
     setSyncStatus(ok?'ok':'local');
   },1200);
 }
@@ -1222,7 +1328,7 @@ function renderInternal(){
   const st=document.getElementById('int-st')?.value||'';
   const cl=document.getElementById('int-cl')?.value||'';
   const flt=orders.filter(o=>{
-    const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi}`);
+    const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi} ${o.supplier||''} ${linkPay(o)?.inv||''}`);
     return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);
   });
   const fltS=applySortOrd(flt);
@@ -1237,13 +1343,19 @@ function renderInternal(){
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L">
         <div style="display:flex;align-items:center;gap:4px">
-          <b class="ec" style="font-family:'IBM Plex Mono';font-size:.74rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
+          <b class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
+          <span style="color:var(--ink4);font-size:.68rem">-</span>
+          <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</span>
+          <span style="color:var(--ink4);font-size:.68rem">-</span>
+          <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--purple)" onclick="editOrderPrices('${esc(o.pi)}',event)" title="Invoice Fornecedor — editar em Financeiro">${esc(linkPay(o)?.inv||'—')}</span>
           <span class="note-icon" style="position:relative;cursor:pointer;font-size:.7rem;opacity:${o.notes?'1':'.35'}" onclick="editField(${o.num},'notes',event)" title="${o.notes?'':'Adicionar nota'}">${o.notes?'📝':'＋'}${o.notes?`<span class="note-tip" style="display:none;position:absolute;left:0;top:1.2rem;z-index:20;background:var(--ink);color:#fff;padding:.4rem .6rem;border-radius:6px;font-size:.66rem;font-style:normal;font-weight:400;white-space:normal;width:200px;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3)">${esc(o.notes)}</span>`:''}</span>
         </div>
-        <div class="ec" style="font-family:'IBM Plex Mono';font-size:.62rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</div>
         <div class="ec" style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px;cursor:pointer" onclick="editField(${o.num},'colecao',event)">${o.colecao?esc(o.colecao):'＋ coleção'}</div>
       </td>
-      <td class="L ec" onclick="editField(${o.num},'client',event)"><b>${esc(o.client)}</b></td>
+      <td class="L ec" onclick="editField(${o.num},'client',event)">
+        <b>${esc(o.client)}</b>
+        <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'supplier',event);event.stopPropagation()">${esc(o.supplier||'—')}</div>
+      </td>
       <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
         ${esc(o.product)}
         <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${esc(o.container||'—')}</div>
@@ -1358,7 +1470,7 @@ function renderFinanceiro(){
   const cl=document.getElementById('fin-cl')?.value||'';
   const fsup=document.getElementById('fin-sup')?.value||'';
   const flt=payments.filter(p=>{
-    const t=norm(`${p.pi} ${p.po} ${p.supplier} ${p.client||''}`);
+    const t=norm(`${p.pi} ${p.po} ${p.inv||''} ${p.supplier} ${p.client||''}`);
     const linkedO=linkOrd(p);
     const effStatus=linkedO?linkedO.status:p.status;
     return(!q||t.includes(q))&&(!st||effStatus===st)&&(!fsup||p.supplier===fsup)&&(!cl||p.client===cl);
@@ -1400,8 +1512,14 @@ function renderFinanceiro(){
       </div>
     </div>`;
 
-  // cards por IP
-  document.getElementById('fin-cards').innerHTML=fltS.map(p=>{
+  // cards por IP — ordenados por data do pedido (mais recente primeiro)
+  const cardsOrdered=[...fltS].sort((a,b)=>{
+    const da=dispToISO(linkOrd(a)?.orderDate||'')||'';
+    const db=dispToISO(linkOrd(b)?.orderDate||'')||'';
+    if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
+    return db.localeCompare(da); // desc: mais recente primeiro
+  });
+  document.getElementById('fin-cards').innerHTML=cardsOrdered.map(p=>{
     const totF=pTotalForn(p),totV=pTotalVenda(p);
     const qtyCalc=p.unitPrices.reduce((a,r)=>a+(r.qty||0),0);
     const paid=piPaid(p.pi),recv=piReceived(p.pi);
@@ -1432,7 +1550,11 @@ function renderFinanceiro(){
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
         <div>
           <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy)">${esc(p.pi)}</div>
-          <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--blue)">${esc(p.po||'—')}</div>
+          <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--ink3)">
+            <span style="color:var(--blue)">${esc(p.po||'—')}</span>
+            <span style="color:var(--ink4)"> · </span>
+            <span style="color:var(--purple)">${esc(p.inv||'—')}</span>
+          </div>
         </div>
         <span style="font-size:.55rem;font-weight:600;color:${stPillCol};background:${stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(stTxt)}</span>
       </div>
@@ -1739,22 +1861,26 @@ function openOrderModal(num){
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
   document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
-  ['po','colecao','pi','cli-inv','sup','sup-inv','cont','etd','eta','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  ['po','colecao','pi','data','sup','sup-inv','cont','etd','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
       document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-colecao').value=o.colecao||'';document.getElementById('mo-pi').value=o.pi||'';
       document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
       document.getElementById('mo-notes').value=o.notes||'';
+      document.getElementById('mo-data').value=o.orderDate||'';
       const p=linkPay(o);
       if(p){
-        document.getElementById('mo-cli-inv').value=p.clientInv||'';document.getElementById('mo-sup').value=p.supplier||'';
-        document.getElementById('mo-sup-inv').value=p.inv||'';document.getElementById('mo-pay-st').value=p.status||'Mass P contracted';
-        document.getElementById('mo-etd').value=p.etd||'';document.getElementById('mo-eta').value=p.eta||'';
+        document.getElementById('mo-sup').value=p.supplier||'';
+        document.getElementById('mo-sup-inv').value=p.inv||'';
+        document.getElementById('mo-etd').value=p.etd||'';
         (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
       }
     }
-  } else addProdRow();
+  } else {
+    addProdRow();
+    document.getElementById('mo-data').value=todayDisp(); // pedido novo já vem com a data de hoje
+  }
   updatePreview();
   const allClis=[...new Set([...CLIENTES,...orders.map(o=>o.client),...payments.map(p=>p.client||'')].filter(Boolean))].sort();
   const allForn=[...new Set([...FORNECEDORES,...payments.map(p=>p.supplier).filter(Boolean)])].sort();
@@ -1767,14 +1893,12 @@ function submitOrder(){
   const po=document.getElementById('mo-po').value.trim()||'—';
   const colecao=document.getElementById('mo-colecao').value.trim();
   const pi=document.getElementById('mo-pi').value.trim();
+  const orderDate=normDate(document.getElementById('mo-data').value.trim())||todayDisp();
   const client=document.getElementById('mo-cl').value.trim();
-  const clientInv=document.getElementById('mo-cli-inv').value.trim();
   const supplier=document.getElementById('mo-sup').value.trim();
   const inv=document.getElementById('mo-sup-inv').value.trim();
   const container=document.getElementById('mo-cont').value.trim();
-  const paySt=document.getElementById('mo-pay-st')?.value||'Mass P contracted';
   const etd=normDate(document.getElementById('mo-etd').value.trim())||'—';
-  const eta=normDate(document.getElementById('mo-eta').value.trim())||'—';
   const notes=document.getElementById('mo-notes').value.trim();
   const prodRows=readProdRows();const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
 
@@ -1789,12 +1913,13 @@ function submitOrder(){
       // Buscar payment ANTES de alterar pi/po
       const p=linkPay(o);
       const oldPi=o.pi;
-      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.container=container;o.notes=notes;
+      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.container=container;o.notes=notes;o.orderDate=orderDate;
       if(totalQty>0)o.total=totalQty;
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
       if(p){
         if(pi&&pi!==oldPi){p.pi=pi; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
-        p.po=po;p.inv=inv;p.client=client;p.clientInv=clientInv;p.supplier=supplier||p.supplier;p.status=paySt;p.etd=etd;p.eta=eta;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
+        // clientInv/status/eta não têm mais campo no modal — preserva o que já estava salvo
+        p.po=po;p.inv=inv;p.client=client;p.supplier=supplier||p.supplier;p.etd=etd;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
       }
     }
     saveAll();renderAll();renderFinanceiro();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
@@ -1803,20 +1928,19 @@ function submitOrder(){
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
   if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
-  if(eta&&eta!=='—')emptyDates[6]=mkD(eta,true);
-  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes};
-  // Auto-cascade: se tem ETD, cascatear ETA. Se tem Arte, cascatear tudo.
+  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate};
+  // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
   if(emptyDates[5]&&emptyDates[5].v) autoCascade(newOrder,5);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
-  // Restaurar ETD/ETA se usuário informou explicitamente (não sobrescrever)
+  // Restaurar ETD se usuário informou explicitamente (não sobrescrever)
   if(etd&&etd!=='—')newOrder.dates[5]=mkD(etd,true);
-  if(eta&&eta!=='—')newOrder.dates[6]=mkD(eta,true);
   autoStatus(newOrder);
   orders.unshift(newOrder);
   if(pi&&prodRows.length>0){
+    const eta=newOrder.dates[6]&&newOrder.dates[6].v?newOrder.dates[6].v:'—'; // eta não tem campo próprio — vem do auto-cascade a partir do ETD
     const existing=payments.find(x=>x.pi===pi);
-    if(!existing)payments.unshift({pi,po,inv,client,clientInv,supplier:supplier||'—',status:paySt,etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
-    else{existing.po=po;existing.inv=inv;existing.client=client;existing.clientInv=clientInv;existing.supplier=supplier||existing.supplier;existing.status=paySt;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
+    if(!existing)payments.unshift({pi,po,inv,client,clientInv:'',supplier:supplier||'—',status:'Mass P contracted',etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
+    else{existing.po=po;existing.inv=inv;existing.client=client;existing.supplier=supplier||existing.supplier;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
   }
   saveAll();renderAll();closeOvl('order');toast(`Pedido #${nn} criado ✓`);
 }
@@ -1827,7 +1951,7 @@ function submitOrder(){
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
-  const lbls={pi:'IP',po:'PO#',colecao:'Coleção',client:'Cliente',product:'Produto',container:'Contêiner',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
+  const lbls={pi:'IP',po:'PO#',colecao:'Coleção',client:'Cliente',product:'Produto',container:'Contêiner',supplier:'Fornecedor',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
   showEp(e,lbls[field]||field,String(o[field]||''),field==='total',false);
   const ep=document.getElementById('ep-val');
@@ -1965,10 +2089,10 @@ function closeEp(){document.getElementById('epop').style.display='none';_epCtx=n
 function showTab(id){
   _activeTab=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   const tabs={internal:0,client:1,financeiro:2};
-  document.querySelectorAll('.tab')[tabs[id]]?.classList.add('active');
+  document.querySelectorAll('.stab')[tabs[id]]?.classList.add('active');
   if(id==='financeiro')renderFinanceiro();
 }
 
@@ -2154,7 +2278,7 @@ function renameStatus(i){
 function renderAll(){
   renderSummary();renderInternal();renderClient();populateStatusDropdowns();
   const nAlerts=calcAlerts().length;
-  const tabInt=document.querySelectorAll('.tab')[0];
+  const tabInt=document.querySelectorAll('.stab')[0];
   if(tabInt)tabInt.innerHTML=nAlerts>0?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`:'Controle Interno';
 }
 
