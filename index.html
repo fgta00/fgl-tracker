@@ -278,7 +278,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
   <div style="flex:1"></div>
   <div class="hdr-r">
     <span id="sync-status" style="font-size:.62rem;font-weight:600;margin-right:.5rem" title="Estado da sincronização com a nuvem"></span>
-    <span id="auth-status2" style="font-size:.66rem;color:rgba(255,255,255,.7);margin-right:.4rem"></span>
+    <span id="auth-status2" style="font-size:.72rem;font-weight:600;color:rgba(255,255,255,.85);margin-right:.4rem"></span>
+    <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">↓ Salvar</button>
+    <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">↑ Carregar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
   </div>
 </header>
@@ -288,8 +290,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
   <button class="stab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
   <div style="flex:1"></div>
   <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones">📅</button>
-  <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">↓ Salvar</button>
-  <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">↑ Carregar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
   <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
   <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
 </div>
