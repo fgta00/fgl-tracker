@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FGL Precificação Unificada</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --ink:#0F1923;--ink2:#2D3A45;--ink3:#5A6A76;--ink4:#9AAAB8;
+  --bg:#EDF2F7;--card:#fff;--bdr:#D0DCE8;--bdr2:#B8C8D8;
+  --navy:#0D2B45;--blue:#1565C0;--ltblue:#E3F0FC;
+  --green:#1B7A45;--ltgrn:#D4F0E3;
+  --amber:#B85C00;--ltamb:#FEF0DB;
+  --red:#C01628;--ltred:#FCEAED;
+  --grey:#5A6A76;--ltgry:#EDF1F4;
+  --purple:#5B21B6;--ltpur:#EDE9FE;
+  --teal:#0D6E6E;--ltteal:#CCEFEF;
+}
+body.dark{
+  --ink:#E8EDF2;--ink2:#D0D8E0;--ink3:#A0B0C0;--ink4:#708090;
+  --bg:#111827;--card:#1B2535;--bdr:#2A3A4E;--bdr2:#3A4E65;
+  --navy:#0F172A;--ltblue:#1A2E48;
+  --ltgrn:#0F3026;--ltamb:#3D2800;--ltred:#3D1218;
+  --ltgry:#1B2535;--ltpur:#1E1040;--ltteal:#0D3230;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.4}
+.mono{font-family:'IBM Plex Mono',monospace}
+header{background:var(--navy);color:#fff;padding:.7rem 1.3rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50}
+body.dark header{background:#0A0F1A}
+header .logo .leaf{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,#1A7A45);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+header h1{font-size:.95rem;font-weight:600}
+header .sub{font-size:.66rem;color:rgba(255,255,255,.55);font-weight:400}
+header .spacer{flex:1}
+.dm-toggle{background:none;border:1.5px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85rem}
+.dm-toggle:hover{border-color:rgba(255,255,255,.5);color:#fff}
+.wrap{max-width:1240px;margin:0 auto;padding:1.2rem 1.3rem 3rem}
+.sh{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:.6rem}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem 1.15rem;margin-bottom:1rem}
+.ff{display:flex;flex-direction:column;gap:.25rem}
+.ff label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+.ff input,.ff select{border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.82rem;color:var(--ink);background:var(--card);outline:none;width:100%}
+.ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
+.ff input.mono{font-family:'IBM Plex Mono'}
+.ff input:focus,.ff select:focus{border-color:var(--blue)}
+body.dark .ff input,body.dark .ff select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+.grid{display:grid;gap:.7rem}
+.btn{border:none;border-radius:8px;padding:.45rem .9rem;font-family:'IBM Plex Sans';font-weight:600;font-size:.78rem;cursor:pointer}
+.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:#1050A0}
+.btn-s{background:transparent;border:1.5px solid var(--bdr2);color:var(--ink2)}
+.btn-s:hover{border-color:var(--blue);color:var(--blue)}
+.addrow{background:none;border:1.5px dashed var(--bdr2);color:var(--ink3);font-size:.72rem;padding:.35rem;border-radius:7px;cursor:pointer;width:100%}
+.addrow:hover{border-color:var(--blue);color:var(--blue)}
+.prow{display:grid;grid-template-columns:1.15fr .8fr .8fr 30px .65fr .75fr .85fr .5fr .5fr .5fr .45fr .6fr 24px;gap:.3rem;align-items:center;margin-bottom:.4rem;font-size:.72rem}
+.prow input{border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem .32rem;font-family:'IBM Plex Mono';font-size:.7rem;outline:none;background:var(--card);color:var(--ink);width:100%;min-width:0}
+.prow input:focus{border-color:var(--blue)}
+body.dark .prow input{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+.prow .rm{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem}
+.prow .gear{background:var(--ltgry);border:1px solid var(--bdr2);border-radius:5px;cursor:pointer;font-size:.72rem;padding:.28rem 0;color:var(--ink3)}
+.prow .gear:hover{border-color:var(--blue);color:var(--blue)}
+.prow-h{display:grid;grid-template-columns:1.15fr .8fr .8fr 30px .65fr .75fr .85fr .5fr .5fr .5fr .45fr .6fr 24px;gap:.3rem;font-size:.5rem;line-height:1.25;font-weight:600;text-transform:uppercase;letter-spacing:.01em;color:var(--ink4);margin-bottom:.45rem;padding:0 .1rem;align-items:end}
+.prow-h span{overflow-wrap:break-word}
+.collap-h{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.collap-h .chev{transition:transform .15s;font-size:.7rem;color:var(--ink3)}
+.collap-h.open .chev{transform:rotate(90deg)}
+.collap-body{display:none;margin-top:.8rem}
+.collap-body.open{display:block}
+.prem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.7rem}
+.prem-sec{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);grid-column:1/-1;margin-top:.4rem;border-bottom:1px solid var(--bdr);padding-bottom:.2rem}
+/* COMPARAÇÃO — grid plano, cada célula explícita */
+.cmp{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;border:1px solid var(--bdr);border-radius:12px;overflow:hidden;background:var(--card)}
+.cmp>div{padding:.45rem .7rem;border-bottom:1px solid var(--bdr);font-size:.75rem;display:flex;align-items:center;min-width:0}
+.cmp .lbl{color:var(--ink2);flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.15;gap:0}
+.cmp .v{justify-content:flex-end;font-family:'IBM Plex Mono';font-weight:500;text-align:right}
+.cmp .colh{justify-content:center;flex-direction:column;color:#fff;font-weight:700;font-size:.78rem;padding:.4rem .7rem;text-align:center;border-bottom:none}
+.cmp .fy{background:linear-gradient(135deg,#0D6E6E,#0A5555)}
+.cmp .av{background:linear-gradient(135deg,#0D2B45,#091F33)}
+.cmp .tr{background:linear-gradient(135deg,#1B7A45,#14602F)}
+.cmp .colh .flag{font-size:1rem;margin-bottom:2px}
+.cmp .colh .csub{font-size:.57rem;font-weight:400;opacity:.78}
+.cmp .sec{grid-column:1/-1;background:var(--navy);color:rgba(255,255,255,.85);font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .7rem}
+body.dark .cmp .sec{background:#0A0F1A}
+.cmp .hero{background:var(--ltgry);font-weight:700;font-size:.92rem;padding:.7rem}
+.cmp .hero.v{font-size:1rem}
+.cmp .sub{font-size:.64rem;color:var(--ink4);padding:.28rem .7rem}
+.cmp .corner{background:var(--ltgry);border-bottom:1px solid var(--bdr)}
+body.dark .cmp .corner{background:#1B2535}
+.cmp .cash{background:var(--ltred);font-size:.82rem;padding:.4rem .7rem}
+.cmp .cash.v{font-size:.92rem}
+.cmp .dif{background:var(--ltamb);font-size:.78rem;padding:.35rem .7rem}
+.cmp .liq{background:var(--ltgrn);font-weight:700;font-size:.85rem;padding:.4rem .7rem}
+.cmp .liq.v{font-size:.95rem}
+.tag{display:inline-block;font-size:.56rem;font-weight:600;padding:.08rem .35rem;border-radius:4px;margin-top:3px;margin-right:3px;background:#fff;color:var(--green)}
+.tag-cash{background:#fff;color:var(--amber)}
+.insight{background:linear-gradient(135deg,var(--ltgrn),var(--ltteal));border:1px solid var(--green);border-radius:12px;padding:1rem 1.2rem;margin-top:1rem;font-size:.85rem;line-height:1.55}
+body.dark .insight{background:linear-gradient(135deg,#0F3026,#0D3230);color:#E8EDF2}
+.insight b{color:var(--green)}
+body.dark .insight b{color:#6EE7B7}
+.cbm-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.66rem;color:var(--ink3);background:var(--ltgry);padding:.25rem .6rem;border-radius:6px;font-family:'IBM Plex Mono'}
+.fill-bar{height:6px;background:var(--bdr);border-radius:3px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle}
+.fill-bar div{height:100%;background:var(--green)}
+small.hint{color:var(--ink4);font-size:.62rem}
+.ovl{position:fixed;inset:0;background:rgba(8,15,25,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}
+#ovl-lock,#ovl-auth,#ovl-rvlock{background:rgba(8,15,25,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.ovl.open{display:flex}
+.modal{background:var(--card);border-radius:14px;width:560px;max-width:96vw;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+body.dark .modal{background:#1B2535}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--card)}
+body.dark .modal-h{background:#1B2535}
+.modal-h h2{font-size:.92rem;font-weight:700}
+.mcls{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--ink3)}
+.modal-b{padding:1.1rem}
+.exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
+.exp-row label{font-size:.7rem;color:var(--ink2)}
+.exp-row .formula{font-size:.55rem;color:var(--ink4);font-family:'IBM Plex Mono';display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap}
+.exp-row input,.exp-row select{border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .45rem;font-family:'IBM Plex Mono';font-size:.74rem;background:var(--card);color:var(--ink);width:100%}
+body.dark .exp-row input,body.dark .exp-row select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+.exp-sec{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin:.9rem 0 .5rem;border-bottom:1px solid var(--bdr);padding-bottom:.2rem}
+.exp-total{display:flex;justify-content:space-between;padding:.6rem .2rem 0;margin-top:.6rem;border-top:2px solid var(--bdr2);font-weight:700;font-size:.85rem}
+@media(max-width:780px){.cmp{grid-template-columns:1fr;font-size:.9rem}.prow,.prow-h{grid-template-columns:1fr 1fr;gap:.4rem}}
+
+/* ══ ABAS (padrão FGL Tracker) ══ */
+header{flex-wrap:wrap;row-gap:.4rem}
+header .tabs{display:flex;gap:2px;height:100%;margin-left:.3rem}
+header .tab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'IBM Plex Sans';font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:2.7rem;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:inline-flex;align-items:center}
+header .tab:hover{color:rgba(255,255,255,.85)}
+header .tab.active{color:#fff;border-bottom-color:var(--blue)}
+.view{display:none}
+.view.active{display:block}
+header .hbtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);border-radius:8px;padding:.42rem .8rem;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
+header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.11)}
+#save-status{font-size:.66rem;color:#8FE3A8;font-weight:600;white-space:nowrap}
+
+/* ══════════════════════ REVENDA ══════════════════════ */
+.rv-tabs{display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:1.1rem}
+.rv-tab{padding:.55rem 1.2rem;font-size:.78rem;font-weight:600;border:none;background:none;cursor:pointer;color:var(--ink3);border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;font-family:'IBM Plex Sans'}
+.rv-tab:hover{color:var(--ink)}
+.rv-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.rv-pane{display:none}
+.rv-pane.active{display:block}
+.badge-regime{background:rgba(255,255,255,.15);color:#fff;font-size:.66rem;padding:.22rem .6rem;border-radius:20px;white-space:nowrap}
+.sep-lbl{font-size:.62rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin:.9rem 0 .5rem;padding-top:.6rem;border-top:1px solid var(--bdr)}
+.sep-lbl:first-child{margin-top:0;padding-top:0;border-top:none}
+.toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;width:fit-content}
+.toggle-grp button{padding:.4rem 1.1rem;font-size:.74rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
+.toggle-grp button.active{background:var(--green);color:#fff}
+.ff input.inp-auto{border-color:var(--ltgrn);background:var(--ltgrn);color:var(--green);font-weight:600}
+.aviso-simples{display:none;background:var(--ltamb);border:1px solid var(--amber);border-radius:7px;padding:.4rem .6rem;font-size:.68rem;color:var(--amber);font-weight:600;margin-top:.5rem}
+.difal-bloco{display:none;background:var(--ltpur);border:1px solid var(--purple);border-radius:7px;padding:.7rem .8rem;margin-top:.7rem}
+.difal-bloco.visible{display:block}
+.difal-title{font-weight:700;font-size:.72rem;color:var(--purple);margin-bottom:.5rem}
+.forn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.9rem;align-items:start}
+.forn-card{border:2px solid var(--bdr2);border-radius:10px;overflow:hidden;background:var(--card)}
+.forn-hdr{padding:.5rem .8rem;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.76rem;color:#fff}
+.forn-body{padding:.75rem .8rem}
+.forn-1 .forn-hdr{background:var(--green)}.forn-1{border-color:var(--green)}
+.forn-2 .forn-hdr{background:var(--blue)}.forn-2{border-color:var(--blue)}
+.forn-3 .forn-hdr{background:var(--purple)}.forn-3{border-color:var(--purple)}
+.forn-hdr .rm-forn{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:.62rem;font-weight:600;padding:.2rem .5rem;border-radius:5px;cursor:pointer}
+.res-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.res-table th{background:var(--ltgry);padding:.4rem .6rem;text-align:left;font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid var(--bdr)}
+.res-table th.cf{color:#fff;font-size:.72rem;text-transform:none;letter-spacing:0}
+.res-table th.cf1{background:var(--green)}.res-table th.cf2{background:var(--blue)}.res-table th.cf3{background:var(--purple)}
+.res-table td{padding:.4rem .6rem;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.res-table tr:last-child td{border-bottom:none}
+.res-table tr.rv-sub td{background:var(--ltgry);font-weight:600}
+.res-table tr.rv-tot td{background:var(--green);color:#fff;font-weight:700;font-size:.8rem}
+.res-table tr.rv-tot2 td{background:var(--navy);color:#fff;font-weight:700}
+.res-table tr.rv-caixa td{background:var(--ltamb)}
+.res-table tr.rv-sec td{background:var(--navy);color:rgba(255,255,255,.85);font-weight:700;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .6rem}
+.res-table .num{text-align:right;font-family:'IBM Plex Mono'}
+.res-table .pos{color:var(--green);font-weight:600}
+.res-table .negv{color:var(--red)}
+.res-table .best{background:var(--ltgrn)!important;font-weight:700!important;color:var(--green)!important}
+.res-table .worst{background:var(--ltred)!important;color:var(--red)!important}
+.badge-best{display:inline-block;background:var(--green);color:#fff;font-size:.56rem;font-weight:700;padding:.05rem .35rem;border-radius:4px;margin-left:.3rem;vertical-align:middle}
+.parcela-table{width:100%;border-collapse:collapse;font-size:.74rem}
+.parcela-table th{background:var(--ltgry);padding:.3rem .4rem;text-align:left;font-size:.58rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr)}
+.parcela-table td{padding:.2rem .25rem;border-bottom:1px solid var(--bdr)}
+.parcela-table input{width:100%;border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .35rem;font-size:.74rem;text-align:right;background:var(--ltblue);color:var(--ink)}
+.parcela-table input:focus{outline:none;border-color:var(--blue)}
+.parcela-table .del-btn{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.9rem;padding:0 .25rem}
+.parcela-table .del-btn:hover{color:var(--red)}
+.sum-badge{font-size:.64rem;font-weight:700;padding:.1rem .5rem;border-radius:10px}
+.sum-ok{background:var(--ltgrn);color:var(--green)}
+.sum-err{background:var(--ltred);color:var(--red)}
+.gap-badge{display:inline-block;padding:.25rem .9rem;border-radius:12px;font-size:.68rem;font-weight:700}
+.gap-pos{background:var(--ltgrn);color:var(--green)}
+.gap-neg{background:var(--ltred);color:var(--red)}
+.gap-neu{background:var(--ltgry);color:var(--ink2)}
+.tl-wrap{overflow-x:auto;padding:.25rem 0 .5rem}
+.tl-outer{display:flex;flex-direction:column;gap:.7rem;min-width:420px}
+.tl-row{display:flex;align-items:center}
+.tl-node{display:flex;flex-direction:column;align-items:center;min-width:76px;flex-shrink:0}
+.tl-dot{width:13px;height:13px;border-radius:50%;border:2.5px solid var(--bdr2);background:var(--card);flex-shrink:0}
+.tl-dot.marco{background:var(--ink4);border-color:var(--ink4)}
+.tl-dot.paga{background:var(--amber);border-color:var(--amber)}
+.tl-dot.recebe{background:var(--green);border-color:var(--green)}
+.tl-conn{flex:1;height:2px;background:var(--bdr2)}
+.tl-lbl{font-size:.6rem;font-weight:700;color:var(--ink);text-align:center;margin-top:.2rem;white-space:nowrap}
+.tl-sub{font-size:.58rem;color:var(--ink4);text-align:center}
+.tl-val{font-size:.64rem;font-weight:700;text-align:center;margin-top:.05rem}
+.tl-val.pos{color:var(--green)}
+.tl-val.neg{color:var(--red)}
+.rv-data-table{width:100%;border-collapse:collapse;font-size:.74rem}
+.rv-data-table th{background:var(--navy);color:#fff;padding:.45rem .55rem;text-align:left;font-size:.62rem;font-weight:600;white-space:nowrap}
+.rv-data-table td{padding:.4rem .55rem;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.rv-data-table tr:last-child td{border-bottom:none}
+.rv-data-table tr:hover td{background:var(--ltgry)}
+.rv-num{text-align:right;font-family:'IBM Plex Mono';white-space:nowrap}
+.rv-pos{color:var(--green);font-weight:600}
+.btn-rvsm{padding:.2rem .55rem;font-size:.66rem;border-radius:5px;border:none;cursor:pointer;font-weight:600}
+.btn-conv{background:var(--green);color:#fff}
+.btn-rvdel{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.85rem;padding:0 .25rem}
+.btn-rvdel:hover{color:var(--red)}
+.rv-empty{text-align:center;padding:2rem;color:var(--ink3);font-size:.78rem}
+.status-checks{display:flex;flex-direction:column;gap:.2rem;min-width:150px}
+.status-checks label{display:flex;align-items:center;gap:.3rem;font-size:.66rem;cursor:pointer;white-space:nowrap}
+.badge-status{display:inline-block;padding:.12rem .45rem;border-radius:10px;font-size:.58rem;font-weight:700}
+.s-producao{background:var(--ltamb);color:var(--amber)}
+.s-entregue{background:var(--ltblue);color:var(--blue)}
+.s-recebido{background:var(--ltgrn);color:var(--green)}
+.s-pendente{background:var(--ltgry);color:var(--ink3)}
+@media print{.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="leaf">🌿</span></div>
+  <div><h1>FGL</h1></div>
+  <div class="tabs">
+    <button class="tab" id="tab-import" onclick="showTab('import')" style="display:none">Importação</button>
+    <button class="tab active" id="tab-revenda" onclick="showTab('revenda')">Revenda</button>
+    <a class="tab" id="tab-tracker" href="index.html" style="display:none;text-decoration:none">📋 Tracker</a>
+  </div>
+  <div class="spacer"></div>
+  <span id="save-status"></span>
+  <button class="hbtn" id="auth-status" onclick="onAuthButtonClick()">👤 Minha conta</button>
+  <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
+  <button class="hbtn" onclick="saveState()">↓ Salvar</button>
+  <button class="dm-toggle" id="dm" onclick="toggleDark()">🌙</button>
+</header>
+
+<div id="view-import" class="view">
+<div class="wrap">
+
+  <div class="card">
+    <div class="collap-h open" onclick="toggleCollap(this,'prod-body')">
+      <div class="sh" style="margin:0">1 · Produtos & Empacotamento</div><span class="chev">▶</span>
+    </div>
+    <div class="collap-body open" id="prod-body">
+      <div class="prow-h">
+        <span>Produto</span><span>SKU</span><span>NCM</span><span>⚙</span><span>Qtd</span><span>FOB un US$</span><span>OEM US$</span>
+        <span>Cx L</span><span>Cx W</span><span>Cx H</span><span>Un/Cx</span><span>Peso cx (kg)</span><span></span>
+      </div>
+      <div id="prod-rows"></div>
+      <button class="addrow" onclick="addProd()">＋ Adicionar produto</button>
+      <label style="display:flex;align-items:center;gap:.4rem;margin-top:.6rem;font-size:.72rem;color:var(--ink3);cursor:pointer">
+        <input type="checkbox" id="oemInFob" checked onchange="recalc()" style="width:14px;height:14px">
+        <span><b>OEM entra no FOB</b> — soma ao preço FOB unitário (÷ qtd) e passa a compor a base de impostos. Desmarcado: OEM fica <i>por fora</i> do FOB/impostos, mas continua somando no custo total.</span>
+      </label>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem">
+        <span class="cbm-badge">CBM: <b id="cbm-tot">0,000</b> m³</span>
+        <span class="cbm-badge">Caixas: <b id="cx-tot">0</b></span>
+        <span class="cbm-badge">Peso: <b id="peso-tot">0</b> kg</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.6rem" id="cont-occ"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sh">2 · Operação</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+      <div class="ff"><label>Câmbio US$ DI</label><input class="mono" id="fx" type="number" step="0.0001" value="5.50" oninput="recalc()"><span class="formula">usado no CIF: FOB+Seguro+Frete</span></div>
+      <div class="ff"><label>Câmbio frete (ref.)</label><input class="mono" id="fxFrete" type="number" step="0.0001" value="5.665" oninput="recalc()"><span class="formula">não entra no CIF/impostos</span></div>
+      <div class="ff" style="justify-content:flex-end"><label>Frete intl US$</label><input class="mono" id="frete" type="number" step="1" value="3500" oninput="recalc()"></div>
+      <div class="ff" style="justify-content:flex-end"><label>Modal</label><select id="modal" onchange="recalc()"><option value="FCL">FCL (cheio)</option><option value="LCL">LCL (fracionado)</option></select></div>
+      <div class="ff" style="justify-content:flex-end"><button class="btn btn-s" onclick="openExpenses()" style="white-space:nowrap">⚙ Despesas destino</button></div>
+    </div>
+    <small class="hint" style="display:block;margin-top:.5rem">CIF = FOB + Seguro + Frete, todos convertidos pelo <b>câmbio US$ DI</b> (mesmo câmbio da mercadoria) — é a base de II/IPI/PIS/COFINS. O <b>câmbio de frete</b> fica só como referência (não afeta o CIF nem os impostos). Preencha <b>Margem-alvo</b> (custo→preço) ou <b>Preço de venda</b> (preço→margem). O último editado manda.</small>
+  </div>
+
+  <div class="card">
+    <div class="collap-h" onclick="toggleCollap(this,'prem-body')">
+      <div class="sh" style="margin:0">3 · Premissas fiscais <small class="hint">(clique para ajustar)</small></div><span class="chev">▶</span>
+    </div>
+    <div class="collap-body" id="prem-body">
+      <div class="prem-grid">
+        <div class="prem-sec">ICMS — única diferença fiscal entre as rotas BR</div>
+        <div class="ff"><label>AV Direto RJ %</label><input class="mono" id="icmsAV" type="number" step="0.1" value="18" oninput="recalc()"><span class="formula">16% ICMS + 2% FECP · pago no desembaraço</span></div>
+        <div class="ff"><label>Trading SC %</label><input class="mono" id="icmsTR" type="number" step="0.1" value="4" oninput="recalc()"><span class="formula">benefício SC · única alíquota (entrada = saída, planilha real)</span></div>
+
+        <div class="prem-sec">Trading — revenda p/ AV</div>
+        <div class="ff"><label>Mark up %</label><input class="mono" id="markup" type="number" step="0.1" value="2.5" oninput="recalc()"></div>
+        <div class="ff"><label>PIS saída nom. %</label><input class="mono" id="pisSaida" type="number" step="0.01" value="1.65" oninput="recalc()"><span class="formula">efetivo = pis−(pis×ICMS Trading SC)</span></div>
+        <div class="ff"><label>COFINS saída nom. %</label><input class="mono" id="cofinsSaida" type="number" step="0.01" value="7.6" oninput="recalc()"><span class="formula">efetivo = cof−(cof×ICMS Trading SC)</span></div>
+        <div class="ff"><label>Repasse comercial %</label><input class="mono" id="repasse" type="number" step="0.1" value="1" oninput="recalc()"></div>
+
+        <div class="prem-sec">Margens & Ásia / FY</div>
+        <div class="ff"><label>Margem-alvo BR %</label><input class="mono" id="margAlvo" type="number" step="1" value="40" oninput="setMode('cost');recalc()"><span class="formula">custo→preço (AV / Trading)</span></div>
+        <div class="ff"><label>Margem FY %</label><input class="mono" id="fyMarg" type="number" step="1" value="20" oninput="recalc()"><span class="formula">custo→preço (Ásia)</span></div>
+        <div class="ff"><label>Preço venda un R$</label><input class="mono" id="precoVenda" type="number" step="0.01" placeholder="(opcional)" oninput="setMode('price');recalc()"><span class="formula">preço→margem</span></div>
+      </div>
+      <small class="hint" style="display:block;margin-top:.7rem">As alíquotas de importação (I.I., IPI, PIS, COFINS) são <b>por produto</b> — defina no ⚙ de cada item. Na Trading, o ICMS não é pago separadamente na entrada: é apurado inteiro dentro da nota de saída p/ AV (gross-up), por isso há só uma alíquota (Trading SC %) — igual à planilha real.</small>
+    </div>
+  </div>
+
+  <div class="sh">Comparação de rotas</div>
+  <div class="cmp" id="cmp"></div>
+  <div class="insight" id="insight"></div>
+</div>
+</div>
+<!-- /view-import -->
+
+<!-- ═══ REVENDA ═══ -->
+<div id="view-revenda" class="view active">
+  <div class="wrap">
+
+    <div class="rv-tabs no-print">
+      <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">⚙️ Calculadora</button>
+      <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">📋 Cotações</button>
+      <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">📦 Pedidos</button>
+    </div>
+
+    <div class="card no-print" style="padding:.6rem .9rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem">
+      <span style="font-size:.66rem;color:var(--ink3);font-weight:600" id="rv-sync-status">☁ Cotações/Pedidos compartilhados: bloqueados (abra a aba pra desbloquear)</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-s" style="font-size:.64rem;padding:.28rem .6rem" onclick="rvAddMember()">＋ Adicionar pessoa</button>
+    </div>
+
+    <div id="rvpane-calc" class="rv-pane active">
+      <div class="card" style="background:var(--green);color:#fff;padding:1rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+        <div>
+          <div style="font-size:1.05rem;font-weight:700">Calculadora de Revenda de Sacolas</div>
+          <div style="font-size:.7rem;color:#B8E0C8;margin-top:.15rem">Ânima Verde Ecobags · Rio de Janeiro · Comprador–Revendedor</div>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <span class="badge-regime">Lucro Presumido</span>
+          <span class="badge-regime">Sem IPI na saída (revenda)</span>
+        </div>
+      </div>
+
+      <!-- BLOCO 1: OPERAÇÃO -->
+      <div class="card no-print">
+        <div class="collap-h open" onclick="toggleCollap(this,'rv-op-body')">
+          <div class="sh" style="margin:0">1 · Dados da Operação</div><span class="chev">▶</span>
+        </div>
+        <div class="collap-body open" id="rv-op-body">
+          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+            <div class="ff"><label>Cliente</label><input type="text" id="rv-cliente" placeholder="Nome do cliente"></div>
+            <div class="ff"><label>Data</label><input type="date" id="rv-data"></div>
+            <div class="ff"><label>Quantidade (un)</label><input type="number" class="mono" id="rv-qtd" value="5000" min="1" step="1"></div>
+            <div class="ff"><label>Preço de venda unit. R$</label><input type="number" class="mono" id="rv-pv" value="8.65" min="0" step="0.01"><span class="formula">sem IPI — AV não destaca IPI na revenda</span></div>
+          </div>
+
+          <div class="sep-lbl">Destino e tipo de venda</div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+            <div class="ff"><label>UF destino</label>
+              <select id="rv-uf" onchange="rvCalcular()">
+                <option value="RJ">RJ — intra-estadual</option>
+                <option value="SP">SP (Sul/SE)</option>
+                <option value="MG">MG (Sul/SE)</option>
+                <option value="SC">SC (Sul/SE)</option>
+                <option value="PR">PR (Sul/SE)</option>
+                <option value="RS">RS (Sul/SE)</option>
+                <option value="ES">ES (N/NE/ES)</option>
+                <option value="BA">BA (N/NE)</option>
+                <option value="AM">AM (Norte)</option>
+                <option value="PA">PA (Norte)</option>
+                <option value="CE">CE (N/NE)</option>
+                <option value="OUTRO_SUL_SE">Outro Sul/SE</option>
+                <option value="OUTRO_NNE">Outro N/NE</option>
+              </select>
+            </div>
+            <div class="ff"><label>Tipo de comprador</label>
+              <div class="toggle-grp" id="rv-tipo-toggle">
+                <button id="rv-btn-b2b" class="active" onclick="rvSetTipo('b2b')">B2B</button>
+                <button id="rv-btn-b2c" onclick="rvSetTipo('b2c')">B2C</button>
+              </div>
+              <span class="formula" id="rv-hint-tipo" style="display:block;margin-top:.25rem">Revendedor / empresa</span>
+            </div>
+            <div class="ff"><label>ICMS débito venda %</label><input type="number" class="mono inp-auto" id="rv-icms-deb" step="0.1" min="0" max="100"><span class="formula">auto — editável</span></div>
+            <div class="ff"><label>PIS/COFINS/IRPJ/CSLL %</label><input type="number" class="mono inp-auto" id="rv-fed-pct" value="5.93" step="0.01" min="0"><span class="formula">Lucro Presumido — editável</span></div>
+          </div>
+
+          <div class="sep-lbl">Venda — encargos e frete</div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+            <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv-comissao" value="0" step="0.1" min="0"></div>
+            <div class="ff"><label>Frete entrega — na NF (R$ total)</label><input type="number" class="mono" id="rv-frete-ent" value="0" step="0.01" min="0"><span class="formula">somado à NF · entra na base ICMS</span></div>
+          </div>
+
+          <div class="difal-bloco" id="rv-difal-bloco">
+            <div class="difal-title">⚠ DIFAL — venda B2C inter-estadual</div>
+            <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+              <div class="ff"><label>Alíquota ICMS destino %</label><input type="number" class="mono" id="rv-difal-dest" value="17" step="0.1" min="0" max="100"></div>
+              <div class="ff"><label>Alíquota ICMS origem RJ %</label><input type="number" class="mono" id="rv-difal-orig" value="12" step="0.1" min="0" max="100"></div>
+              <div class="ff"><label>DIFAL por unidade R$</label><input type="number" class="mono inp-auto" id="rv-difal-val" readonly><span class="formula">auto calculado</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 1b: LINHA DO TEMPO -->
+      <div class="card no-print">
+        <div class="collap-h open" onclick="toggleCollap(this,'rv-tl-body')">
+          <div class="sh" style="margin:0">2 · Linha do Tempo — prazos a partir da confirmação do pedido</div><span class="chev">▶</span>
+        </div>
+        <div class="collap-body open" id="rv-tl-body">
+          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:1rem">
+            <div class="ff"><label>Prazo de produção (dias)</label><input type="number" class="mono" id="rv-tl-prod" value="30" min="0" step="1" oninput="rvCalcTimeline()"><span class="formula">pedido → saída fábrica</span></div>
+            <div class="ff" style="grid-column:span 2">
+              <label>Fornecedor (para valores)</label>
+              <div class="toggle-grp" id="rv-tl-forn-toggle" style="margin-top:.25rem">
+                <button class="active" onclick="rvSetTlForn(1,this)">Forn. 1</button>
+                <button onclick="rvSetTlForn(2,this)">Forn. 2</button>
+                <button onclick="rvSetTlForn(3,this)">Forn. 3</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+            <div>
+              <div class="sep-lbl" style="margin-top:0">💸 Pagamento fornecedor (dias após pedido)</div>
+              <table class="parcela-table">
+                <thead><tr><th>#</th><th>% valor</th><th>Dias após pedido</th><th></th></tr></thead>
+                <tbody id="rv-pgto-body"></tbody>
+              </table>
+              <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
+                <button class="btn btn-s" style="font-size:.66rem;padding:.25rem .6rem" onclick="rvAddParcela('pgto')">+ parcela</button>
+                <span id="rv-pgto-sum-badge" class="sum-badge"></span>
+              </div>
+            </div>
+            <div>
+              <div class="sep-lbl" style="margin-top:0">💰 Recebimento cliente (dias após pedido)</div>
+              <table class="parcela-table">
+                <thead><tr><th>#</th><th>% valor</th><th>Dias após pedido</th><th></th></tr></thead>
+                <tbody id="rv-receb-body"></tbody>
+              </table>
+              <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
+                <button class="btn btn-s" style="font-size:.66rem;padding:.25rem .6rem" onclick="rvAddParcela('receb')">+ parcela</button>
+                <span id="rv-receb-sum-badge" class="sum-badge"></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="rv-timeline-visual"></div>
+        </div>
+      </div>
+
+      <!-- BLOCO 2: FORNECEDORES -->
+      <div class="card no-print">
+        <div class="collap-h open" onclick="toggleCollap(this,'rv-forn-body')">
+          <div class="sh" style="margin:0">3 · Fornecedores — até 3 para comparação</div><span class="chev">▶</span>
+        </div>
+        <div class="collap-body open" id="rv-forn-body">
+          <small class="hint" style="display:block;margin-bottom:.7rem">Campos em <b>azul</b> = entrada manual · <b>verde</b> = calculado automaticamente (editável)</small>
+          <div class="forn-grid" id="rv-forn-grid"></div>
+        </div>
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="no-print" style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0 1.3rem">
+        <button class="btn btn-p" style="font-size:.85rem;padding:.6rem 1.6rem" onclick="rvCalcular()">⟳ Calcular</button>
+        <button class="btn btn-s" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn" style="background:var(--blue);color:#fff" onclick="rvSalvarCotacao()">💾 Salvar Cotação</button>
+        <button class="btn btn-s" onclick="rvLimparTudo()">Limpar tudo</button>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div id="rv-resultados" style="display:none">
+        <div class="card">
+          <div class="collap-h open" style="cursor:default;background:var(--green)" >
+            <div style="margin:0;color:#fff;font-size:.78rem;font-weight:700;letter-spacing:0;text-transform:none" id="rv-res-titulo">Resultados</div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="res-table" id="rv-tabela-res"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rvpane-cotacoes" class="rv-pane">
+      <div class="card">
+        <div class="collap-h open" style="cursor:default">
+          <div class="sh" style="margin:0">Cotações salvas</div>
+          <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .7rem" onclick="rvLimparTodasCotacoes()">Limpar todas</button>
+        </div>
+        <div style="overflow-x:auto"><div id="rv-cotacoes-container"></div></div>
+      </div>
+    </div>
+
+    <div id="rvpane-pedidos" class="rv-pane">
+      <div class="card">
+        <div class="collap-h open" style="cursor:default">
+          <div class="sh" style="margin:0">Pedidos confirmados</div>
+          <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .7rem" onclick="rvLimparTodosPedidos()">Limpar todos</button>
+        </div>
+        <div style="overflow-x:auto"><div id="rv-pedidos-container"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- POPUP ALÍQUOTAS POR PRODUTO -->
+<div class="ovl" id="ovl-ncm" onclick="if(event.target===this)closeM('ncm')">
+  <div class="modal" style="width:420px">
+    <div class="modal-h"><h2 id="ncm-title">Alíquotas de importação</h2><button class="mcls" onclick="closeM('ncm')">✕</button></div>
+    <div class="modal-b">
+      <small class="hint" style="display:block;margin-bottom:.8rem">Alíquotas específicas desta NCM. Padrão: 4202.92.00 (sacolas).</small>
+      <div class="exp-row"><label>I.I. %</label><input class="mono" id="ncm-ii" type="number" step="0.01"><span class="formula">× CIF</span></div>
+      <div class="exp-row"><label>IPI %</label><input class="mono" id="ncm-ipi" type="number" step="0.001"><span class="formula">× (CIF+II)</span></div>
+      <div class="exp-row"><label>PIS %</label><input class="mono" id="ncm-pis" type="number" step="0.001"><span class="formula">× CIF</span></div>
+      <div class="exp-row"><label>COFINS %</label><input class="mono" id="ncm-cofins" type="number" step="0.001"><span class="formula">× CIF</span></div>
+      <div style="text-align:right;margin-top:1rem"><button class="btn btn-p" onclick="saveNCM()">Salvar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP DESPESAS DESTINO -->
+<div class="ovl" id="ovl-exp" onclick="if(event.target===this)closeM('exp')">
+  <div class="modal">
+    <div class="modal-h"><h2>Despesas de destino — conferência</h2><button class="mcls" onclick="closeM('exp')">✕</button></div>
+    <div class="modal-b">
+      <small class="hint" style="display:block;margin-bottom:.5rem">Custos portuários/frete, comuns às rotas BR. Taxas em US$ convertem pelo câmbio. As com fórmula recalculam sozinhas.</small>
+
+      <div class="exp-sec">Com fórmula <span style="font-weight:400;text-transform:none;color:var(--ink4)">(calculado; pode editar)</span></div>
+      <div class="exp-row"><label>AFRMM</label><input class="mono" id="e-afrmm" disabled><span class="formula"><input class="mono" id="e-afrmmpct" type="number" step="0.1" value="8" oninput="saveExp()" style="width:46px">% × (frete+capatazia)</span></div>
+      <div class="exp-row"><label>Diferença de frete</label><input class="mono" id="e-difrete" disabled><span class="formula">frete × (câmbio frete − câmbio DI)</span></div>
+      <div class="exp-row"><label>Seguro internacional</label><input class="mono" id="e-seg" disabled><span class="formula"><input class="mono" id="e-segpct" type="number" step="0.01" value="0.12" oninput="saveExp()" style="width:50px">% × base</span></div>
+      <div class="exp-row"><label>Capatazia / THC</label><input class="mono" id="e-thc" type="number" step="0.01" oninput="thcManual()"><span class="formula" id="thc-f">LCL cbm×75 · edite p/ sobrepor</span></div>
+      <div class="exp-row" id="thc-fcl-row"><label style="font-size:.62rem;color:var(--ink4)">↳ THC FCL fixo R$</label><input class="mono" id="e-thcfcl" type="number" value="1060" oninput="saveExp()"><span></span></div>
+
+      <div class="exp-sec">Taxas fixas <span style="font-weight:400;text-transform:none;color:var(--ink4)">(valor + moeda)</span></div>
+      <div id="fixed-exp"></div>
+
+      <div class="exp-sec">Armazenagem (por período)</div>
+      <div class="exp-row"><label>1º período (sempre) R$</label><input class="mono" id="e-arm1" type="number" value="565" oninput="saveExp()"><span></span></div>
+      <div class="exp-row"><label>Períodos adicionais R$</label><input class="mono" id="e-arm2" type="number" value="0" oninput="saveExp()"><span class="formula">se atraso</span></div>
+      <div class="exp-row"><label>Levante R$</label><input class="mono" id="e-levante" type="number" value="490" oninput="saveExp()"><span></span></div>
+      <div class="exp-row"><label>Pesagem R$</label><input class="mono" id="e-pesagem" type="number" value="165" oninput="saveExp()"><span></span></div>
+
+      <div class="exp-sec">Sobretaxas <span style="font-weight:400;text-transform:none;color:var(--ink4)">(quando aplicável)</span></div>
+      <div class="exp-row"><label>Picking (LCL) R$</label><input class="mono" id="e-picking" type="number" value="0" oninput="saveExp()"><span></span></div>
+      <div class="exp-row"><label>Sobretaxa geral R$</label><input class="mono" id="e-sobre" type="number" value="0" oninput="saveExp()"><span class="formula">carreg/posic/CRS</span></div>
+
+      <div class="exp-total"><span>Total despesas destino</span><span class="mono" id="e-total">R$ 0,00</span></div>
+      <div style="text-align:right;margin-top:.8rem"><button class="btn btn-p" onclick="closeM('exp')">Fechar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTA — SUPABASE AUTH (e-mail + senha) -->
+<div class="ovl" id="ovl-auth">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-b" style="text-align:center;padding-top:1.6rem">
+      <div style="font-size:2rem;margin-bottom:.4rem">👤</div>
+      <div class="sh" style="justify-content:center;margin-bottom:.3rem">Entrar</div>
+      <p style="font-size:.74rem;color:var(--ink3);margin-bottom:.9rem">Acesso restrito. Preencha os 3 campos — a senha do cofre libera automaticamente o que você tiver permissão de ver.</p>
+      <input class="mono" id="auth-email" type="email" placeholder="seu@email.com" autocomplete="email"
+        style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink);margin-bottom:.5rem">
+      <input class="mono" id="auth-pw" type="password" placeholder="Senha da conta" autocomplete="current-password"
+        style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink);margin-bottom:.5rem">
+      <input class="mono" id="auth-vault-pw" type="password" placeholder="Senha do cofre" autocomplete="off"
+        style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink)">
+      <div id="auth-err" style="color:var(--red);font-size:.7rem;margin-top:.4rem;min-height:1.2em"></div>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem">
+        <button class="btn btn-p" style="flex:1" onclick="authSignIn()">Entrar</button>
+        <button class="btn btn-s" style="flex:1" onclick="authSignUp()">Criar conta</button>
+      </div>
+      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Primeira vez? Use "Criar conta". Sua gerente faz o mesmo com o e-mail dela — depois você a adiciona no vault compartilhado.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CADEADO — ABA IMPORTAÇÃO (acesso restrito) -->
+<div class="ovl" id="ovl-lock" style="z-index:500" onclick="if(event.target===this)showTab('revenda')">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-b" style="text-align:center;padding-top:1.6rem">
+      <div style="font-size:2rem;margin-bottom:.4rem">🔒</div>
+      <div class="sh" style="justify-content:center;margin-bottom:.3rem">Importação protegida</div>
+      <p style="font-size:.76rem;color:var(--ink3);margin-bottom:.9rem" id="lock-hint">Acesso restrito. Digite a senha para continuar.</p>
+      <input class="mono" id="lock-pass" type="password" placeholder="Senha" autocomplete="off"
+        style="width:100%;padding:.65rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:1rem;background:var(--card);color:var(--ink)"
+        onkeydown="if(event.key==='Enter')tryUnlock()">
+      <div id="lock-err" style="color:var(--red);font-size:.72rem;margin-top:.4rem;min-height:1.2em"></div>
+      <button class="btn btn-p" style="width:100%;margin-top:.7rem" onclick="tryUnlock()">Entrar</button>
+      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora desta caixa para voltar à Revenda.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CADEADO — COTAÇÕES/PEDIDOS COMPARTILHADOS (Revenda) -->
+<div class="ovl" id="ovl-rvlock" style="z-index:500" onclick="if(event.target===this)rvShowTab('calc')">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-b" style="text-align:center;padding-top:1.6rem">
+      <div style="font-size:2rem;margin-bottom:.4rem">🔒</div>
+      <div class="sh" style="justify-content:center;margin-bottom:.3rem">Dados compartilhados</div>
+      <p style="font-size:.76rem;color:var(--ink3);margin-bottom:.9rem" id="rvlock-hint">Digite a senha do cofre compartilhado (a mesma da sua gerente).</p>
+      <input class="mono" id="rvlock-pass" type="password" placeholder="Senha do cofre" autocomplete="off"
+        style="width:100%;padding:.65rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:1rem;background:var(--card);color:var(--ink)"
+        onkeydown="if(event.key==='Enter')tryRvUnlock()">
+      <div id="rvlock-err" style="color:var(--red);font-size:.72rem;margin-top:.4rem;min-height:1.2em"></div>
+      <button class="btn btn-p" style="width:100%;margin-top:.7rem" onclick="tryRvUnlock()">Entrar</button>
+      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora pra voltar à Calculadora (sem barreira nenhuma pra usá-la).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════ PRODUTOS ════════ */
+let prods=[];
+const DEF_NCM={ii:35,ipi:6.5,pis:2.1,cofins:9.65};
+function addProd(d={}){
+  prods.push({desc:d.desc||'',sku:d.sku||'',ncm:d.ncm||'4202.92.00',qty:d.qty||0,fob:d.fob||0,oem:d.oem??d.arte??0,
+    cxL:d.cxL||0,cxW:d.cxW||0,cxH:d.cxH||0,unCx:d.unCx||0,pesoCx:d.pesoCx??d.pesoUn??0,
+    ii:d.ii??DEF_NCM.ii,ipi:d.ipi??DEF_NCM.ipi,pis:d.pis??DEF_NCM.pis,cofins:d.cofins??DEF_NCM.cofins});
+  renderProds();
+}
+function rmProd(i){prods.splice(i,1);renderProds();recalc();}
+function renderProds(){
+  document.getElementById('prod-rows').innerHTML=prods.map((p,i)=>`
+    <div class="prow">
+      <input value="${esc(p.desc)}" placeholder="Sacola Ráfia G" oninput="upd(${i},'desc',this.value)">
+      <input value="${esc(p.sku)}" class="mono" placeholder="SKU" oninput="upd(${i},'sku',this.value)">
+      <input value="${esc(p.ncm)}" class="mono" oninput="upd(${i},'ncm',this.value)">
+      <button class="gear" onclick="openNCM(${i})" title="Alíquotas desta NCM">⚙</button>
+      <input value="${p.qty||''}" class="mono" type="number" oninput="upd(${i},'qty',this.value)">
+      <input value="${p.fob||''}" class="mono" type="number" step="0.001" oninput="upd(${i},'fob',this.value)">
+      <input value="${p.oem||''}" class="mono" type="number" oninput="upd(${i},'oem',this.value)">
+      <input value="${p.cxL||''}" class="mono" type="number" oninput="upd(${i},'cxL',this.value)">
+      <input value="${p.cxW||''}" class="mono" type="number" oninput="upd(${i},'cxW',this.value)">
+      <input value="${p.cxH||''}" class="mono" type="number" oninput="upd(${i},'cxH',this.value)">
+      <input value="${p.unCx||''}" class="mono" type="number" oninput="upd(${i},'unCx',this.value)">
+      <input value="${p.pesoCx||''}" class="mono" type="number" step="0.001" oninput="upd(${i},'pesoCx',this.value)">
+      <button class="rm" onclick="rmProd(${i})">✕</button>
+    </div>`).join('');
+}
+function upd(i,k,v){prods[i][k]=(k==='desc'||k==='ncm'||k==='sku')?v:(parseFloat(v)||0);recalc();}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+let _ncmIdx=-1;
+function openNCM(i){
+  _ncmIdx=i;const p=prods[i];
+  document.getElementById('ncm-title').textContent='Alíquotas — '+(p.ncm||'NCM');
+  document.getElementById('ncm-ii').value=p.ii;
+  document.getElementById('ncm-ipi').value=p.ipi;
+  document.getElementById('ncm-pis').value=p.pis;
+  document.getElementById('ncm-cofins').value=p.cofins;
+  document.getElementById('ovl-ncm').classList.add('open');
+}
+function saveNCM(){
+  if(_ncmIdx<0)return;const p=prods[_ncmIdx];
+  p.ii=parseFloat(document.getElementById('ncm-ii').value)||0;
+  p.ipi=parseFloat(document.getElementById('ncm-ipi').value)||0;
+  p.pis=parseFloat(document.getElementById('ncm-pis').value)||0;
+  p.cofins=parseFloat(document.getElementById('ncm-cofins').value)||0;
+  closeM('ncm');recalc();
+}
+
+/* ════════ DESPESAS DESTINO ════════ */
+let fixedExp=[
+  {key:'desp',label:'Honorário despachante',val:1772,cur:'BRL'},
+  {key:'desconsol',label:'Desconsolidação',val:100,cur:'BRL'},
+  {key:'liber',label:'Liberação de BL',val:75,cur:'BRL'},
+  {key:'siscomex',label:'Taxa Siscomex',val:154.23,cur:'BRL'},
+  {key:'isps',label:'ISPS',val:25,cur:'USD'},
+  {key:'iof',label:'IOF',val:28,cur:'BRL'},
+  {key:'dropoff',label:'Drop off',val:0,cur:'BRL'},
+];
+let expCfg={segpct:0.12,afrmmPct:8,thcfcl:1060,arm1:565,arm2:0,levante:490,pesagem:165,picking:0,sobre:0,thcManual:null};
+function openExpenses(){renderExpModal();document.getElementById('ovl-exp').classList.add('open');}
+function renderExpModal(){
+  document.getElementById('fixed-exp').innerHTML=fixedExp.map((e,i)=>`
+    <div class="exp-row" style="grid-template-columns:1.4fr .9fr .6fr">
+      <label>${esc(e.label)} <span class="formula" id="fx-conv-${i}" style="display:block"></span></label>
+      <input class="mono" type="number" value="${e.val}" oninput="fixedExp[${i}].val=parseFloat(this.value)||0;saveExp()">
+      <select onchange="fixedExp[${i}].cur=this.value;saveExp()"><option value="BRL"${e.cur==='BRL'?' selected':''}>R$</option><option value="USD"${e.cur==='USD'?' selected':''}>US$</option></select>
+    </div>`).join('');
+  document.getElementById('e-segpct').value=expCfg.segpct;
+  document.getElementById('e-afrmmpct').value=expCfg.afrmmPct;
+  document.getElementById('e-thcfcl').value=expCfg.thcfcl;
+  document.getElementById('e-arm1').value=expCfg.arm1;
+  document.getElementById('e-arm2').value=expCfg.arm2;
+  document.getElementById('e-levante').value=expCfg.levante;
+  document.getElementById('e-pesagem').value=expCfg.pesagem;
+  document.getElementById('e-picking').value=expCfg.picking;
+  document.getElementById('e-sobre').value=expCfg.sobre;
+  updateExpDisplay();
+}
+function saveExp(){
+  expCfg.segpct=parseFloat(document.getElementById('e-segpct').value)||0;
+  expCfg.afrmmPct=parseFloat(document.getElementById('e-afrmmpct').value)||0;
+  expCfg.thcfcl=parseFloat(document.getElementById('e-thcfcl').value)||0;
+  expCfg.arm1=parseFloat(document.getElementById('e-arm1').value)||0;
+  expCfg.arm2=parseFloat(document.getElementById('e-arm2').value)||0;
+  expCfg.levante=parseFloat(document.getElementById('e-levante').value)||0;
+  expCfg.pesagem=parseFloat(document.getElementById('e-pesagem').value)||0;
+  expCfg.picking=parseFloat(document.getElementById('e-picking').value)||0;
+  expCfg.sobre=parseFloat(document.getElementById('e-sobre').value)||0;
+  updateExpDisplay();recalc();
+}
+function updateExpDisplay(){
+  const d=destBreakdown();
+  const fx=val('fx');
+  document.getElementById('e-afrmm').value=d.afrmm.toFixed(2);
+  document.getElementById('e-difrete').value=d.difrete.toFixed(2);
+  document.getElementById('e-seg').value=d.seguro.toFixed(2);
+  // THC: só preenche se não houver override manual (deixa o usuário editar)
+  const thcEl=document.getElementById('e-thc');
+  if(expCfg.thcManual==null) thcEl.value=d.thcCalc.toFixed(2);
+  document.getElementById('e-total').textContent=fR(d.total);
+  document.getElementById('thc-fcl-row').style.display=document.getElementById('modal').value==='FCL'?'grid':'none';
+  // mostra conversão R$ ao lado de cada taxa fixa em US$
+  fixedExp.forEach((e,i)=>{
+    const span=document.getElementById('fx-conv-'+i);
+    if(span) span.textContent=e.cur==='USD'?('= '+fR(e.val*fx)):'';
+  });
+}
+function destBreakdown(){
+  const fx=val('fx'),fxF=val('fxFrete'),freteUSD=val('frete');
+  const modal=document.getElementById('modal').value;
+  const pk=packing();
+  const freteBRL=freteUSD*fx; // dólar DI — mesmo câmbio do FOB, igual à planilha real (Encomenda!P = frete × ITJ!E24)
+  let fobUSD=0;prods.forEach(p=>fobUSD+=p.qty*p.fob);
+  const fobBRL=fobUSD*fx;
+  // THC: usa override manual se houver; senão fórmula
+  const thcCalc=modal==='LCL'?Math.max(135,pk.cbm*75):expCfg.thcfcl;
+  const thc=(expCfg.thcManual!=null&&!isNaN(expCfg.thcManual))?expCfg.thcManual:thcCalc;
+  // AFRMM = alíquota × (Frete + Capatazia/THC) — alíquota editável (padrão 8%)
+  const afrmm=(freteBRL+thc)*(expCfg.afrmmPct/100);
+  // Diferença de frete: o agente cobra o frete no dólar frete (DI + PTAX, normalmente ~3% acima do DI),
+  // mas o CIF/impostos usam só o DI. A diferença é despesa operacional à parte, não entra na base tributável.
+  const difrete=freteUSD*(fxF-fx);
+  const seguro=(fobBRL+freteBRL)*(expCfg.segpct/100);
+  // taxas fixas convertidas p/ R$
+  let fixed=0;const fixedBRL=fixedExp.map(e=>{const v=e.cur==='USD'?e.val*fx:e.val;fixed+=v;return v;});
+  const arm=expCfg.arm1+expCfg.arm2+expCfg.levante+expCfg.pesagem;
+  const sobre=expCfg.picking+expCfg.sobre;
+  const total=afrmm+difrete+seguro+thc+fixed+arm+sobre;
+  return{afrmm,difrete,seguro,thc,thcCalc,fixed,fixedBRL,arm,sobre,total};
+}
+function thcManual(){
+  const v=parseFloat(document.getElementById('e-thc').value);
+  expCfg.thcManual=isNaN(v)?null:v;
+  recalc();
+}
+
+/* ════════ UTILS ════════ */
+const val=id=>parseFloat(document.getElementById(id).value)||0;
+const pct=id=>(parseFloat(document.getElementById(id).value)||0)/100;
+const fR=n=>'R$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fU=n=>'US$ '+(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const f3=n=>(n||0).toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+const fPct=n=>(n*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+let _mode='cost';
+function setMode(m){_mode=m;}
+
+/* ════════ PACKING ════════ */
+function packing(){
+  let cbm=0,caixas=0,peso=0,qtyTot=0;
+  prods.forEach(p=>{
+    const nCx=p.unCx>0?Math.ceil(p.qty/p.unCx):0;
+    cbm+=nCx*(p.cxL*p.cxW*p.cxH)/1e6;
+    caixas+=nCx;peso+=nCx*p.pesoCx;qtyTot+=p.qty;
+  });
+  return{cbm,caixas,peso,qtyTot};
+}
+
+/* ════════ MOTOR DE IMPOSTOS (unificado AV/Trading), item-a-item ════════ */
+function importTaxes(){
+  const fx=val('fx'),freteUSD=val('frete');
+  const pk=packing();
+  const oemInFob=document.getElementById('oemInFob').checked;
+  let fobUSD=0,oemForaUSD=0;
+  prods.forEach(p=>{fobUSD+=p.qty*p.fob+(oemInFob?p.oem:0);if(!oemInFob)oemForaUSD+=p.oem;});
+  const fobBRL=fobUSD*fx;
+  const oemForaBRL=oemForaUSD*fx; // OEM "por fora": não passa pelo CIF/impostos, mas soma no custo total lá na frente
+  const freteBRL=freteUSD*fx; // CIF = FOB + Seguro + Frete, todos no dólar DI (câmbio principal)
+  const db=destBreakdown();
+  // seguro já vai dentro do CIF (por item, abaixo) e afrmm é somado à parte no custoImport —
+  // por isso tiramos os dois do total de "despesas destino" aqui, senão contam em dobro.
+  const seguro=db.seguro, afrmm=db.afrmm, dest=db.total-db.afrmm-db.seguro;
+  let ii=0,ipi=0,pis=0,cofins=0,cifTot=0;
+  prods.forEach(p=>{
+    const itemFobBRL=(p.qty*p.fob+(oemInFob?p.oem:0))*fx;
+    const share=fobBRL>0?itemFobBRL/fobBRL:0;
+    const cif=itemFobBRL+freteBRL*share+seguro*share;
+    cifTot+=cif;
+    const i_ii=cif*(p.ii/100);
+    ii+=i_ii;
+    ipi+=(cif+i_ii)*(p.ipi/100);
+    pis+=cif*(p.pis/100);
+    cofins+=cif*(p.cofins/100);
+  });
+  return{fobUSD,fobBRL,freteBRL,cif:cifTot,ii,ipi,pis,cofins,afrmm,dest,seguro,oemForaBRL,qtyTot:pk.qtyTot};
+}
+
+/* ════════ CÁLCULO BR ════════ */
+function calcBR(icmsRate,isTrading){
+  const t=importTaxes();
+
+  if(isTrading){
+    // ═ Via Trading (benefício SC) — replica EXATAMENTE a aba "Encomenda" da planilha real ═
+    // Na planilha não existe uma linha de "ICMS de importação" separada para a Trading:
+    // o ICMS é inteiramente apurado DENTRO do gross-up da nota de saída (colunas AE→AF→AG→AL).
+    // "Total NF entrada" (col. AE) = CIF + II + IPI + PIS + COFINS + despesas — SEM ICMS.
+    const custoImport=t.cif+t.ii+t.ipi+t.pis+t.cofins+t.afrmm+t.dest; // = coluna AE "TOTAL NF ENTRADA"
+    const markupR=pct('markup'), icmsS=icmsRate; // "Trading SC %" = mesma alíquota do benefício, usada no próprio gross-up (planilha: uma única coluna AK)
+    const pisNom=pct('pisSaida'), cofNom=pct('cofinsSaida');
+    // PIS/COFINS efetivos = nominal − (nominal × ICMS saída)
+    const pisEf=pisNom-(pisNom*icmsS);
+    const cofEf=cofNom-(cofNom*icmsS);
+    // Fator AF = 1 − ICMS − markup − PIS_ef − COFINS_ef
+    const fator=1-icmsS-markupR-pisEf-cofEf;
+    // Crédito nacionalização (col. AD) = −(IPI+PIS+COFINS); ICMS NÃO entra aqui
+    const credNac=-(t.ipi+t.pis+t.cofins);
+    // Base NF saída (col. AG/AH) = (Total NF entrada + créditos nac.) / fator
+    const baseSaida=fator>0?(custoImport+credNac)/fator:0;
+    const markup=baseSaida*markupR;
+    const icms=baseSaida*icmsS;      // = coluna AL — ICMS calculado sobre a BASE FINAL, não sobre o CIF
+    const pisSv=baseSaida*pisEf;
+    const cofSv=baseSaida*cofEf;
+    // IPI saída = base × alíquota IPI (média ponderada dos itens de entrada)
+    const ipiRate=(t.cif+t.ii)>0?t.ipi/(t.cif+t.ii):0;
+    const ipiSv=baseSaida*ipiRate;
+    // NF saída total = base + IPI saída (base já embute markup/ICMS/PIS/COFINS via fator)
+    const nfSaida=baseSaida+ipiSv;
+    // Crédito do cliente AV (Lucro Presumido credita só ICMS+IPI da saída)
+    const credCliente=icms+ipiSv;
+    const repasse=baseSaida*pct('repasse');
+    // OEM "por fora": não passa pelo gross-up (sem markup/ICMS/PIS/COFINS em cima), mas é desembolso real
+    const custoLiquido=nfSaida-credCliente-repasse+t.oemForaBRL;
+    const caixa=nfSaida+t.oemForaBRL;             // o que a AV desembolsa (NF saída + OEM por fora)
+    const diferido=credCliente;      // ICMS+IPI da saída = crédito preso da AV
+    const impostos=t.ii+t.ipi+t.pis+t.cofins+icms;
+    const creditos=t.ipi+icms;       // mantido só para referência; não é o que reduz o custo líquido aqui (ver credCliente)
+    const rev={markup,icmsSv:icms,pisSv,cofSv,ipiSv,nfSaida,credCliente,repasse,baseSaida,fator,credNac:-credNac};
+    const custoUnit=t.qtyTot>0?custoLiquido/t.qtyTot:0;
+    const caixaUnit=t.qtyTot>0?caixa/t.qtyTot:0;
+    const difUnit=t.qtyTot>0?diferido/t.qtyTot:0;
+    return{...t,icms,impostos,custoImport,creditos,custoLiquido,custoUnit,caixa,diferido,caixaUnit,difUnit,rev,icmsRate};
+  }
+
+  // ═ AV Direto — ICMS de importação pago no desembaraço (gross-up simples sobre CIF+impostos+despesas) ═
+  const baseICMS=(t.cif+t.ii+t.ipi+t.pis+t.cofins+t.afrmm+t.dest)/(1-icmsRate);
+  const icms=baseICMS*icmsRate;
+  const impostos=t.ii+t.ipi+t.pis+t.cofins+icms;
+  const custoImport=t.cif+impostos+t.afrmm+t.dest;
+  const creditos=t.ipi+icms;        // IPI + ICMS de entrada = diferido
+  // OEM "por fora": custo real, sem gerar crédito de imposto
+  const custoLiquido=custoImport-creditos+t.oemForaBRL;
+  const caixa=custoImport+t.oemForaBRL;
+  const diferido=creditos;
+  const custoUnit=t.qtyTot>0?custoLiquido/t.qtyTot:0;
+  const caixaUnit=t.qtyTot>0?caixa/t.qtyTot:0;
+  const difUnit=t.qtyTot>0?diferido/t.qtyTot:0;
+  return{...t,icms,impostos,custoImport,creditos,custoLiquido,custoUnit,caixa,diferido,caixaUnit,difUnit,rev:null,icmsRate};
+}
+
+/* ════════ FY ════════ */
+function calcFY(){
+  const pk=packing();
+  let custoUSD=0;
+  prods.forEach(p=>{const oemUn=p.qty>0?p.oem/p.qty:0;custoUSD+=(p.fob+oemUn)*p.qty;});
+  return{custoTotalUSD:custoUSD,custoUnit:pk.qtyTot>0?custoUSD/pk.qtyTot:0,qtyTot:pk.qtyTot};
+}
+
+/* ════════ PREÇO/MARGEM ════════ */
+function priceMargin(custoUnit,salePrice){
+  if(_mode==='price'&&salePrice>0)return{preco:salePrice,margem:(salePrice-custoUnit)/salePrice};
+  const m=val('margAlvo')/100;
+  return{preco:m<1?custoUnit/(1-m):custoUnit,margem:m};
+}
+function priceMarginFY(c){const m=val('fyMarg')/100;return{preco:m<1?c/(1-m):c,margem:m};}
+
+/* ════════ RECALC ════════ */
+function recalc(){
+  const pk=packing();
+  document.getElementById('cbm-tot').textContent=f3(pk.cbm);
+  document.getElementById('cx-tot').textContent=pk.caixas.toLocaleString('pt-BR');
+  document.getElementById('peso-tot').textContent=Math.round(pk.peso).toLocaleString('pt-BR');
+  // três containers lado a lado
+  const conts=[{n:"20' DRY",cap:28},{n:"40' NOR",cap:58},{n:"40' HC",cap:69}];
+  document.getElementById('cont-occ').innerHTML=conts.map(c=>{
+    const fill=c.cap>0?pk.cbm/c.cap*100:0;
+    const col=fill>100?'var(--red)':fill>90?'var(--amber)':'var(--green)';
+    return `<div style="background:var(--ltgry);border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem">
+        <span style="font-size:.66rem;font-weight:600;color:var(--ink2)">${c.n}</span>
+        <span style="font-size:.62rem;color:var(--ink4);font-family:'IBM Plex Mono'">${c.cap} m³</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem">
+        <div style="flex:1;height:7px;background:var(--bdr);border-radius:4px;overflow:hidden"><div style="height:100%;width:${Math.min(100,fill)}%;background:${col}"></div></div>
+        <span style="font-size:.72rem;font-weight:700;font-family:'IBM Plex Mono';color:${col}">${Math.round(fill)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const fy=calcFY();
+  const av=calcBR(pct('icmsAV'),false);
+  const tr=calcBR(pct('icmsTR'),true);
+  const fx=val('fx');
+  const sale=val('precoVenda');
+  const avPM=priceMargin(av.custoUnit,_mode==='price'?sale:0);
+  const trPM=priceMargin(tr.custoUnit,_mode==='price'?sale:0);
+  const fyPM=priceMarginFY(fy.custoUnit);
+  renderCmp(fy,av,tr,fyPM,avPM,trPM,fx);
+  renderInsight(av,tr,fy,fx);
+}
+
+function renderCmp(fy,av,tr,fyPM,avPM,trPM,fx){
+  const C=(cls,txt)=>`<div class="${cls}">${txt}</div>`;
+  const R=(lbl,fyV,avV,trV,extra='')=>C('lbl '+extra,lbl)+C('v '+extra,fyV)+C('v '+extra,avV)+C('v '+extra,trV);
+  const best=tr.custoLiquido<av.custoLiquido?'tr':'av';
+  const bestCash=tr.diferido>av.diferido?'tr':'av'; // maior crédito diferido = menos desencaixe de caixa agora
+  let h='';
+  h+=C('colh corner','');
+  h+=C('colh fy','Ásia / FY<span class="csub">FOB+margem · US$</span>');
+  h+=C('colh av','AV Direto<span class="csub">RJ · ICMS '+fPct(av.icmsRate)+'</span>'+(best==='av'?'<span class="tag">+barato</span>':'')+(bestCash==='av'?'<span class="tag tag-cash">↓desencaixe</span>':''));
+  h+=C('colh tr','Via Trading<span class="csub">SC · ICMS '+fPct(tr.icmsRate)+'</span>'+(best==='tr'?'<span class="tag">+barato</span>':'')+(bestCash==='tr'?'<span class="tag tag-cash">↓desencaixe</span>':''));
+  // ── BLOCO-RESUMO: CAIXA × DIFERIDO × LÍQUIDO (a decisão) ──
+  h+=C('sec','💰 Decisão de caixa');
+  h+=R('<b>💸 Desembolso de caixa</b><br><span style="font-size:.6rem;color:var(--ink4)">o que sai do bolso agora</span>','—',
+      `<b style="color:var(--red)">${fR(av.caixa)}</b>`,
+      `<b style="color:var(--red)">${fR(tr.caixa)}</b>`,'cash');
+  h+=R('<b>⏳ Crédito diferido</b><br><span style="font-size:.6rem;color:var(--ink4)">ICMS+IPI presos, a compensar</span>','—',
+      `<span style="color:var(--amber)">${fR(av.diferido)}</span>`,
+      `<span style="color:var(--amber)">${fR(tr.diferido)}</span>`,'dif');
+  h+=R('<b>= Custo líquido contábil</b><br><span style="font-size:.6rem;color:var(--ink4)">caixa − diferido</span>',
+      fU(fy.custoTotalUSD),
+      `<b>${fR(av.custoLiquido)}</b>`,
+      `<b>${fR(tr.custoLiquido)}</b>`,'liq');
+  h+=C('sec','Custo de importação (detalhe)');
+  h+=R('FOB',fU(fy.custoTotalUSD),fR(av.fobBRL),fR(tr.fobBRL));
+  h+=R('Frete + CIF','—',fR(av.cif),fR(tr.cif));
+  h+=R('I.I.+IPI+PIS+COFINS','—',fR(av.ii+av.ipi+av.pis+av.cofins),fR(tr.ii+tr.ipi+tr.pis+tr.cofins));
+  h+=R('ICMS importação',"—",fR(av.icms),'—<span style="font-size:.55rem;color:var(--ink4)"> (apurado só na saída ↓)</span>');
+  h+=R('AFRMM + despesas destino','—',fR(av.afrmm+av.dest),fR(tr.afrmm+tr.dest));
+  h+=R('(−) Créditos entrada','—','−'+fR(av.creditos),'—');
+  h+=R('(+) OEM por fora do FOB','—',fR(av.oemForaBRL),fR(tr.oemForaBRL));
+  h+=C('sec','Camada revenda Trading → AV');
+  h+=R('Base NF saída (gross-up ÷'+(tr.rev?tr.rev.fator.toFixed(4):'—')+')','—','—',fR(tr.rev?tr.rev.baseSaida:0));
+  h+=R('↳ ICMS saída (Trading SC %)','—','—',fR(tr.rev?tr.rev.icmsSv:0),'sub');
+  h+=R('↳ Markup + PIS/COFINS efet. + IPI saída','—','—',fR(tr.rev?(tr.rev.markup+tr.rev.pisSv+tr.rev.cofSv+tr.rev.ipiSv):0),'sub');
+  h+=R('(−) Créditos cliente AV','—','—','−'+fR(tr.rev?tr.rev.credCliente:0));
+  h+=R('(−) Repasse comercial','—','—','−'+fR(tr.rev?tr.rev.repasse:0));
+  h+=C('sec','Resultado por unidade');
+  h+=R('Custo unitário (líquido)',f3(fy.custoUnit)+' US$',f3(av.custoUnit)+' R$',f3(tr.custoUnit)+' R$','hero');
+  h+=R('↳ caixa por unidade','—',f3(av.caixaUnit)+' R$',f3(tr.caixaUnit)+' R$','sub');
+  h+=R('↳ moeda oposta',f3(fy.custoUnit*fx)+' R$',f3(av.custoUnit/fx)+' US$',f3(tr.custoUnit/fx)+' US$','sub');
+  h+=C('sec',_mode==='price'?'Margem (a partir do preço informado)':'Preço sugerido (margem-alvo)');
+  h+=R('Preço unitário',f3(fyPM.preco)+' US$',f3(avPM.preco)+' R$',f3(trPM.preco)+' R$','hero');
+  h+=R('↳ moeda oposta',f3(fyPM.preco*fx)+' R$',f3(avPM.preco/fx)+' US$',f3(trPM.preco/fx)+' US$','sub');
+  h+=R('Margem',fPct(fyPM.margem),fPct(avPM.margem),fPct(trPM.margem));
+  document.getElementById('cmp').innerHTML=h;
+}
+
+function renderInsight(av,tr,fy,fx){
+  const el=document.getElementById('insight');
+  if(av.qtyTot===0){el.innerHTML='Preencha os produtos para ver a análise comparativa.';return;}
+  const difCaixa=av.caixa-tr.caixa;       // quanto a mais a AV exige de caixa
+  const difLiq=av.custoLiquido-tr.custoLiquido;
+  let txt='';
+  if(difCaixa>0){
+    txt=`<b>Caixa:</b> a <b>AV Direto</b> exige <b>${fR(difCaixa)}</b> a mais de desembolso agora — dos quais boa parte é ICMS de importação (${fPct(av.icmsRate)}) que vira <b>crédito diferido</b> (${fR(av.diferido)}), preso até haver débitos futuros para compensar. A <b>Via Trading</b> preserva caixa: não paga ICMS separado na entrada — ele é apurado só na nota de saída, à alíquota de ${fPct(tr.icmsRate)}, com diferido bem menor (${fR(tr.diferido)}). `;
+  } else {
+    txt=`<b>Caixa:</b> a Via Trading exige ${fR(-difCaixa)} a mais de desembolso agora. `;
+  }
+  if(difLiq>0){
+    txt+=`No <b>custo líquido contábil</b>, a Trading ainda fica <b>${fR(difLiq)}</b> mais barata. `;
+  } else if(difLiq<0){
+    txt+=`Já no <b>custo líquido contábil</b>, a AV Direto fica ${fR(-difLiq)} mais barata — a diferença está no crédito diferido que, se você conseguir compensar no tempo, reduz o custo real. `;
+  }
+  txt+=`A rota <b>Ásia/FY</b> sai a ${f3(fy.custoUnit*fx)} R$/un (sem nacionalização, p/ revenda fora do Brasil).`;
+  el.innerHTML=txt;
+}
+
+/* ════════ EXEMPLO ════════ */
+function loadExample(){
+  prods=[];
+  addProd({desc:'Sacola Ráfia',ncm:'4202.92.00',qty:40000,fob:0.29,oem:1500,cxL:42,cxW:23,cxH:37,unCx:100,pesoCx:7});
+  document.getElementById('fx').value='5.50';
+  document.getElementById('fxFrete').value='5.665';
+  document.getElementById('frete').value='3500';
+  document.getElementById('margAlvo').value='40';
+  document.getElementById('precoVenda').value='';
+  _mode='cost';recalc();
+}
+
+/* ════════ CRIPTOGRAFIA (AES-256-GCM, chave derivada da senha por PBKDF2) ════════
+   A senha do cofre NUNCA é gravada em disco nem embutida no código — só existe
+   em memória enquanto a aba estiver aberta. O envelope cifrado carrega consigo
+   os parâmetros usados (formatVersion/cryptoVersion/kdf/iterations/salt/iv),
+   pra permitir mudar esses parâmetros no futuro sem quebrar backups antigos. */
+function buf2b64(buf){let bin='';new Uint8Array(buf).forEach(b=>bin+=String.fromCharCode(b));return btoa(bin);}
+function b642buf(b64){const bin=atob(b64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf;}
+const PBKDF2_ITER=100000;
+async function deriveKey(password,salt,iterations){
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptJSON(password,obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(password,salt,PBKDF2_ITER);
+  const pt=new TextEncoder().encode(JSON.stringify(obj));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,pt);
+  return{formatVersion:1,cryptoVersion:1,kdf:'PBKDF2-SHA256',iterations:PBKDF2_ITER,salt:buf2b64(salt),iv:buf2b64(iv),ciphertext:buf2b64(ct)};
+}
+async function decryptJSON(password,payload){
+  const iterations=payload.iterations||PBKDF2_ITER;
+  const salt=b642buf(payload.salt),iv=b642buf(payload.iv),ct=b642buf(payload.ciphertext||payload.data);
+  const key=await deriveKey(password,salt,iterations);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct); // lança erro se a senha estiver errada
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+/* ════════ SUPABASE (backend real: Auth + RLS + revisão) ════════ */
+const SUPA_URL='https://zytlxglrzjzcybxhhgso.supabase.co';
+const SUPA_KEY='sb_publishable_R059JG4GGKZa2aacg3ceHQ_v9vgLSzD';
+let _supa=null,_supaOK=false;
+try{if(window.supabase){_supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true}});_supaOK=true;}}catch(e){console.warn('Supabase init falhou:',e);}
+function localTs(key){return localStorage.getItem(key+'_ts')||'';}
+function setLocalTs(key){localStorage.setItem(key+'_ts',new Date().toISOString());}
+
+/* ── CONTA (Supabase Auth — e-mail + senha, controla QUEM pode ler/escrever) ── */
+const FRED_EMAIL='fred@animaverde.com.br'; // único e-mail com acesso à Importação e ao Tracker
+let authUser=null;      // {id,email} quando logado
+let _pendingTab=null;   // pra retomar o fluxo (Importação/Revenda) depois do login
+function updateAuthUI(){
+  const el=document.getElementById('auth-status');
+  if(el)el.textContent=authUser?('🟢 '+authUser.email):'👤 Minha conta';
+  updateHeaderVisibility();
+}
+function updateHeaderVisibility(){
+  const isFred=!!(authUser&&authUser.email&&authUser.email.toLowerCase()===FRED_EMAIL);
+  const tabImport=document.getElementById('tab-import');
+  const tabTracker=document.getElementById('tab-tracker');
+  if(tabImport)tabImport.style.display=isFred?'':'none';
+  if(tabTracker)tabTracker.style.display=isFred?'':'none';
+}
+async function initAuth(){
+  if(!_supaOK)return;
+  const{data:{session}}=await _supa.auth.getSession();
+  if(session)authUser={id:session.user.id,email:session.user.email};
+  updateAuthUI();
+  _supa.auth.onAuthStateChange((_evt,session)=>{
+    authUser=session?{id:session.user.id,email:session.user.email}:null;
+    updateAuthUI();
+  });
+}
+function openAuthModal(){
+  document.getElementById('auth-err').textContent='';
+  document.getElementById('ovl-auth').classList.add('open');
+  setTimeout(()=>{const el=document.getElementById('auth-email');if(el)el.focus();},50);
+}
+function onAuthButtonClick(){authUser?authSignOut():openAuthModal();}
+
+/* Tenta liberar os vaults que a conta tiver permissão, usando a senha do
+   cofre digitada junto no login — falha silenciosa em qualquer um deles
+   não é erro (a pessoa pode não ter permissão, ou a senha ser diferente
+   por vault; nesses casos os cadeados de cada aba continuam funcionando
+   normalmente como plano B). */
+async function attemptAutoUnlock(vaultPass){
+  if(!vaultPass||!authUser)return;
+  if(authUser.email&&authUser.email.toLowerCase()===FRED_EMAIL){
+    try{
+      const localRaw=localStorage.getItem(SAVE_KEY);
+      const cloud=await importCloudGet();
+      let vaultToUse=null,fromCloud=false;
+      if(cloud&&cloud.blob){
+        _importRevision=cloud.revision||1;
+        if(!localRaw){vaultToUse=cloud.blob;fromCloud=true;}
+        else{const cloudTs=cloud.updated_at||'';fromCloud=cloudTs>=localTs(SAVE_KEY);vaultToUse=fromCloud?cloud.blob:localRaw;}
+      }else if(localRaw){vaultToUse=localRaw;_importRevision=0;}
+      if(vaultToUse){
+        const payload=JSON.parse(vaultToUse);
+        const state=await decryptJSON(vaultPass,payload);
+        importPass=vaultPass;
+        applyState(state);recalc();
+        if(fromCloud){localStorage.setItem(SAVE_KEY,vaultToUse);setLocalTs(SAVE_KEY);}
+        else if(_supaOK){await importCloudSave(vaultToUse);}
+      }else{
+        importPass=vaultPass;_importRevision=0; // 1º uso — essa senha vira a senha do cofre
+      }
+    }catch(e){/* senha não bate pro cofre de Importação — sem problema, cadeado da aba cobre depois */}
+  }
+  try{
+    const cloud=await rvCloudGet(); // RLS já filtra: só volta algo se for membro
+    if(cloud&&cloud.blob){
+      const localRaw=localStorage.getItem('rv_sync_vault');
+      const localTsV=localTs('rv_sync_vault');
+      let vaultToUse=cloud.blob,fromCloud=true;
+      if(localRaw&&localTsV>(cloud.updated_at||'')){vaultToUse=localRaw;fromCloud=false;}
+      const payload=JSON.parse(vaultToUse);
+      const data=await decryptJSON(vaultPass,payload);
+      rvSyncPass=vaultPass;_rvRevision=cloud.revision||1;
+      rvApplySyncData(data);
+      if(fromCloud){localStorage.setItem('rv_sync_vault',vaultToUse);setLocalTs('rv_sync_vault');}
+      else{await rvCloudSave(vaultToUse);}
+      updateRvSyncStatus();
+    }
+  }catch(e){/* senha não bate pro cofre compartilhado, ou ainda não é membro — sem problema */}
+}
+async function authSignIn(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-pw').value;
+  const vaultPw=document.getElementById('auth-vault-pw').value;
+  if(!email||!pw){document.getElementById('auth-err').textContent='Preencha e-mail e senha.';return;}
+  document.getElementById('auth-err').style.color='';
+  document.getElementById('auth-err').textContent='Entrando…';
+  const{data,error}=await _supa.auth.signInWithPassword({email,password:pw});
+  if(error){document.getElementById('auth-err').style.color='var(--red)';document.getElementById('auth-err').textContent='Erro: '+error.message;return;}
+  authUser={id:data.user.id,email:data.user.email};
+  updateAuthUI();
+  document.getElementById('ovl-auth').classList.remove('open');
+  toastSave('Conectado ✓');
+  await attemptAutoUnlock(vaultPw);
+  document.getElementById('auth-vault-pw').value='';
+  _resumePending();
+}
+async function authSignUp(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-pw').value;
+  const vaultPw=document.getElementById('auth-vault-pw').value;
+  if(!email||!pw){document.getElementById('auth-err').textContent='Preencha e-mail e senha.';return;}
+  if(pw.length<6){document.getElementById('auth-err').textContent='Senha muito curta (mín. 6 caracteres).';return;}
+  document.getElementById('auth-err').style.color='';
+  document.getElementById('auth-err').textContent='Criando conta…';
+  const{data,error}=await _supa.auth.signUp({email,password:pw});
+  if(error){document.getElementById('auth-err').style.color='var(--red)';document.getElementById('auth-err').textContent='Erro: '+error.message;return;}
+  if(data.session){
+    authUser={id:data.user.id,email:data.user.email};
+    updateAuthUI();
+    document.getElementById('ovl-auth').classList.remove('open');
+    toastSave('Conta criada e conectada ✓');
+    await attemptAutoUnlock(vaultPw);
+    document.getElementById('auth-vault-pw').value='';
+    _resumePending();
+  }else{
+    document.getElementById('auth-err').textContent='Conta criada — confirme o e-mail (verifique a caixa de entrada) e entre de novo.';
+  }
+}
+async function authSignOut(){
+  if(!confirm('Sair da conta ('+authUser.email+')?\nA Importação também tranca de novo.'))return;
+  await _supa.auth.signOut();
+  authUser=null;importPass=null;rvSyncPass=null;
+  updateAuthUI();
+  toastSave('Desconectado');
+}
+function _resumePending(){
+  const p=_pendingTab;_pendingTab=null;
+  if(p==='import')checkLock();
+  else if(p==='revenda-connect')checkRvLock();
+}
+
+/* ════════ IMPORTAÇÃO: vault pessoal (Auth + revisão, sem sobrescrita silenciosa) ════════ */
+const SAVE_KEY='fgl_unif_import_v1';
+const SAVE_IDS=['fx','fxFrete','frete','modal','icmsAV','icmsTR','markup','pisSaida','cofinsSaida','repasse','margAlvo','fyMarg','precoVenda'];
+const IMPORT_VAULT_ID='import';
+let _importRevision=0;
+let _importSyncTimer=null;
+function collectState(){
+  const fields={};
+  SAVE_IDS.forEach(id=>{const el=document.getElementById(id);if(el)fields[id]=el.value;});
+  const oemInFob=document.getElementById('oemInFob').checked;
+  return{prods,fixedExp,expCfg,fields,oemInFob,mode:_mode};
+}
+function applyState(state){
+  if(state.prods&&state.prods.length){prods=state.prods;renderProds();}
+  if(state.fixedExp)fixedExp=state.fixedExp;
+  if(state.expCfg)Object.assign(expCfg,state.expCfg);
+  Object.entries(state.fields||{}).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+  if(typeof state.oemInFob==='boolean')document.getElementById('oemInFob').checked=state.oemInFob;
+  _mode=state.mode||'cost';
+}
+async function importCloudGet(){
+  if(!_supaOK||!authUser)return null;
+  try{
+    const{data,error}=await _supa.from('app_vault').select('blob,revision,updated_at')
+      .eq('user_id',authUser.id).eq('id',IMPORT_VAULT_ID).maybeSingle();
+    if(error){console.warn('importCloudGet:',error.message);return null;}
+    return data;
+  }catch(e){console.warn(e);return null;}
+}
+async function importCloudSave(blobStr){
+  if(!_supaOK||!authUser)return{ok:false,reason:'no-auth'};
+  try{
+    if(_importRevision===0){
+      const{error}=await _supa.from('app_vault').insert({user_id:authUser.id,id:IMPORT_VAULT_ID,blob:blobStr,revision:1});
+      if(error){if(error.code==='23505')return{ok:false,reason:'conflict'};console.warn(error.message);return{ok:false,reason:'error'};}
+      _importRevision=1;return{ok:true};
+    }
+    const nextRev=_importRevision+1;
+    const{data,error}=await _supa.from('app_vault')
+      .update({blob:blobStr,revision:nextRev,updated_at:new Date().toISOString()})
+      .eq('user_id',authUser.id).eq('id',IMPORT_VAULT_ID).eq('revision',_importRevision).select();
+    if(error){console.warn(error.message);return{ok:false,reason:'error'};}
+    if(!data||data.length===0)return{ok:false,reason:'conflict'};
+    _importRevision=nextRev;return{ok:true};
+  }catch(e){console.warn(e);return{ok:false,reason:'error'};}
+}
+async function saveState(){
+  if(!importPass){toastSave('Desbloqueie a Importação primeiro');return;}
+  const payload=await encryptJSON(importPass,collectState());
+  const payloadStr=JSON.stringify(payload);
+  localStorage.setItem(SAVE_KEY,payloadStr);
+  setLocalTs(SAVE_KEY);
+  if(!authUser){toastSave('Salvo local (sem conta conectada)');return;}
+  toastSave('☁ Salvando…');
+  clearTimeout(_importSyncTimer);
+  _importSyncTimer=setTimeout(async()=>{
+    const r=await importCloudSave(payloadStr);
+    if(r.ok)toastSave('Salvo, cifrado e sincronizado ✓');
+    else if(r.reason==='conflict'){
+      toastSave('⚠ Conflito de versão');
+      alert('Outra máquina (ou aba) salvou uma versão mais nova enquanto você editava.\n\nClique "↑ Carregar" pra trazer a versão mais recente antes de salvar de novo — senão você sobrescreve o que foi salvo lá.');
+    }else toastSave('Salvo local — falha ao sincronizar');
+  },1200);
+}
+async function loadState(silent){
+  if(!importPass){if(!silent)toastSave('Desbloqueie a Importação primeiro');return;}
+  let raw=localStorage.getItem(SAVE_KEY),fromCloud=false;
+  if(authUser){
+    const cloud=await importCloudGet();
+    if(cloud&&cloud.blob){_importRevision=cloud.revision||1;raw=cloud.blob;fromCloud=true;}
+  }
+  if(!raw){if(!silent)toastSave('Nada salvo ainda');return;}
+  try{
+    const payload=JSON.parse(raw);
+    const state=await decryptJSON(importPass,payload);
+    applyState(state);recalc();
+    if(fromCloud){localStorage.setItem(SAVE_KEY,raw);setLocalTs(SAVE_KEY);}
+    if(!silent)toastSave(fromCloud?'Carregado da nuvem ✓':'Carregado ✓ (local)');
+  }catch(e){
+    if(!silent)toastSave('Falha ao decifrar');
+    console.warn('Falha ao carregar estado salvo (senha errada ou dado corrompido):',e);
+  }
+}
+function toastSave(msg){
+  const el=document.getElementById('save-status');
+  if(!el)return;
+  el.textContent=msg;
+  setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2600);
+}
+
+/* ════════ ABAS ════════ */
+function showTab(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('header .tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='import'){checkLock();}else{document.getElementById('ovl-lock').classList.remove('open');}
+}
+
+/* ════════ SENHA DO COFRE — ABA IMPORTAÇÃO ════════ */
+let importPass=null; // fica null até o usuário digitar certo nesta sessão da aba
+function checkLock(){
+  if(!authUser){
+    document.getElementById('ovl-lock').classList.remove('open');
+    _pendingTab='import';
+    openAuthModal();
+    return;
+  }
+  if(importPass){document.getElementById('ovl-lock').classList.remove('open');return;}
+  const hasLocal=!!localStorage.getItem(SAVE_KEY);
+  document.getElementById('lock-hint').textContent=hasLocal
+    ? 'Conta conectada. Digite a senha do cofre pra decifrar os dados.'
+    : 'Conta conectada, primeiro acesso: a senha que você digitar agora vira a senha do cofre.';
+  document.getElementById('ovl-lock').classList.add('open');
+  setTimeout(()=>{const el=document.getElementById('lock-pass');if(el)el.focus();},50);
+}
+async function tryUnlock(){
+  const v=document.getElementById('lock-pass').value;
+  if(!v){document.getElementById('lock-err').textContent='Digite uma senha.';return;}
+  document.getElementById('lock-err').style.color='';
+  document.getElementById('lock-err').textContent='Conectando à nuvem…';
+  const localRaw=localStorage.getItem(SAVE_KEY);
+  const cloud=await importCloudGet();
+  let vaultToUse=null,fromCloud=false;
+  if(cloud&&cloud.blob){
+    _importRevision=cloud.revision||1;
+    if(!localRaw){vaultToUse=cloud.blob;fromCloud=true;}
+    else{
+      const cloudTs=cloud.updated_at||'';
+      fromCloud=cloudTs>=localTs(SAVE_KEY);
+      vaultToUse=fromCloud?cloud.blob:localRaw;
+    }
+  }else if(localRaw){vaultToUse=localRaw;_importRevision=0;}
+  document.getElementById('lock-err').textContent='';
+
+  if(vaultToUse){
+    try{
+      const payload=JSON.parse(vaultToUse);
+      const state=await decryptJSON(v,payload); // valida a senha de verdade
+      importPass=v;
+      applyState(state);recalc();
+      if(fromCloud){localStorage.setItem(SAVE_KEY,vaultToUse);setLocalTs(SAVE_KEY);}
+      else if(_supaOK&&authUser){await importCloudSave(vaultToUse);}
+      unlockUI();
+    }catch(e){
+      document.getElementById('lock-err').style.color='var(--red)';
+      document.getElementById('lock-err').textContent='Senha incorreta.';
+      document.getElementById('lock-pass').value='';document.getElementById('lock-pass').focus();
+    }
+  }else{
+    importPass=v;_importRevision=0;
+    unlockUI();
+  }
+}
+function unlockUI(){
+  document.getElementById('ovl-lock').classList.remove('open');
+  document.getElementById('lock-err').textContent='';
+  document.getElementById('lock-pass').value='';
+}
+
+/* ════════ REVENDA: vault compartilhado (Auth + membros + revisão) ════════ */
+const SHARED_VAULT_ID='revenda';
+let rvSyncPass=null;
+let _rvSyncTimer=null;
+let _rvRevision=0;
+
+function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos()};}
+function rvApplySyncData(data){
+  if(Array.isArray(data.cotacoes))rvSaveCotacoes(data.cotacoes);
+  if(Array.isArray(data.pedidos))rvSavePedidos(data.pedidos);
+  rvRenderCotacoes();rvRenderPedidos();
+}
+function updateRvSyncStatus(msg){
+  const el=document.getElementById('rv-sync-status');
+  if(!el)return;
+  if(msg){el.textContent=msg;return;}
+  if(!authUser){el.textContent='☁ Cotações/Pedidos compartilhados: entre com sua conta primeiro';return;}
+  el.textContent=rvSyncPass?'☁ Cotações/Pedidos compartilhados: conectado ✓ (sincroniza sozinho)':'☁ Cotações/Pedidos compartilhados: bloqueados (abra a aba pra desbloquear)';
+}
+async function rvCloudGet(){
+  if(!_supaOK||!authUser)return null;
+  try{
+    const{data,error}=await _supa.from('precificacao_shared_vault').select('blob,revision,updated_at').eq('id',SHARED_VAULT_ID).maybeSingle();
+    if(error){console.warn('rvCloudGet:',error.message);return null;}
+    return data;
+  }catch(e){console.warn(e);return null;}
+}
+async function rvCloudSave(blobStr){
+  if(!_supaOK||!authUser)return{ok:false,reason:'no-auth'};
+  try{
+    const nextRev=_rvRevision+1;
+    const{data,error}=await _supa.from('precificacao_shared_vault')
+      .update({blob:blobStr,revision:nextRev,updated_at:new Date().toISOString()})
+      .eq('id',SHARED_VAULT_ID).eq('revision',_rvRevision).select();
+    if(error){console.warn(error.message);return{ok:false,reason:'error'};}
+    if(!data||data.length===0)return{ok:false,reason:'conflict'};
+    _rvRevision=nextRev;return{ok:true};
+  }catch(e){console.warn(e);return{ok:false,reason:'error'};}
+}
+function checkRvLock(){
+  if(!authUser){
+    document.getElementById('ovl-rvlock').classList.remove('open');
+    _pendingTab='revenda-connect';
+    openAuthModal();
+    return;
+  }
+  if(rvSyncPass){document.getElementById('ovl-rvlock').classList.remove('open');return;}
+  document.getElementById('rvlock-hint').textContent='Conta conectada. Digite a senha do cofre compartilhado (a mesma da sua gerente).';
+  document.getElementById('ovl-rvlock').classList.add('open');
+  setTimeout(()=>{const el=document.getElementById('rvlock-pass');if(el)el.focus();},50);
+}
+async function tryRvUnlock(){
+  const pw=document.getElementById('rvlock-pass').value;
+  if(!pw){document.getElementById('rvlock-err').textContent='Digite uma senha.';return;}
+  document.getElementById('rvlock-err').style.color='';
+  document.getElementById('rvlock-err').textContent='Conectando à nuvem…';
+  try{
+    const cloud=await rvCloudGet();
+    if(!cloud){
+      // ninguém criou ainda — cria agora e você já vira o 1º membro
+      const payload=await encryptJSON(pw,rvCollectSyncData());
+      const payloadStr=JSON.stringify(payload);
+      const{error}=await _supa.rpc('pv_create_shared',{p_id:SHARED_VAULT_ID,p_blob:payloadStr});
+      if(error){
+        document.getElementById('rvlock-err').style.color='var(--red)';
+        document.getElementById('rvlock-err').textContent='Erro: '+error.message;
+        return;
+      }
+      rvSyncPass=pw;_rvRevision=1;
+      localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
+      updateRvSyncStatus();
+      rvUnlockUI();
+      toastSave('Vault compartilhado criado ✓ — use "＋ Adicionar pessoa" pra convidar');
+      return;
+    }
+    const localRaw=localStorage.getItem('rv_sync_vault');
+    const localTsV=localTs('rv_sync_vault');
+    let vaultToUse=cloud.blob,fromCloud=true;
+    if(localRaw&&localTsV>(cloud.updated_at||'')){vaultToUse=localRaw;fromCloud=false;}
+    const payload=JSON.parse(vaultToUse);
+    const data=await decryptJSON(pw,payload); // senha errada OU sem permissão (RLS) cai no catch
+    rvSyncPass=pw;_rvRevision=cloud.revision||1;
+    rvApplySyncData(data);
+    if(fromCloud){localStorage.setItem('rv_sync_vault',vaultToUse);setLocalTs('rv_sync_vault');}
+    else{await rvCloudSave(vaultToUse);}
+    updateRvSyncStatus();
+    rvUnlockUI();
+    toastSave('Dados compartilhados conectados ✓');
+  }catch(e){
+    console.warn(e);
+    document.getElementById('rvlock-err').style.color='var(--red)';
+    document.getElementById('rvlock-err').textContent='Senha incorreta (ou você ainda não foi adicionado(a) como membro).';
+    document.getElementById('rvlock-pass').value='';
+    document.getElementById('rvlock-pass').focus();
+  }
+}
+function rvUnlockUI(){
+  document.getElementById('ovl-rvlock').classList.remove('open');
+  document.getElementById('rvlock-err').textContent='';
+  document.getElementById('rvlock-pass').value='';
+  rvRenderCotacoes();rvRenderPedidos();
+}
+async function rvSyncPush(){
+  if(!rvSyncPass||!authUser)return;
+  const payload=await encryptJSON(rvSyncPass,rvCollectSyncData());
+  const payloadStr=JSON.stringify(payload);
+  localStorage.setItem('rv_sync_vault',payloadStr);
+  setLocalTs('rv_sync_vault');
+  updateRvSyncStatus('☁ Salvando…');
+  clearTimeout(_rvSyncTimer);
+  _rvSyncTimer=setTimeout(async()=>{
+    const r=await rvCloudSave(payloadStr);
+    if(r.ok)updateRvSyncStatus();
+    else if(r.reason==='conflict')updateRvSyncStatus('⚠ Conflito — clique "Conectar" de novo pra atualizar');
+    else updateRvSyncStatus('⚠ Cotações/Pedidos: só local (falha ao sincronizar)');
+  },1200);
+}
+async function rvAddMember(){
+  if(!authUser){toastSave('Entre com sua conta primeiro');return;}
+  if(!rvSyncPass){toastSave('Conecte os dados compartilhados primeiro');return;}
+  const email=prompt('E-mail da pessoa a adicionar\n(ela precisa já ter criado conta no app pelo menos uma vez — botão "Minha conta")');
+  if(!email)return;
+  const{data,error}=await _supa.rpc('pv_add_member',{p_id:SHARED_VAULT_ID,p_email:email.trim()});
+  if(error){alert('Erro: '+error.message);return;}
+  if(data==='not_found'){alert('Essa pessoa ainda não tem conta — peça pra ela abrir o app, clicar em "👤 Minha conta" e criar login com esse e-mail primeiro. Depois tenta de novo.');return;}
+  alert('Adicionado(a) ✓ — agora essa pessoa pode clicar "🔗 Conectar dados compartilhados" e usar a mesma senha do cofre.');
+}
+/* ════════ UI ════════ */
+function toggleCollap(h,id){h.classList.toggle('open');document.getElementById(id).classList.toggle('open');}
+function closeM(id){document.getElementById('ovl-'+id).classList.remove('open');}
+function toggleDark(){const d=document.body.classList.toggle('dark');document.getElementById('dm').textContent=d?'☀':'🌙';localStorage.setItem('calc_dark',d?'1':'0');}
+if(localStorage.getItem('calc_dark')==='1'){document.body.classList.add('dark');document.getElementById('dm').textContent='☀';}
+
+/* ═══════════════════════════════════════════════════════════════
+   REVENDA — lógica idêntica à calculadora_SM_2026.html original
+   (custo de aquisição · nacional/importado · UF destino · B2B/B2C ·
+   ICMS débito/crédito · DIFAL · comissão · frete entrega · comparação
+   de até 3 fornecedores · cotações/pedidos salvos)
+   ═══════════════════════════════════════════════════════════════ */
+let rvTipoVenda='b2b';
+const rvv=id=>parseFloat(document.getElementById(id).value)||0;
+const rvvs=id=>document.getElementById(id).value;
+const rvEl=id=>document.getElementById(id);
+const rvBrl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function rvFmtPct(n){return (n*100).toFixed(2).replace('.',',')+'%';}
+
+/* ── ALÍQUOTA ICMS DÉBITO VENDA ── */
+function rvIcmsDebVenda(uf,tipoProduto){
+  if(uf==='RJ')return 20;
+  if(tipoProduto==='importado')return 4; // Res. 13/2012
+  const sulSe=['SP','MG','SC','PR','RS','OUTRO_SUL_SE'];
+  return sulSe.includes(uf)?12:7;
+}
+/* ── ALÍQUOTA ICMS CRÉDITO COMPRA ── */
+function rvIcmsCred(tipo){
+  const map={imp_fora:4,imp_rj:20,nac_sul_se:12,nac_n_ne:7,nac_rj:20,simples:0,'':0};
+  return map[tipo]??0;
+}
+function rvTipoProduto(tipo){return tipo.startsWith('imp')?'importado':'nacional';}
+
+/* ── TOGGLE B2B/B2C ── */
+function rvSetTipo(t){
+  rvTipoVenda=t;
+  rvEl('rv-btn-b2b').classList.toggle('active',t==='b2b');
+  rvEl('rv-btn-b2c').classList.toggle('active',t==='b2c');
+  rvEl('rv-hint-tipo').textContent=t==='b2b'?'Revendedor / empresa':'Consumidor final';
+  rvCalcular();
+}
+
+/* ── FORNECEDORES (monta os 3 cards) ── */
+const RV_TIPO_OPTS=[
+  ['imp_fora','Importado — fora RJ'],['imp_rj','Importado — dentro RJ'],
+  ['nac_sul_se','Nacional LP/LR — Sul/SE'],['nac_n_ne','Nacional LP/LR — N/NE/ES'],
+  ['nac_rj','Nacional LP/LR — Intra-RJ'],['simples','Simples Nacional']
+];
+function rvFornCard(n){
+  const optNone=n===1?'':'<option value="">— não usar —</option>';
+  const opts=optNone+RV_TIPO_OPTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  const rmBtn=n===1?'':`<button class="rm-forn" onclick="rvLimparForn(${n})">Limpar</button>`;
+  return `
+  <div class="forn-card forn-${n}" id="rv-fc${n}">
+    <div class="forn-hdr"><span>Fornecedor ${n}</span>${rmBtn}</div>
+    <div class="forn-body">
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
+        <div class="ff" style="grid-column:1/-1"><label>Nome</label><input type="text" id="rv-f${n}-nome" placeholder="${n===1?'Ex: Sacacho':'Opcional'}"></div>
+        <div class="ff"><label>Tipo</label><select id="rv-f${n}-tipo" onchange="rvTipoChange(${n})">${opts}</select></div>
+        <div class="ff"><label>ICMS crédito %</label><input type="number" class="mono inp-auto" id="rv-f${n}-icms-cred" step="0.1" min="0"><span class="formula">auto — editável</span></div>
+      </div>
+      <div id="rv-f${n}-aviso-simples" class="aviso-simples">⚠ Simples: confirmar % de crédito na NF. Padrão = 0%.</div>
+      <div class="sep-lbl">Preço e IPI</div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
+        <div class="ff"><label>Preço compra unit. R$</label><input type="number" class="mono" id="rv-f${n}-pc" value="${n===1?'4.25':'0'}" step="0.01" min="0"></div>
+        <div class="ff"><label>IPI na NF entrada %</label><input type="number" class="mono" id="rv-f${n}-ipi-ent" value="0" step="0.1" min="0"><span class="formula">custo puro — sem crédito p/ AV</span></div>
+      </div>
+      <div class="sep-lbl">Outros custos (totais do pedido)</div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
+        <div class="ff"><label>Frete compra R$</label><input type="number" class="mono" id="rv-f${n}-frete" value="0" step="0.01" min="0"></div>
+        <div class="ff"><label>Outros/clichê R$</label><input type="number" class="mono" id="rv-f${n}-outros" value="0" step="0.01" min="0"></div>
+      </div>
+    </div>
+  </div>`;
+}
+function rvRenderFornGrid(){
+  rvEl('rv-forn-grid').innerHTML=[1,2,3].map(rvFornCard).join('');
+  // liga eventos input/change de todos os campos recém-criados
+  document.querySelectorAll('#rv-forn-grid input, #rv-forn-grid select').forEach(elm=>{
+    elm.addEventListener('input',rvCalcular);
+    elm.addEventListener('change',rvCalcular);
+  });
+}
+
+/* ── MUDANÇA DE TIPO DE FORNECEDOR ── */
+function rvTipoChange(n){
+  const tipo=rvvs(`rv-f${n}-tipo`);
+  rvEl(`rv-f${n}-icms-cred`).value=rvIcmsCred(tipo);
+  rvEl(`rv-f${n}-aviso-simples`).style.display=tipo==='simples'?'block':'none';
+  rvCalcular();
+}
+function rvLimparForn(n){
+  rvEl(`rv-f${n}-tipo`).value='';
+  rvEl(`rv-f${n}-nome`).value='';
+  rvEl(`rv-f${n}-pc`).value='0';
+  rvEl(`rv-f${n}-ipi-ent`).value='0';
+  rvEl(`rv-f${n}-icms-cred`).value='0';
+  rvEl(`rv-f${n}-frete`).value='0';
+  rvEl(`rv-f${n}-outros`).value='0';
+  rvEl(`rv-f${n}-aviso-simples`).style.display='none';
+  rvCalcular();
+}
+
+/* ── DIFAL ── */
+function rvAtualizarDifal(){
+  const uf=rvvs('rv-uf');
+  const show=rvTipoVenda==='b2c'&&uf!=='RJ';
+  rvEl('rv-difal-bloco').classList.toggle('visible',show);
+  if(show){
+    const pv=rvv('rv-pv');
+    const freteNF=rvv('rv-frete-ent')/Math.max(rvv('rv-qtd'),1);
+    const base=pv+freteNF;
+    const dest=rvv('rv-difal-dest')/100, orig=rvv('rv-difal-orig')/100;
+    rvEl('rv-difal-val').value=(base*Math.max(dest-orig,0)).toFixed(4);
+  }
+}
+
+/* ── CÁLCULO PRINCIPAL ── */
+function rvCalcular(){
+  if(!rvEl('rv-f1-tipo'))return; // grid ainda não montado
+  const qtd=Math.max(rvv('rv-qtd'),1);
+  const pv=rvv('rv-pv');
+  const icmsDebPct=rvv('rv-icms-deb')/100;
+  const fedPct=rvv('rv-fed-pct')/100;
+  const comisPct=rvv('rv-comissao')/100;
+  const freteEntNF=rvv('rv-frete-ent');
+  const freteEntNF_u=freteEntNF/qtd;
+
+  const uf=rvvs('rv-uf');
+  const tipoF1=rvvs('rv-f1-tipo');
+  const tprod=rvTipoProduto(tipoF1||'imp_fora');
+  const icmsDebAuto=rvIcmsDebVenda(uf,tprod);
+  rvEl('rv-icms-deb').value=icmsDebAuto;
+
+  rvAtualizarDifal();
+  const difalUnit=rvTipoVenda==='b2c'&&uf!=='RJ'?rvv('rv-difal-val'):0;
+  const baseICMS=pv+freteEntNF_u;
+  const deb_icms=baseICMS*icmsDebPct;
+  const fed=pv*fedPct;
+  const comissao=pv*comisPct;
+  const evu_comum=deb_icms+fed+comissao+freteEntNF_u+difalUnit;
+
+  const fornecedores=[];
+  for(let n=1;n<=3;n++){
+    const tipo=rvvs(`rv-f${n}-tipo`);
+    if(!tipo)continue;
+    const nome=rvvs(`rv-f${n}-nome`)||`Fornecedor ${n}`;
+    const pc=rvv(`rv-f${n}-pc`);
+    if(pc<=0)continue;
+    const ipiEntPct=rvv(`rv-f${n}-ipi-ent`)/100;
+    const icmsCredPct=rvv(`rv-f${n}-icms-cred`)/100;
+    const freteC=rvv(`rv-f${n}-frete`);
+    const outros=rvv(`rv-f${n}-outros`);
+    const ipi_custo=pc*ipiEntPct;
+    const frete_c_u=freteC/qtd;
+    const outros_u=outros/qtd;
+    const cred_icms=pc*icmsCredPct;
+    const ctu=pc+ipi_custo+frete_c_u+outros_u-cred_icms;
+    const lucro_u=pv-ctu-evu_comum;
+    const margem=pv>0?lucro_u/pv:0;
+    const cmv=pv>0?ctu/pv:0;
+    const lucro_total=lucro_u*qtd;
+    const ctu_sem_icms=pc+ipi_custo+frete_c_u+outros_u;
+    const evu_sem_icms=fed+comissao+freteEntNF_u+difalUnit;
+    const lucro_u_sem_icms=pv-ctu_sem_icms-evu_sem_icms;
+    const lucro_tot_sem_icms=lucro_u_sem_icms*qtd;
+    const margem_sem_icms=pv>0?lucro_u_sem_icms/pv:0;
+    const total_venda_nf=pv*qtd+freteEntNF;
+    const total_venda=pv*qtd;
+    const total_custo_nf=(pc+ipi_custo)*qtd;
+    const saldo_icms=(deb_icms-cred_icms)*qtd;
+    const caixa_imediato=total_venda_nf-total_custo_nf-freteC-freteEntNF-(comissao*qtd)-(difalUnit*qtd);
+    const margem_caixa=total_venda_nf>0?caixa_imediato/total_venda_nf:0;
+    fornecedores.push({n,nome,tipo,pc,ipi_custo,frete_c_u,outros_u,cred_icms,ctu,deb_icms,fed,comissao,
+      freteEntNF_u,difalUnit,evu_comum,lucro_u,margem,cmv,lucro_total,total_venda,total_venda_nf,
+      total_custo_nf,freteC,saldo_icms,lucro_tot_sem_icms,margem_sem_icms,caixa_imediato,margem_caixa,qtd});
+  }
+  if(fornecedores.length===0){rvEl('rv-resultados').style.display='none';return;}
+  const melhorMargem=Math.max(...fornecedores.map(f=>f.margem));
+  window._rvLastFornecedores=fornecedores;
+  rvRenderTabela(fornecedores,pv,qtd,melhorMargem,uf,rvTipoVenda);
+  rvCalcTimeline();
+  rvEl('rv-resultados').style.display='block';
+  const d=rvvs('rv-data')||'—', cli=rvvs('rv-cliente')||'—';
+  rvEl('rv-res-titulo').textContent=`Resultados — ${cli||'Operação'} · ${qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(pv)}`;
+}
+
+/* ── RENDER TABELA COMPARATIVA ── */
+function rvRenderTabela(fs,pv,qtd,melhorMargem,uf,tipoVenda){
+  const nf=fs.length;
+  const t=rvEl('rv-tabela-res');
+  let html='<thead><tr><th style="width:34%">Componente</th>';
+  for(const f of fs){
+    html+=`<th class="cf cf${f.n}">${esc(f.nome)}`;
+    if(nf>1&&f.margem===melhorMargem)html+='<span class="badge-best">✓ melhor</span>';
+    html+='</th>';
+  }
+  html+='</tr></thead><tbody>';
+
+  function row(label,vals,opts={}){
+    const cls=(opts.subtotal?' rv-sub':'')+(opts.total?' rv-tot':'')+(opts.caixa?' rv-caixa':'')+(opts.sec?' rv-sec':'');
+    html+=`<tr class="${cls.trim()}">`;
+    if(opts.sec){html+=`<td colspan="${nf+1}">${label}</td>`;}
+    else{
+      html+=`<td>${label}</td>`;
+      for(let i=0;i<nf;i++){
+        const val=vals[i];
+        const isBest=opts.bestIdx!==undefined&&i===opts.bestIdx;
+        const isWorst=opts.worstIdx!==undefined&&i===opts.worstIdx&&nf>1;
+        let c='num';
+        if(isBest)c+=' best';else if(isWorst)c+=' worst';
+        else if(opts.pos&&val>0)c+=' pos';else if(opts.neg&&val<0)c+=' negv';
+        const disp=opts.pct?(val*100).toFixed(1).replace('.',',')+'%':(opts.int?val.toLocaleString('pt-BR'):rvBrl(val));
+        html+=`<td class="${c}">${disp}</td>`;
+      }
+    }
+    html+='</tr>';
+  }
+  const bestIdx=arr=>arr.indexOf(Math.max(...arr));
+  const worstIdx=arr=>arr.indexOf(Math.min(...arr));
+
+  row('CUSTO DE COMPRA',null,{sec:true});
+  row('Preço compra unit.',fs.map(f=>f.pc));
+  row('IPI na NF entrada (custo puro)',fs.map(f=>f.ipi_custo));
+  row('Frete compra unit.',fs.map(f=>f.frete_c_u));
+  row('Outros/clichê unit.',fs.map(f=>f.outros_u));
+  row('(−) Crédito ICMS compra',fs.map(f=>-f.cred_icms),{neg:true});
+  const ctus=fs.map(f=>f.ctu);
+  row('Custo Total Unitário (CTU)',ctus,{subtotal:true,bestIdx:worstIdx(ctus),worstIdx:bestIdx(ctus)});
+
+  row('ENCARGOS SOBRE VENDA',null,{sec:true});
+  row(`ICMS débito (${(fs[0].deb_icms/(pv+fs[0].freteEntNF_u)*100).toFixed(0)}% s/ base PV+frete NF)`,fs.map(f=>f.deb_icms));
+  row('PIS/COFINS/IRPJ/CSLL (s/ PV)',fs.map(f=>f.fed));
+  row('Comissão (s/ PV)',fs.map(f=>f.comissao));
+  row('Frete entrega unit. (na NF)',fs.map(f=>f.freteEntNF_u));
+  if(tipoVenda==='b2c'&&uf!=='RJ')row('DIFAL unit.',fs.map(f=>f.difalUnit));
+  row('Total encargos venda unit.',fs.map(f=>f.evu_comum),{subtotal:true});
+
+  row('RESULTADO UNITÁRIO',null,{sec:true});
+  const lucs=fs.map(f=>f.lucro_u);
+  row('Lucro unitário (PV−CTU−EVU)',lucs,{pos:true,bestIdx:bestIdx(lucs),worstIdx:nf>1?worstIdx(lucs):undefined});
+  const margens=fs.map(f=>f.margem);
+  row('Margem de lucro (%)',margens,{pct:true,bestIdx:bestIdx(margens),worstIdx:nf>1?worstIdx(margens):undefined});
+  const cmvs=fs.map(f=>f.cmv);
+  row('CMV — Custo da Mercadoria Vendida (%)',cmvs,{pct:true,bestIdx:worstIdx(cmvs),worstIdx:nf>1?bestIdx(cmvs):undefined});
+  row('ICMS saldo a recolher unit. (dif.)',fs.map(f=>f.saldo_icms/f.qtd));
+
+  row('TOTAIS DO PEDIDO',null,{sec:true});
+  row(`Total NF Saída = (PV × ${qtd.toLocaleString('pt-BR')} un) + Frete Entrega`,fs.map(f=>f.total_venda_nf));
+  row('(−) Total NF Entrada (PC+IPI custo)',fs.map(f=>-f.total_custo_nf),{neg:true});
+  row('(−) Frete Compra',fs.map(f=>-f.freteC),{neg:true});
+  row('(−) Outros/Clichê',fs.map(f=>-(f.outros_u*f.qtd)),{neg:true});
+  row('(+) Crédito ICMS Compra',fs.map(f=>f.cred_icms*f.qtd),{pos:true});
+  row('(−) ICMS Débito Venda',fs.map(f=>-f.deb_icms*f.qtd),{neg:true});
+  row('(−) PIS/COFINS/IRPJ/CSLL',fs.map(f=>-f.fed*f.qtd),{neg:true});
+  row('(−) Comissão',fs.map(f=>-f.comissao*f.qtd),{neg:true});
+  row('(−) Frete Entrega NF',fs.map(f=>-f.freteEntNF_u*f.qtd),{neg:true});
+  if(tipoVenda==='b2c'&&uf!=='RJ')row('(−) DIFAL',fs.map(f=>-f.difalUnit*f.qtd),{neg:true});
+
+  const lts=fs.map(f=>f.lucro_total), mgs=fs.map(f=>f.margem);
+  html+='<tr class="rv-tot"><td>= Lucro Total</td>';
+  for(let i=0;i<nf;i++){
+    const isBest=nf>1&&i===bestIdx(lts), isWorst=nf>1&&i===worstIdx(lts);
+    let c='num';if(isBest)c+=' best';if(isWorst)c+=' worst';
+    html+=`<td class="${c}">${rvBrl(lts[i])} <span style="font-size:.68rem;opacity:.85">(${(mgs[i]*100).toFixed(1).replace('.',',')}%)</span></td>`;
+  }
+  html+='</tr>';
+
+  const lsicms=fs.map(f=>f.lucro_tot_sem_icms), msicms=fs.map(f=>f.margem_sem_icms);
+  html+='<tr class="rv-tot2"><td>= Lucro Total s/ efeito ICMS</td>';
+  for(let i=0;i<nf;i++){
+    const isBest=nf>1&&i===bestIdx(lsicms), isWorst=nf>1&&i===worstIdx(lsicms);
+    let c='num';if(isBest)c+=' best';if(isWorst)c+=' worst';
+    html+=`<td class="${c}">${rvBrl(lsicms[i])} <span style="font-size:.68rem;opacity:.85">(${(msicms[i]*100).toFixed(1).replace('.',',')}%)</span></td>`;
+  }
+  html+='</tr>';
+  row('↳ ICMS saldo da operação (ref. gestão)',fs.map(f=>f.saldo_icms));
+
+  html+='</tbody>';
+  t.innerHTML=html;
+}
+
+/* ── LIMPAR TUDO ── */
+function rvLimparTudo(){
+  ['rv-cliente'].forEach(id=>rvEl(id).value='');
+  rvEl('rv-data').value=new Date().toISOString().split('T')[0];
+  rvEl('rv-qtd').value='5000';
+  rvEl('rv-pv').value='8.65';
+  rvEl('rv-comissao').value='0';
+  rvEl('rv-frete-ent').value='0';
+  for(let n=1;n<=3;n++)rvLimparForn(n);
+  rvEl('rv-resultados').style.display='none';
+}
+
+/* ── LINHA DO TEMPO ── */
+let rvTlForn=1;
+let rvPgtoRows=[{pct:100,dias:30}];
+let rvRecebRows=[{pct:100,dias:60}];
+function rvSetTlForn(n,btn){
+  rvTlForn=n;
+  document.querySelectorAll('#rv-tl-forn-toggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  rvCalcTimeline();
+}
+function rvRenderParcelas(tipo){
+  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
+  const tbody=rvEl(`rv-${tipo}-body`);
+  tbody.innerHTML=rows.map((r,i)=>`
+    <tr>
+      <td style="color:var(--ink4);font-size:.62rem;text-align:center;width:18px">${i+1}</td>
+      <td><input type="number" value="${r.pct}" min="0" max="100" step="1" oninput="rvUpdateRow('${tipo}',${i},'pct',this.value)"></td>
+      <td><input type="number" value="${r.dias}" min="0" step="1" oninput="rvUpdateRow('${tipo}',${i},'dias',this.value)"></td>
+      <td><button class="del-btn" onclick="rvDelParcela('${tipo}',${i})">×</button></td>
+    </tr>`).join('');
+  rvUpdateSumBadge(tipo);
+}
+function rvUpdateRow(tipo,i,field,val){
+  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
+  rows[i][field]=parseFloat(val)||0;
+  rvUpdateSumBadge(tipo);
+  rvCalcTimeline();
+}
+function rvAddParcela(tipo){
+  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
+  const lastDias=rows.length?rows[rows.length-1].dias+30:30;
+  rows.push({pct:0,dias:lastDias});
+  rvRenderParcelas(tipo);rvCalcTimeline();
+}
+function rvDelParcela(tipo,i){
+  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
+  if(rows.length<=1)return;
+  rows.splice(i,1);rvRenderParcelas(tipo);rvCalcTimeline();
+}
+function rvUpdateSumBadge(tipo){
+  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
+  const sum=rows.reduce((a,r)=>a+(parseFloat(r.pct)||0),0);
+  const badge=rvEl(`rv-${tipo}-sum-badge`);
+  badge.textContent=`Σ ${sum.toFixed(0)}%`;
+  badge.className='sum-badge '+(Math.abs(sum-100)<0.5?'sum-ok':'sum-err');
+}
+function rvCalcTimeline(){
+  const prod=parseInt(rvEl('rv-tl-prod').value)||0;
+  const dataInput=rvvs('rv-data');
+  const t0=dataInput?new Date(dataInput+'T00:00:00'):new Date();
+  const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
+  const fmtD=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  const allF=window._rvLastFornecedores||[];
+  const f=allF.find(x=>x.n===rvTlForn)||null;
+  const totalPagar=f?(f.total_custo_nf+f.freteC):0;
+  const totalReceber=f?f.total_venda_nf:0;
+  const events=[];
+  events.push({dias:0,label:'Confirmação Pedido',sub:'D0',valor:0,tipo:'marco'});
+  events.push({dias:prod,label:'Saída Fábrica',sub:`D+${prod}`,valor:0,tipo:'marco'});
+  rvPgtoRows.forEach((r,i)=>{
+    const lbl=rvPgtoRows.length>1?`Paga ${i+1}ª`:'Paga Forn.';
+    events.push({dias:r.dias,label:lbl,sub:`D+${r.dias}`,valor:-(totalPagar*r.pct/100),tipo:'paga'});
+  });
+  rvRecebRows.forEach((r,i)=>{
+    const lbl=rvRecebRows.length>1?`Recebe ${i+1}ª`:'Recebe';
+    events.push({dias:r.dias,label:lbl,sub:`D+${r.dias}`,valor:(totalReceber*r.pct/100),tipo:'recebe'});
+  });
+  events.sort((a,b)=>a.dias!==b.dias?a.dias-b.dias:(a.tipo==='marco'?-1:1));
+  let html='<div class="tl-wrap"><div class="tl-outer"><div class="tl-row">';
+  events.forEach((e,i)=>{
+    const d=addDays(t0,e.dias);
+    html+=`<div class="tl-node"><div class="tl-dot ${e.tipo}"></div><div class="tl-lbl">${e.label}</div><div class="tl-sub">${fmtD(d)}</div><div class="tl-sub">${e.sub}</div>`;
+    if(e.valor<0)html+=`<div class="tl-val neg">${rvBrl(e.valor)}</div>`;
+    if(e.valor>0)html+=`<div class="tl-val pos">+${rvBrl(e.valor)}</div>`;
+    html+='</div>';
+    if(i<events.length-1)html+='<div class="tl-conn"></div>';
+  });
+  html+='</div>';
+  const pagaEvs=events.filter(e=>e.tipo==='paga'), recebEvs=events.filter(e=>e.tipo==='recebe');
+  if(pagaEvs.length&&recebEvs.length){
+    const lastPaga=Math.max(...pagaEvs.map(e=>e.dias)), lastReceb=Math.max(...recebEvs.map(e=>e.dias));
+    const gap=lastReceb-lastPaga;
+    const gapTxt=gap>0?`✅ Recebe ${gap} dias depois do último pagamento`:gap<0?`⚠ Paga ${Math.abs(gap)} dias antes de receber tudo`:`⚖ Último pagamento e recebimento no mesmo dia`;
+    const cls=gap>0?'gap-pos':gap<0?'gap-neg':'gap-neu';
+    html+=`<div style="text-align:center;margin-top:.4rem"><span class="gap-badge ${cls}">${gapTxt}</span></div>`;
+  }
+  html+='</div></div>';
+  rvEl('rv-timeline-visual').innerHTML=html;
+}
+
+/* ── SUB-ABAS DA REVENDA ── */
+function rvShowTab(id){
+  document.querySelectorAll('.rv-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
+  rvEl('rvpane-'+id).classList.add('active');
+  rvEl('rvtab-'+id).classList.add('active');
+  if(id==='cotacoes'||id==='pedidos'){
+    checkRvLock();
+    if(rvSyncPass){id==='cotacoes'?rvRenderCotacoes():rvRenderPedidos();}
+  }else{
+    document.getElementById('ovl-rvlock').classList.remove('open');
+  }
+}
+
+/* ── STORAGE ── */
+function rvLoadCotacoes(){try{return JSON.parse(localStorage.getItem('av_cotacoes')||'[]');}catch(e){return[];}}
+function rvSaveCotacoes(d){localStorage.setItem('av_cotacoes',JSON.stringify(d));}
+function rvLoadPedidos(){try{return JSON.parse(localStorage.getItem('av_pedidos')||'[]');}catch(e){return[];}}
+function rvSavePedidos(d){localStorage.setItem('av_pedidos',JSON.stringify(d));}
+
+const RV_STATUS_STEPS=[
+  {key:'confirmado',label:'Pedido confirmado'},{key:'producao',label:'Em produção'},
+  {key:'fat_forn',label:'Faturado fornecedor'},{key:'pago_forn',label:'Pago fornecedor'},
+  {key:'entregue',label:'Entregue cliente'},{key:'nf_emitida',label:'NF emitida'},
+  {key:'recebido',label:'Recebido cliente'}
+];
+
+/* ── SALVAR COTAÇÃO ── */
+function rvSalvarCotacao(){
+  const fs=window._rvLastFornecedores||[];
+  if(!fs.length){alert('Calcule primeiro antes de salvar.');return;}
+  const cotacao={
+    id:Date.now(),data:rvvs('rv-data')||new Date().toLocaleDateString('pt-BR'),
+    cliente:rvvs('rv-cliente')||'—',qtd:rvv('rv-qtd'),pv:rvv('rv-pv'),uf:rvvs('rv-uf'),
+    prod:parseInt(rvEl('rv-tl-prod').value)||0,
+    pgto:JSON.parse(JSON.stringify(rvPgtoRows)),receb:JSON.parse(JSON.stringify(rvRecebRows)),
+    fornecedores:fs.map(f=>({n:f.n,nome:f.nome,tipo:f.tipo,pc:f.pc,ctu:f.ctu,margem:f.margem,
+      lucro_total:f.lucro_total,total_venda_nf:f.total_venda_nf,total_custo_nf:f.total_custo_nf,
+      freteC:f.freteC,saldo_icms:f.saldo_icms}))
+  };
+  const lista=rvLoadCotacoes();
+  lista.unshift(cotacao);
+  rvSaveCotacoes(lista);
+  rvSyncPush();
+  alert('Cotação salva! Acesse a aba Cotações.');
+}
+
+/* ── RENDER COTAÇÕES ── */
+function rvRenderCotacoes(){
+  const lista=rvLoadCotacoes();
+  const cont=rvEl('rv-cotacoes-container');
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
+  const brl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+  const pctf=n=>((n||0)*100).toFixed(1).replace('.',',')+' %';
+  let html=`<table class="rv-data-table"><thead><tr>
+    <th>Data</th><th>Cliente</th><th>UF</th><th>Qtd</th><th>PV unit.</th>
+    <th>Fornecedor(es)</th><th>Melhor margem</th><th>Lucro total</th><th>Ações</th>
+  </tr></thead><tbody>`;
+  lista.forEach(c=>{
+    const best=[...c.fornecedores].sort((a,b)=>b.margem-a.margem)[0];
+    const forns=c.fornecedores.map(f=>f.nome||`Forn.${f.n}`).join(', ');
+    html+=`<tr>
+      <td style="white-space:nowrap">${esc(c.data)}</td>
+      <td><strong>${esc(c.cliente)}</strong></td>
+      <td>${esc(c.uf)}</td>
+      <td class="rv-num">${(c.qtd||0).toLocaleString('pt-BR')}</td>
+      <td class="rv-num">${brl(c.pv)}</td>
+      <td>${esc(forns)}</td>
+      <td class="rv-num rv-pos">${pctf(best.margem)} <span style="color:var(--ink4);font-size:.6rem">(${esc(best.nome||'Forn.'+best.n)})</span></td>
+      <td class="rv-num rv-pos">${brl(best.lucro_total)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-rvsm btn-conv" onclick="rvConverterEmPedido(${c.id})">→ Pedido</button>
+        <button class="btn-rvdel" onclick="rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  cont.innerHTML=html;
+}
+function rvExcluirCotacao(id){
+  if(!confirm('Excluir esta cotação?'))return;
+  rvSaveCotacoes(rvLoadCotacoes().filter(c=>c.id!==id));
+  rvRenderCotacoes();
+  rvSyncPush();
+}
+function rvLimparTodasCotacoes(){
+  if(!confirm('Excluir TODAS as cotações?'))return;
+  rvSaveCotacoes([]);rvRenderCotacoes();
+  rvSyncPush();
+}
+
+/* ── CONVERTER EM PEDIDO ── */
+function rvConverterEmPedido(cotId){
+  const cot=rvLoadCotacoes().find(c=>c.id===cotId);
+  if(!cot)return;
+  let forn;
+  if(cot.fornecedores.length===1){forn=cot.fornecedores[0];}
+  else{
+    const opts=cot.fornecedores.map((f,i)=>`${i+1}. ${f.nome||'Forn.'+f.n}`).join('\n');
+    const choice=prompt(`Qual fornecedor foi confirmado?\n${opts}\n\nDigite o número:`);
+    const idx=parseInt(choice)-1;
+    if(isNaN(idx)||!cot.fornecedores[idx])return;
+    forn=cot.fornecedores[idx];
+  }
+  const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
+  const pedido={
+    id:Date.now(),cotId,data:cot.data,cliente:cot.cliente,qtd:cot.qtd,pv:cot.pv,uf:cot.uf,
+    fornecedor:forn.nome||('Forn.'+forn.n),pc:forn.pc,ctu:forn.ctu,margem:forn.margem,
+    lucro_total:forn.lucro_total,total_venda:forn.total_venda_nf,
+    total_custo:forn.total_custo_nf+forn.freteC,saldo_icms:forn.saldo_icms,
+    prod:cot.prod,pgto:cot.pgto,receb:cot.receb,status,obs:''
+  };
+  const lista=rvLoadPedidos();
+  lista.unshift(pedido);
+  rvSavePedidos(lista);
+  rvSyncPush();
+  rvShowTab('pedidos');
+}
+
+/* ── RENDER PEDIDOS ── */
+function rvRenderPedidos(){
+  const lista=rvLoadPedidos();
+  const cont=rvEl('rv-pedidos-container');
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação em pedido.</div>';return;}
+  const brl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+  const pctf=n=>((n||0)*100).toFixed(1).replace('.',',')+' %';
+  function badgeStatus(st){
+    if(st.recebido)return '<span class="badge-status s-recebido">✅ Recebido</span>';
+    if(st.entregue)return '<span class="badge-status s-entregue">🚚 Entregue</span>';
+    if(st.producao)return '<span class="badge-status s-producao">🏭 Produção</span>';
+    return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
+  }
+  let html=`<table class="rv-data-table"><thead><tr>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Qtd</th>
+    <th>Total NF</th><th>Margem</th><th>Lucro</th><th>Status</th><th>Obs</th><th></th>
+  </tr></thead><tbody>`;
+  lista.forEach(p=>{
+    const checks=RV_STATUS_STEPS.map(s=>
+      `<label><input type="checkbox" ${p.status[s.key]?'checked':''} onchange="rvToggleStatus(${p.id},'${s.key}',this.checked)"> ${s.label}</label>`
+    ).join('');
+    html+=`<tr>
+      <td style="white-space:nowrap">${esc(p.data)}</td>
+      <td><strong>${esc(p.cliente)}</strong></td>
+      <td>${esc(p.fornecedor)}</td>
+      <td class="rv-num">${(p.qtd||0).toLocaleString('pt-BR')}</td>
+      <td class="rv-num">${brl(p.total_venda)}</td>
+      <td class="rv-num rv-pos">${pctf(p.margem)}</td>
+      <td class="rv-num rv-pos">${brl(p.lucro_total)}</td>
+      <td>${badgeStatus(p.status)}
+        <details style="margin-top:.25rem">
+          <summary style="font-size:.6rem;color:var(--ink4);cursor:pointer">ver etapas</summary>
+          <div class="status-checks" style="margin-top:.25rem">${checks}</div>
+        </details>
+      </td>
+      <td><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
+      <td><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
+    </tr>`;
+  });
+  const totVenda=lista.reduce((a,p)=>a+(p.total_venda||0),0);
+  const totLucro=lista.reduce((a,p)=>a+(p.lucro_total||0),0);
+  const totMargem=totVenda>0?totLucro/totVenda:0;
+  html+=`<tr style="background:var(--green);color:#fff;font-weight:700">
+    <td colspan="4" style="padding:.5rem .6rem">TOTAIS (${lista.length} pedidos)</td>
+    <td class="rv-num">${brl(totVenda)}</td>
+    <td class="rv-num">${pctf(totMargem)}</td>
+    <td class="rv-num">${brl(totLucro)}</td>
+    <td colspan="3"></td>
+  </tr>`;
+  html+='</tbody></table>';
+  cont.innerHTML=html;
+}
+function rvToggleStatus(id,key,val){
+  const lista=rvLoadPedidos();
+  const p=lista.find(x=>x.id===id);
+  if(!p)return;
+  p.status[key]=val;
+  rvSavePedidos(lista);
+  rvRenderPedidos();
+  rvSyncPush();
+}
+function rvUpdateObs(id,val){
+  const lista=rvLoadPedidos();
+  const p=lista.find(x=>x.id===id);
+  if(!p)return;
+  p.obs=val;
+  rvSavePedidos(lista);
+  rvSyncPush();
+}
+function rvExcluirPedido(id){
+  if(!confirm('Excluir este pedido?'))return;
+  rvSavePedidos(rvLoadPedidos().filter(p=>p.id!==id));
+  rvRenderPedidos();
+  rvSyncPush();
+}
+function rvLimparTodosPedidos(){
+  if(!confirm('Excluir TODOS os pedidos?'))return;
+  rvSavePedidos([]);rvRenderPedidos();
+  rvSyncPush();
+}
+
+/* ── INIT REVENDA ── */
+function rvInit(){
+  rvEl('rv-data').value=new Date().toISOString().split('T')[0];
+  rvRenderFornGrid();
+  rvTipoChange(1);
+  rvRenderParcelas('pgto');
+  rvRenderParcelas('receb');
+  rvCalcular();
+  // demais campos da Operação (fora do grid de fornecedores) também recalculam ao digitar
+  document.querySelectorAll('#rvpane-calc .ff input, #rvpane-calc .ff select, #rvpane-calc select#rv-uf').forEach(elm=>{
+    if(elm.id&&elm.id.startsWith('rv-f'))return; // já ligado em rvRenderFornGrid
+    elm.addEventListener('input',rvCalcular);
+    elm.addEventListener('change',rvCalcular);
+  });
+  updateRvSyncStatus();
+}
+
+addProd({ncm:'4202.92.00'});
+recalc();
+rvInit();
+initAuth().then(()=>{
+  updateRvSyncStatus();
+  if(!authUser)openAuthModal(); // gate obrigatório logo na abertura da página
+});
+// obs: os dados da Importação ficam cifrados no localStorage; só são carregados
+// quando o usuário desbloqueia a aba com a senha certa (dentro de tryUnlock)
+</script>
+</body>
+</html>

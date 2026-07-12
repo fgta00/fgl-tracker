@@ -270,8 +270,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <header>
   <div class="logo"><div class="logo-i">🌿</div>FGL</div>
   <div class="tabs">
-    <a class="tab" id="tab-import" href="https://fgta00.github.io/fgl-precificacao/" style="display:none;text-decoration:none">Importação</a>
-    <a class="tab" id="tab-revenda" href="https://fgta00.github.io/fgl-precificacao/" style="text-decoration:none">Revenda</a>
+    <a class="tab" id="tab-import" href="precificacao.html" style="display:none;text-decoration:none">Importação</a>
+    <a class="tab" id="tab-revenda" href="precificacao.html" style="text-decoration:none">Revenda</a>
     <button class="tab active" id="tab-tracker">Tracker</button>
   </div>
   <div class="hdr-r">
@@ -691,13 +691,13 @@ async function cloudGetLegacy(){
   }catch(e){console.warn('cloudGetLegacy falhou:',e);return null;}
 }
 
-// ── NOVO: tracker_vault, dono único (Fred), com Auth real + revisão (evita sobrescrita silenciosa) ──
+// ── NOVO: app_vault, dono único (Fred), com Auth real + revisão (evita sobrescrita silenciosa) ──
 const TRACKER_VAULT_ID='main';
 let _trackerRevision=0;
 async function cloudGet(){
   if(!_supaOK||!authUser)return null;
   try{
-    const{data,error}=await _supa.from('tracker_vault').select('blob,revision,updated_at')
+    const{data,error}=await _supa.from('app_vault').select('blob,revision,updated_at')
       .eq('user_id',authUser.id).eq('id',TRACKER_VAULT_ID).maybeSingle();
     if(error){console.warn('cloudGet error:',error.message);return null;}
     return data||null;
@@ -707,12 +707,12 @@ async function cloudSet(blob){
   if(!_supaOK||!authUser)return false;
   try{
     if(_trackerRevision===0){
-      const{error}=await _supa.from('tracker_vault').insert({user_id:authUser.id,id:TRACKER_VAULT_ID,blob,revision:1});
+      const{error}=await _supa.from('app_vault').insert({user_id:authUser.id,id:TRACKER_VAULT_ID,blob,revision:1});
       if(error){if(error.code==='23505')return false;console.warn(error.message);return false;}
       _trackerRevision=1;return true;
     }
     const nextRev=_trackerRevision+1;
-    const{data,error}=await _supa.from('tracker_vault')
+    const{data,error}=await _supa.from('app_vault')
       .update({blob,revision:nextRev,updated_at:new Date().toISOString()})
       .eq('user_id',authUser.id).eq('id',TRACKER_VAULT_ID).eq('revision',_trackerRevision).select();
     if(error){console.warn(error.message);return false;}
