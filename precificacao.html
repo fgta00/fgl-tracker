@@ -1148,6 +1148,7 @@ async function authSignOut(){
   if(!confirm('Sair da conta ('+authUser.email+')?\nA Importação também tranca de novo.'))return;
   await _supa.auth.signOut();
   authUser=null;importPass=null;rvSyncPass=null;
+  sessionStorage.removeItem(SESS_IMPORT_PW);sessionStorage.removeItem(SESS_RV_PW);
   updateAuthUI();
   toastSave('Desconectado');
 }
@@ -1258,6 +1259,7 @@ function showTab(id){
 
 /* ════════ SENHA DO COFRE — ABA IMPORTAÇÃO ════════ */
 let importPass=null; // fica null até o usuário digitar certo nesta sessão da aba
+const SESS_IMPORT_PW='fgl_sess_import_pw';
 function checkLock(){
   if(!authUser){
     document.getElementById('ovl-lock').classList.remove('open');
@@ -1266,6 +1268,8 @@ function checkLock(){
     return;
   }
   if(importPass){document.getElementById('ovl-lock').classList.remove('open');return;}
+  const savedPw=sessionStorage.getItem(SESS_IMPORT_PW);
+  if(savedPw){tryUnlock(savedPw);return;}
   const hasLocal=!!localStorage.getItem(SAVE_KEY);
   document.getElementById('lock-hint').textContent=hasLocal
     ? 'Conta conectada. Digite a senha do cofre pra decifrar os dados.'
@@ -1273,8 +1277,8 @@ function checkLock(){
   document.getElementById('ovl-lock').classList.add('open');
   setTimeout(()=>{const el=document.getElementById('lock-pass');if(el)el.focus();},50);
 }
-async function tryUnlock(){
-  const v=document.getElementById('lock-pass').value;
+async function tryUnlock(pwOverride){
+  const v=pwOverride||document.getElementById('lock-pass').value;
   if(!v){document.getElementById('lock-err').textContent='Digite uma senha.';return;}
   document.getElementById('lock-err').style.color='';
   document.getElementById('lock-err').textContent='Conectando à nuvem…';
@@ -1297,19 +1301,28 @@ async function tryUnlock(){
       const payload=JSON.parse(vaultToUse);
       const state=await decryptJSON(v,payload); // valida a senha de verdade
       importPass=v;
+      sessionStorage.setItem(SESS_IMPORT_PW,v); // sobrevive à troca de página nesta aba
       applyState(state);recalc();
       if(fromCloud){localStorage.setItem(SAVE_KEY,vaultToUse);setLocalTs(SAVE_KEY);}
       else if(_supaOK&&authUser){await importCloudSave(vaultToUse);}
       unlockUI();
     }catch(e){
+      sessionStorage.removeItem(SESS_IMPORT_PW); // senha salva não bate mais — não insiste sozinha
+      if(pwOverride){checkLockForceOpen();return;} // falha silenciosa: abre o cadeado normal pra digitar de novo
       document.getElementById('lock-err').style.color='var(--red)';
       document.getElementById('lock-err').textContent='Senha incorreta.';
       document.getElementById('lock-pass').value='';document.getElementById('lock-pass').focus();
     }
   }else{
     importPass=v;_importRevision=0;
+    sessionStorage.setItem(SESS_IMPORT_PW,v);
     unlockUI();
   }
+}
+function checkLockForceOpen(){
+  document.getElementById('lock-hint').textContent='Sua sessão expirou ou a senha mudou. Digite a senha do cofre.';
+  document.getElementById('ovl-lock').classList.add('open');
+  setTimeout(()=>{const el=document.getElementById('lock-pass');if(el)el.focus();},50);
 }
 function unlockUI(){
   document.getElementById('ovl-lock').classList.remove('open');
@@ -1356,6 +1369,7 @@ async function rvCloudSave(blobStr){
     _rvRevision=nextRev;return{ok:true};
   }catch(e){console.warn(e);return{ok:false,reason:'error'};}
 }
+const SESS_RV_PW='fgl_sess_revenda_pw';
 function checkRvLock(){
   if(!authUser){
     document.getElementById('ovl-rvlock').classList.remove('open');
@@ -1364,12 +1378,14 @@ function checkRvLock(){
     return;
   }
   if(rvSyncPass){document.getElementById('ovl-rvlock').classList.remove('open');return;}
+  const savedPw=sessionStorage.getItem(SESS_RV_PW);
+  if(savedPw){tryRvUnlock(savedPw);return;}
   document.getElementById('rvlock-hint').textContent='Conta conectada. Digite a senha do cofre compartilhado (a mesma da sua gerente).';
   document.getElementById('ovl-rvlock').classList.add('open');
   setTimeout(()=>{const el=document.getElementById('rvlock-pass');if(el)el.focus();},50);
 }
-async function tryRvUnlock(){
-  const pw=document.getElementById('rvlock-pass').value;
+async function tryRvUnlock(pwOverride){
+  const pw=pwOverride||document.getElementById('rvlock-pass').value;
   if(!pw){document.getElementById('rvlock-err').textContent='Digite uma senha.';return;}
   document.getElementById('rvlock-err').style.color='';
   document.getElementById('rvlock-err').textContent='Conectando à nuvem…';
@@ -1386,6 +1402,7 @@ async function tryRvUnlock(){
         return;
       }
       rvSyncPass=pw;_rvRevision=1;
+      sessionStorage.setItem(SESS_RV_PW,pw);
       localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
       updateRvSyncStatus();
       rvUnlockUI();
@@ -1399,6 +1416,7 @@ async function tryRvUnlock(){
     const payload=JSON.parse(vaultToUse);
     const data=await decryptJSON(pw,payload); // senha errada OU sem permissão (RLS) cai no catch
     rvSyncPass=pw;_rvRevision=cloud.revision||1;
+    sessionStorage.setItem(SESS_RV_PW,pw);
     rvApplySyncData(data);
     if(fromCloud){localStorage.setItem('rv_sync_vault',vaultToUse);setLocalTs('rv_sync_vault');}
     else{await rvCloudSave(vaultToUse);}
@@ -1407,6 +1425,13 @@ async function tryRvUnlock(){
     toastSave('Dados compartilhados conectados ✓');
   }catch(e){
     console.warn(e);
+    sessionStorage.removeItem(SESS_RV_PW);
+    if(pwOverride){
+      document.getElementById('rvlock-hint').textContent='Sua sessão expirou ou a senha mudou. Digite a senha do cofre.';
+      document.getElementById('ovl-rvlock').classList.add('open');
+      setTimeout(()=>{const el=document.getElementById('rvlock-pass');if(el)el.focus();},50);
+      return;
+    }
     document.getElementById('rvlock-err').style.color='var(--red)';
     document.getElementById('rvlock-err').textContent='Senha incorreta (ou você ainda não foi adicionado(a) como membro).';
     document.getElementById('rvlock-pass').value='';
