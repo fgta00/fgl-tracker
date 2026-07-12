@@ -54,16 +54,17 @@ body.dark .btn-bkp{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
 body.dark .btn-add{background:#16A34A}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
-header{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.4rem;position:sticky;top:0;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+header{background:var(--navy);height:52px;display:flex;align-items:center;gap:1rem;padding:0 1.4rem;position:sticky;top:0;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4)}
 .logo{display:flex;align-items:center;gap:.5rem;color:#fff;font-weight:700;font-size:.86rem;letter-spacing:.03em}
 .logo-i{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,#1A7A45);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .tabs{display:flex;gap:2px;height:100%}
 .tab{background:none;border:none;color:rgba(255,255,255,.48);font-family:'IBM Plex Sans';font-size:.73rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:100%;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:inline-flex;align-items:center}
 .tab:hover{color:rgba(255,255,255,.82)}.tab.active{color:#fff;border-bottom-color:#4DB8FF}
-.subheader{background:var(--card);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.5rem;padding:.4rem 1.4rem;position:sticky;top:52px;z-index:290}
-.stab{background:none;border:none;color:var(--ink3);font-family:'IBM Plex Sans';font-size:.72rem;font-weight:600;padding:.6rem 1rem;cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
-.stab:hover{color:var(--ink)}
-.stab.active{color:var(--green);border-bottom-color:var(--green)}
+.subheader{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:.5rem;padding:.4rem 1.4rem;position:sticky;top:52px;z-index:290}
+body.dark .subheader{background:#0A0F1A}
+.stab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'IBM Plex Sans';font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:.6rem 1rem;cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
+.stab:hover{color:rgba(255,255,255,.85)}
+.stab.active{color:#fff;border-bottom-color:#4DB8FF}
 .hdr-r{display:flex;align-items:center;gap:.7rem}
 .hdr-d{font-size:.68rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono'}
 .btn-add{background:var(--green);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;padding:.34rem .85rem;border-radius:7px;cursor:pointer;transition:background .15s}
@@ -90,7 +91,7 @@ tr:hover .del-row{opacity:1}
 .tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:collapse;font-size:11.5px}
 thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14)}
-thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2);text-transform:uppercase;letter-spacing:.02em}
+thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2)}
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
@@ -274,10 +275,10 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <a class="tab" id="tab-revenda" href="precificacao.html" style="text-decoration:none">Revenda</a>
     <button class="tab active" id="tab-tracker">Tracker</button>
   </div>
+  <div style="flex:1"></div>
   <div class="hdr-r">
     <span id="sync-status" style="font-size:.62rem;font-weight:600;margin-right:.5rem" title="Estado da sincronização com a nuvem"></span>
     <span id="auth-status2" style="font-size:.66rem;color:rgba(255,255,255,.7);margin-right:.4rem"></span>
-    <span class="hdr-d" id="hdr-date"></span>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
   </div>
 </header>
@@ -1099,7 +1100,6 @@ async function doLogin(){
   setSyncStatus(_supaOK?'ok':'offline');
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-wrap').classList.add('authed');
-  document.getElementById('hdr-date').textContent=todayDisp();
   renderAll();
 }
 
