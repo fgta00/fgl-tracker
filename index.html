@@ -964,7 +964,9 @@ async function initAuth(){
   _supa.auth.onAuthStateChange((_evt,session)=>{
     authUser=session?{id:session.user.id,email:session.user.email}:null;
   });
-  prepareLoginScreen();
+  updateHeaderVisibility();
+  const savedPw=authUser?sessionStorage.getItem(SESS_TRACKER_PW):null;
+  if(savedPw){doLogin(savedPw);}else{prepareLoginScreen();}
 }
 function prepareLoginScreen(){
   const f1=document.getElementById('login-email'),f2=document.getElementById('login-account-pw');
@@ -1016,8 +1018,9 @@ function applyLoadedData(data){
   if(data.conteineres)CONTEINERES=data.conteineres;
   if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
 }
-async function doLogin(){
-  const vaultPw=document.getElementById('login-pw').value;
+const SESS_TRACKER_PW='fgl_sess_tracker_pw';
+async function doLogin(pwOverride){
+  const vaultPw=pwOverride||document.getElementById('login-pw').value;
   if(!vaultPw){document.getElementById('login-err').style.color='';document.getElementById('login-err').textContent='Digite a senha do cofre';return;}
 
   if(!authUser){
@@ -1032,8 +1035,7 @@ async function doLogin(){
   }
   updateHeaderVisibility();
 
-  document.getElementById('login-err').style.color='var(--ink4)';
-  document.getElementById('login-err').textContent='Buscando dados…';
+  if(!pwOverride){document.getElementById('login-err').style.color='var(--ink4)';document.getElementById('login-err').textContent='Buscando dados…';}
   try{
     const localVault=localStorage.getItem(SK+'vault_v2');
     const localTsV=localStorage.getItem(SK+'vault_v2_ts')||'';
@@ -1049,6 +1051,7 @@ async function doLogin(){
       const payload=JSON.parse(vaultToUse);
       const data=await decryptJSON(vaultPw,payload); // valida a senha do cofre de verdade
       _cryptoKey=vaultPw;
+      sessionStorage.setItem(SESS_TRACKER_PW,vaultPw); // sobrevive à troca de página nesta aba
       applyLoadedData(data);
       if(fromCloud){localStorage.setItem(SK+'vault_v2',vaultToUse);localStorage.setItem(SK+'vault_v2_ts',new Date().toISOString());}
       else if(_supaOK){await cloudSet(vaultToUse);}
@@ -1084,14 +1087,17 @@ async function doLogin(){
         // senão, começa vazio mesmo (1º uso de verdade)
       }
       _cryptoKey=vaultPw;_trackerRevision=0;
+      sessionStorage.setItem(SESS_TRACKER_PW,vaultPw);
       await saveAll();
     }
   }catch(e){
+    sessionStorage.removeItem(SESS_TRACKER_PW); // senha salva não bate mais — não insiste sozinha
+    _cryptoKey=null;
+    if(pwOverride){prepareLoginScreen();return;} // falha silenciosa: mostra a tela normal pra digitar de novo
     document.getElementById('login-err').style.color='';
     document.getElementById('login-err').textContent='Senha do cofre incorreta';
     document.getElementById('login-pw').value='';
     document.getElementById('login-pw').focus();
-    _cryptoKey=null;
     return;
   }
   document.getElementById('login-err').textContent='';
