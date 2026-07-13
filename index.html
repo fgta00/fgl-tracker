@@ -254,15 +254,18 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
   <div class="login-box">
     <div class="login-logo">🌿</div>
     <h1>FGL</h1>
-    <div class="login-sub" id="login-sub">Acesso restrito</div>
-    <input class="wide" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
-    <input class="wide" type="password" id="login-account-pw" placeholder="Senha da conta" autocomplete="current-password">
-    <input type="password" id="login-pw" placeholder="Senha do cofre" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="login-btn-row">
-      <button onclick="doLogin()">Entrar</button>
-      <button class="sec" id="login-signup-btn" onclick="doSignup()">Criar conta</button>
+    <div class="login-sub" id="login-loading-txt">Carregando…</div>
+    <div id="login-form" style="display:none">
+      <div class="login-sub" id="login-sub">Acesso restrito</div>
+      <input class="wide" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+      <input class="wide" type="password" id="login-account-pw" placeholder="Senha da conta" autocomplete="current-password">
+      <input type="password" id="login-pw" placeholder="Senha do cofre" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="login-btn-row">
+        <button onclick="doLogin()">Entrar</button>
+        <button class="sec" id="login-signup-btn" onclick="doSignup()">Criar conta</button>
+      </div>
+      <div class="login-err" id="login-err"></div>
     </div>
-    <div class="login-err" id="login-err"></div>
   </div>
 </div>
 
@@ -969,6 +972,8 @@ async function initAuth(){
   if(savedPw){doLogin(savedPw);}else{prepareLoginScreen();}
 }
 function prepareLoginScreen(){
+  document.getElementById('login-loading-txt').style.display='none';
+  document.getElementById('login-form').style.display='';
   const f1=document.getElementById('login-email'),f2=document.getElementById('login-account-pw');
   const signupBtn=document.getElementById('login-signup-btn'),sub=document.getElementById('login-sub');
   if(authUser){
