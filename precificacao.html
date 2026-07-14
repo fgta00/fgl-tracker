@@ -344,28 +344,30 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
         <div class="card no-print">
           <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
-          <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rv2-qtd" value="1000" min="1" step="1" oninput="rv2Calc()"></div>
+          <div class="grid" style="grid-template-columns:120px 1fr;gap:.6rem;align-items:end">
+            <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rv2-qtd" value="1000" min="1" step="1" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Mercadoria</label>
+              <div class="toggle-grp" id="rv2-tipo-toggle">
+                <button class="active" onclick="rv2SetTipo('Nacional')">Nacional</button>
+                <button onclick="rv2SetTipo('Importada')">Importada</button>
+              </div>
+            </div>
+          </div>
 
-          <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
+          <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar cliente">＋</button>
             </div>
-            <div class="ff"><label>Preço de venda unit. R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
 
-          <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
+          <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar fornecedor">＋</button>
             </div>
-            <div class="ff"><label>Preço compra unit. R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
-          </div>
-
-          <div class="sep-lbl">Mercadoria</div>
-          <div class="toggle-grp" id="rv2-tipo-toggle">
-            <button class="active" onclick="rv2SetTipo('Nacional')">Nacional</button>
-            <button onclick="rv2SetTipo('Importada')">Importada</button>
+            <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
 
           <div class="collap-h" onclick="toggleCollap(this,'rv2-opt-body')" style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
@@ -398,7 +400,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 
       <!-- HISTÓRICO DE COMPRAS DO CLIENTE -->
       <div class="card no-print" style="margin-top:1rem">
-        <div class="sh" style="margin-bottom:.5rem">Histórico de Compras — <span id="rv2-hist-cliente" style="color:var(--ink3);text-transform:none;letter-spacing:0;font-weight:400">selecione um cliente</span></div>
+        <div class="sh" style="margin-bottom:.5rem">Histórico de Compras e Cotações — <span id="rv2-hist-cliente" style="color:var(--ink3);text-transform:none;letter-spacing:0;font-weight:400">selecione um cliente</span></div>
         <div id="rv2-hist-table"></div>
       </div>
     </div>
