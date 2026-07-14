@@ -331,153 +331,63 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
     </div>
 
     <div id="rvpane-calc" class="rv-pane active">
-      <div class="card" style="background:var(--green);color:#fff;padding:1rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+      <div class="card" style="background:var(--green);color:#fff;padding:.8rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
         <div>
-          <div style="font-size:1.05rem;font-weight:700">Calculadora de Revenda de Sacolas</div>
-          <div style="font-size:.7rem;color:#B8E0C8;margin-top:.15rem">Ânima Verde Ecobags · Rio de Janeiro · Comprador–Revendedor</div>
+          <div style="font-size:1rem;font-weight:700">Revenda — Ânima Verde</div>
+          <div style="font-size:.68rem;color:#B8E0C8;margin-top:.1rem">RJ · Lucro Presumido · comprador–revendedor</div>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <span class="badge-regime">Lucro Presumido</span>
-          <span class="badge-regime">Sem IPI na saída (revenda)</span>
         </div>
       </div>
 
-      <!-- BLOCO 1: OPERAÇÃO -->
-      <div class="card no-print">
-        <div class="collap-h open" onclick="toggleCollap(this,'rv-op-body')">
-          <div class="sh" style="margin:0">1 · Dados da Operação</div><span class="chev">▶</span>
-        </div>
-        <div class="collap-body open" id="rv-op-body">
-          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-            <div class="ff"><label>Cliente</label><input type="text" id="rv-cliente" placeholder="Nome do cliente"></div>
-            <div class="ff"><label>Data</label><input type="date" id="rv-data"></div>
-            <div class="ff"><label>Quantidade (un)</label><input type="number" class="mono" id="rv-qtd" value="5000" min="1" step="1"></div>
-            <div class="ff"><label>Preço de venda unit. R$</label><input type="number" class="mono" id="rv-pv" value="8.65" min="0" step="0.01"><span class="formula">sem IPI — AV não destaca IPI na revenda</span></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+        <!-- CARD ESQUERDO: DADOS DA VENDA -->
+        <div class="card no-print">
+          <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
+
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.4rem;align-items:end">
+            <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
+            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar cliente">＋ Novo</button>
+          </div>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.4rem;align-items:end;margin-top:.6rem">
+            <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
+            <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar fornecedor">＋ Novo</button>
           </div>
 
-          <div class="sep-lbl">Destino e tipo de venda</div>
-          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
-            <div class="ff"><label>UF destino</label>
-              <select id="rv-uf" onchange="rvCalcular()">
-                <option value="RJ">RJ — intra-estadual</option>
-                <option value="SP">SP (Sul/SE)</option>
-                <option value="MG">MG (Sul/SE)</option>
-                <option value="SC">SC (Sul/SE)</option>
-                <option value="PR">PR (Sul/SE)</option>
-                <option value="RS">RS (Sul/SE)</option>
-                <option value="ES">ES (N/NE/ES)</option>
-                <option value="BA">BA (N/NE)</option>
-                <option value="AM">AM (Norte)</option>
-                <option value="PA">PA (Norte)</option>
-                <option value="CE">CE (N/NE)</option>
-                <option value="OUTRO_SUL_SE">Outro Sul/SE</option>
-                <option value="OUTRO_NNE">Outro N/NE</option>
-              </select>
-            </div>
-            <div class="ff"><label>Tipo de comprador</label>
-              <div class="toggle-grp" id="rv-tipo-toggle">
-                <button id="rv-btn-b2b" class="active" onclick="rvSetTipo('b2b')">B2B</button>
-                <button id="rv-btn-b2c" onclick="rvSetTipo('b2c')">B2C</button>
-              </div>
-              <span class="formula" id="rv-hint-tipo" style="display:block;margin-top:.25rem">Revendedor / empresa</span>
-            </div>
-            <div class="ff"><label>ICMS débito venda %</label><input type="number" class="mono inp-auto" id="rv-icms-deb" step="0.1" min="0" max="100"><span class="formula">auto — editável</span></div>
-            <div class="ff"><label>PIS/COFINS/IRPJ/CSLL %</label><input type="number" class="mono inp-auto" id="rv-fed-pct" value="5.93" step="0.01" min="0"><span class="formula">Lucro Presumido — editável</span></div>
+          <div class="sep-lbl">Mercadoria</div>
+          <div class="toggle-grp" id="rv2-tipo-toggle">
+            <button class="active" onclick="rv2SetTipo('Nacional')">Nacional</button>
+            <button onclick="rv2SetTipo('Importada')">Importada</button>
           </div>
 
-          <div class="sep-lbl">Venda — encargos e frete</div>
-          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
-            <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv-comissao" value="0" step="0.1" min="0"></div>
-            <div class="ff"><label>Frete entrega — na NF (R$ total)</label><input type="number" class="mono" id="rv-frete-ent" value="0" step="0.01" min="0"><span class="formula">somado à NF · entra na base ICMS</span></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.8rem">
+            <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rv2-qtd" value="1000" min="1" step="1" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Preço compra unit. R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
+          <div class="ff" style="margin-top:.6rem"><label>Preço de venda unit. R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
 
-          <div class="difal-bloco" id="rv-difal-bloco">
-            <div class="difal-title">⚠ DIFAL — venda B2C inter-estadual</div>
-            <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
-              <div class="ff"><label>Alíquota ICMS destino %</label><input type="number" class="mono" id="rv-difal-dest" value="17" step="0.1" min="0" max="100"></div>
-              <div class="ff"><label>Alíquota ICMS origem RJ %</label><input type="number" class="mono" id="rv-difal-orig" value="12" step="0.1" min="0" max="100"></div>
-              <div class="ff"><label>DIFAL por unidade R$</label><input type="number" class="mono inp-auto" id="rv-difal-val" readonly><span class="formula">auto calculado</span></div>
-            </div>
+          <div class="no-print" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.1rem">
+            <button class="btn" style="background:var(--blue);color:#fff;flex:1" onclick="rv2SalvarCotacao()">💾 Salvar Cotação</button>
+            <button class="btn btn-p" style="flex:1" onclick="rv2CriarPedido()">📦 Criar Pedido</button>
           </div>
         </div>
-      </div>
 
-      <!-- BLOCO 1b: LINHA DO TEMPO -->
-      <div class="card no-print">
-        <div class="collap-h open" onclick="toggleCollap(this,'rv-tl-body')">
-          <div class="sh" style="margin:0">2 · Linha do Tempo — prazos a partir da confirmação do pedido</div><span class="chev">▶</span>
-        </div>
-        <div class="collap-body open" id="rv-tl-body">
-          <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:1rem">
-            <div class="ff"><label>Prazo de produção (dias)</label><input type="number" class="mono" id="rv-tl-prod" value="30" min="0" step="1" oninput="rvCalcTimeline()"><span class="formula">pedido → saída fábrica</span></div>
-            <div class="ff" style="grid-column:span 2">
-              <label>Fornecedor (para valores)</label>
-              <div class="toggle-grp" id="rv-tl-forn-toggle" style="margin-top:.25rem">
-                <button class="active" onclick="rvSetTlForn(1,this)">Forn. 1</button>
-                <button onclick="rvSetTlForn(2,this)">Forn. 2</button>
-                <button onclick="rvSetTlForn(3,this)">Forn. 3</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-            <div>
-              <div class="sep-lbl" style="margin-top:0">💸 Pagamento fornecedor (dias após pedido)</div>
-              <table class="parcela-table">
-                <thead><tr><th>#</th><th>% valor</th><th>Dias após pedido</th><th></th></tr></thead>
-                <tbody id="rv-pgto-body"></tbody>
-              </table>
-              <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
-                <button class="btn btn-s" style="font-size:.66rem;padding:.25rem .6rem" onclick="rvAddParcela('pgto')">+ parcela</button>
-                <span id="rv-pgto-sum-badge" class="sum-badge"></span>
-              </div>
-            </div>
-            <div>
-              <div class="sep-lbl" style="margin-top:0">💰 Recebimento cliente (dias após pedido)</div>
-              <table class="parcela-table">
-                <thead><tr><th>#</th><th>% valor</th><th>Dias após pedido</th><th></th></tr></thead>
-                <tbody id="rv-receb-body"></tbody>
-              </table>
-              <div style="display:flex;align-items:center;gap:.5rem;margin-top:.4rem">
-                <button class="btn btn-s" style="font-size:.66rem;padding:.25rem .6rem" onclick="rvAddParcela('receb')">+ parcela</button>
-                <span id="rv-receb-sum-badge" class="sum-badge"></span>
-              </div>
-            </div>
-          </div>
-
-          <div id="rv-timeline-visual"></div>
-        </div>
-      </div>
-
-      <!-- BLOCO 2: FORNECEDORES -->
-      <div class="card no-print">
-        <div class="collap-h open" onclick="toggleCollap(this,'rv-forn-body')">
-          <div class="sh" style="margin:0">3 · Fornecedores — até 3 para comparação</div><span class="chev">▶</span>
-        </div>
-        <div class="collap-body open" id="rv-forn-body">
-          <small class="hint" style="display:block;margin-bottom:.7rem">Campos em <b>azul</b> = entrada manual · <b>verde</b> = calculado automaticamente (editável)</small>
-          <div class="forn-grid" id="rv-forn-grid"></div>
-        </div>
-      </div>
-
-      <!-- BOTÕES -->
-      <div class="no-print" style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0 1.3rem">
-        <button class="btn btn-p" style="font-size:.85rem;padding:.6rem 1.6rem" onclick="rvCalcular()">⟳ Calcular</button>
-        <button class="btn btn-s" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
-        <button class="btn" style="background:var(--blue);color:#fff" onclick="rvSalvarCotacao()">💾 Salvar Cotação</button>
-        <button class="btn btn-s" onclick="rvLimparTudo()">Limpar tudo</button>
-      </div>
-
-      <!-- RESULTADOS -->
-      <div id="rv-resultados" style="display:none">
+        <!-- CARD DIREITO: RESULTADO -->
         <div class="card">
-          <div class="collap-h open" style="cursor:default;background:var(--green)" >
-            <div style="margin:0;color:#fff;font-size:.78rem;font-weight:700;letter-spacing:0;text-transform:none" id="rv-res-titulo">Resultados</div>
+          <div class="sh" style="margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
+            <span>Resultado</span>
+            <button class="btn btn-s no-print" style="font-size:.6rem;padding:.22rem .55rem" id="rv2-detalhe-btn" onclick="rv2ToggleDetalhe()">Ver detalhado</button>
           </div>
-          <div style="overflow-x:auto">
-            <table class="res-table" id="rv-tabela-res"></table>
-          </div>
+          <div id="rv2-resumo"><p class="hint">Selecione cliente e fornecedor pra calcular.</p></div>
+          <div id="rv2-detalhe" style="display:none;margin-top:.6rem"></div>
         </div>
+      </div>
+
+      <!-- HISTÓRICO DE COMPRAS DO CLIENTE -->
+      <div class="card no-print" style="margin-top:1rem">
+        <div class="sh" style="margin-bottom:.5rem">Histórico de Compras — <span id="rv2-hist-cliente" style="color:var(--ink3);text-transform:none;letter-spacing:0;font-weight:400">selecione um cliente</span></div>
+        <div id="rv2-hist-table"></div>
       </div>
     </div>
 
@@ -501,6 +411,27 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- CADASTRO RÁPIDO — CLIENTE / FORNECEDOR -->
+<div class="ovl" id="ovl-rvcad" onclick="if(event.target===this)closeM('rvcad')">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="modal-x" onclick="closeM('rvcad')">✕</button></div>
+    <div class="modal-b">
+      <div class="ff"><label>Nome</label><input type="text" id="rvcad-nome" placeholder="Ex: Zona Sul"></div>
+      <div class="ff" style="margin-top:.5rem"><label>Estado (UF)</label>
+        <select id="rvcad-estado"></select>
+      </div>
+      <div class="ff" id="rvcad-regime-wrap" style="margin-top:.5rem;display:none">
+        <label>Regime fiscal</label>
+        <div class="toggle-grp" id="rvcad-regime-toggle">
+          <button class="active" onclick="rv2SetCadRegime('LP')">Lucro Presumido</button>
+          <button onclick="rv2SetCadRegime('SN')">Simples Nacional</button>
+        </div>
+      </div>
+      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveCad()">Salvar cadastro</button>
+    </div>
   </div>
 </div>
 
@@ -1336,10 +1267,14 @@ let rvSyncPass=null;
 let _rvSyncTimer=null;
 let _rvRevision=0;
 
-function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos()};}
+function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2};}
 function rvApplySyncData(data){
   if(Array.isArray(data.cotacoes))rvSaveCotacoes(data.cotacoes);
   if(Array.isArray(data.pedidos))rvSavePedidos(data.pedidos);
+  if(Array.isArray(data.clientes2))RV_CLIENTES2=data.clientes2;
+  if(Array.isArray(data.fornecedores2))RV_FORNECEDORES2=data.fornecedores2;
+  rv2SaveLocalCad();
+  rv2PopulateSelects();
   rvRenderCotacoes();rvRenderPedidos();
 }
 function updateRvSyncStatus(msg){
@@ -1481,377 +1416,46 @@ if(localStorage.getItem('calc_dark')==='1'){document.body.classList.add('dark');
    ICMS débito/crédito · DIFAL · comissão · frete entrega · comparação
    de até 3 fornecedores · cotações/pedidos salvos)
    ═══════════════════════════════════════════════════════════════ */
-let rvTipoVenda='b2b';
-const rvv=id=>parseFloat(document.getElementById(id).value)||0;
-const rvvs=id=>document.getElementById(id).value;
 const rvEl=id=>document.getElementById(id);
 const rvBrl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-function rvFmtPct(n){return (n*100).toFixed(2).replace('.',',')+'%';}
 
-/* ── ALÍQUOTA ICMS DÉBITO VENDA ── */
-function rvIcmsDebVenda(uf,tipoProduto){
-  if(uf==='RJ')return 20;
-  if(tipoProduto==='importado')return 4; // Res. 13/2012
-  const sulSe=['SP','MG','SC','PR','RS','OUTRO_SUL_SE'];
-  return sulSe.includes(uf)?12:7;
-}
-/* ── ALÍQUOTA ICMS CRÉDITO COMPRA ── */
-function rvIcmsCred(tipo){
-  const map={imp_fora:4,imp_rj:20,nac_sul_se:12,nac_n_ne:7,nac_rj:20,simples:0,'':0};
-  return map[tipo]??0;
-}
-function rvTipoProduto(tipo){return tipo.startsWith('imp')?'importado':'nacional';}
-
-/* ── TOGGLE B2B/B2C ── */
-function rvSetTipo(t){
-  rvTipoVenda=t;
-  rvEl('rv-btn-b2b').classList.toggle('active',t==='b2b');
-  rvEl('rv-btn-b2c').classList.toggle('active',t==='b2c');
-  rvEl('rv-hint-tipo').textContent=t==='b2b'?'Revendedor / empresa':'Consumidor final';
-  rvCalcular();
-}
-
-/* ── FORNECEDORES (monta os 3 cards) ── */
-const RV_TIPO_OPTS=[
-  ['imp_fora','Importado — fora RJ'],['imp_rj','Importado — dentro RJ'],
-  ['nac_sul_se','Nacional LP/LR — Sul/SE'],['nac_n_ne','Nacional LP/LR — N/NE/ES'],
-  ['nac_rj','Nacional LP/LR — Intra-RJ'],['simples','Simples Nacional']
+/* ═══════════════════════════════════════════════════════════════
+   REVENDA — versão simplificada
+   Cadastros (Cliente: nome+estado · Fornecedor: nome+estado+regime)
+   + tabelas de ICMS crédito/débito pré-definidas (RJ, Lucro Presumido)
+   ═══════════════════════════════════════════════════════════════ */
+const ESTADOS=[['AC','Acre'],['AL','Alagoas'],['AP','Amapá'],['AM','Amazonas'],['BA','Bahia'],['CE','Ceará'],['DF','Distrito Federal'],['ES','Espírito Santo'],['GO','Goiás'],['MA','Maranhão'],['MT','Mato Grosso'],['MS','Mato Grosso do Sul'],['MG','Minas Gerais'],['PA','Pará'],['PB','Paraíba'],['PR','Paraná'],['PE','Pernambuco'],['PI','Piauí'],['RJ','Rio de Janeiro'],['RN','Rio Grande do Norte'],['RS','Rio Grande do Sul'],['RO','Rondônia'],['RR','Roraima'],['SC','Santa Catarina'],['SP','São Paulo'],['SE','Sergipe'],['TO','Tocantins']];
+const REGIAO_MAP={
+  RJ:'SE_RJ',
+  SP:'SE_S',MG:'SE_S',PR:'SE_S',SC:'SE_S',RS:'SE_S',
+  ES:'N_NE_CO',AC:'N_NE_CO',AP:'N_NE_CO',AM:'N_NE_CO',PA:'N_NE_CO',RO:'N_NE_CO',RR:'N_NE_CO',TO:'N_NE_CO',
+  AL:'N_NE_CO',BA:'N_NE_CO',CE:'N_NE_CO',MA:'N_NE_CO',PB:'N_NE_CO',PE:'N_NE_CO',PI:'N_NE_CO',RN:'N_NE_CO',SE:'N_NE_CO',
+  DF:'N_NE_CO',GO:'N_NE_CO',MT:'N_NE_CO',MS:'N_NE_CO'
+};
+const REGIAO_LBL={SE_RJ:'SE (RJ)',SE_S:'SE (-ES) + S',N_NE_CO:'N+NE+CO (+ES)'};
+// Alíquota de CRÉDITO de ICMS: [Tipo Mercadoria][Regime Fornecedor][Região Fornecedor]
+const TAB_CREDITO={
+  Importada:{SN:{SE_RJ:4,SE_S:4,N_NE_CO:4},LP:{SE_RJ:20,SE_S:4,N_NE_CO:4}},
+  Nacional:{SN:{SE_RJ:4,SE_S:4,N_NE_CO:4},LP:{SE_RJ:20,SE_S:7,N_NE_CO:12}}
+};
+// Alíquota de DÉBITO de ICMS: [Tipo Mercadoria][Região Cliente]
+const TAB_DEBITO={
+  Importada:{SE_RJ:20,SE_S:4,N_NE_CO:4},
+  Nacional:{SE_RJ:20,SE_S:7,N_NE_CO:12}
+};
+const RV_FED_PCT=5.93; // PIS/COFINS/IRPJ/CSLL — fixo, Lucro Presumido RJ
+const RV_STATUS_STEPS=[
+  {key:'confirmado',label:'Pedido confirmado'},{key:'producao',label:'Em produção'},
+  {key:'fat_forn',label:'Faturado fornecedor'},{key:'pago_forn',label:'Pago fornecedor'},
+  {key:'entregue',label:'Entregue cliente'},{key:'nf_emitida',label:'NF emitida'},
+  {key:'recebido',label:'Recebido cliente'}
 ];
-function rvFornCard(n){
-  const optNone=n===1?'':'<option value="">— não usar —</option>';
-  const opts=optNone+RV_TIPO_OPTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  const rmBtn=n===1?'':`<button class="rm-forn" onclick="rvLimparForn(${n})">Limpar</button>`;
-  return `
-  <div class="forn-card forn-${n}" id="rv-fc${n}">
-    <div class="forn-hdr"><span>Fornecedor ${n}</span>${rmBtn}</div>
-    <div class="forn-body">
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
-        <div class="ff" style="grid-column:1/-1"><label>Nome</label><input type="text" id="rv-f${n}-nome" placeholder="${n===1?'Ex: Sacacho':'Opcional'}"></div>
-        <div class="ff"><label>Tipo</label><select id="rv-f${n}-tipo" onchange="rvTipoChange(${n})">${opts}</select></div>
-        <div class="ff"><label>ICMS crédito %</label><input type="number" class="mono inp-auto" id="rv-f${n}-icms-cred" step="0.1" min="0"><span class="formula">auto — editável</span></div>
-      </div>
-      <div id="rv-f${n}-aviso-simples" class="aviso-simples">⚠ Simples: confirmar % de crédito na NF. Padrão = 0%.</div>
-      <div class="sep-lbl">Preço e IPI</div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
-        <div class="ff"><label>Preço compra unit. R$</label><input type="number" class="mono" id="rv-f${n}-pc" value="${n===1?'4.25':'0'}" step="0.01" min="0"></div>
-        <div class="ff"><label>IPI na NF entrada %</label><input type="number" class="mono" id="rv-f${n}-ipi-ent" value="0" step="0.1" min="0"><span class="formula">custo puro — sem crédito p/ AV</span></div>
-      </div>
-      <div class="sep-lbl">Outros custos (totais do pedido)</div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.5rem">
-        <div class="ff"><label>Frete compra R$</label><input type="number" class="mono" id="rv-f${n}-frete" value="0" step="0.01" min="0"></div>
-        <div class="ff"><label>Outros/clichê R$</label><input type="number" class="mono" id="rv-f${n}-outros" value="0" step="0.01" min="0"></div>
-      </div>
-    </div>
-  </div>`;
-}
-function rvRenderFornGrid(){
-  rvEl('rv-forn-grid').innerHTML=[1,2,3].map(rvFornCard).join('');
-  // liga eventos input/change de todos os campos recém-criados
-  document.querySelectorAll('#rv-forn-grid input, #rv-forn-grid select').forEach(elm=>{
-    elm.addEventListener('input',rvCalcular);
-    elm.addEventListener('change',rvCalcular);
-  });
-}
 
-/* ── MUDANÇA DE TIPO DE FORNECEDOR ── */
-function rvTipoChange(n){
-  const tipo=rvvs(`rv-f${n}-tipo`);
-  rvEl(`rv-f${n}-icms-cred`).value=rvIcmsCred(tipo);
-  rvEl(`rv-f${n}-aviso-simples`).style.display=tipo==='simples'?'block':'none';
-  rvCalcular();
-}
-function rvLimparForn(n){
-  rvEl(`rv-f${n}-tipo`).value='';
-  rvEl(`rv-f${n}-nome`).value='';
-  rvEl(`rv-f${n}-pc`).value='0';
-  rvEl(`rv-f${n}-ipi-ent`).value='0';
-  rvEl(`rv-f${n}-icms-cred`).value='0';
-  rvEl(`rv-f${n}-frete`).value='0';
-  rvEl(`rv-f${n}-outros`).value='0';
-  rvEl(`rv-f${n}-aviso-simples`).style.display='none';
-  rvCalcular();
-}
-
-/* ── DIFAL ── */
-function rvAtualizarDifal(){
-  const uf=rvvs('rv-uf');
-  const show=rvTipoVenda==='b2c'&&uf!=='RJ';
-  rvEl('rv-difal-bloco').classList.toggle('visible',show);
-  if(show){
-    const pv=rvv('rv-pv');
-    const freteNF=rvv('rv-frete-ent')/Math.max(rvv('rv-qtd'),1);
-    const base=pv+freteNF;
-    const dest=rvv('rv-difal-dest')/100, orig=rvv('rv-difal-orig')/100;
-    rvEl('rv-difal-val').value=(base*Math.max(dest-orig,0)).toFixed(4);
-  }
-}
-
-/* ── CÁLCULO PRINCIPAL ── */
-function rvCalcular(){
-  if(!rvEl('rv-f1-tipo'))return; // grid ainda não montado
-  const qtd=Math.max(rvv('rv-qtd'),1);
-  const pv=rvv('rv-pv');
-  const icmsDebPct=rvv('rv-icms-deb')/100;
-  const fedPct=rvv('rv-fed-pct')/100;
-  const comisPct=rvv('rv-comissao')/100;
-  const freteEntNF=rvv('rv-frete-ent');
-  const freteEntNF_u=freteEntNF/qtd;
-
-  const uf=rvvs('rv-uf');
-  const tipoF1=rvvs('rv-f1-tipo');
-  const tprod=rvTipoProduto(tipoF1||'imp_fora');
-  const icmsDebAuto=rvIcmsDebVenda(uf,tprod);
-  rvEl('rv-icms-deb').value=icmsDebAuto;
-
-  rvAtualizarDifal();
-  const difalUnit=rvTipoVenda==='b2c'&&uf!=='RJ'?rvv('rv-difal-val'):0;
-  const baseICMS=pv+freteEntNF_u;
-  const deb_icms=baseICMS*icmsDebPct;
-  const fed=pv*fedPct;
-  const comissao=pv*comisPct;
-  const evu_comum=deb_icms+fed+comissao+freteEntNF_u+difalUnit;
-
-  const fornecedores=[];
-  for(let n=1;n<=3;n++){
-    const tipo=rvvs(`rv-f${n}-tipo`);
-    if(!tipo)continue;
-    const nome=rvvs(`rv-f${n}-nome`)||`Fornecedor ${n}`;
-    const pc=rvv(`rv-f${n}-pc`);
-    if(pc<=0)continue;
-    const ipiEntPct=rvv(`rv-f${n}-ipi-ent`)/100;
-    const icmsCredPct=rvv(`rv-f${n}-icms-cred`)/100;
-    const freteC=rvv(`rv-f${n}-frete`);
-    const outros=rvv(`rv-f${n}-outros`);
-    const ipi_custo=pc*ipiEntPct;
-    const frete_c_u=freteC/qtd;
-    const outros_u=outros/qtd;
-    const cred_icms=pc*icmsCredPct;
-    const ctu=pc+ipi_custo+frete_c_u+outros_u-cred_icms;
-    const lucro_u=pv-ctu-evu_comum;
-    const margem=pv>0?lucro_u/pv:0;
-    const cmv=pv>0?ctu/pv:0;
-    const lucro_total=lucro_u*qtd;
-    const ctu_sem_icms=pc+ipi_custo+frete_c_u+outros_u;
-    const evu_sem_icms=fed+comissao+freteEntNF_u+difalUnit;
-    const lucro_u_sem_icms=pv-ctu_sem_icms-evu_sem_icms;
-    const lucro_tot_sem_icms=lucro_u_sem_icms*qtd;
-    const margem_sem_icms=pv>0?lucro_u_sem_icms/pv:0;
-    const total_venda_nf=pv*qtd+freteEntNF;
-    const total_venda=pv*qtd;
-    const total_custo_nf=(pc+ipi_custo)*qtd;
-    const saldo_icms=(deb_icms-cred_icms)*qtd;
-    const caixa_imediato=total_venda_nf-total_custo_nf-freteC-freteEntNF-(comissao*qtd)-(difalUnit*qtd);
-    const margem_caixa=total_venda_nf>0?caixa_imediato/total_venda_nf:0;
-    fornecedores.push({n,nome,tipo,pc,ipi_custo,frete_c_u,outros_u,cred_icms,ctu,deb_icms,fed,comissao,
-      freteEntNF_u,difalUnit,evu_comum,lucro_u,margem,cmv,lucro_total,total_venda,total_venda_nf,
-      total_custo_nf,freteC,saldo_icms,lucro_tot_sem_icms,margem_sem_icms,caixa_imediato,margem_caixa,qtd});
-  }
-  if(fornecedores.length===0){rvEl('rv-resultados').style.display='none';return;}
-  const melhorMargem=Math.max(...fornecedores.map(f=>f.margem));
-  window._rvLastFornecedores=fornecedores;
-  rvRenderTabela(fornecedores,pv,qtd,melhorMargem,uf,rvTipoVenda);
-  rvCalcTimeline();
-  rvEl('rv-resultados').style.display='block';
-  const d=rvvs('rv-data')||'—', cli=rvvs('rv-cliente')||'—';
-  rvEl('rv-res-titulo').textContent=`Resultados — ${cli||'Operação'} · ${qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(pv)}`;
-}
-
-/* ── RENDER TABELA COMPARATIVA ── */
-function rvRenderTabela(fs,pv,qtd,melhorMargem,uf,tipoVenda){
-  const nf=fs.length;
-  const t=rvEl('rv-tabela-res');
-  let html='<thead><tr><th style="width:34%">Componente</th>';
-  for(const f of fs){
-    html+=`<th class="cf cf${f.n}">${esc(f.nome)}`;
-    if(nf>1&&f.margem===melhorMargem)html+='<span class="badge-best">✓ melhor</span>';
-    html+='</th>';
-  }
-  html+='</tr></thead><tbody>';
-
-  function row(label,vals,opts={}){
-    const cls=(opts.subtotal?' rv-sub':'')+(opts.total?' rv-tot':'')+(opts.caixa?' rv-caixa':'')+(opts.sec?' rv-sec':'');
-    html+=`<tr class="${cls.trim()}">`;
-    if(opts.sec){html+=`<td colspan="${nf+1}">${label}</td>`;}
-    else{
-      html+=`<td>${label}</td>`;
-      for(let i=0;i<nf;i++){
-        const val=vals[i];
-        const isBest=opts.bestIdx!==undefined&&i===opts.bestIdx;
-        const isWorst=opts.worstIdx!==undefined&&i===opts.worstIdx&&nf>1;
-        let c='num';
-        if(isBest)c+=' best';else if(isWorst)c+=' worst';
-        else if(opts.pos&&val>0)c+=' pos';else if(opts.neg&&val<0)c+=' negv';
-        const disp=opts.pct?(val*100).toFixed(1).replace('.',',')+'%':(opts.int?val.toLocaleString('pt-BR'):rvBrl(val));
-        html+=`<td class="${c}">${disp}</td>`;
-      }
-    }
-    html+='</tr>';
-  }
-  const bestIdx=arr=>arr.indexOf(Math.max(...arr));
-  const worstIdx=arr=>arr.indexOf(Math.min(...arr));
-
-  row('CUSTO DE COMPRA',null,{sec:true});
-  row('Preço compra unit.',fs.map(f=>f.pc));
-  row('IPI na NF entrada (custo puro)',fs.map(f=>f.ipi_custo));
-  row('Frete compra unit.',fs.map(f=>f.frete_c_u));
-  row('Outros/clichê unit.',fs.map(f=>f.outros_u));
-  row('(−) Crédito ICMS compra',fs.map(f=>-f.cred_icms),{neg:true});
-  const ctus=fs.map(f=>f.ctu);
-  row('Custo Total Unitário (CTU)',ctus,{subtotal:true,bestIdx:worstIdx(ctus),worstIdx:bestIdx(ctus)});
-
-  row('ENCARGOS SOBRE VENDA',null,{sec:true});
-  row(`ICMS débito (${(fs[0].deb_icms/(pv+fs[0].freteEntNF_u)*100).toFixed(0)}% s/ base PV+frete NF)`,fs.map(f=>f.deb_icms));
-  row('PIS/COFINS/IRPJ/CSLL (s/ PV)',fs.map(f=>f.fed));
-  row('Comissão (s/ PV)',fs.map(f=>f.comissao));
-  row('Frete entrega unit. (na NF)',fs.map(f=>f.freteEntNF_u));
-  if(tipoVenda==='b2c'&&uf!=='RJ')row('DIFAL unit.',fs.map(f=>f.difalUnit));
-  row('Total encargos venda unit.',fs.map(f=>f.evu_comum),{subtotal:true});
-
-  row('RESULTADO UNITÁRIO',null,{sec:true});
-  const lucs=fs.map(f=>f.lucro_u);
-  row('Lucro unitário (PV−CTU−EVU)',lucs,{pos:true,bestIdx:bestIdx(lucs),worstIdx:nf>1?worstIdx(lucs):undefined});
-  const margens=fs.map(f=>f.margem);
-  row('Margem de lucro (%)',margens,{pct:true,bestIdx:bestIdx(margens),worstIdx:nf>1?worstIdx(margens):undefined});
-  const cmvs=fs.map(f=>f.cmv);
-  row('CMV — Custo da Mercadoria Vendida (%)',cmvs,{pct:true,bestIdx:worstIdx(cmvs),worstIdx:nf>1?bestIdx(cmvs):undefined});
-  row('ICMS saldo a recolher unit. (dif.)',fs.map(f=>f.saldo_icms/f.qtd));
-
-  row('TOTAIS DO PEDIDO',null,{sec:true});
-  row(`Total NF Saída = (PV × ${qtd.toLocaleString('pt-BR')} un) + Frete Entrega`,fs.map(f=>f.total_venda_nf));
-  row('(−) Total NF Entrada (PC+IPI custo)',fs.map(f=>-f.total_custo_nf),{neg:true});
-  row('(−) Frete Compra',fs.map(f=>-f.freteC),{neg:true});
-  row('(−) Outros/Clichê',fs.map(f=>-(f.outros_u*f.qtd)),{neg:true});
-  row('(+) Crédito ICMS Compra',fs.map(f=>f.cred_icms*f.qtd),{pos:true});
-  row('(−) ICMS Débito Venda',fs.map(f=>-f.deb_icms*f.qtd),{neg:true});
-  row('(−) PIS/COFINS/IRPJ/CSLL',fs.map(f=>-f.fed*f.qtd),{neg:true});
-  row('(−) Comissão',fs.map(f=>-f.comissao*f.qtd),{neg:true});
-  row('(−) Frete Entrega NF',fs.map(f=>-f.freteEntNF_u*f.qtd),{neg:true});
-  if(tipoVenda==='b2c'&&uf!=='RJ')row('(−) DIFAL',fs.map(f=>-f.difalUnit*f.qtd),{neg:true});
-
-  const lts=fs.map(f=>f.lucro_total), mgs=fs.map(f=>f.margem);
-  html+='<tr class="rv-tot"><td>= Lucro Total</td>';
-  for(let i=0;i<nf;i++){
-    const isBest=nf>1&&i===bestIdx(lts), isWorst=nf>1&&i===worstIdx(lts);
-    let c='num';if(isBest)c+=' best';if(isWorst)c+=' worst';
-    html+=`<td class="${c}">${rvBrl(lts[i])} <span style="font-size:.68rem;opacity:.85">(${(mgs[i]*100).toFixed(1).replace('.',',')}%)</span></td>`;
-  }
-  html+='</tr>';
-
-  const lsicms=fs.map(f=>f.lucro_tot_sem_icms), msicms=fs.map(f=>f.margem_sem_icms);
-  html+='<tr class="rv-tot2"><td>= Lucro Total s/ efeito ICMS</td>';
-  for(let i=0;i<nf;i++){
-    const isBest=nf>1&&i===bestIdx(lsicms), isWorst=nf>1&&i===worstIdx(lsicms);
-    let c='num';if(isBest)c+=' best';if(isWorst)c+=' worst';
-    html+=`<td class="${c}">${rvBrl(lsicms[i])} <span style="font-size:.68rem;opacity:.85">(${(msicms[i]*100).toFixed(1).replace('.',',')}%)</span></td>`;
-  }
-  html+='</tr>';
-  row('↳ ICMS saldo da operação (ref. gestão)',fs.map(f=>f.saldo_icms));
-
-  html+='</tbody>';
-  t.innerHTML=html;
-}
-
-/* ── LIMPAR TUDO ── */
-function rvLimparTudo(){
-  ['rv-cliente'].forEach(id=>rvEl(id).value='');
-  rvEl('rv-data').value=new Date().toISOString().split('T')[0];
-  rvEl('rv-qtd').value='5000';
-  rvEl('rv-pv').value='8.65';
-  rvEl('rv-comissao').value='0';
-  rvEl('rv-frete-ent').value='0';
-  for(let n=1;n<=3;n++)rvLimparForn(n);
-  rvEl('rv-resultados').style.display='none';
-}
-
-/* ── LINHA DO TEMPO ── */
-let rvTlForn=1;
-let rvPgtoRows=[{pct:100,dias:30}];
-let rvRecebRows=[{pct:100,dias:60}];
-function rvSetTlForn(n,btn){
-  rvTlForn=n;
-  document.querySelectorAll('#rv-tl-forn-toggle button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  rvCalcTimeline();
-}
-function rvRenderParcelas(tipo){
-  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
-  const tbody=rvEl(`rv-${tipo}-body`);
-  tbody.innerHTML=rows.map((r,i)=>`
-    <tr>
-      <td style="color:var(--ink4);font-size:.62rem;text-align:center;width:18px">${i+1}</td>
-      <td><input type="number" value="${r.pct}" min="0" max="100" step="1" oninput="rvUpdateRow('${tipo}',${i},'pct',this.value)"></td>
-      <td><input type="number" value="${r.dias}" min="0" step="1" oninput="rvUpdateRow('${tipo}',${i},'dias',this.value)"></td>
-      <td><button class="del-btn" onclick="rvDelParcela('${tipo}',${i})">×</button></td>
-    </tr>`).join('');
-  rvUpdateSumBadge(tipo);
-}
-function rvUpdateRow(tipo,i,field,val){
-  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
-  rows[i][field]=parseFloat(val)||0;
-  rvUpdateSumBadge(tipo);
-  rvCalcTimeline();
-}
-function rvAddParcela(tipo){
-  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
-  const lastDias=rows.length?rows[rows.length-1].dias+30:30;
-  rows.push({pct:0,dias:lastDias});
-  rvRenderParcelas(tipo);rvCalcTimeline();
-}
-function rvDelParcela(tipo,i){
-  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
-  if(rows.length<=1)return;
-  rows.splice(i,1);rvRenderParcelas(tipo);rvCalcTimeline();
-}
-function rvUpdateSumBadge(tipo){
-  const rows=tipo==='pgto'?rvPgtoRows:rvRecebRows;
-  const sum=rows.reduce((a,r)=>a+(parseFloat(r.pct)||0),0);
-  const badge=rvEl(`rv-${tipo}-sum-badge`);
-  badge.textContent=`Σ ${sum.toFixed(0)}%`;
-  badge.className='sum-badge '+(Math.abs(sum-100)<0.5?'sum-ok':'sum-err');
-}
-function rvCalcTimeline(){
-  const prod=parseInt(rvEl('rv-tl-prod').value)||0;
-  const dataInput=rvvs('rv-data');
-  const t0=dataInput?new Date(dataInput+'T00:00:00'):new Date();
-  const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
-  const fmtD=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
-  const allF=window._rvLastFornecedores||[];
-  const f=allF.find(x=>x.n===rvTlForn)||null;
-  const totalPagar=f?(f.total_custo_nf+f.freteC):0;
-  const totalReceber=f?f.total_venda_nf:0;
-  const events=[];
-  events.push({dias:0,label:'Confirmação Pedido',sub:'D0',valor:0,tipo:'marco'});
-  events.push({dias:prod,label:'Saída Fábrica',sub:`D+${prod}`,valor:0,tipo:'marco'});
-  rvPgtoRows.forEach((r,i)=>{
-    const lbl=rvPgtoRows.length>1?`Paga ${i+1}ª`:'Paga Forn.';
-    events.push({dias:r.dias,label:lbl,sub:`D+${r.dias}`,valor:-(totalPagar*r.pct/100),tipo:'paga'});
-  });
-  rvRecebRows.forEach((r,i)=>{
-    const lbl=rvRecebRows.length>1?`Recebe ${i+1}ª`:'Recebe';
-    events.push({dias:r.dias,label:lbl,sub:`D+${r.dias}`,valor:(totalReceber*r.pct/100),tipo:'recebe'});
-  });
-  events.sort((a,b)=>a.dias!==b.dias?a.dias-b.dias:(a.tipo==='marco'?-1:1));
-  let html='<div class="tl-wrap"><div class="tl-outer"><div class="tl-row">';
-  events.forEach((e,i)=>{
-    const d=addDays(t0,e.dias);
-    html+=`<div class="tl-node"><div class="tl-dot ${e.tipo}"></div><div class="tl-lbl">${e.label}</div><div class="tl-sub">${fmtD(d)}</div><div class="tl-sub">${e.sub}</div>`;
-    if(e.valor<0)html+=`<div class="tl-val neg">${rvBrl(e.valor)}</div>`;
-    if(e.valor>0)html+=`<div class="tl-val pos">+${rvBrl(e.valor)}</div>`;
-    html+='</div>';
-    if(i<events.length-1)html+='<div class="tl-conn"></div>';
-  });
-  html+='</div>';
-  const pagaEvs=events.filter(e=>e.tipo==='paga'), recebEvs=events.filter(e=>e.tipo==='recebe');
-  if(pagaEvs.length&&recebEvs.length){
-    const lastPaga=Math.max(...pagaEvs.map(e=>e.dias)), lastReceb=Math.max(...recebEvs.map(e=>e.dias));
-    const gap=lastReceb-lastPaga;
-    const gapTxt=gap>0?`✅ Recebe ${gap} dias depois do último pagamento`:gap<0?`⚠ Paga ${Math.abs(gap)} dias antes de receber tudo`:`⚖ Último pagamento e recebimento no mesmo dia`;
-    const cls=gap>0?'gap-pos':gap<0?'gap-neg':'gap-neu';
-    html+=`<div style="text-align:center;margin-top:.4rem"><span class="gap-badge ${cls}">${gapTxt}</span></div>`;
-  }
-  html+='</div></div>';
-  rvEl('rv-timeline-visual').innerHTML=html;
-}
+/* ── ARMAZENAMENTO LOCAL (cotações/pedidos) ── */
+function rvLoadCotacoes(){try{return JSON.parse(localStorage.getItem('av_cotacoes')||'[]');}catch(e){return[];}}
+function rvSaveCotacoes(d){localStorage.setItem('av_cotacoes',JSON.stringify(d));}
+function rvLoadPedidos(){try{return JSON.parse(localStorage.getItem('av_pedidos')||'[]');}catch(e){return[];}}
+function rvSavePedidos(d){localStorage.setItem('av_pedidos',JSON.stringify(d));}
 
 /* ── SUB-ABAS DA REVENDA ── */
 function rvShowTab(id){
@@ -1867,62 +1471,222 @@ function rvShowTab(id){
   }
 }
 
-/* ── STORAGE ── */
-function rvLoadCotacoes(){try{return JSON.parse(localStorage.getItem('av_cotacoes')||'[]');}catch(e){return[];}}
-function rvSaveCotacoes(d){localStorage.setItem('av_cotacoes',JSON.stringify(d));}
-function rvLoadPedidos(){try{return JSON.parse(localStorage.getItem('av_pedidos')||'[]');}catch(e){return[];}}
-function rvSavePedidos(d){localStorage.setItem('av_pedidos',JSON.stringify(d));}
+let RV_CLIENTES2=[];      // {nome,estado}
+let RV_FORNECEDORES2=[];  // {nome,estado,regime:'LP'|'SN'}
+let rv2Tipo='Nacional';
+let rv2DetalheOpen=false;
 
-const RV_STATUS_STEPS=[
-  {key:'confirmado',label:'Pedido confirmado'},{key:'producao',label:'Em produção'},
-  {key:'fat_forn',label:'Faturado fornecedor'},{key:'pago_forn',label:'Pago fornecedor'},
-  {key:'entregue',label:'Entregue cliente'},{key:'nf_emitida',label:'NF emitida'},
-  {key:'recebido',label:'Recebido cliente'}
-];
-
-/* ── SALVAR COTAÇÃO ── */
-function rvSalvarCotacao(){
-  const fs=window._rvLastFornecedores||[];
-  if(!fs.length){alert('Calcule primeiro antes de salvar.');return;}
-  const cotacao={
-    id:Date.now(),data:rvvs('rv-data')||new Date().toLocaleDateString('pt-BR'),
-    cliente:rvvs('rv-cliente')||'—',qtd:rvv('rv-qtd'),pv:rvv('rv-pv'),uf:rvvs('rv-uf'),
-    prod:parseInt(rvEl('rv-tl-prod').value)||0,
-    pgto:JSON.parse(JSON.stringify(rvPgtoRows)),receb:JSON.parse(JSON.stringify(rvRecebRows)),
-    fornecedores:fs.map(f=>({n:f.n,nome:f.nome,tipo:f.tipo,pc:f.pc,ctu:f.ctu,margem:f.margem,
-      lucro_total:f.lucro_total,total_venda_nf:f.total_venda_nf,total_custo_nf:f.total_custo_nf,
-      freteC:f.freteC,saldo_icms:f.saldo_icms}))
-  };
-  const lista=rvLoadCotacoes();
-  lista.unshift(cotacao);
-  rvSaveCotacoes(lista);
-  rvSyncPush();
-  alert('Cotação salva! Acesse a aba Cotações.');
+function rv2SaveLocalCad(){
+  localStorage.setItem('rv2_clientes',JSON.stringify(RV_CLIENTES2));
+  localStorage.setItem('rv2_fornecedores',JSON.stringify(RV_FORNECEDORES2));
+}
+function rv2LoadLocalCad(){
+  try{RV_CLIENTES2=JSON.parse(localStorage.getItem('rv2_clientes')||'[]');}catch(e){RV_CLIENTES2=[];}
+  try{RV_FORNECEDORES2=JSON.parse(localStorage.getItem('rv2_fornecedores')||'[]');}catch(e){RV_FORNECEDORES2=[];}
 }
 
-/* ── RENDER COTAÇÕES ── */
+function rv2PopulateSelects(){
+  const selCli=rvEl('rv2-cliente'),selForn=rvEl('rv2-fornecedor');
+  const curCli=selCli.value,curForn=selForn.value;
+  selCli.innerHTML='<option value="">— selecione —</option>'+RV_CLIENTES2.map(c=>`<option value="${esc(c.nome)}">${esc(c.nome)} (${c.estado})</option>`).join('');
+  selForn.innerHTML='<option value="">— selecione —</option>'+RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)} (${f.estado} · ${f.regime})</option>`).join('');
+  if(RV_CLIENTES2.some(c=>c.nome===curCli))selCli.value=curCli;
+  if(RV_FORNECEDORES2.some(f=>f.nome===curForn))selForn.value=curForn;
+  const estSel=rvEl('rvcad-estado');
+  if(estSel)estSel.innerHTML=ESTADOS.map(([uf,nome])=>`<option value="${uf}">${uf} — ${esc(nome)}</option>`).join('');
+}
+function rv2GetCliente(){return RV_CLIENTES2.find(c=>c.nome===rvEl('rv2-cliente').value);}
+function rv2GetFornecedor(){return RV_FORNECEDORES2.find(f=>f.nome===rvEl('rv2-fornecedor').value);}
+function rv2SetTipo(t){
+  rv2Tipo=t;
+  document.querySelectorAll('#rv2-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
+  rv2Calc();
+}
+function rv2OnClienteChange(){rv2Calc();rv2RenderHist();}
+
+/* ── CÁLCULO ── */
+function rv2Calc(){
+  const cliente=rv2GetCliente(),fornecedor=rv2GetFornecedor();
+  const qtd=parseFloat(rvEl('rv2-qtd').value)||0;
+  const preco=parseFloat(rvEl('rv2-preco').value)||0;
+  const pv=parseFloat(rvEl('rv2-pv').value)||0;
+  if(!cliente||!fornecedor||qtd<=0||pv<=0){
+    rvEl('rv2-resumo').innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';
+    rvEl('rv2-detalhe').innerHTML='';
+    return null;
+  }
+  const regFor=REGIAO_MAP[fornecedor.estado]||'SE_S';
+  const regCli=REGIAO_MAP[cliente.estado]||'SE_S';
+  const icmsCredPct=TAB_CREDITO[rv2Tipo][fornecedor.regime][regFor];
+  const icmsDebPct=TAB_DEBITO[rv2Tipo][regCli];
+
+  const custoTotal=preco*qtd;
+  const vendaTotal=pv*qtd;
+  const credICMS=custoTotal*(icmsCredPct/100);
+  const debICMS=vendaTotal*(icmsDebPct/100);
+  const fed=vendaTotal*(RV_FED_PCT/100);
+  const custoLiquido=custoTotal-credICMS;
+  const lucroTotal=vendaTotal-custoLiquido-debICMS-fed;
+  const margem=vendaTotal>0?lucroTotal/vendaTotal:0;
+  const saldoICMS=debICMS-credICMS;
+
+  const r={cliente,fornecedor,tipo:rv2Tipo,qtd,preco,pv,regFor,regCli,icmsCredPct,icmsDebPct,
+    custoTotal,vendaTotal,credICMS,debICMS,fed,custoLiquido,lucroTotal,margem,saldoICMS};
+  rv2Render(r);
+  return r;
+}
+function rv2Render(r){
+  rvEl('rv2-resumo').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <div class="card" style="background:var(--ltgrn);padding:.7rem .8rem;border:none">
+        <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Lucro total</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--green)">${rvBrl(r.lucroTotal)}</div>
+        <div style="font-size:.68rem;color:var(--green)">${(r.margem*100).toFixed(1).replace('.',',')}% de margem</div>
+      </div>
+      <div class="card" style="background:var(--ltblue);padding:.7rem .8rem;border:none">
+        <div style="font-size:.6rem;color:var(--blue);font-weight:700;text-transform:uppercase">Venda total</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--blue)">${rvBrl(r.vendaTotal)}</div>
+        <div style="font-size:.68rem;color:var(--blue)">${r.qtd.toLocaleString('pt-BR')} un · ${rvBrl(r.pv)}/un</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+      <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
+      <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
+    </div>`;
+  if(rv2DetalheOpen)rv2RenderDetalhe(r);
+}
+function rv2RenderDetalhe(r){
+  rvEl('rv2-detalhe').innerHTML=`
+    <table class="res-table">
+      <tbody>
+        <tr class="rv-sec"><td colspan="2">Custo de compra</td></tr>
+        <tr><td>Custo total (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.preco)})</td><td class="num">${rvBrl(r.custoTotal)}</td></tr>
+        <tr><td>(−) Crédito ICMS (${r.icmsCredPct}%)</td><td class="num negv">−${rvBrl(r.credICMS)}</td></tr>
+        <tr class="rv-sub"><td>= Custo líquido</td><td class="num">${rvBrl(r.custoLiquido)}</td></tr>
+        <tr class="rv-sec"><td colspan="2">Venda</td></tr>
+        <tr><td>Venda total (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(r.vendaTotal)}</td></tr>
+        <tr><td>(−) ICMS débito (${r.icmsDebPct}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
+        <tr><td>(−) PIS/COFINS/IRPJ/CSLL (${RV_FED_PCT}%)</td><td class="num negv">−${rvBrl(r.fed)}</td></tr>
+        <tr class="rv-tot"><td>= Lucro total</td><td class="num">${rvBrl(r.lucroTotal)} (${(r.margem*100).toFixed(1).replace('.',',')}%)</td></tr>
+        <tr class="rv-sec"><td colspan="2">Caixa (referência)</td></tr>
+        <tr><td>Saldo ICMS do período (débito − crédito)</td><td class="num">${rvBrl(r.saldoICMS)}</td></tr>
+      </tbody>
+    </table>`;
+}
+function rv2ToggleDetalhe(){
+  rv2DetalheOpen=!rv2DetalheOpen;
+  rvEl('rv2-detalhe-btn').textContent=rv2DetalheOpen?'Ocultar detalhado':'Ver detalhado';
+  rvEl('rv2-detalhe').style.display=rv2DetalheOpen?'block':'none';
+  const r=rv2Calc();
+}
+
+/* ── CADASTRO RÁPIDO (Cliente / Fornecedor) ── */
+let rv2CadTipo='cliente',rv2CadRegime='LP';
+function rv2OpenCad(tipo){
+  rv2CadTipo=tipo;rv2CadRegime='LP';
+  rvEl('rvcad-title').textContent=tipo==='cliente'?'Novo cliente':'Novo fornecedor';
+  rvEl('rvcad-nome').value='';
+  rvEl('rvcad-estado').value='RJ';
+  rvEl('rvcad-regime-wrap').style.display=tipo==='fornecedor'?'block':'none';
+  document.querySelectorAll('#rvcad-regime-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.includes('Presumido')));
+  document.getElementById('ovl-rvcad').classList.add('open');
+  setTimeout(()=>rvEl('rvcad-nome').focus(),50);
+}
+function rv2SetCadRegime(r){
+  rv2CadRegime=r;
+  document.querySelectorAll('#rvcad-regime-toggle button').forEach(b=>b.classList.toggle('active',(r==='LP')===b.textContent.includes('Presumido')));
+}
+function rv2SaveCad(){
+  const nome=rvEl('rvcad-nome').value.trim();
+  const estado=rvEl('rvcad-estado').value;
+  if(!nome){toastSave('Digite um nome');return;}
+  if(rv2CadTipo==='cliente'){
+    if(RV_CLIENTES2.some(c=>c.nome.toLowerCase()===nome.toLowerCase())){toastSave('Cliente já cadastrado');return;}
+    RV_CLIENTES2.push({nome,estado});
+    rv2PopulateSelects();rvEl('rv2-cliente').value=nome;rv2OnClienteChange();
+  }else{
+    if(RV_FORNECEDORES2.some(f=>f.nome.toLowerCase()===nome.toLowerCase())){toastSave('Fornecedor já cadastrado');return;}
+    RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime});
+    rv2PopulateSelects();rvEl('rv2-fornecedor').value=nome;rv2Calc();
+  }
+  closeM('rvcad');
+  rv2SaveLocalCad();
+  rvSyncPush();
+  toastSave('Cadastrado ✓');
+}
+
+/* ── HISTÓRICO DE COMPRAS DO CLIENTE ── */
+function rv2RenderHist(){
+  const cliente=rv2GetCliente();
+  rvEl('rv2-hist-cliente').textContent=cliente?cliente.nome:'selecione um cliente';
+  const cont=rvEl('rv2-hist-table');
+  if(!cliente){cont.innerHTML='';return;}
+  const registros=[
+    ...rvLoadCotacoes().filter(c=>c.cliente===cliente.nome).map(c=>({...c,origem:'Cotação'})),
+    ...rvLoadPedidos().filter(p=>p.cliente===cliente.nome).map(p=>({...p,origem:'Pedido'}))
+  ].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  if(!registros.length){cont.innerHTML='<p class="hint">Nenhuma compra registrada ainda pra esse cliente.</p>';return;}
+  let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Origem</th><th>Qtd</th><th>Preço venda</th><th>Lucro %</th><th>Lucro</th></tr></thead><tbody>';
+  registros.forEach(r=>{
+    html+=`<tr>
+      <td>${esc(r.data||'—')}</td>
+      <td>${r.origem}</td>
+      <td class="rv-num">${(r.qtd||0).toLocaleString('pt-BR')}</td>
+      <td class="rv-num">${rvBrl(r.pv)}</td>
+      <td class="rv-num rv-pos">${((r.margem||0)*100).toFixed(1).replace('.',',')}%</td>
+      <td class="rv-num rv-pos">${rvBrl(r.lucroTotal)}</td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  cont.innerHTML=html;
+}
+
+/* ── SALVAR COTAÇÃO / CRIAR PEDIDO ── */
+function rv2SalvarCotacao(){
+  const r=rv2Calc();
+  if(!r){toastSave('Preencha os dados antes de salvar');return;}
+  const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
+    cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    lucroTotal:r.lucroTotal,margem:r.margem};
+  const lista=rvLoadCotacoes();lista.unshift(cotacao);rvSaveCotacoes(lista);
+  rvSyncPush();
+  rv2RenderHist();
+  toastSave('Cotação salva ✓');
+}
+function rv2CriarPedido(){
+  const r=rv2Calc();
+  if(!r){toastSave('Preencha os dados antes de criar o pedido');return;}
+  const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
+  const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
+    cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    lucroTotal:r.lucroTotal,margem:r.margem,status,obs:''};
+  const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
+  rvSyncPush();
+  rv2RenderHist();
+  toastSave('Pedido criado ✓');
+  rvShowTab('pedidos');
+}
+
+/* ── COTAÇÕES / PEDIDOS (listas) ── */
 function rvRenderCotacoes(){
   const lista=rvLoadCotacoes();
   const cont=rvEl('rv-cotacoes-container');
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
-  const brl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
-  const pctf=n=>((n||0)*100).toFixed(1).replace('.',',')+' %';
   let html=`<table class="rv-data-table"><thead><tr>
-    <th>Data</th><th>Cliente</th><th>UF</th><th>Qtd</th><th>PV unit.</th>
-    <th>Fornecedor(es)</th><th>Melhor margem</th><th>Lucro total</th><th>Ações</th>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th>Qtd</th><th>Preço venda</th><th>Margem</th><th>Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
-    const best=[...c.fornecedores].sort((a,b)=>b.margem-a.margem)[0];
-    const forns=c.fornecedores.map(f=>f.nome||`Forn.${f.n}`).join(', ');
     html+=`<tr>
       <td style="white-space:nowrap">${esc(c.data)}</td>
       <td><strong>${esc(c.cliente)}</strong></td>
-      <td>${esc(c.uf)}</td>
+      <td>${esc(c.fornecedor)}</td>
+      <td>${esc(c.tipo)}</td>
       <td class="rv-num">${(c.qtd||0).toLocaleString('pt-BR')}</td>
-      <td class="rv-num">${brl(c.pv)}</td>
-      <td>${esc(forns)}</td>
-      <td class="rv-num rv-pos">${pctf(best.margem)} <span style="color:var(--ink4);font-size:.6rem">(${esc(best.nome||'Forn.'+best.n)})</span></td>
-      <td class="rv-num rv-pos">${brl(best.lucro_total)}</td>
+      <td class="rv-num">${rvBrl(c.pv)}</td>
+      <td class="rv-num rv-pos">${((c.margem||0)*100).toFixed(1).replace('.',',')}%</td>
+      <td class="rv-num rv-pos">${rvBrl(c.lucroTotal)}</td>
       <td style="white-space:nowrap">
         <button class="btn-rvsm btn-conv" onclick="rvConverterEmPedido(${c.id})">→ Pedido</button>
         <button class="btn-rvdel" onclick="rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
@@ -1943,42 +1707,19 @@ function rvLimparTodasCotacoes(){
   rvSaveCotacoes([]);rvRenderCotacoes();
   rvSyncPush();
 }
-
-/* ── CONVERTER EM PEDIDO ── */
 function rvConverterEmPedido(cotId){
   const cot=rvLoadCotacoes().find(c=>c.id===cotId);
   if(!cot)return;
-  let forn;
-  if(cot.fornecedores.length===1){forn=cot.fornecedores[0];}
-  else{
-    const opts=cot.fornecedores.map((f,i)=>`${i+1}. ${f.nome||'Forn.'+f.n}`).join('\n');
-    const choice=prompt(`Qual fornecedor foi confirmado?\n${opts}\n\nDigite o número:`);
-    const idx=parseInt(choice)-1;
-    if(isNaN(idx)||!cot.fornecedores[idx])return;
-    forn=cot.fornecedores[idx];
-  }
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
-  const pedido={
-    id:Date.now(),cotId,data:cot.data,cliente:cot.cliente,qtd:cot.qtd,pv:cot.pv,uf:cot.uf,
-    fornecedor:forn.nome||('Forn.'+forn.n),pc:forn.pc,ctu:forn.ctu,margem:forn.margem,
-    lucro_total:forn.lucro_total,total_venda:forn.total_venda_nf,
-    total_custo:forn.total_custo_nf+forn.freteC,saldo_icms:forn.saldo_icms,
-    prod:cot.prod,pgto:cot.pgto,receb:cot.receb,status,obs:''
-  };
-  const lista=rvLoadPedidos();
-  lista.unshift(pedido);
-  rvSavePedidos(lista);
+  const pedido={...cot,id:Date.now(),cotId,status,obs:''};
+  const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
   rvSyncPush();
   rvShowTab('pedidos');
 }
-
-/* ── RENDER PEDIDOS ── */
 function rvRenderPedidos(){
   const lista=rvLoadPedidos();
   const cont=rvEl('rv-pedidos-container');
-  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação em pedido.</div>';return;}
-  const brl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
-  const pctf=n=>((n||0)*100).toFixed(1).replace('.',',')+' %';
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação ou clique "Criar Pedido".</div>';return;}
   function badgeStatus(st){
     if(st.recebido)return '<span class="badge-status s-recebido">✅ Recebido</span>';
     if(st.entregue)return '<span class="badge-status s-entregue">🚚 Entregue</span>';
@@ -1987,7 +1728,7 @@ function rvRenderPedidos(){
   }
   let html=`<table class="rv-data-table"><thead><tr>
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Qtd</th>
-    <th>Total NF</th><th>Margem</th><th>Lucro</th><th>Status</th><th>Obs</th><th></th>
+    <th>Venda total</th><th>Margem</th><th>Lucro</th><th>Status</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     const checks=RV_STATUS_STEPS.map(s=>
@@ -1998,9 +1739,9 @@ function rvRenderPedidos(){
       <td><strong>${esc(p.cliente)}</strong></td>
       <td>${esc(p.fornecedor)}</td>
       <td class="rv-num">${(p.qtd||0).toLocaleString('pt-BR')}</td>
-      <td class="rv-num">${brl(p.total_venda)}</td>
-      <td class="rv-num rv-pos">${pctf(p.margem)}</td>
-      <td class="rv-num rv-pos">${brl(p.lucro_total)}</td>
+      <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
+      <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
+      <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
       <td>${badgeStatus(p.status)}
         <details style="margin-top:.25rem">
           <summary style="font-size:.6rem;color:var(--ink4);cursor:pointer">ver etapas</summary>
@@ -2011,14 +1752,14 @@ function rvRenderPedidos(){
       <td><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
   });
-  const totVenda=lista.reduce((a,p)=>a+(p.total_venda||0),0);
-  const totLucro=lista.reduce((a,p)=>a+(p.lucro_total||0),0);
+  const totVenda=lista.reduce((a,p)=>a+(p.vendaTotal||0),0);
+  const totLucro=lista.reduce((a,p)=>a+(p.lucroTotal||0),0);
   const totMargem=totVenda>0?totLucro/totVenda:0;
   html+=`<tr style="background:var(--green);color:#fff;font-weight:700">
     <td colspan="4" style="padding:.5rem .6rem">TOTAIS (${lista.length} pedidos)</td>
-    <td class="rv-num">${brl(totVenda)}</td>
-    <td class="rv-num">${pctf(totMargem)}</td>
-    <td class="rv-num">${brl(totLucro)}</td>
+    <td class="rv-num">${rvBrl(totVenda)}</td>
+    <td class="rv-num">${(totMargem*100).toFixed(1).replace('.',',')}%</td>
+    <td class="rv-num">${rvBrl(totLucro)}</td>
     <td colspan="3"></td>
   </tr>`;
   html+='</tbody></table>';
@@ -2053,20 +1794,9 @@ function rvLimparTodosPedidos(){
   rvSyncPush();
 }
 
-/* ── INIT REVENDA ── */
 function rvInit(){
-  rvEl('rv-data').value=new Date().toISOString().split('T')[0];
-  rvRenderFornGrid();
-  rvTipoChange(1);
-  rvRenderParcelas('pgto');
-  rvRenderParcelas('receb');
-  rvCalcular();
-  // demais campos da Operação (fora do grid de fornecedores) também recalculam ao digitar
-  document.querySelectorAll('#rvpane-calc .ff input, #rvpane-calc .ff select, #rvpane-calc select#rv-uf').forEach(elm=>{
-    if(elm.id&&elm.id.startsWith('rv-f'))return; // já ligado em rvRenderFornGrid
-    elm.addEventListener('input',rvCalcular);
-    elm.addEventListener('change',rvCalcular);
-  });
+  rv2LoadLocalCad();
+  rv2PopulateSelects();
   updateRvSyncStatus();
 }
 
