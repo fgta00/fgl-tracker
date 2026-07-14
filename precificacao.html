@@ -376,7 +376,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
           <div class="collap-body" id="rv2-opt-body">
             <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
               <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
-              <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">entra na base do ICMS</span></div>
+              <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo — já embutido no preço de venda</span></div>
             </div>
             <div class="ff" style="margin-top:.6rem"><label>Clichê / molde total R$</label><input type="number" class="mono" id="rv2-cliche" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo puro, sem ICMS</span></div>
           </div>
@@ -1575,15 +1575,15 @@ function rv2Calc(){
 
   const custoCompra=preco*qtd;
   const credICMS=custoCompra*(icmsCredPct/100);
-  const custoTotal=custoCompra+cliche;           // clichê é custo puro, sem crédito de ICMS
+  const custoTotal=custoCompra+cliche+freteTotal;  // frete é custo (já embutido no PV) — igual clichê, sem crédito de ICMS
   const custoLiquido=custoTotal-credICMS;
 
   const vendaProduto=pv*qtd;
-  const baseICMSvenda=vendaProduto+freteTotal;    // frete entra na base do débito
+  const baseICMSvenda=vendaProduto;                // sem frete — o PV já é o preço final cobrado do cliente
   const debICMS=baseICMSvenda*(icmsDebPct/100);
   const comissao=vendaProduto*(comissaoPct/100);
   const fed=vendaProduto*(fedPct/100);
-  const vendaTotal=vendaProduto+freteTotal;       // total da NF (produto + frete)
+  const vendaTotal=vendaProduto;                   // receita = só o produto
 
   const lucroTotal=vendaTotal-custoLiquido-debICMS-comissao-fed;
   const margem=vendaTotal>0?lucroTotal/vendaTotal:0;
@@ -1617,23 +1617,23 @@ function rv2Render(r){
   if(rv2DetalheOpen)rv2RenderDetalhe(r);
 }
 function rv2RenderDetalhe(r){
-  const encargosLinhas=(r.comissaoPct>0||r.freteTotal>0||r.cliche>0)?`
-        <tr class="rv-sec"><td colspan="2">Encargos opcionais</td></tr>
-        ${r.cliche>0?`<tr><td>Clichê / molde (no custo)</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:''}
-        ${r.freteTotal>0?`<tr><td>Frete entrega total <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:''}
-        ${r.comissaoPct>0?`<tr><td>Comissão (${r.comissaoPct}% s/ venda produto)</td><td class="num negv">−${rvBrl(r.comissao)}</td></tr>`:''}`:'';
+  const custoExtraLinhas=(r.cliche>0||r.freteTotal>0)?`
+        ${r.cliche>0?`<tr><td>(+) Clichê / molde</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:''}
+        ${r.freteTotal>0?`<tr><td>(+) Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:''}`:'';
+  const comissaoLinha=r.comissaoPct>0?`<tr><td>(−) Comissão (${r.comissaoPct}% s/ venda produto)</td><td class="num negv">−${rvBrl(r.comissao)}</td></tr>`:'';
   rvEl('rv2-detalhe').innerHTML=`
     <table class="res-table">
       <tbody>
-        <tr class="rv-sec"><td colspan="2">Custo de compra</td></tr>
+        <tr class="rv-sec"><td colspan="2">Custo</td></tr>
         <tr><td>Compra (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.preco)})</td><td class="num">${rvBrl(r.custoCompra)}</td></tr>
         <tr><td>(−) Crédito ICMS (${r.icmsCredPct}%)</td><td class="num negv">−${rvBrl(r.credICMS)}</td></tr>
+        ${custoExtraLinhas}
         <tr class="rv-sub"><td>= Custo líquido</td><td class="num">${rvBrl(r.custoLiquido)}</td></tr>
         <tr class="rv-sec"><td colspan="2">Venda</td></tr>
         <tr><td>Venda produto (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(r.vendaProduto)}</td></tr>
         <tr><td>(−) ICMS débito (${r.icmsDebPct}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
         <tr><td>(−) PIS/COFINS/IRPJ/CSLL (${r.fedPct}%)</td><td class="num negv">−${rvBrl(r.fed)}</td></tr>
-        ${encargosLinhas}
+        ${comissaoLinha}
         <tr class="rv-tot"><td>= Lucro total</td><td class="num">${rvBrl(r.lucroTotal)} (${(r.margem*100).toFixed(1).replace('.',',')}%)</td></tr>
         <tr class="rv-sec"><td colspan="2">Caixa (referência)</td></tr>
         <tr><td>Saldo ICMS do período (débito − crédito)</td><td class="num">${rvBrl(r.saldoICMS)}</td></tr>
