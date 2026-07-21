@@ -2146,7 +2146,7 @@ function openFinPopup(pi){
     </div>
   </div>`;
 
-  // Two columns: payments | receipts
+  // Two columns: payments | receipts (só os lançamentos)
   h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">`;
 
   // Payments column
@@ -2160,9 +2160,7 @@ function openFinPopup(pi){
       </div>`;
     });
   } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum pagamento lançado</div>`;
-  h+=`<div style="font-size:.62rem;color:var(--ink3);margin-top:.5rem">Total pago: <b style="color:${pP>100?'var(--red)':'var(--red)'}">${fUSD(paid)}</b> de ${fUSD(tF)}${pP>100?' <span style="color:var(--red)">⚠ pago a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aPagar))+'</b>'}</div>
-    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pP)}%;background:${pP>100?'var(--red)':'var(--red)'}"></div></div>
-  </div>`;
+  h+=`</div>`;
 
   // Receipts column
   h+=`<div>
@@ -2175,9 +2173,19 @@ function openFinPopup(pi){
       </div>`;
     });
   } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum recebimento lançado</div>`;
-  h+=`<div style="font-size:.62rem;color:var(--ink3);margin-top:.5rem">Total recebido: <b style="color:var(--green)">${fUSD(recv)}</b> de ${fUSD(tV)}${pR>100?' <span style="color:var(--red)">⚠ recebido a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aReceber))+'</b>'}</div>
-    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pR)}%;background:${pR>100?'var(--red)':'var(--green)'}"></div></div>
-  </div></div>`;
+  h+=`</div></div>`;
+
+  // Totais — linha própria abaixo das duas colunas, sempre alinhados entre si
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--bdr)">
+    <div>
+      <div style="font-size:.62rem;color:var(--ink3)">Total pago: <b style="color:var(--red)">${fUSD(paid)}</b> de ${fUSD(tF)}${pP>100?' <span style="color:var(--red)">⚠ pago a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aPagar))+'</b>'}</div>
+      <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pP)}%;background:var(--red)"></div></div>
+    </div>
+    <div>
+      <div style="font-size:.62rem;color:var(--ink3)">Total recebido: <b style="color:var(--green)">${fUSD(recv)}</b> de ${fUSD(tV)}${pR>100?' <span style="color:var(--red)">⚠ recebido a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aReceber))+'</b>'}</div>
+      <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pR)}%;background:${pR>100?'var(--red)':'var(--green)'}"></div></div>
+    </div>
+  </div>`;
 
   // Saldo line
   h+=`<div style="margin-top:1rem;padding-top:.7rem;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
