@@ -384,7 +384,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
     <span class="finfo" id="fin-cnt"></span>
   </div>
-  <div id="fin-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.7rem;margin-bottom:1.4rem"></div>
+  <div id="fin-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:.9rem;margin-bottom:1.4rem"></div>
 
   <div class="fin-2col">
     <!-- PAGAMENTOS -->
@@ -1539,8 +1539,9 @@ function renderFinanceiro(){
     const pctPago=totF>0?Math.round((paid/totF)*100):0;
     const pctReceb=totV>0?Math.round((recv/totV)*100):0;
     const mg=totV-totF;const pctMg=totV>0?Math.round((mg/totV)*100):null;
-    const bcP=pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
-    const bcR=pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
+    const bcP=pctPago>100?'var(--red)':pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
+    const bcR=pctReceb>100?'var(--red)':pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
+    const overPago=pctPago>100,overReceb=pctReceb>100;
     const linkedOrd=linkOrd(p);
     // Fonte de verdade: order.dates[5]=Embarque/ETD, order.dates[6]=ETA — PRESERVAR SYNC
     const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
@@ -1558,7 +1559,7 @@ function renderFinanceiro(){
     const stTxt=linkedOrd?linkedOrd.status:'—';
     const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
 
-    return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.75rem .85rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
+    return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1.05rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
         <div>
           <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy)">${esc(p.pi)}</div>
@@ -1566,6 +1567,7 @@ function renderFinanceiro(){
             <span style="color:var(--blue)">${esc(p.po||'—')}</span>
             <span style="color:var(--ink4)"> · </span>
             <span style="color:var(--purple)">${esc(p.inv||'—')}</span>
+            ${linkedOrd?.colecao?`<span style="color:var(--ink4)"> · </span><span style="color:var(--ink3)">${esc(linkedOrd.colecao)}</span>`:''}
           </div>
         </div>
         <span style="font-size:.55rem;font-weight:600;color:${stPillCol};background:${stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(stTxt)}</span>
@@ -1574,11 +1576,11 @@ function renderFinanceiro(){
       <div style="font-size:.58rem;color:var(--ink4);font-family:'IBM Plex Mono';margin-bottom:.55rem">${fN(qtyCalc)} un · ETD ${esc(etdDisp)}${etaDisp!=='—'?' · ETA '+esc(etaDisp):''}</div>
 
       <div style="margin-bottom:.35rem">
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>💳 Pago ${pctPago}%</span><span style="color:${aPagar>0?'var(--red)':'var(--green)'}">${aPagar>0?'falta '+fUSD(aPagar):'✓ quitado'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>💳 Pago ${pctPago}%${overPago?' ⚠':''}</span><span style="color:${overPago?'var(--red)':aPagar>0?'var(--red)':'var(--green)'}">${overPago?'⚠ conferir (pago a mais)':aPagar>0?'falta '+fUSD(aPagar):'✓ quitado'}</span></div>
         <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctPago)}%;background:${bcP}"></div></div>
       </div>
       <div style="margin-bottom:.55rem">
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${pctReceb}%</span><span style="color:${aReceber>0?'var(--red)':'var(--green)'}">${totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓ quitado'):'—'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${pctReceb}%${overReceb?' ⚠':''}</span><span style="color:${overReceb?'var(--red)':aReceber>0?'var(--red)':'var(--green)'}">${overReceb?'⚠ conferir (recebido a mais)':totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓ quitado'):'—'}</span></div>
         <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctReceb)}%;background:${bcR}"></div></div>
       </div>
 
@@ -2149,9 +2151,7 @@ function openFinPopup(pi){
 
   // Payments column
   h+=`<div>
-    <div style="font-size:.7rem;font-weight:700;color:var(--red);padding:.4rem .6rem;background:var(--ltred);border-left:3px solid var(--red);border-radius:0 6px 6px 0;margin-bottom:.5rem">💳 Pago ao Fornecedor</div>
-    <div style="font-size:.62rem;color:var(--ink3);margin-bottom:.4rem">Total pago: <b style="color:var(--red)">${fUSD(paid)}</b> de ${fUSD(tF)} • falta <b>${fUSD(Math.max(0,aPagar))}</b></div>
-    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-bottom:.6rem"><div style="height:100%;width:${Math.min(100,pP)}%;background:var(--red)"></div></div>`;
+    <div style="font-size:.7rem;font-weight:700;color:var(--red);padding:.4rem .6rem;background:var(--ltred);border-left:3px solid var(--red);border-radius:0 6px 6px 0;margin-bottom:.5rem">💳 Pago ao Fornecedor</div>`;
   if(pays.length){
     pays.forEach(l=>{
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem .5rem;border:1px solid var(--bdr);border-radius:6px;margin-bottom:.35rem;background:var(--card)">
@@ -2160,13 +2160,13 @@ function openFinPopup(pi){
       </div>`;
     });
   } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum pagamento lançado</div>`;
-  h+=`</div>`;
+  h+=`<div style="font-size:.62rem;color:var(--ink3);margin-top:.5rem">Total pago: <b style="color:${pP>100?'var(--red)':'var(--red)'}">${fUSD(paid)}</b> de ${fUSD(tF)}${pP>100?' <span style="color:var(--red)">⚠ pago a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aPagar))+'</b>'}</div>
+    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pP)}%;background:${pP>100?'var(--red)':'var(--red)'}"></div></div>
+  </div>`;
 
   // Receipts column
   h+=`<div>
-    <div style="font-size:.7rem;font-weight:700;color:var(--green);padding:.4rem .6rem;background:var(--ltgrn);border-left:3px solid var(--green);border-radius:0 6px 6px 0;margin-bottom:.5rem">📥 Recebido do Cliente</div>
-    <div style="font-size:.62rem;color:var(--ink3);margin-bottom:.4rem">Total recebido: <b style="color:var(--green)">${fUSD(recv)}</b> de ${fUSD(tV)} • falta <b>${fUSD(Math.max(0,aReceber))}</b></div>
-    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-bottom:.6rem"><div style="height:100%;width:${Math.min(100,pR)}%;background:var(--green)"></div></div>`;
+    <div style="font-size:.7rem;font-weight:700;color:var(--green);padding:.4rem .6rem;background:var(--ltgrn);border-left:3px solid var(--green);border-radius:0 6px 6px 0;margin-bottom:.5rem">📥 Recebido do Cliente</div>`;
   if(recs.length){
     recs.forEach(r=>{
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem .5rem;border:1px solid var(--bdr);border-radius:6px;margin-bottom:.35rem;background:var(--card)">
@@ -2175,7 +2175,9 @@ function openFinPopup(pi){
       </div>`;
     });
   } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum recebimento lançado</div>`;
-  h+=`</div></div>`;
+  h+=`<div style="font-size:.62rem;color:var(--ink3);margin-top:.5rem">Total recebido: <b style="color:var(--green)">${fUSD(recv)}</b> de ${fUSD(tV)}${pR>100?' <span style="color:var(--red)">⚠ recebido a mais — conferir</span>':' • falta <b>'+fUSD(Math.max(0,aReceber))+'</b>'}</div>
+    <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${Math.min(100,pR)}%;background:${pR>100?'var(--red)':'var(--green)'}"></div></div>
+  </div></div>`;
 
   // Saldo line
   h+=`<div style="margin-top:1rem;padding-top:.7rem;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
