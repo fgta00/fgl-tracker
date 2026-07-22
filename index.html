@@ -144,6 +144,10 @@ td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-of
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
 .grid-av{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem}
 .hint-sm{font-size:.56rem;color:var(--ink4);display:block;margin-top:2px}
+.toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:7px;overflow:hidden;width:fit-content}
+.toggle-grp button{padding:.4rem 1rem;font-size:.72rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
+.toggle-grp button.active{background:var(--green);color:#fff}
+body.dark .toggle-grp button{background:#1B2535;color:var(--ink3)}
 .ff{display:flex;flex-direction:column;gap:.22rem}
 .ff.full{grid-column:1/-1}
 .ff label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3)}
@@ -496,6 +500,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         <div class="fsep">Identificação</div>
         <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
         <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
+        <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
+          <div class="toggle-grp" id="mo-av-rota-toggle">
+            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
+            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
+          </div>
+        </div>
         <div class="ff"><label>Data (DD/MM/AA)</label>
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
@@ -527,16 +537,16 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
           </div>
         </div>
+        <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
+        <div class="ff full">
+          <div id="mo-prod-rows"></div>
+          <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
+        </div>
+        <div class="preview-box" id="mo-preview"></div>
 
         <div id="mo-av-block" style="display:none;grid-column:1/-1">
           <div class="fsep">🇧🇷 Camadas AV — nacionalização (IP tipo C)</div>
           <div class="grid-av">
-            <div class="ff"><label>Rota</label>
-              <div class="toggle-grp" id="mo-av-rota-toggle">
-                <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
-                <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
-              </div>
-            </div>
             <div class="ff"><label>Câmbio venda cliente R$</label><input type="number" id="mo-av-cambio-venda" class="mono" placeholder="5.50" step="0.01"><span class="hint-sm">no ato da IP</span></div>
             <div class="ff"><label>Câmbio camadas (desembaraço) R$</label><input type="number" id="mo-av-cambio-camadas" class="mono" placeholder="5.65" step="0.01"><span class="hint-sm">~2-3 meses depois</span></div>
           </div>
@@ -545,12 +555,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <div class="ff" id="mo-av-trading-wrap"><label>Custo Trading (R$)</label><input type="number" id="mo-av-custo-trading" class="mono" placeholder="0.00" step="0.01"><span class="hint-sm">valor fechado, editável depois</span></div>
           </div>
         </div>
-        <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
-        <div class="ff full">
-          <div id="mo-prod-rows"></div>
-          <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
-        </div>
-        <div class="preview-box" id="mo-preview"></div>
         <div class="fsep">Notas</div>
         <div class="ff full"><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div>
       </div>
@@ -1895,6 +1899,7 @@ function rvAVCheck(){
   const pi=(document.getElementById('mo-pi').value||'').trim();
   const isC=/c$/i.test(pi);
   document.getElementById('mo-av-block').style.display=isC?'':'none';
+  document.getElementById('mo-av-rota-ff').style.display=isC?'':'none';
 }
 function rvAVSetRota(r){
   document.querySelectorAll('#mo-av-rota-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(r==='direta'?'direta':'trading')));
