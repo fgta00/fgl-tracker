@@ -142,6 +142,8 @@ td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-of
 .mbody{padding:1.15rem}
 .fsep{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#fff;padding:.3rem .6rem;background:var(--navy);border-radius:5px;margin:.55rem 0 .35rem;grid-column:1/-1}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.grid-av{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem}
+.hint-sm{font-size:.56rem;color:var(--ink4);display:block;margin-top:2px}
 .ff{display:flex;flex-direction:column;gap:.22rem}
 .ff.full{grid-column:1/-1}
 .ff label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3)}
@@ -493,7 +495,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <div class="fg">
         <div class="fsep">Identificação</div>
         <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
-        <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F"></div>
+        <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
         <div class="ff"><label>Data (DD/MM/AA)</label>
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
@@ -523,6 +525,24 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
             <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
             <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
+          </div>
+        </div>
+
+        <div id="mo-av-block" style="display:none;grid-column:1/-1">
+          <div class="fsep">🇧🇷 Camadas AV — nacionalização (IP tipo C)</div>
+          <div class="grid-av">
+            <div class="ff"><label>Rota</label>
+              <div class="toggle-grp" id="mo-av-rota-toggle">
+                <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
+                <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
+              </div>
+            </div>
+            <div class="ff"><label>Câmbio venda cliente R$</label><input type="number" id="mo-av-cambio-venda" class="mono" placeholder="5.50" step="0.01"><span class="hint-sm">no ato da IP</span></div>
+            <div class="ff"><label>Câmbio camadas (desembaraço) R$</label><input type="number" id="mo-av-cambio-camadas" class="mono" placeholder="5.65" step="0.01"><span class="hint-sm">~2-3 meses depois</span></div>
+          </div>
+          <div class="grid-av" style="margin-top:.5rem">
+            <div class="ff"><label>Custo Importação — RF (R$)</label><input type="number" id="mo-av-custo-rf" class="mono" placeholder="0.00" step="0.01"><span class="hint-sm">valor fechado, editável depois</span></div>
+            <div class="ff" id="mo-av-trading-wrap"><label>Custo Trading (R$)</label><input type="number" id="mo-av-custo-trading" class="mono" placeholder="0.00" step="0.01"><span class="hint-sm">valor fechado, editável depois</span></div>
           </div>
         </div>
         <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
@@ -1870,12 +1890,23 @@ function populateDatalistsMestre(){
   const dlCont=document.getElementById('dl-cont');if(dlCont)dlCont.innerHTML=CONTEINERES.map(c=>'<option value="'+esc(c)+'">').join('');
   const dlProd=document.getElementById('dl-prod');if(dlProd)dlProd.innerHTML=PRODUTOS.map(p=>'<option value="'+esc(p)+'">').join('');
 }
+/* ── CAMADAS AV (visual só — sem lógica de cálculo/pagamento ainda) ── */
+function rvAVCheck(){
+  const pi=(document.getElementById('mo-pi').value||'').trim();
+  const isC=/c$/i.test(pi);
+  document.getElementById('mo-av-block').style.display=isC?'':'none';
+}
+function rvAVSetRota(r){
+  document.querySelectorAll('#mo-av-rota-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(r==='direta'?'direta':'trading')));
+  document.getElementById('mo-av-trading-wrap').style.display=r==='trading'?'':'none';
+}
 function openOrderModal(num){
   _editNum=num;
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
   document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
-  ['po','colecao','pi','data','sup','sup-inv','cont','etd','notes'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  ['po','colecao','pi','data','sup','sup-inv','cont','etd','notes','av-cambio-venda','av-cambio-camadas','av-custo-rf','av-custo-trading'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  rvAVSetRota('direta');
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
@@ -1896,6 +1927,7 @@ function openOrderModal(num){
     document.getElementById('mo-data').value=todayDisp(); // pedido novo já vem com a data de hoje
   }
   updatePreview();
+  rvAVCheck();
   const allClis=[...new Set([...CLIENTES,...orders.map(o=>o.client),...payments.map(p=>p.client||'')].filter(Boolean))].sort();
   const allForn=[...new Set([...FORNECEDORES,...payments.map(p=>p.supplier).filter(Boolean)])].sort();
   document.getElementById('mo-cl-list').innerHTML=allClis.map(c=>`<option value="${esc(c)}">`).join('');
