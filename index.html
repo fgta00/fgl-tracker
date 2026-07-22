@@ -500,17 +500,17 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         <div class="fsep">Identificação</div>
         <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
         <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
-        <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
-          <div class="toggle-grp" id="mo-av-rota-toggle">
-            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
-            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
-          </div>
-        </div>
         <div class="ff"><label>Data (DD/MM/AA)</label>
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
             <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
             <button class="date-cal-btn" type="button" onclick="openCal('mo-data-cal')" tabindex="-1">📅</button>
+          </div>
+        </div>
+        <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
+          <div class="toggle-grp" id="mo-av-rota-toggle">
+            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
+            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
           </div>
         </div>
         <div class="fsep">Cliente</div>
