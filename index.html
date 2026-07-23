@@ -328,8 +328,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
-          <th class="L" style="min-width:80px">IP / PO / FO</th>
-          <th class="L" style="min-width:95px">Cliente / Fornecedor</th>
+          <th class="L" style="min-width:150px">AV/FY · Cliente · Fornecedor · Coleção</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:200px">Situação</th>
@@ -1412,19 +1411,22 @@ function renderInternal(){
         </div>
       </td>
       <td class="L">
-        <div style="display:flex;align-items:center;gap:4px">
+        <div style="display:flex;align-items:center;gap:5px">
           <b style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}">${o.pi?esc(o.pi):'—'}</b>
-          <span style="color:var(--ink4);font-size:.68rem">-</span>
-          <span style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--blue)">${esc(o.po)}</span>
-          <span style="color:var(--ink4);font-size:.68rem">-</span>
-          <span style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--purple)" title="Invoice Fornecedor">${esc(linkPay(o)?.inv||'—')}</span>
+          <span style="font-size:.55rem;font-weight:700;color:#fff;background:${isIpC(o.pi)?'var(--green)':'var(--blue)'};padding:.05rem .3rem;border-radius:3px">${isIpC(o.pi)?'AV':'FY'}</span>
           ${o.notes?`<span style="position:relative;cursor:default;font-size:.7rem" title="${esc(o.notes)}">📝</span>`:''}
         </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
+          <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--blue)">${esc(o.po)}</span>
+          <span style="color:var(--ink4);font-size:.65rem">·</span>
+          <span style="font-size:.7rem">${esc(o.client)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
+          <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--purple)" title="Invoice Fornecedor">${esc(linkPay(o)?.inv||'—')}</span>
+          <span style="color:var(--ink4);font-size:.65rem">·</span>
+          <span style="font-size:.7rem;color:var(--ink3)">${esc(o.supplier||'—')}</span>
+        </div>
         <div style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px">${o.colecao?esc(o.colecao):'—'}</div>
-      </td>
-      <td class="L">
-        <b>${esc(o.client)}</b>
-        <div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.supplier||'—')}</div>
       </td>
       <td class="L W" style="max-width:195px">
         ${esc(o.product)}
