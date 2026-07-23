@@ -1407,32 +1407,31 @@ function renderInternal(){
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L">
         <div style="display:flex;align-items:center;gap:4px">
-          <b class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}" onclick="editField(${o.num},'pi',event)">${o.pi?esc(o.pi):'＋ IP'}</b>
+          <b style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}">${o.pi?esc(o.pi):'—'}</b>
           <span style="color:var(--ink4);font-size:.68rem">-</span>
-          <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--blue)" onclick="editField(${o.num},'po',event)">${esc(o.po)}</span>
+          <span style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--blue)">${esc(o.po)}</span>
           <span style="color:var(--ink4);font-size:.68rem">-</span>
-          <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--purple)" onclick="${linkPay(o)?`editFinField('${esc(o.pi)}','inv',event)`:'event.stopPropagation()'}" title="${linkPay(o)?'Editar Invoice Fornecedor':'Sem pedido de compra vinculado ainda'}">${esc(linkPay(o)?.inv||'—')}</span>
-          <span class="note-icon" style="position:relative;cursor:pointer;font-size:.7rem;opacity:${o.notes?'1':'.35'}" onclick="editField(${o.num},'notes',event)" title="${o.notes?'':'Adicionar nota'}">${o.notes?'📝':'＋'}${o.notes?`<span class="note-tip" style="display:none;position:absolute;left:0;top:1.2rem;z-index:20;background:var(--ink);color:#fff;padding:.4rem .6rem;border-radius:6px;font-size:.66rem;font-style:normal;font-weight:400;white-space:normal;width:200px;line-height:1.35;box-shadow:0 4px 12px rgba(0,0,0,.3)">${esc(o.notes)}</span>`:''}</span>
+          <span style="font-family:'IBM Plex Mono';font-size:.72rem;color:var(--purple)" title="Invoice Fornecedor">${esc(linkPay(o)?.inv||'—')}</span>
+          ${o.notes?`<span style="position:relative;cursor:default;font-size:.7rem" title="${esc(o.notes)}">📝</span>`:''}
         </div>
-        <div class="ec" style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px;cursor:pointer" onclick="editField(${o.num},'colecao',event)">${o.colecao?esc(o.colecao):'＋ coleção'}</div>
+        <div style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px">${o.colecao?esc(o.colecao):'—'}</div>
       </td>
-      <td class="L ec" onclick="editField(${o.num},'client',event)">
+      <td class="L">
         <b>${esc(o.client)}</b>
-        <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'supplier',event);event.stopPropagation()">${esc(o.supplier||'—')}</div>
+        <div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.supplier||'—')}</div>
       </td>
-      <td class="L W ec" style="max-width:195px" onclick="editField(${o.num},'product',event)">
+      <td class="L W" style="max-width:195px">
         ${esc(o.product)}
-        <div class="ec" style="color:var(--ink4);font-size:.63rem;margin-top:1px" onclick="editField(${o.num},'container',event);event.stopPropagation()">${esc(o.container||'—')}</div>
+        <div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.container||'—')}</div>
       </td>
       <td style="white-space:nowrap">
-        <span class="ec" style="font-family:'IBM Plex Mono';font-size:.72rem" onclick="editField(${o.num},'total',event)">${fN(o.total)}</span>
-        ${o.pi?`<span class="ec" style="font-size:.56rem;color:var(--blue);cursor:pointer;border:1px solid var(--blue);border-radius:3px;padding:.04rem .22rem;margin-left:.2rem" onclick="editOrderPrices('${esc(o.pi)}',event)" title="Editar qtd/preços">$</span>`:''}
+        <span style="font-family:'IBM Plex Mono';font-size:.72rem">${fN(o.total)}</span>
         ${(()=>{
           const fp=linkPay(o);if(!fp)return'';
           const tF=pTotalForn(fp),tV=pTotalVenda(fp),pd=piPaid(fp.pi),rv=piReceived(fp.pi);
           const pP=tF>0?Math.round(pd/tF*100):0,pR=tV>0?Math.round(rv/tV*100):0;
           const mg=tV-tF,pM=tV>0?Math.round(mg/tV*100):0;
-          return`<div style="margin-top:3px;font-size:.55rem;line-height:1.4;color:var(--ink3);cursor:pointer" onclick="openFinPopup('${esc(fp.pi)}')" title="Ver financeiro do IP">
+          return`<div style="margin-top:3px;font-size:.55rem;line-height:1.4;color:var(--ink3)">
             <div style="display:flex;align-items:center;gap:3px">P <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pP}%;background:${pP>=80?'var(--green)':pP>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pP}%</b></div>
             <div style="display:flex;align-items:center;gap:3px">R <div style="width:32px;height:4px;background:var(--ltgry);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pR}%;background:${pR>=80?'var(--green)':pR>=30?'var(--amber)':'var(--red)'}"></div></div><b>${pR}%</b></div>
             <div style="color:${mg>=0?'var(--green)':'var(--red)'};font-weight:600">Mg ${pM}%</div>
@@ -1462,7 +1461,11 @@ function renderInternal(){
       })()}</td>
       <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
-      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
+      <td style="padding:0 .25rem;white-space:nowrap">
+        <button class="bsm" onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" style="margin-right:.2rem;padding:.2rem .35rem;font-size:.72rem">✏️</button>
+        <button class="bsm" onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="margin-right:.2rem;padding:.2rem .35rem;font-size:.72rem;opacity:${o.pi?'1':'.4'};cursor:${o.pi?'pointer':'not-allowed'}">💰</button>
+        <button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1777,8 +1780,10 @@ function onLCamadaChange(){
     }else{
       const av=ordAVLayers(o);
       const tF=av[layer]||0,paid=piPaid(pi,layer),falta=Math.max(0,tF-paid);
-      const fxTxt=o&&o.cambioCamadas?` · câmbio ${o.cambioCamadas}`:' · ⚠ defina o câmbio das camadas na IP';
-      ctx.innerHTML=`Total ${layer==='rf'?'RF':'Trading'} <b>${fUSD(tF)}</b> (R$ ${((layer==='rf'?o?.custoImportacaoRF:o?.custoTrading)||0).toFixed(2)}) · pago <b style="color:var(--green)">${fUSD(paid)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>${fxTxt}`;
+      const fxBadge=o&&o.cambioCamadas
+        ?`<span style="display:inline-block;background:var(--ltblue);color:var(--blue);font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.3rem">câmbio ${o.cambioCamadas}</span>`
+        :`<span style="display:inline-block;background:var(--ltred);color:var(--red);font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.3rem">⚠ câmbio das camadas não definido — edite o pedido (✏️ na Controle Interno)</span>`;
+      ctx.innerHTML=`Total ${layer==='rf'?'RF':'Trading'} <b>${fUSD(tF)}</b> (R$ ${((layer==='rf'?o?.custoImportacaoRF:o?.custoTrading)||0).toFixed(2)}) · pago <b style="color:var(--green)">${fUSD(paid)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>${fxBadge}`;
     }
   } else if(ctx) ctx.innerHTML='';
 }
@@ -1789,8 +1794,10 @@ function onRpiChange(){
   document.getElementById('r-amt-lbl').textContent=isIpC(pi)?'Valor R$':'Valor USD';
   const ctx=document.getElementById('r-ctx');
   if(p&&ctx){const tV=pTotalVenda(p),recv=piReceived(pi),falta=Math.max(0,tV-recv);
-    const fxTxt=isIpC(pi)?(o&&o.cambioVenda?` · câmbio ${o.cambioVenda}`:' · ⚠ defina o câmbio de venda na IP'):'';
-    ctx.innerHTML=tV>0?`Total venda <b>${fUSD(tV)}</b> · recebido <b style="color:var(--green)">${fUSD(recv)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>${fxTxt}`:'Sem preço de venda definido';
+    const fxBadge=isIpC(pi)?(o&&o.cambioVenda
+      ?`<span style="display:inline-block;background:var(--ltblue);color:var(--blue);font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.3rem">câmbio ${o.cambioVenda}</span>`
+      :`<span style="display:inline-block;background:var(--ltred);color:var(--red);font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-left:.3rem">⚠ câmbio de venda não definido — edite o pedido (✏️ na Controle Interno)</span>`):'';
+    ctx.innerHTML=tV>0?`Total venda <b>${fUSD(tV)}</b> · recebido <b style="color:var(--green)">${fUSD(recv)}</b> · falta <b style="color:var(--red)">${fUSD(falta)}</b>${fxBadge}`:'Sem preço de venda definido';
   } else if(ctx) ctx.innerHTML='';
 }
 
