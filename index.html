@@ -1404,7 +1404,13 @@ function renderInternal(){
   clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${esc(c)}"${c===curCl?' selected':''}>${esc(c)}</option>`).join('');
   document.getElementById('int-body').innerHTML=fltS.map((o,i)=>{
     return`<tr${i%2?'':' class="alt"'}>
-      <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
+      <td class="L">
+        <b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b>
+        <div style="display:flex;gap:.2rem;margin-top:.25rem">
+          <button class="bsm" onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" style="padding:.15rem .3rem;font-size:.62rem">✏️</button>
+          <button class="bsm" onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="padding:.15rem .3rem;font-size:.62rem;opacity:${o.pi?'1':'.4'};cursor:${o.pi?'pointer':'not-allowed'}">💰</button>
+        </div>
+      </td>
       <td class="L">
         <div style="display:flex;align-items:center;gap:4px">
           <b style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}">${o.pi?esc(o.pi):'—'}</b>
@@ -1461,11 +1467,7 @@ function renderInternal(){
       })()}</td>
       <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
-      <td style="padding:0 .25rem;white-space:nowrap">
-        <button class="bsm" onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" style="margin-right:.2rem;padding:.2rem .35rem;font-size:.72rem">✏️</button>
-        <button class="bsm" onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="margin-right:.2rem;padding:.2rem .35rem;font-size:.72rem;opacity:${o.pi?'1':'.4'};cursor:${o.pi?'pointer':'not-allowed'}">💰</button>
-        <button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button>
-      </td>
+      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
   }).join('');
 }
