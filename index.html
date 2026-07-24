@@ -1450,22 +1450,23 @@ function renderInternal(){
         const a=nextAction(o);
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.5rem .5rem .5rem .6rem;align-items:flex-start;text-align:left">`;
+        const bgTint=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
+        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;align-items:center;text-align:center">`;
         inner+=`<div>${statusSel(o.num,o.status)}</div>`;
         if(a&&!snoozed){
           const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-          inner+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px">
-            <div style="flex:1">
-              <div style="font-size:.72rem;font-weight:600;color:${col};line-height:1.3">${esc(a.text)}</div>
-              <div style="font-size:.64rem;color:var(--ink3);line-height:1.3;margin-top:2px">→ ${esc(a.suggestion)}</div>
+          inner+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+            <div style="display:flex;align-items:center;gap:4px">
+              <span style="font-size:.76rem;font-weight:700;color:${col};line-height:1.3">${esc(a.text)}</span>
+              <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.72rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
-            <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.72rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
+            <div style="font-size:.64rem;color:var(--ink3);line-height:1.3">→ ${esc(a.suggestion)}</div>
           </div>`;
         } else if(snoozed){
           inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
         }
         inner+=`</div>`;
-        return`<div style="display:flex" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:3px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
+        return`<div style="display:flex;background:${bgTint}" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
       <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
