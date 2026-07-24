@@ -1536,29 +1536,42 @@ function renderClient(){
 /* ══════════════════════════════════════
    RENDER FINANCEIRO (kept compact — same logic, with fixes applied)
 ══════════════════════════════════════ */
-function renderFinanceiro(){
-  const q=norm(document.getElementById('fin-q')?.value);
-  const st=document.getElementById('fin-st')?.value||'';
-  const cl=document.getElementById('fin-cl')?.value||'';
-  const fsup=document.getElementById('fin-sup')?.value||'';
-  const flt=payments.filter(p=>{
+/* ══════════════════════════════════════
+   FINANCEIRO — funções auxiliares
+   (renderFinanceiro() virou um orquestrador curto; cada responsabilidade
+   mora numa função própria. Nenhuma delas deve alterar orders/payments —
+   a sincronização real e persistida é feita só por syncLinked(), em outro
+   momento do ciclo de vida, não durante a renderização)
+══════════════════════════════════════ */
+function getFinanceFilters(){
+  return{
+    q:norm(document.getElementById('fin-q')?.value),
+    st:document.getElementById('fin-st')?.value||'',
+    cl:document.getElementById('fin-cl')?.value||'',
+    fsup:document.getElementById('fin-sup')?.value||''
+  };
+}
+function getFilteredFinancePayments(filters){
+  const{q,st,cl,fsup}=filters;
+  return payments.filter(p=>{
     const t=norm(`${p.pi} ${p.po} ${p.inv||''} ${p.supplier} ${p.client||''}`);
     const linkedO=linkOrd(p);
     const effStatus=linkedO?linkedO.status:p.status;
     return(!q||t.includes(q))&&(!st||effStatus===st)&&(!fsup||p.supplier===fsup)&&(!cl||p.client===cl);
   });
-  const fltS=applySortPay(flt);
-  document.getElementById('fin-cnt').textContent=`${flt.length} pedidos`;
+}
+function getSortedFinancePayments(list){return applySortPay(list);}
 
-  // populate filters
+function populateFinanceFilters(){
   const finStSel=document.getElementById('fin-st');
   if(finStSel){const v=finStSel.value;finStSel.innerHTML='<option value="">Todos Status</option>'+SLST.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
   const fSupSel=document.getElementById('fin-sup');
   if(fSupSel){const v=fSupSel.value;const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();fSupSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
   const clSel=document.getElementById('fin-cl');
   if(clSel){const v=clSel.value;const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();clSel.innerHTML='<option value="">Todos Clientes</option>'+cls.map(c=>`<option value="${esc(c)}"${c===v?' selected':''}>${esc(c)}</option>`).join('');}
+}
 
-  // summary — hero hierárquico
+function calculateFinanceSummary(){
   const totForn=payments.reduce((a,p)=>a+pTotalForn(p),0);
   const totVenda=payments.reduce((a,p)=>a+pTotalVenda(p),0);
   const totPago=payments.reduce((a,p)=>a+piPaid(p.pi),0);
@@ -1567,73 +1580,72 @@ function renderFinanceiro(){
   const aPagarT=Math.max(0,totForn-totPago);
   const aReceberT=Math.max(0,totVenda-totReceb);
   const saldoT=aReceberT-aPagarT;
+  return{totForn,totVenda,totPago,totReceb,margem,aPagarT,aReceberT,saldoT};
+}
+function renderFinanceSummary(s){
   const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.62rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.4rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
   const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.25rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.65rem;color:var(--ink3)">${lbl}</span><span style="font-size:.7rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
   document.getElementById('fin-sum-hero').innerHTML=`
     <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch">
       <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1rem 1.2rem">
-        ${big('A Pagar',fUSD(aPagarT),'var(--red)')}
-        ${big('A Receber',fUSD(aReceberT),'var(--green)')}
-        ${big('Saldo Líquido',fUSD(saldoT),saldoT>=0?'var(--green)':'var(--red)')}
+        ${big('A Pagar',fUSD(s.aPagarT),'var(--red)')}
+        ${big('A Receber',fUSD(s.aReceberT),'var(--green)')}
+        ${big('Saldo Líquido',fUSD(s.saldoT),s.saldoT>=0?'var(--green)':'var(--red)')}
       </div>
       <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.7rem 1rem">
-        ${small('Total Compra',fUSD(totForn),'var(--ink2)')}
-        ${small('Total Venda',fUSD(totVenda),'var(--teal)')}
-        ${small('Margem Bruta',fUSD(margem)+(totVenda>0?' ('+Math.round(margem/totVenda*100)+'%)':''),margem>=0?'var(--green)':'var(--red)')}
-        ${small('Pago / Recebido',fUSD(totPago)+' / '+fUSD(totReceb),'var(--ink2)')}
+        ${small('Total Compra',fUSD(s.totForn),'var(--ink2)')}
+        ${small('Total Venda',fUSD(s.totVenda),'var(--teal)')}
+        ${small('Margem Bruta',fUSD(s.margem)+(s.totVenda>0?' ('+Math.round(s.margem/s.totVenda*100)+'%)':''),s.margem>=0?'var(--green)':'var(--red)')}
+        ${small('Pago / Recebido',fUSD(s.totPago)+' / '+fUSD(s.totReceb),'var(--ink2)')}
       </div>
     </div>`;
+}
 
-  // cards por IP — ordenados por data do pedido (mais recente primeiro)
-  const cardsOrdered=[...fltS].sort((a,b)=>{
-    const da=dispToISO(linkOrd(a)?.orderDate||'')||'';
-    const db=dispToISO(linkOrd(b)?.orderDate||'')||'';
-    if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
-    return db.localeCompare(da); // desc: mais recente primeiro
-  });
-  document.getElementById('fin-cards').innerHTML=cardsOrdered.map(p=>{
-    const totF=pTotalFornAV(p),totV=pTotalVenda(p);
-    const qtyCalc=p.unitPrices.reduce((a,r)=>a+(r.qty||0),0);
-    const paid=piPaid(p.pi),recv=piReceived(p.pi);
-    const aPagar=Math.max(0,totF-paid),aReceber=Math.max(0,totV-recv);
-    const pctPago=totF>0?Math.round((paid/totF)*100):0;
-    const pctReceb=totV>0?Math.round((recv/totV)*100):0;
-    const mg=totV-totF;const pctMg=totV>0?Math.round((mg/totV)*100):null;
-    const bcP=pctPago>100?'var(--red)':pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
-    const bcR=pctReceb>100?'var(--red)':pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
-    const overPago=pctPago>100,overReceb=pctReceb>100;
-    const linkedOrd=linkOrd(p);
-    // Fonte de verdade: order.dates[5]=Embarque/ETD, order.dates[6]=ETA — PRESERVAR SYNC
-    const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
-    const etaVal=linkedOrd?.dates[6]?.v||p.eta||'—';
-    const etdDisp=etdVal!=='—'?(normDate(etdVal)||etdVal):'—';
-    const etaDisp=etaVal!=='—'?(normDate(etaVal)||etaVal):'—';
-    if(etdDisp!=='—')p.etd=etdDisp;
-    if(etaDisp!=='—')p.eta=etaDisp;
-    if(linkedOrd){
-      if(linkedOrd.client)p.client=linkedOrd.client;
-      if(linkedOrd.supplier)p.supplier=linkedOrd.supplier;
-      if(linkedOrd.po&&linkedOrd.po!=='—')p.po=linkedOrd.po;
-    }
-    const stColor=linkedOrd?(SC[linkedOrd.status]?.c||''):'';
-    const stTxt=linkedOrd?linkedOrd.status:'—';
-    const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
-
-    return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1.05rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
+/* buildFinanceCardViewModel: só LÊ orders/payments, nunca escreve neles.
+   A sincronização de verdade (persistida) é feita por syncLinked(), em
+   outro momento do ciclo de vida — aqui é só "qual valor eu mostro agora". */
+function buildFinanceCardViewModel(p){
+  const linkedOrd=linkOrd(p);
+  const totF=pTotalFornAV(p),totV=pTotalVenda(p);
+  const qtyCalc=p.unitPrices.reduce((a,r)=>a+(r.qty||0),0);
+  const paid=piPaid(p.pi),recv=piReceived(p.pi);
+  const aPagar=Math.max(0,totF-paid),aReceber=Math.max(0,totV-recv);
+  const pctPago=totF>0?Math.round((paid/totF)*100):0;
+  const pctReceb=totV>0?Math.round((recv/totV)*100):0;
+  const mg=totV-totF;const pctMg=totV>0?Math.round((mg/totV)*100):null;
+  const bcP=pctPago>100?'var(--red)':pctPago>=80?'var(--green)':pctPago>=30?'var(--amber)':'var(--red)';
+  const bcR=pctReceb>100?'var(--red)':pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
+  const overPago=pctPago>100,overReceb=pctReceb>100;
+  // Fonte de verdade pra exibição: order.dates primeiro, payment como fallback — SEM gravar de volta em p
+  const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
+  const etaVal=linkedOrd?.dates[6]?.v||p.eta||'—';
+  const etdDisp=etdVal!=='—'?(normDate(etdVal)||etdVal):'—';
+  const etaDisp=etaVal!=='—'?(normDate(etaVal)||etaVal):'—';
+  const client=linkedOrd?.client||p.client||'—';
+  const supplier=linkedOrd?.supplier||p.supplier||'—';
+  const po=(linkedOrd?.po&&linkedOrd.po!=='—')?linkedOrd.po:(p.po||'—');
+  const stTxt=linkedOrd?linkedOrd.status:'—';
+  const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
+  return{p,linkedOrd,totF,totV,qtyCalc,paid,recv,aPagar,aReceber,pctPago,pctReceb,mg,pctMg,bcP,bcR,
+    overPago,overReceb,etdDisp,etaDisp,client,supplier,po,stTxt,stPillCol};
+}
+function renderFinanceCard(vm){
+  const{p,linkedOrd}=vm;
+  return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1.05rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
         <div>
           <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy)">${esc(p.pi)}</div>
           <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--ink3)">
-            <span style="color:var(--blue)">${esc(p.po||'—')}</span>
+            <span style="color:var(--blue)">${esc(vm.po||'—')}</span>
             <span style="color:var(--ink4)"> · </span>
             <span style="color:var(--purple)">${esc(p.inv||'—')}</span>
             ${linkedOrd?.colecao?`<span style="color:var(--ink4)"> · </span><span style="color:var(--ink3)">${esc(linkedOrd.colecao)}</span>`:''}
           </div>
         </div>
-        <span style="font-size:.55rem;font-weight:600;color:${stPillCol};background:${stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(stTxt)}</span>
+        <span style="font-size:.55rem;font-weight:600;color:${vm.stPillCol};background:${vm.stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(vm.stTxt)}</span>
       </div>
-      <div style="font-size:.66rem;color:var(--ink2);margin-bottom:.1rem"><b>${esc(p.supplier||'—')}</b> <span style="color:var(--ink4)">→</span> ${esc(p.client||'—')}</div>
-      <div style="font-size:.58rem;color:var(--ink4);font-family:'IBM Plex Mono';margin-bottom:.55rem">${fN(qtyCalc)} un · ETD ${esc(etdDisp)}${etaDisp!=='—'?' · ETA '+esc(etaDisp):''}</div>
+      <div style="font-size:.66rem;color:var(--ink2);margin-bottom:.1rem"><b>${esc(vm.supplier)}</b> <span style="color:var(--ink4)">→</span> ${esc(vm.client)}</div>
+      <div style="font-size:.58rem;color:var(--ink4);font-family:'IBM Plex Mono';margin-bottom:.55rem">${fN(vm.qtyCalc)} un · ETD ${esc(vm.etdDisp)}${vm.etaDisp!=='—'?' · ETA '+esc(vm.etaDisp):''}</div>
       ${(()=>{
         if(!isIpC(p.pi)||!linkedOrd)return'';
         const av=ordAVLayers(linkedOrd);
@@ -1646,111 +1658,163 @@ function renderFinanceiro(){
         return `<div style="font-size:.56rem;color:var(--ink3);background:var(--ltgry);border-radius:5px;padding:.2rem .4rem;margin-bottom:.4rem">🇧🇷 ${linkedOrd.rotaAV==='trading'?'Via Trading':'Direta'} — ${parts.join(' · ')}</div>`;
       })()}
       <div style="margin-bottom:.35rem">
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>💳 Pago ${pctPago}%${overPago?' ⚠':''}</span><span style="color:${overPago?'var(--red)':aPagar>0?'var(--red)':'var(--green)'}">${overPago?'⚠ conferir (pago a mais)':aPagar>0?'falta '+fUSD(aPagar):'✓ quitado'}</span></div>
-        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctPago)}%;background:${bcP}"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>💳 Pago ${vm.pctPago}%${vm.overPago?' ⚠':''}</span><span style="color:${vm.overPago?'var(--red)':vm.aPagar>0?'var(--red)':'var(--green)'}">${vm.overPago?'⚠ conferir (pago a mais)':vm.aPagar>0?'falta '+fUSD(vm.aPagar):'✓ quitado'}</span></div>
+        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,vm.pctPago)}%;background:${vm.bcP}"></div></div>
       </div>
       <div style="margin-bottom:.55rem">
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${pctReceb}%${overReceb?' ⚠':''}</span><span style="color:${overReceb?'var(--red)':aReceber>0?'var(--red)':'var(--green)'}">${overReceb?'⚠ conferir (recebido a mais)':totV>0?(aReceber>0?'falta '+fUSD(aReceber):'✓ quitado'):'—'}</span></div>
-        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,pctReceb)}%;background:${bcR}"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${vm.pctReceb}%${vm.overReceb?' ⚠':''}</span><span style="color:${vm.overReceb?'var(--red)':vm.aReceber>0?'var(--red)':'var(--green)'}">${vm.overReceb?'⚠ conferir (recebido a mais)':vm.totV>0?(vm.aReceber>0?'falta '+fUSD(vm.aReceber):'✓ quitado'):'—'}</span></div>
+        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,vm.pctReceb)}%;background:${vm.bcR}"></div></div>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:.5rem;border-top:1px solid var(--bdr)">
         <span style="font-size:.6rem;color:var(--ink3)">Margem</span>
-        <span style="font-family:'IBM Plex Mono';font-weight:700;font-size:.78rem;color:${mg>=0?'var(--green)':'var(--red)'}">${totV>0?fUSD(mg)+(pctMg!==null?` <span style="font-size:.6rem;opacity:.7">(${pctMg}%)</span>`:''):'—'}</span>
+        <span style="font-family:'IBM Plex Mono';font-weight:700;font-size:.78rem;color:${vm.mg>=0?'var(--green)':'var(--red)'}">${vm.totV>0?fUSD(vm.mg)+(vm.pctMg!==null?` <span style="font-size:.6rem;opacity:.7">(${vm.pctMg}%)</span>`:''):'—'}</span>
       </div>
     </div>`;
-  }).join('')||'<div style="grid-column:1/-1;text-align:center;color:var(--ink4);padding:2rem;font-size:.8rem">Nenhum pedido encontrado</div>';
+}
+function renderFinanceCards(list){
+  const cardsOrdered=[...list].sort((a,b)=>{
+    const da=dispToISO(linkOrd(a)?.orderDate||'')||'';
+    const db=dispToISO(linkOrd(b)?.orderDate||'')||'';
+    if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;
+    return db.localeCompare(da); // desc: mais recente primeiro
+  });
+  document.getElementById('fin-cards').innerHTML=cardsOrdered.map(p=>renderFinanceCard(buildFinanceCardViewModel(p))).join('')
+    ||'<div style="grid-column:1/-1;text-align:center;color:var(--ink4);padding:2rem;font-size:.8rem">Nenhum pedido encontrado</div>';
+}
 
-  // ── LEDGER ──
-  renderLedger();
-  renderReceipts();
-
-  // PI selectors
+function populateFinanceEntrySelectors(){
   const selLP=document.getElementById('l-pi');const curLP=selLP.value;
   selLP.innerHTML='<option value="">— IP —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curLP?' selected':''}>${esc(p.pi)} — ${esc(p.supplier)}</option>`).join('');
   const selRP=document.getElementById('r-pi');const curRP=selRP.value;
   selRP.innerHTML='<option value="">— IP —</option>'+payments.map(p=>`<option value="${esc(p.pi)}"${p.pi===curRP?' selected':''}>${esc(p.pi)} — ${esc(p.client||p.supplier)}</option>`).join('');
+}
+
+function renderFinanceiro(){
+  const filters=getFinanceFilters();
+  const filteredPayments=getFilteredFinancePayments(filters);
+  const sortedPayments=getSortedFinancePayments(filteredPayments);
+  document.getElementById('fin-cnt').textContent=`${filteredPayments.length} pedidos`;
+
+  populateFinanceFilters();
+  renderFinanceSummary(calculateFinanceSummary());
+  renderFinanceCards(sortedPayments);
+  renderLedger();
+  renderReceipts();
+  populateFinanceEntrySelectors();
   updateSortHeaders();
 }
 
-function renderLedger(){
-  const supSel=document.getElementById('led-sup-f'),piSel2=document.getElementById('led-pi-f');
-  const curSup=supSel?.value||'',curPi2=piSel2?.value||'';
-  if(supSel){const sups=[...new Set(ledger.map(l=>l.supplier))].sort();supSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===curSup?' selected':''}>${esc(s)}</option>`).join('');}
-  if(piSel2){const pis=[...new Set(ledger.map(l=>l.pi))].sort();piSel2.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi2?' selected':''}>${esc(p)}</option>`).join('');}
-  const ledQ=norm(document.getElementById('led-q')?.value);
-  const ledSup=supSel?.value||'',ledPi=piSel2?.value||'';
-  const ledFrom=document.getElementById('led-from')?.value||'',ledTo=document.getElementById('led-to')?.value||'';
-  let fltLed=[...ledger].filter(l=>{
-    if(ledQ&&!norm(`${l.pi} ${l.supplier} ${l.ref} ${l.notes}`).includes(ledQ))return false;
-    if(ledSup&&l.supplier!==ledSup)return false;if(ledPi&&l.pi!==ledPi)return false;
-    if(ledFrom||ledTo){const iso=dispToISO(l.date);if(ledFrom&&iso<ledFrom)return false;if(ledTo&&iso>ledTo)return false;}
+/* ══════════════════════════════════════
+   LEDGER / RECEIPTS — infraestrutura comum
+   (renderLedger/renderReceipts viram wrappers finos de renderTransactions;
+   os arrays `ledger` e `receipts` continuam separados, só a lógica de
+   filtrar/ordenar/somar/montar linhas é compartilhada)
+══════════════════════════════════════ */
+const transactionConfigs={
+  ledger:{
+    type:'ledger',
+    getList:()=>ledger,
+    entityField:'supplier',
+    entityFilterId:'led-sup-f', entityFilterLabel:'Todos Fornecedores',
+    piFilterId:'led-pi-f',
+    qId:'led-q', fromId:'led-from', toId:'led-to',
+    cntId:'led-cnt', totsId:'led-tots', bodyId:'led-body', footId:'led-foot',
+    sortState:()=>ledSort,
+    amountStyle:'',
+    totColor1:'var(--blue)', totColor2:'var(--green)', totLabel2:'Lançamentos',
+    footBg:'var(--ltgry)', footBorder:'var(--bdr2)',
+    showLayerBadge:true,
+    delFnName:'delLedger', editFnName:'editLed',
+    searchFields:l=>`${l.pi} ${l.supplier} ${l.ref} ${l.notes}`,
+  },
+  receipts:{
+    type:'receipts',
+    getList:()=>receipts,
+    entityField:'client',
+    entityFilterId:'rec-cli-f', entityFilterLabel:'Todos Clientes',
+    piFilterId:'rec-pi-f',
+    qId:'rec-q', fromId:'rec-from', toId:'rec-to',
+    cntId:'rec-cnt', totsId:'rec-tots', bodyId:'rec-body', footId:'rec-foot',
+    sortState:()=>recSort,
+    amountStyle:'color:var(--teal)',
+    totColor1:'var(--green)', totColor2:'var(--teal)', totLabel2:'Recebimentos',
+    footBg:'#F0FAF5', footBorder:'var(--green)',
+    showLayerBadge:false,
+    delFnName:'delReceipt', editFnName:'editRec',
+    searchFields:r=>`${r.pi} ${r.client||''} ${r.ref} ${r.notes}`,
+  }
+};
+
+function filterTransactions(config){
+  const list=config.getList();
+  const entitySel=document.getElementById(config.entityFilterId);
+  const piSel=document.getElementById(config.piFilterId);
+  const curEntity=entitySel?.value||'',curPi=piSel?.value||'';
+  if(entitySel){
+    const vals=[...new Set(list.map(x=>x[config.entityField]||'').filter(Boolean))].sort();
+    entitySel.innerHTML=`<option value="">${config.entityFilterLabel}</option>`+vals.map(v=>`<option value="${esc(v)}"${v===curEntity?' selected':''}>${esc(v)}</option>`).join('');
+  }
+  if(piSel){
+    const pis=[...new Set(list.map(x=>x.pi))].sort();
+    piSel.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi?' selected':''}>${esc(p)}</option>`).join('');
+  }
+  const q=norm(document.getElementById(config.qId)?.value);
+  const entityVal=entitySel?.value||'',piVal=piSel?.value||'';
+  const fromV=document.getElementById(config.fromId)?.value||'',toV=document.getElementById(config.toId)?.value||'';
+  return list.filter(x=>{
+    if(q&&!norm(config.searchFields(x)).includes(q))return false;
+    if(entityVal&&x[config.entityField]!==entityVal)return false;
+    if(piVal&&x.pi!==piVal)return false;
+    if(fromV||toV){const iso=dispToISO(x.date);if(fromV&&iso<fromV)return false;if(toV&&iso>toV)return false;}
     return true;
   });
-  fltLed.sort((a,b)=>{
-    let av,bv;
-    if(ledSort.col==='n'){av=a.n;bv=b.n;}else if(ledSort.col==='date'){av=dispToISO(a.date)||'';bv=dispToISO(b.date)||'';}
-    else if(ledSort.col==='amount'){av=a.amount;bv=b.amount;}else if(ledSort.col==='pi'){av=a.pi;bv=b.pi;}
-    else if(ledSort.col==='supplier'){av=a.supplier;bv=b.supplier;}else{av=a.n;bv=b.n;}
-    if(av<bv)return-1*ledSort.dir;if(av>bv)return ledSort.dir;return 0;
-  });
-  const lt=fltLed.reduce((a,l)=>a+l.amount,0);
-  document.getElementById('led-cnt').textContent=`${fltLed.length} / ${ledger.length}`;
-  document.getElementById('led-tots').innerHTML=[
-    {l:'Total filtrado',v:fUSD(lt),d:'var(--blue)',c:'var(--blue)'},
-    {l:'Lançamentos',v:ledger.length,d:'var(--green)',c:'var(--green)'},
-  ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
-  document.getElementById('led-body').innerHTML=fltLed.map((l,i)=>`<tr${i%2?'':' class="alt"'}>
-    <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${l.n}</td>
-    <td class="ec" onclick="editLed(${l.n},'date',event)"><span class="dok">${esc(l.date)}</span></td>
-    <td class="ec mono mpos" onclick="editLed(${l.n},'amount',event)">${fUSD(l.amount)}${l.amountBRL?`<div style="font-size:.58rem;color:var(--ink4);font-weight:400">R$ ${l.amountBRL.toFixed(2)} @${l.fxApplied}</div>`:''}</td>
-    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editLed(${l.n},'pi',event)">${esc(l.pi)}${l.layer&&l.layer!=='fy'?`<span style="display:block;font-size:.55rem;font-weight:700;color:${l.layer==='rf'?'var(--purple)':'var(--teal)'}">${l.layer==='rf'?'RF':'TRADING'}</span>`:''}</td>
-    <td class="ec L" onclick="editLed(${l.n},'supplier',event)">${esc(l.supplier)}</td>
-    <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="editLed(${l.n},'ref',event)">${esc(l.ref)}</td>
-    <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="editLed(${l.n},'notes',event)">${esc(l.notes)}</td>
-    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delLedger(${l.n})">✕</button></td>
-  </tr>`).join('');
-  document.getElementById('led-foot').innerHTML=`<tr style="background:var(--ltgry);border-top:2px solid var(--bdr2)"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(lt)}</b></td><td colspan="5"></td></tr>`;
 }
-function renderReceipts(){
-  const recCliSel=document.getElementById('rec-cli-f'),recPiSel=document.getElementById('rec-pi-f');
-  const curRC=recCliSel?.value||'',curRP2=recPiSel?.value||'';
-  if(recCliSel){const clis=[...new Set(receipts.map(r=>r.client||'').filter(Boolean))].sort();recCliSel.innerHTML='<option value="">Todos Clientes</option>'+clis.map(c=>`<option value="${esc(c)}"${c===curRC?' selected':''}>${esc(c)}</option>`).join('');}
-  if(recPiSel){const pis=[...new Set(receipts.map(r=>r.pi))].sort();recPiSel.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curRP2?' selected':''}>${esc(p)}</option>`).join('');}
-  const recQ=norm(document.getElementById('rec-q')?.value);
-  const recCli=recCliSel?.value||'',recPi=recPiSel?.value||'';
-  const recFrom=document.getElementById('rec-from')?.value||'',recTo=document.getElementById('rec-to')?.value||'';
-  let fltRec=[...receipts].filter(r=>{
-    if(recQ&&!norm(`${r.pi} ${r.client||''} ${r.ref} ${r.notes}`).includes(recQ))return false;
-    if(recCli&&r.client!==recCli)return false;if(recPi&&r.pi!==recPi)return false;
-    if(recFrom||recTo){const iso=dispToISO(r.date);if(recFrom&&iso<recFrom)return false;if(recTo&&iso>recTo)return false;}
-    return true;
-  });
-  fltRec.sort((a,b)=>{
+function sortTransactions(list,config){
+  const s=config.sortState();
+  return[...list].sort((a,b)=>{
     let av,bv;
-    if(recSort.col==='n'){av=a.n;bv=b.n;}else if(recSort.col==='date'){av=dispToISO(a.date)||'';bv=dispToISO(b.date)||'';}
-    else if(recSort.col==='amount'){av=a.amount;bv=b.amount;}else if(recSort.col==='pi'){av=a.pi;bv=b.pi;}
-    else if(recSort.col==='client'){av=a.client||'';bv=b.client||'';}else{av=a.n;bv=b.n;}
-    if(av<bv)return-1*recSort.dir;if(av>bv)return recSort.dir;return 0;
+    if(s.col==='n'){av=a.n;bv=b.n;}
+    else if(s.col==='date'){av=dispToISO(a.date)||'';bv=dispToISO(b.date)||'';}
+    else if(s.col==='amount'){av=a.amount;bv=b.amount;}
+    else if(s.col==='pi'){av=a.pi;bv=b.pi;}
+    else if(s.col===config.entityField){av=a[config.entityField]||'';bv=b[config.entityField]||'';}
+    else{av=a.n;bv=b.n;}
+    if(av<bv)return-1*s.dir;if(av>bv)return s.dir;return 0;
   });
-  const rt=fltRec.reduce((a,r)=>a+r.amount,0);
-  document.getElementById('rec-cnt').textContent=`${fltRec.length} / ${receipts.length}`;
-  document.getElementById('rec-tots').innerHTML=[
-    {l:'Total filtrado',v:fUSD(rt),d:'var(--green)',c:'var(--green)'},
-    {l:'Recebimentos',v:receipts.length,d:'var(--teal)',c:'var(--teal)'},
-  ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
-  document.getElementById('rec-body').innerHTML=fltRec.map((r,i)=>`<tr${i%2?'':' class="alt"'}>
-    <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${r.n}</td>
-    <td class="ec" onclick="editRec(${r.n},'date',event)"><span class="dok">${esc(r.date)}</span></td>
-    <td class="ec mono mpos" style="color:var(--teal)" onclick="editRec(${r.n},'amount',event)">${fUSD(r.amount)}${r.amountBRL?`<div style="font-size:.58rem;color:var(--ink4);font-weight:400">R$ ${r.amountBRL.toFixed(2)} @${r.fxApplied}</div>`:''}</td>
-    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="editRec(${r.n},'pi',event)">${esc(r.pi)}</td>
-    <td class="ec L" onclick="editRec(${r.n},'client',event)">${esc(r.client)||'—'}</td>
-    <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="editRec(${r.n},'ref',event)">${esc(r.ref)}</td>
-    <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="editRec(${r.n},'notes',event)">${esc(r.notes)}</td>
-    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delReceipt(${r.n})">✕</button></td>
-  </tr>`).join('');
-  document.getElementById('rec-foot').innerHTML=`<tr style="background:#F0FAF5;border-top:2px solid var(--green)"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(rt)}</b></td><td colspan="5"></td></tr>`;
 }
+function calculateTransactionTotals(list){return list.reduce((a,x)=>a+x.amount,0);}
+function buildTransactionRows(list,config){
+  return list.map((x,i)=>{
+    const amountSub=x.amountBRL?`<div style="font-size:.58rem;color:var(--ink4);font-weight:400">R$ ${x.amountBRL.toFixed(2)} @${x.fxApplied}</div>`:'';
+    const layerBadge=(config.showLayerBadge&&x.layer&&x.layer!=='fy')?`<span style="display:block;font-size:.55rem;font-weight:700;color:${x.layer==='rf'?'var(--purple)':'var(--teal)'}">${x.layer==='rf'?'RF':'TRADING'}</span>`:'';
+    return`<tr${i%2?'':' class="alt"'}>
+    <td style="font-family:'IBM Plex Mono';font-size:.66rem;color:var(--ink4)">${x.n}</td>
+    <td class="ec" onclick="${config.editFnName}(${x.n},'date',event)"><span class="dok">${esc(x.date)}</span></td>
+    <td class="ec mono mpos" style="${config.amountStyle}" onclick="${config.editFnName}(${x.n},'amount',event)">${fUSD(x.amount)}${amountSub}</td>
+    <td class="ec L" style="font-family:'IBM Plex Mono';font-size:.71rem;color:var(--blue)" onclick="${config.editFnName}(${x.n},'pi',event)">${esc(x.pi)}${layerBadge}</td>
+    <td class="ec L" onclick="${config.editFnName}(${x.n},'${config.entityField}',event)">${esc(x[config.entityField])||'—'}</td>
+    <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="${config.editFnName}(${x.n},'ref',event)">${esc(x.ref)}</td>
+    <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="${config.editFnName}(${x.n},'notes',event)">${esc(x.notes)}</td>
+    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="${config.delFnName}(${x.n})">✕</button></td>
+  </tr>`;
+  }).join('');
+}
+function renderTransactions(config){
+  const filtered=filterTransactions(config);
+  const sorted=sortTransactions(filtered,config);
+  const total=calculateTransactionTotals(sorted);
+  const fullList=config.getList();
+  document.getElementById(config.cntId).textContent=`${sorted.length} / ${fullList.length}`;
+  document.getElementById(config.totsId).innerHTML=[
+    {l:'Total filtrado',v:fUSD(total),d:config.totColor1,c:config.totColor1},
+    {l:config.totLabel2,v:fullList.length,d:config.totColor2,c:config.totColor2},
+  ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:.75rem">${x.v}</div></div></div>`).join('');
+  document.getElementById(config.bodyId).innerHTML=buildTransactionRows(sorted,config);
+  document.getElementById(config.footId).innerHTML=`<tr style="background:${config.footBg};border-top:2px solid ${config.footBorder}"><td colspan="2" class="L" style="font-weight:700;font-size:.7rem;padding-left:.7rem">TOTAL</td><td class="mono mpos"><b>${fUSD(total)}</b></td><td colspan="5"></td></tr>`;
+}
+function renderLedger(){renderTransactions(transactionConfigs.ledger);}
+function renderReceipts(){renderTransactions(transactionConfigs.receipts);}
 
 /* ══════════════════════════════════════
    ACTIONS (LEDGER/RECEIPT/DELETE)
