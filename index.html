@@ -1451,7 +1451,7 @@ function renderInternal(){
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
         const bgTint=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
-        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;align-items:center;text-align:center">`;
+        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;align-items:center;text-align:center;flex:1">`;
         inner+=`<div>${statusSel(o.num,o.status)}</div>`;
         if(a&&!snoozed){
           const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
@@ -1466,7 +1466,7 @@ function renderInternal(){
           inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
         }
         inner+=`</div>`;
-        return`<div style="display:flex;background:${bgTint}" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
+        return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
       <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
