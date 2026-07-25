@@ -307,10 +307,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 
 <!-- ═══ CONTROLE INTERNO ═══ -->
 <div id="view-internal" class="view active">
-  <div class="toggle-grp" id="ci-subview-toggle" style="margin-bottom:.9rem">
-    <button class="active" data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
-    <button data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
-  </div>
   <div id="ci-content-interno">
   <div class="sbar" id="int-sum"></div>
   <div class="tb">
@@ -318,7 +314,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <select id="int-st" onchange="renderInternal()"><option value="">Todos os Status</option></select>
     <select id="int-cl" onchange="renderInternal()"><option value="">Todos os Clientes</option></select>
     <span class="finfo" id="int-cnt"></span>
-    <div class="ml"><button class="bsm" onclick="exportCSV()">⬇ CSV</button></div>
+    <div class="ml" style="display:flex;gap:.5rem;align-items:center">
+      <div class="toggle-grp ci-subview-toggle">
+        <button class="active" data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
+        <button data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
+      </div>
+      <button class="bsm" onclick="exportCSV()">⬇ CSV</button>
+    </div>
   </div>
   <div class="tw">
     <table id="int-tbl">
@@ -361,7 +363,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <select id="cli-st" onchange="renderClient()"><option value="">Todos os Status</option></select>
     <select id="cli-cl" onchange="renderClient()"><option value="">Todos os Clientes</option></select>
     <span class="finfo" id="cli-cnt"></span>
-    <div class="ml"><button class="bsm" onclick="exportClientCSV()">⬇ CSV</button></div>
+    <div class="ml" style="display:flex;gap:.5rem;align-items:center">
+      <div class="toggle-grp ci-subview-toggle">
+        <button data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
+        <button class="active" data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
+      </div>
+      <button class="bsm" onclick="exportClientCSV()">⬇ CSV</button>
+    </div>
   </div>
   <div class="tw">
     <table>
@@ -2336,7 +2344,7 @@ function showTab(id){
 let rvTrackerSubview='interno';
 function setInternalSubview(mode){
   rvTrackerSubview=mode;
-  document.querySelectorAll('#ci-subview-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  document.querySelectorAll('.ci-subview-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
   document.getElementById('ci-content-interno').style.display=mode==='interno'?'':'none';
   document.getElementById('view-client').style.display=mode==='cliente'?'':'none';
   if(mode==='cliente')renderClient();else renderInternal();
