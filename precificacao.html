@@ -239,7 +239,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
   <span id="save-status"></span>
   <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba Revenda pra desbloquear)" style="cursor:default">☁</span>
   <button class="hbtn" id="auth-status" onclick="onAuthButtonClick()">👤 Minha conta</button>
-  <button class="hbtn" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres">🔐 Segurança</button>
+  <button class="hbtn" id="btn-security" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres" style="display:none">🔐 Segurança</button>
   <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
   <button class="hbtn" onclick="saveState()">↓ Salvar</button>
   <button class="dm-toggle" id="dm" onclick="toggleDark()">🌙</button>
@@ -324,8 +324,6 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">⚙️ Calculadora</button>
       <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">📋 Cotações</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">📦 Pedidos</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-s no-print" style="font-size:.64rem;padding:.28rem .6rem;margin-bottom:.4rem" onclick="rvAddMember()">＋ Add user</button>
     </div>
 
     <div id="rvpane-calc" class="rv-pane active">
@@ -358,8 +356,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
           <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
-              <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar cliente">＋</button>
-              <button class="btn btn-s" onclick="rv2OpenCadList('cliente')" title="Editar/apagar clientes cadastrados">🗂</button>
+              <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
             </div>
             <div class="ff"><label>Preço venda R$ <span style="font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">(já com frete)</span></label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
@@ -367,8 +364,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
           <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
-              <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar fornecedor">＋</button>
-              <button class="btn btn-s" onclick="rv2OpenCadList('fornecedor')" title="Editar/apagar fornecedores cadastrados">🗂</button>
+              <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores">＋</button>
             </div>
             <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
@@ -433,7 +429,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 
 <!-- CADASTRO RÁPIDO — CLIENTE / FORNECEDOR -->
 <div class="ovl" id="ovl-rvcad" onclick="if(event.target===this)closeM('rvcad')">
-  <div class="modal" style="max-width:360px">
+  <div class="modal" style="max-width:440px">
     <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="mcls" onclick="closeM('rvcad')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Nome</label><input type="text" id="rvcad-nome" placeholder="Ex: Zona Sul"></div>
@@ -448,6 +444,9 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
         </div>
       </div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveCad()">Salvar cadastro</button>
+
+      <div class="fsep" style="margin-top:1.2rem" id="rvcad-list-title">Cadastrados</div>
+      <div id="rvcad-list-body"></div>
     </div>
   </div>
 </div>
@@ -496,17 +495,8 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
         <div class="ff" style="margin-top:.6rem"><label>Clichê / molde total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
       </div>
       <div id="rvedit-preview" style="margin-top:.8rem"></div>
+      <div id="rvedit-detalhe" style="margin-top:.6rem"></div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveEdit()">💾 Salvar alterações</button>
-    </div>
-  </div>
-</div>
-
-<!-- GERENCIAR CADASTROS — CLIENTES / FORNECEDORES (editar/apagar) -->
-<div class="ovl" id="ovl-rvcadlist" onclick="if(event.target===this)closeM('rvcadlist')">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-h"><span id="rvcadlist-title">Clientes cadastrados</span><button class="mcls" onclick="closeM('rvcadlist')">✕</button></div>
-    <div class="modal-b">
-      <div id="rvcadlist-body"></div>
     </div>
   </div>
 </div>
@@ -533,6 +523,10 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <input type="password" id="sec-rv-pw1" placeholder="Nova senha do cofre" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
       <input type="password" id="sec-rv-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
       <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (Revenda)</button>
+
+      <div class="fsep" style="margin-top:1.2rem">Acesso ao cofre da Revenda</div>
+      <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem">Adiciona alguém pelo e-mail — a pessoa precisa já ter criado a própria conta antes.</p>
+      <button class="btn btn-s" style="width:100%" onclick="rvAddMember()">＋ Add user</button>
     </div>
   </div>
 </div>
@@ -1072,8 +1066,10 @@ function updateHeaderVisibility(){
   const isFred=!!(authUser&&authUser.email&&authUser.email.toLowerCase()===FRED_EMAIL);
   const tabImport=document.getElementById('tab-import');
   const tabTracker=document.getElementById('tab-tracker');
+  const btnSecurity=document.getElementById('btn-security');
   if(tabImport)tabImport.style.display=isFred?'':'none';
   if(tabTracker)tabTracker.style.display=isFred?'':'none';
+  if(btnSecurity)btnSecurity.style.display=isFred?'':'none';
 }
 async function initAuth(){
   if(!_supaOK)return;
@@ -1805,12 +1801,12 @@ function rv2Render(r){
     </div>`;
   if(rv2DetalheOpen)rv2RenderDetalhe(r);
 }
-function rv2RenderDetalhe(r){
+function rv2RenderDetalhe(r,targetId){
   const custoExtraLinhas=(r.cliche>0||r.freteTotal>0)?`
         ${r.cliche>0?`<tr><td>(+) Clichê / molde</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:''}
         ${r.freteTotal>0?`<tr><td>(+) Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:''}`:'';
   const comissaoLinha=r.comissaoPct>0?`<tr><td>(−) Comissão (${r.comissaoPct}% s/ venda produto)</td><td class="num negv">−${rvBrl(r.comissao)}</td></tr>`:'';
-  rvEl('rv2-detalhe').innerHTML=`
+  rvEl(targetId||'rv2-detalhe').innerHTML=`
     <table class="res-table">
       <tbody>
         <tr class="rv-sec"><td colspan="2">Custo</td></tr>
@@ -1836,15 +1832,17 @@ function rv2ToggleDetalhe(){
   const r=rv2Calc();
 }
 
-/* ── CADASTRO RÁPIDO (Cliente / Fornecedor) ── */
+/* ── CADASTRO RÁPIDO + GERENCIAR (editar/apagar) — Cliente / Fornecedor, tudo na mesma janela ── */
 let rv2CadTipo='cliente',rv2CadRegime='LP';
 function rv2OpenCad(tipo){
   rv2CadTipo=tipo;rv2CadRegime='LP';
   rvEl('rvcad-title').textContent=tipo==='cliente'?'Novo cliente':'Novo fornecedor';
+  rvEl('rvcad-list-title').textContent=tipo==='cliente'?'Clientes cadastrados':'Fornecedores cadastrados';
   rvEl('rvcad-nome').value='';
   rvEl('rvcad-estado').value='RJ';
   rvEl('rvcad-regime-wrap').style.display=tipo==='fornecedor'?'block':'none';
   document.querySelectorAll('#rvcad-regime-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.includes('Presumido')));
+  rv2RenderCadList();
   document.getElementById('ovl-rvcad').classList.add('open');
   setTimeout(()=>rvEl('rvcad-nome').focus(),50);
 }
@@ -1865,36 +1863,27 @@ function rv2SaveCad(){
     RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime});
     rv2PopulateSelects();rvEl('rv2-fornecedor').value=nome;rv2Calc();
   }
-  closeM('rvcad');
   rv2SaveLocalCad();
   rvSyncPush();
+  rvEl('rvcad-nome').value='';
+  rv2RenderCadList(); // mantém a janela aberta, já mostra o novo item na lista
   toastSave('Cadastrado ✓');
 }
-
-/* ── GERENCIAR CADASTROS (editar/apagar cliente/fornecedor já salvos) ── */
-let rvCadListTipo='cliente';
-function rv2OpenCadList(tipo){
-  rvCadListTipo=tipo;
-  rvEl('rvcadlist-title').textContent=tipo==='cliente'?'Clientes cadastrados':'Fornecedores cadastrados';
-  rv2RenderCadList();
-  document.getElementById('ovl-rvcadlist').classList.add('open');
-}
 function rv2RenderCadList(){
-  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
-  const body=rvEl('rvcadlist-body');
+  const lista=rv2CadTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const body=rvEl('rvcad-list-body');
   if(!lista.length){body.innerHTML='<p class="hint">Nenhum cadastro ainda.</p>';return;}
-  const estadosOpts=ESTADOS.map(([uf])=>uf).join(',');
   body.innerHTML=`<table class="rv-data-table"><thead><tr>
-    <th>Nome</th><th>UF</th>${rvCadListTipo==='fornecedor'?'<th>Regime</th>':''}<th></th>
+    <th>Nome</th><th>UF</th>${rv2CadTipo==='fornecedor'?'<th>Regime</th>':''}<th></th>
   </tr></thead><tbody>`+lista.map((item,i)=>`<tr>
     <td><input type="text" value="${esc(item.nome)}" style="width:100%;border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .4rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'nome',this.value)"></td>
     <td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'estado',this.value)">${ESTADOS.map(([uf])=>`<option value="${uf}"${uf===item.estado?' selected':''}>${uf}</option>`).join('')}</select></td>
-    ${rvCadListTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>`:''}
+    ${rv2CadTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>`:''}
     <td><button class="btn-rvdel" onclick="rv2DeleteCad(${i})" title="Apagar">🗑</button></td>
   </tr>`).join('')+'</tbody></table>';
 }
 function rv2UpdateCadField(idx,field,value){
-  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const lista=rv2CadTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
   const item=lista[idx];if(!item)return;
   if(field==='nome'){
     const novoNome=value.trim();
@@ -1906,7 +1895,7 @@ function rv2UpdateCadField(idx,field,value){
   toastSave('Atualizado ✓');
 }
 function rv2DeleteCad(idx){
-  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const lista=rv2CadTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
   const item=lista[idx];if(!item)return;
   if(!confirm(`Apagar "${item.nome}"? Cotações/pedidos já salvos não são afetados (guardam o nome como texto).`))return;
   lista.splice(idx,1);
@@ -2009,11 +1998,12 @@ function rv2EditPreview(){
   const cliche=parseFloat(rvEl('rvedit-cliche').value)||0;
   const r=rv2CalcCore(cliente,fornecedor,rvEditTipo,qtd,preco,pv,comissaoPct,freteTotal,cliche);
   const prev=rvEl('rvedit-preview');
-  if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';return null;}
+  if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';rvEl('rvedit-detalhe').innerHTML='';return null;}
   prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
     <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Lucro recalculado</div>
     <div style="font-size:1.1rem;font-weight:700;color:var(--green)">${rvBrl(r.lucroTotal)} <span style="font-size:.7rem">(${(r.margem*100).toFixed(1).replace('.',',')}%)</span></div>
   </div>`;
+  rv2RenderDetalhe(r,'rvedit-detalhe');
   return r;
 }
 function rv2SaveEdit(){
