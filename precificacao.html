@@ -144,6 +144,8 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 .sep-lbl{font-size:.62rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin:.9rem 0 .5rem;padding-top:.6rem;border-top:1px solid var(--bdr)}
 .sep-lbl:first-child{margin-top:0;padding-top:0;border-top:none}
 .toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;width:fit-content}
+.pill-toggle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .55rem;border:1.5px solid var(--bdr2);border-radius:20px;font-size:.6rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;margin-top:.35rem}
+.pill-toggle.active{background:var(--green);border-color:var(--green);color:#fff}
 .toggle-grp button{padding:.4rem 1.1rem;font-size:.74rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
 .toggle-grp button.active{background:var(--green);color:#fff}
 .ff input.inp-auto{border-color:var(--ltgrn);background:var(--ltgrn);color:var(--green);font-weight:600}
@@ -206,6 +208,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 .tl-val.neg{color:var(--red)}
 .rv-data-table{width:100%;border-collapse:collapse;font-size:.74rem}
 .rv-data-table th{background:var(--navy);color:#fff;padding:.45rem .55rem;text-align:left;font-size:.62rem;font-weight:600;white-space:nowrap}
+.rv-data-table th.rv-num{text-align:right}
 .rv-data-table td{padding:.4rem .55rem;border-bottom:1px solid var(--bdr);vertical-align:middle}
 .rv-data-table tr:last-child td{border-bottom:none}
 .rv-data-table tr:hover td{background:var(--ltgry)}
@@ -358,7 +361,9 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
               <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
             </div>
-            <div class="ff"><label>Preço venda R$ <span style="font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">(já com frete)</span></label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()">
+              <button type="button" class="pill-toggle" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">Frete incluso</button>
+            </div>
           </div>
 
           <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
@@ -366,7 +371,9 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
               <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores">＋</button>
             </div>
-            <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()">
+              <button type="button" class="pill-toggle" id="rv2-com-logo-btn" onclick="rv2ToggleComLogo()" title="Marca que o produto leva logo — lembra de preencher o clichê/molde nos encargos opcionais">Com logo</button>
+            </div>
           </div>
 
           <div class="collap-h" onclick="toggleCollap(this,'rv2-opt-body')" style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
@@ -377,7 +384,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
               <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
               <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo — já embutido no preço de venda</span></div>
             </div>
-            <div class="ff" style="margin-top:.6rem"><label>Clichê / molde total R$</label><input type="number" class="mono" id="rv2-cliche" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo puro, sem ICMS</span></div>
+            <div class="ff" style="margin-top:.6rem"><label>Clichê / molde / logo total R$</label><input type="number" class="mono" id="rv2-cliche" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo puro, sem ICMS</span></div>
           </div>
 
           <div class="no-print" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.1rem">
@@ -408,7 +415,6 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <div class="card">
         <div class="collap-h open" style="cursor:default">
           <div class="sh" style="margin:0">Cotações salvas</div>
-          <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .7rem" onclick="rvLimparTodasCotacoes()">Limpar todas</button>
         </div>
         <div style="overflow-x:auto"><div id="rv-cotacoes-container"></div></div>
       </div>
@@ -418,7 +424,6 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <div class="card">
         <div class="collap-h open" style="cursor:default">
           <div class="sh" style="margin:0">Pedidos confirmados</div>
-          <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .7rem" onclick="rvLimparTodosPedidos()">Limpar todos</button>
         </div>
         <div style="overflow-x:auto"><div id="rv-pedidos-container"></div></div>
       </div>
@@ -473,11 +478,15 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rvedit-qtd" min="1" step="1"></div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
         <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
-        <div class="ff"><label>Preço venda R$ <span style="font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">(já com frete)</span></label><input type="number" class="mono" id="rvedit-pv" step="0.01" min="0"></div>
+        <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rvedit-pv" step="0.01" min="0">
+          <button type="button" class="pill-toggle" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">Frete incluso</button>
+        </div>
       </div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
         <div class="ff"><label>Fornecedor</label><select id="rvedit-fornecedor"></select></div>
-        <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rvedit-preco" step="0.01" min="0"></div>
+        <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rvedit-preco" step="0.01" min="0">
+          <button type="button" class="pill-toggle" id="rvedit-com-logo-btn" onclick="rvEditToggleComLogo()">Com logo</button>
+        </div>
       </div>
       <div class="sep-lbl">Mercadoria</div>
       <div class="toggle-grp" id="rvedit-tipo-toggle">
@@ -492,7 +501,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
           <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rvedit-comissao" step="0.1" min="0"></div>
           <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rvedit-frete" step="0.01" min="0"></div>
         </div>
-        <div class="ff" style="margin-top:.6rem"><label>Clichê / molde total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
+        <div class="ff" style="margin-top:.6rem"><label>Clichê / molde / logo total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
       </div>
       <div id="rvedit-preview" style="margin-top:.8rem"></div>
       <div id="rvedit-detalhe" style="margin-top:.6rem"></div>
@@ -1739,30 +1748,46 @@ function rv2LoadEmpresaLocal(){
   try{RV_EMPRESA=JSON.parse(localStorage.getItem('rv2_empresa')||'')||RV_EMPRESA;}catch(e){}
 }
 
-function rv2CalcCore(cliente,fornecedor,tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche){
+function rv2CalcCore(cliente,fornecedor,tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
   if(!cliente||!fornecedor||qtd<=0||pv<=0)return null;
   const fedPct=RV_EMPRESA.fedPct;
   const regFor=REGIAO_MAP[fornecedor.estado]||'SE_S';
   const regCli=REGIAO_MAP[cliente.estado]||'SE_S';
   const icmsCredPct=TAB_CREDITO[tipo][fornecedor.regime][regFor];
   const icmsDebPct=TAB_DEBITO[tipo][regCli];
+
+  // ── DRE ──
+  // Frete incluso: o valor do frete passa a fazer parte da Receita de Venda
+  // (e por consequência entra na base de ICMS débito, comissão e federais) —
+  // em vez de ser descontado como Despesa de Venda.
+  const receita=pv*qtd+(freteIncluso?freteTotal:0);   // Receita de Venda
   const custoCompra=preco*qtd;
-  const credICMS=custoCompra*(icmsCredPct/100);
-  const custoTotal=custoCompra+cliche+freteTotal;  // frete é custo (já embutido no PV) — igual clichê, sem crédito de ICMS
-  const custoLiquido=custoTotal-credICMS;
-  const vendaProduto=pv*qtd;
-  const baseICMSvenda=vendaProduto;                // sem frete — o PV já é o preço final cobrado do cliente
-  const debICMS=baseICMSvenda*(icmsDebPct/100);
-  const comissao=vendaProduto*(comissaoPct/100);
-  const fed=vendaProduto*(fedPct/100);
-  const vendaTotal=vendaProduto;                   // receita = só o produto
-  const lucroTotal=vendaTotal-custoLiquido-debICMS-comissao-fed;
-  const margem=vendaTotal>0?lucroTotal/vendaTotal:0;
-  const saldoICMS=debICMS-credICMS;
+  const CMV=custoCompra+cliche;                      // CMV = despesa de compra + clichê/molde/logo
+  const lucroBruto=receita-CMV;
+
+  const comissao=receita*(comissaoPct/100);
+  const fed=receita*(fedPct/100);
+  const freteDespesa=freteIncluso?0:freteTotal;
+  const despesasVenda=comissao+freteDespesa+fed;      // comissão + frete (se não incluso) + PIS/COFINS/IRPJ/CSLL
+  const margemLiquida=lucroBruto-despesasVenda;        // ← RESULTADO (resumo)
+  const pctMargemLiquida=receita>0?margemLiquida/receita:0;
+
+  // ── Apuração de ICMS (não é operação — é acerto de imposto, à parte do DRE) ──
+  const credICMS=custoCompra*(icmsCredPct/100);        // crédito da compra
+  const debICMS=receita*(icmsDebPct/100);              // débito da venda
+  const apuracaoICMS=credICMS-debICMS;                 // negativo = a recolher; positivo = a recuperar
+
+  const margemFinal=margemLiquida+apuracaoICMS;         // ← só no detalhamento
+  const pctMargemFinal=receita>0?margemFinal/receita:0;
+
   const freteUnit=qtd>0?freteTotal/qtd:0;
   return{cliente,fornecedor,tipo,qtd,preco,pv,regFor,regCli,icmsCredPct,icmsDebPct,fedPct,
-    comissaoPct,freteTotal,freteUnit,cliche,custoCompra,custoTotal,vendaProduto,baseICMSvenda,vendaTotal,
-    credICMS,debICMS,comissao,fed,custoLiquido,lucroTotal,margem,saldoICMS};
+    comissaoPct,freteTotal,freteUnit,freteIncluso:!!freteIncluso,freteDespesa,comLogo:!!comLogo,cliche,
+    receita,custoCompra,CMV,lucroBruto,comissao,fed,despesasVenda,margemLiquida,pctMargemLiquida,
+    credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
+    // nomes antigos mantidos como alias — cotações/pedidos já salvos e o histórico continuam lendo a "margem final" (bottom line real)
+    vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
+    lucroTotal:margemFinal,margem:pctMargemFinal,saldoICMS:debICMS-credICMS};
 }
 function rv2Calc(){
   const cliente=rv2GetCliente(),fornecedor=rv2GetFornecedor();
@@ -1772,7 +1797,7 @@ function rv2Calc(){
   const comissaoPct=parseFloat(rvEl('rv2-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rv2-frete').value)||0;
   const cliche=parseFloat(rvEl('rv2-cliche').value)||0;
-  const r=rv2CalcCore(cliente,fornecedor,rv2Tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche);
+  const r=rv2CalcCore(cliente,fornecedor,rv2Tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche,rv2FreteIncluso,rv2ComLogo);
   if(!r){
     rvEl('rv2-resumo').innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';
     rvEl('rv2-detalhe').innerHTML='';
@@ -1781,17 +1806,37 @@ function rv2Calc(){
   rv2Render(r);
   return r;
 }
+let rv2FreteIncluso=false,rv2ComLogo=false;
+function rv2ToggleFreteIncluso(){
+  rv2FreteIncluso=!rv2FreteIncluso;
+  rvEl('rv2-frete-incluso-btn').classList.toggle('active',rv2FreteIncluso);
+  rv2Calc();
+}
+function rv2ToggleComLogo(){
+  rv2ComLogo=!rv2ComLogo;
+  rvEl('rv2-com-logo-btn').classList.toggle('active',rv2ComLogo);
+  if(rv2ComLogo){
+    // lembra de preencher o clichê/molde/logo — abre os encargos opcionais se estiverem fechados
+    const body=document.getElementById('rv2-opt-body');
+    if(body&&!body.classList.contains('open')){
+      const h=body.previousElementSibling;
+      if(h)toggleCollap(h,'rv2-opt-body');
+    }
+    setTimeout(()=>rvEl('rv2-cliche')?.focus(),150);
+  }
+  rv2Calc();
+}
 function rv2Render(r){
   rvEl('rv2-resumo').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
       <div class="card" style="background:var(--ltgrn);padding:.7rem .8rem;border:none">
-        <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Lucro total</div>
-        <div style="font-size:1.3rem;font-weight:700;color:var(--green)">${rvBrl(r.lucroTotal)}</div>
-        <div style="font-size:.68rem;color:var(--green)">${(r.margem*100).toFixed(1).replace('.',',')}% de margem</div>
+        <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Margem líquida</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--green)">${rvBrl(r.margemLiquida)}</div>
+        <div style="font-size:.68rem;color:var(--green)">${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}% · antes da apuração de ICMS</div>
       </div>
       <div class="card" style="background:var(--ltblue);padding:.7rem .8rem;border:none">
         <div style="font-size:.6rem;color:var(--blue);font-weight:700;text-transform:uppercase">Venda total</div>
-        <div style="font-size:1.3rem;font-weight:700;color:var(--blue)">${rvBrl(r.vendaTotal)}</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--blue)">${rvBrl(r.receita)}</div>
         <div style="font-size:.68rem;color:var(--blue)">${r.qtd.toLocaleString('pt-BR')} un · ${rvBrl(r.pv)}/un${r.freteTotal>0?' + frete':''}</div>
       </div>
     </div>
@@ -1802,26 +1847,32 @@ function rv2Render(r){
   if(rv2DetalheOpen)rv2RenderDetalhe(r);
 }
 function rv2RenderDetalhe(r,targetId){
-  const custoExtraLinhas=(r.cliche>0||r.freteTotal>0)?`
-        ${r.cliche>0?`<tr><td>(+) Clichê / molde</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:''}
-        ${r.freteTotal>0?`<tr><td>(+) Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:''}`:'';
-  const comissaoLinha=r.comissaoPct>0?`<tr><td>(−) Comissão (${r.comissaoPct}% s/ venda produto)</td><td class="num negv">−${rvBrl(r.comissao)}</td></tr>`:'';
+  const cmvClicheLinha=r.cliche>0?`<tr><td>(+) Clichê / molde / logo</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:'';
+  const freteLinha=r.freteTotal>0?`<tr><td>Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:'';
+  const comissaoLinha=r.comissaoPct>0?`<tr><td>Comissão (${r.comissaoPct}% s/ receita)</td><td class="num">${rvBrl(r.comissao)}</td></tr>`:'';
   rvEl(targetId||'rv2-detalhe').innerHTML=`
     <table class="res-table">
       <tbody>
-        <tr class="rv-sec"><td colspan="2">Custo</td></tr>
+        <tr class="rv-sec"><td colspan="2">Receita de Venda</td></tr>
+        <tr><td>Venda produto (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(r.receita)}</td></tr>
+
+        <tr class="rv-sec"><td colspan="2">(−) CMV</td></tr>
         <tr><td>Compra (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.preco)})</td><td class="num">${rvBrl(r.custoCompra)}</td></tr>
-        <tr><td>(−) Crédito ICMS (${r.icmsCredPct}%)</td><td class="num negv">−${rvBrl(r.credICMS)}</td></tr>
-        ${custoExtraLinhas}
-        <tr class="rv-sub"><td>= Custo líquido</td><td class="num">${rvBrl(r.custoLiquido)}</td></tr>
-        <tr class="rv-sec"><td colspan="2">Venda</td></tr>
-        <tr><td>Venda produto (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(r.vendaProduto)}</td></tr>
-        <tr><td>(−) ICMS débito (${r.icmsDebPct}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
-        <tr><td>(−) PIS/COFINS/IRPJ/CSLL (${r.fedPct}%)</td><td class="num negv">−${rvBrl(r.fed)}</td></tr>
+        ${cmvClicheLinha}
+        <tr class="rv-sub"><td>= Lucro Bruto</td><td class="num">${rvBrl(r.lucroBruto)}</td></tr>
+
+        <tr class="rv-sec"><td colspan="2">(−) Despesas de Venda</td></tr>
         ${comissaoLinha}
-        <tr class="rv-tot"><td>= Lucro total</td><td class="num">${rvBrl(r.lucroTotal)} (${(r.margem*100).toFixed(1).replace('.',',')}%)</td></tr>
-        <tr class="rv-sec"><td colspan="2">Caixa (referência)</td></tr>
-        <tr><td>Saldo ICMS do período (débito − crédito)</td><td class="num">${rvBrl(r.saldoICMS)}</td></tr>
+        ${freteLinha}
+        <tr><td>PIS/COFINS/IRPJ/CSLL (${r.fedPct}% s/ receita)</td><td class="num">${rvBrl(r.fed)}</td></tr>
+        <tr class="rv-tot"><td>= MARGEM LÍQUIDA</td><td class="num">${rvBrl(r.margemLiquida)} (${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</td></tr>
+
+        <tr class="rv-sec"><td colspan="2">Apuração de ICMS <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">(acerto de imposto, não é despesa)</span></td></tr>
+        <tr><td>(+) Crédito da compra (${r.icmsCredPct}%)</td><td class="num">${rvBrl(r.credICMS)}</td></tr>
+        <tr><td>(−) Débito da venda (${r.icmsDebPct}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
+        <tr class="rv-sub"><td>= Saldo ICMS (${r.apuracaoICMS>=0?'a recuperar':'a recolher'})</td><td class="num">${rvBrl(r.apuracaoICMS)}</td></tr>
+
+        <tr class="rv-tot"><td>= MARGEM FINAL</td><td class="num">${rvBrl(r.margemFinal)} (${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</td></tr>
       </tbody>
     </table>`;
 }
@@ -1915,7 +1966,7 @@ function rv2RenderHist(){
     ...rvLoadPedidos().filter(p=>p.cliente===cliente.nome).map(p=>({...p,origem:'Pedido'}))
   ].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   if(!registros.length){cont.innerHTML='<p class="hint">Nenhuma compra registrada ainda pra esse cliente.</p>';return;}
-  let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Origem</th><th>Qtd</th><th>Preço venda</th><th>Lucro %</th><th>Lucro</th></tr></thead><tbody>';
+  let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Origem</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Lucro %</th><th class="rv-num">Lucro</th></tr></thead><tbody>';
   registros.forEach(r=>{
     html+=`<tr>
       <td>${esc(r.data||'—')}</td>
@@ -1937,7 +1988,7 @@ function rv2SalvarCotacao(){
   const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
-    freteTotal:r.freteTotal,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem};
   const lista=rvLoadCotacoes();lista.unshift(cotacao);rvSaveCotacoes(lista);
   rvSyncPush();
@@ -1951,7 +2002,7 @@ function rv2CriarPedido(){
   const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
-    freteTotal:r.freteTotal,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem,status,obs:''};
   const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
   rvSyncPush();
@@ -1962,10 +2013,20 @@ function rv2CriarPedido(){
 
 /* ── EDITAR COTAÇÃO/PEDIDO JÁ SALVOS ── */
 let rvEditCtx=null; // {kind:'cotacao'|'pedido', id}
-let rvEditTipo='Nacional';
+let rvEditTipo='Nacional',rvEditFreteIncluso=false,rvEditComLogo=false;
 function rvEditSetTipo(t){
   rvEditTipo=t;
   document.querySelectorAll('#rvedit-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
+  rv2EditPreview();
+}
+function rvEditToggleFreteIncluso(){
+  rvEditFreteIncluso=!rvEditFreteIncluso;
+  rvEl('rvedit-frete-incluso-btn').classList.toggle('active',rvEditFreteIncluso);
+  rv2EditPreview();
+}
+function rvEditToggleComLogo(){
+  rvEditComLogo=!rvEditComLogo;
+  rvEl('rvedit-com-logo-btn').classList.toggle('active',rvEditComLogo);
   rv2EditPreview();
 }
 function rv2OpenEdit(kind,id){
@@ -1984,6 +2045,10 @@ function rv2OpenEdit(kind,id){
   rvEl('rvedit-comissao').value=rec.comissaoPct||0;
   rvEl('rvedit-frete').value=rec.freteTotal||0;
   rvEl('rvedit-cliche').value=rec.cliche||0;
+  rvEditFreteIncluso=!!rec.freteIncluso;
+  rvEl('rvedit-frete-incluso-btn').classList.toggle('active',rvEditFreteIncluso);
+  rvEditComLogo=!!rec.comLogo;
+  rvEl('rvedit-com-logo-btn').classList.toggle('active',rvEditComLogo);
   rvEditSetTipo(rec.tipo||'Nacional');
   document.getElementById('ovl-rvedit').classList.add('open');
 }
@@ -1996,12 +2061,12 @@ function rv2EditPreview(){
   const comissaoPct=parseFloat(rvEl('rvedit-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rvedit-frete').value)||0;
   const cliche=parseFloat(rvEl('rvedit-cliche').value)||0;
-  const r=rv2CalcCore(cliente,fornecedor,rvEditTipo,qtd,preco,pv,comissaoPct,freteTotal,cliche);
+  const r=rv2CalcCore(cliente,fornecedor,rvEditTipo,qtd,preco,pv,comissaoPct,freteTotal,cliche,rvEditFreteIncluso,rvEditComLogo);
   const prev=rvEl('rvedit-preview');
   if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';rvEl('rvedit-detalhe').innerHTML='';return null;}
   prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
-    <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Lucro recalculado</div>
-    <div style="font-size:1.1rem;font-weight:700;color:var(--green)">${rvBrl(r.lucroTotal)} <span style="font-size:.7rem">(${(r.margem*100).toFixed(1).replace('.',',')}%)</span></div>
+    <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Margem líquida recalculada</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--green)">${rvBrl(r.margemLiquida)} <span style="font-size:.7rem">(${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</span></div>
   </div>`;
   rv2RenderDetalhe(r,'rvedit-detalhe');
   return r;
@@ -2016,8 +2081,8 @@ function rv2SaveEdit(){
   Object.assign(rec,{
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
-    freteTotal:r.freteTotal,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
-    lucroTotal:r.lucroTotal,margem:r.margem
+    freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
+    custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem
   });
   if(kind==='cotacao'){rvSaveCotacoes(lista);rvRenderCotacoes();}
   else{rvSavePedidos(lista);rvRenderPedidos();}
@@ -2037,7 +2102,7 @@ function rvRenderCotacoes(){
   const cont=rvEl('rv-cotacoes-container');
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr>
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th>Qtd</th><th>Preço venda</th><th>Margem</th><th>Lucro</th><th>Ações</th>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
     html+=`<tr onclick="rv2OpenEdit('cotacao',${c.id})" style="cursor:pointer" title="Clique pra editar">
@@ -2089,8 +2154,8 @@ function rvRenderPedidos(){
     return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
   }
   let html=`<table class="rv-data-table"><thead><tr>
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Qtd</th>
-    <th>Venda total</th><th>Margem</th><th>Lucro</th><th>Status</th><th>Obs</th><th></th>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Status</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     const checks=RV_STATUS_STEPS.map(s=>
