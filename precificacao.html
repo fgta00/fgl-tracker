@@ -239,6 +239,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
   <span id="save-status"></span>
   <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba Revenda pra desbloquear)" style="cursor:default">☁</span>
   <button class="hbtn" id="auth-status" onclick="onAuthButtonClick()">👤 Minha conta</button>
+  <button class="hbtn" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres">🔐 Segurança</button>
   <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
   <button class="hbtn" onclick="saveState()">↓ Salvar</button>
   <button class="dm-toggle" id="dm" onclick="toggleDark()">🌙</button>
@@ -358,14 +359,16 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar cliente">＋</button>
+              <button class="btn btn-s" onclick="rv2OpenCadList('cliente')" title="Editar/apagar clientes cadastrados">🗂</button>
             </div>
-            <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
+            <div class="ff"><label>Preço venda R$ <span style="font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">(já com frete)</span></label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
 
           <div class="grid" style="grid-template-columns:2.3fr 1fr;gap:.6rem;margin-top:.6rem;align-items:end">
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
               <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar fornecedor">＋</button>
+              <button class="btn btn-s" onclick="rv2OpenCadList('fornecedor')" title="Editar/apagar fornecedores cadastrados">🗂</button>
             </div>
             <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()"></div>
           </div>
@@ -431,7 +434,7 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 <!-- CADASTRO RÁPIDO — CLIENTE / FORNECEDOR -->
 <div class="ovl" id="ovl-rvcad" onclick="if(event.target===this)closeM('rvcad')">
   <div class="modal" style="max-width:360px">
-    <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="modal-x" onclick="closeM('rvcad')">✕</button></div>
+    <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="mcls" onclick="closeM('rvcad')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Nome</label><input type="text" id="rvcad-nome" placeholder="Ex: Zona Sul"></div>
       <div class="ff" style="margin-top:.5rem"><label>Estado (UF)</label>
@@ -452,13 +455,84 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 <!-- MINHA EMPRESA (AV) — regime e alíquota federal -->
 <div class="ovl" id="ovl-rvempresa" onclick="if(event.target===this)closeM('rvempresa')">
   <div class="modal" style="max-width:360px">
-    <div class="modal-h"><span>Minha Empresa — Ânima Verde</span><button class="modal-x" onclick="closeM('rvempresa')">✕</button></div>
+    <div class="modal-h"><span>Minha Empresa — Ânima Verde</span><button class="mcls" onclick="closeM('rvempresa')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Regime fiscal</label>
         <div style="padding:.5rem .7rem;background:var(--ltgrn);color:var(--green);border-radius:7px;font-size:.8rem;font-weight:600">Lucro Presumido (RJ)</div>
       </div>
       <div class="ff" style="margin-top:.6rem"><label>PIS/COFINS/IRPJ/CSLL %</label><input type="number" class="mono" id="rvempresa-fedpct" value="5.93" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">alíquota federal efetiva sobre a venda</span></div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="closeM('rvempresa');rv2SaveEmpresa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDITAR COTAÇÃO/PEDIDO SALVO -->
+<div class="ovl" id="ovl-rvedit" onclick="if(event.target===this)closeM('rvedit')">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-h"><span id="rvedit-title">Editar</span><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
+    <div class="modal-b">
+      <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rvedit-qtd" min="1" step="1"></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+        <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
+        <div class="ff"><label>Preço venda R$ <span style="font-weight:400;color:var(--ink4);text-transform:none;letter-spacing:0">(já com frete)</span></label><input type="number" class="mono" id="rvedit-pv" step="0.01" min="0"></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+        <div class="ff"><label>Fornecedor</label><select id="rvedit-fornecedor"></select></div>
+        <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rvedit-preco" step="0.01" min="0"></div>
+      </div>
+      <div class="sep-lbl">Mercadoria</div>
+      <div class="toggle-grp" id="rvedit-tipo-toggle">
+        <button class="active" type="button" onclick="rvEditSetTipo('Nacional')">Nacional</button>
+        <button type="button" onclick="rvEditSetTipo('Importada')">Importada</button>
+      </div>
+      <div class="collap-h" onclick="toggleCollap(this,'rvedit-opt-body')" style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
+        <div class="sh" style="margin:0;font-size:.62rem">+ Encargos opcionais</div><span class="chev">▶</span>
+      </div>
+      <div class="collap-body" id="rvedit-opt-body">
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+          <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rvedit-comissao" step="0.1" min="0"></div>
+          <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rvedit-frete" step="0.01" min="0"></div>
+        </div>
+        <div class="ff" style="margin-top:.6rem"><label>Clichê / molde total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
+      </div>
+      <div id="rvedit-preview" style="margin-top:.8rem"></div>
+      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveEdit()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- GERENCIAR CADASTROS — CLIENTES / FORNECEDORES (editar/apagar) -->
+<div class="ovl" id="ovl-rvcadlist" onclick="if(event.target===this)closeM('rvcadlist')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h"><span id="rvcadlist-title">Clientes cadastrados</span><button class="mcls" onclick="closeM('rvcadlist')">✕</button></div>
+    <div class="modal-b">
+      <div id="rvcadlist-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEGURANÇA — trocar senha da conta e dos cofres -->
+<div class="ovl" id="ovl-security" onclick="if(event.target===this)closeM('security')">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-h"><span>Segurança</span><button class="mcls" onclick="closeM('security')">✕</button></div>
+    <div class="modal-b">
+      <div class="fsep">Senha da conta</div>
+      <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem">É a senha do seu login (e-mail + senha). Não é a senha de nenhum cofre.</p>
+      <input type="password" id="sec-acc-pw1" placeholder="Nova senha da conta" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
+      <input type="password" id="sec-acc-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
+      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeAccountPw()">Trocar senha da conta</button>
+
+      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — Importação</div>
+      <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem" id="sec-import-hint">Precisa estar com a Importação desbloqueada nesta sessão pra poder trocar.</p>
+      <input type="password" id="sec-import-pw1" placeholder="Nova senha do cofre" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
+      <input type="password" id="sec-import-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
+      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeImportVaultPw()">Trocar senha do cofre (Importação)</button>
+
+      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — Revenda compartilhada</div>
+      <p style="font-size:.68rem;color:var(--red);margin:.3rem 0 .5rem" id="sec-rv-hint">⚠ Afeta todo mundo com acesso (você e sua gerente). Combine antes de trocar — quem não souber a senha nova fica sem acesso até você avisar. Precisa estar conectado nesta sessão pra poder trocar.</p>
+      <input type="password" id="sec-rv-pw1" placeholder="Nova senha do cofre" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
+      <input type="password" id="sec-rv-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
+      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (Revenda)</button>
     </div>
   </div>
 </div>
@@ -1181,6 +1255,65 @@ async function saveState(){
     }else toastSave('Salvo local — falha ao sincronizar');
   },1200);
 }
+
+/* ── SEGURANÇA — trocar senha da conta e dos cofres ── */
+function openSecurityModal(){
+  rvEl('sec-import-hint').textContent=importPass
+    ?'Importação desbloqueada nesta sessão — pode trocar a senha do cofre.'
+    :'Precisa estar com a Importação desbloqueada nesta sessão pra poder trocar (clique na aba Importação e digite a senha atual primeiro).';
+  rvEl('sec-import-hint').style.color=importPass?'var(--green)':'var(--ink3)';
+  rvEl('sec-rv-hint').innerHTML=rvSyncPass
+    ?'⚠ Afeta todo mundo com acesso (você e sua gerente). Combine antes de trocar — quem não souber a senha nova fica sem acesso até você avisar.'
+    :'⚠ Precisa estar conectado ao cofre compartilhado nesta sessão pra poder trocar (abra a aba Cotações ou Pedidos e conecte primeiro).';
+  document.getElementById('ovl-security').classList.add('open');
+}
+async function secChangeAccountPw(){
+  const newPw=rvEl('sec-acc-pw1').value,confirmPw=rvEl('sec-acc-pw2').value;
+  if(!authUser){alert('Entre na conta primeiro.');return;}
+  if(!newPw||newPw.length<6){alert('Digite uma senha nova com pelo menos 6 caracteres.');return;}
+  if(newPw!==confirmPw){alert('As duas senhas novas não coincidem.');return;}
+  const{error}=await _supa.auth.updateUser({password:newPw});
+  if(error){alert('Erro ao trocar a senha da conta: '+error.message);return;}
+  rvEl('sec-acc-pw1').value='';rvEl('sec-acc-pw2').value='';
+  toastSave('Senha da conta alterada ✓');
+}
+async function secChangeImportVaultPw(){
+  const newPw=rvEl('sec-import-pw1').value,confirmPw=rvEl('sec-import-pw2').value;
+  if(!importPass){alert('Desbloqueie a Importação primeiro (clique na aba Importação e digite a senha atual do cofre).');return;}
+  if(!newPw||newPw.length<4){alert('Digite uma senha nova com pelo menos 4 caracteres.');return;}
+  if(newPw!==confirmPw){alert('As duas senhas novas não coincidem.');return;}
+  if(!confirm('Trocar a senha do cofre da Importação?\n\nVocê vai precisar dessa senha nova da próxima vez que abrir a Importação.'))return;
+  try{
+    const payload=await encryptJSON(newPw,collectState());
+    const payloadStr=JSON.stringify(payload);
+    const r=await importCloudSave(payloadStr);
+    if(!r.ok){alert('Não deu pra trocar agora — falha ao salvar na nuvem ('+(r.reason||'erro')+'). Tente de novo em instantes.');return;}
+    importPass=newPw;
+    sessionStorage.setItem(SESS_IMPORT_PW,newPw);
+    localStorage.setItem(SAVE_KEY,payloadStr);setLocalTs(SAVE_KEY);
+    rvEl('sec-import-pw1').value='';rvEl('sec-import-pw2').value='';
+    toastSave('Senha do cofre (Importação) alterada ✓');
+  }catch(e){console.warn(e);alert('Erro ao trocar a senha do cofre. Tente de novo.');}
+}
+async function secChangeRvVaultPw(){
+  const newPw=rvEl('sec-rv-pw1').value,confirmPw=rvEl('sec-rv-pw2').value;
+  if(!rvSyncPass){alert('Conecte no cofre compartilhado da Revenda primeiro (abra Cotações ou Pedidos).');return;}
+  if(!newPw||newPw.length<4){alert('Digite uma senha nova com pelo menos 4 caracteres.');return;}
+  if(newPw!==confirmPw){alert('As duas senhas novas não coincidem.');return;}
+  if(!confirm('Trocar a senha do cofre COMPARTILHADO da Revenda?\n\nTodo mundo com acesso (você e sua gerente) vai precisar da senha NOVA a partir de agora. Combine com ela antes — senão ela fica sem conseguir entrar até você avisar.'))return;
+  try{
+    const payload=await encryptJSON(newPw,rvCollectSyncData());
+    const payloadStr=JSON.stringify(payload);
+    const r=await rvCloudSave(payloadStr);
+    if(!r.ok){alert('Não deu pra trocar agora — falha ao salvar na nuvem ('+(r.reason||'erro')+'). Tente de novo em instantes.');return;}
+    rvSyncPass=newPw;
+    sessionStorage.setItem(SESS_RV_PW,newPw);
+    localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
+    rvEl('sec-rv-pw1').value='';rvEl('sec-rv-pw2').value='';
+    toastSave('Senha do cofre (Revenda) alterada ✓ — avise quem mais tem acesso');
+  }catch(e){console.warn(e);alert('Erro ao trocar a senha do cofre. Tente de novo.');}
+}
+
 async function loadState(silent){
   if(!importPass){if(!silent)toastSave('Desbloqueie a Importação primeiro');return;}
   let raw=localStorage.getItem(SAVE_KEY),fromCloud=false;
@@ -1296,11 +1429,26 @@ let _rvSyncTimer=null;
 let _rvRevision=0;
 
 function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA};}
+function rvMergeById(localList,cloudList){
+  // Une por id em vez de sobrescrever — protege dados salvos localmente
+  // antes de nunca ter sincronizado (cenário: salvou uma cotação sem
+  // estar conectado ainda, depois conectou e a nuvem "ganhava" por engano)
+  const map=new Map();
+  (cloudList||[]).forEach(x=>map.set(x.id,x));
+  (localList||[]).forEach(x=>map.set(x.id,x)); // local prevalece em empate de id (edição feita aqui é a mais recente)
+  return[...map.values()].sort((a,b)=>b.id-a.id);
+}
+function rvMergeByKey(localList,cloudList,keyFn){
+  const map=new Map();
+  (cloudList||[]).forEach(x=>map.set(keyFn(x),x));
+  (localList||[]).forEach(x=>map.set(keyFn(x),x)); // local prevalece em empate de chave
+  return[...map.values()];
+}
 function rvApplySyncData(data){
-  if(Array.isArray(data.cotacoes))rvSaveCotacoes(data.cotacoes);
-  if(Array.isArray(data.pedidos))rvSavePedidos(data.pedidos);
-  if(Array.isArray(data.clientes2))RV_CLIENTES2=data.clientes2;
-  if(Array.isArray(data.fornecedores2))RV_FORNECEDORES2=data.fornecedores2;
+  if(Array.isArray(data.cotacoes))rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes));
+  if(Array.isArray(data.pedidos))rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos));
+  if(Array.isArray(data.clientes2))RV_CLIENTES2=rvMergeByKey(RV_CLIENTES2,data.clientes2,c=>(c.nome||'').toLowerCase().trim());
+  if(Array.isArray(data.fornecedores2))RV_FORNECEDORES2=rvMergeByKey(RV_FORNECEDORES2,data.fornecedores2,f=>(f.nome||'').toLowerCase().trim());
   if(data.empresa&&typeof data.empresa.fedPct==='number'){
     RV_EMPRESA=data.empresa;
     localStorage.setItem('rv2_empresa',JSON.stringify(RV_EMPRESA));
@@ -1422,10 +1570,35 @@ async function rvSyncPush(){
   clearTimeout(_rvSyncTimer);
   _rvSyncTimer=setTimeout(async()=>{
     const r=await rvCloudSave(payloadStr);
-    if(r.ok)updateRvSyncStatus();
-    else if(r.reason==='conflict')updateRvSyncStatus('⚠ Conflito — clique "Conectar" de novo pra atualizar');
-    else updateRvSyncStatus('⚠ Cotações/Pedidos: só local (falha ao sincronizar)');
+    if(r.ok){updateRvSyncStatus();return;}
+    if(r.reason==='conflict'){
+      // alguém salvou por cima entre nossa leitura e nossa escrita — busca o mais atual,
+      // MESCLA com o que temos aqui (sem apagar nada de ninguém) e tenta de novo sozinho
+      const ok=await rvRecoverAndRetry();
+      if(ok){updateRvSyncStatus();toastSave('Sincronizado ✓ (havia uma versão mais nova, mesclado automaticamente)');}
+      else{updateRvSyncStatus('⚠ Não sincronizou — dado só local');alert('⚠ Não deu pra sincronizar com a nuvem agora.\n\nSeus dados estão salvos aqui neste navegador, mas ainda não chegaram no cofre compartilhado — quem estiver do outro lado não vai ver essa mudança ainda.\n\nTente de novo em alguns instantes (recarregue a página se persistir).');}
+    }else{
+      updateRvSyncStatus('⚠ Cotações/Pedidos: só local (falha ao sincronizar)');
+      alert('⚠ Não deu pra sincronizar com a nuvem agora.\n\nSeus dados estão salvos aqui neste navegador, mas ainda não chegaram no cofre compartilhado — quem estiver do outro lado não vai ver essa mudança ainda.\n\nTente de novo em alguns instantes (recarregue a página se persistir).');
+    }
   },1200);
+}
+async function rvRecoverAndRetry(){
+  try{
+    const cloud=await rvCloudGet();
+    if(!cloud||!cloud.blob)return false;
+    const data=await decryptJSON(rvSyncPass,JSON.parse(cloud.blob));
+    // mescla: cotações/pedidos por id (não perde nada de ninguém); cadastros/empresa ficam com a versão local (é a que acabamos de editar)
+    rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes||[]));
+    rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos||[]));
+    _rvRevision=cloud.revision||_rvRevision;
+    const payload=await encryptJSON(rvSyncPass,rvCollectSyncData());
+    const payloadStr=JSON.stringify(payload);
+    localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
+    const r2=await rvCloudSave(payloadStr);
+    if(r2.ok){rvRenderCotacoes();rvRenderPedidos();rv2RenderHist();return true;}
+    return false;
+  }catch(e){console.warn('rvRecoverAndRetry falhou:',e);return false;}
 }
 async function rvAddMember(){
   if(!authUser){toastSave('Entre com sua conta primeiro');return;}
@@ -1484,11 +1657,27 @@ const RV_STATUS_STEPS=[
   {key:'recebido',label:'Recebido cliente'}
 ];
 
-/* ── ARMAZENAMENTO LOCAL (cotações/pedidos) ── */
+/* ── ARMAZENAMENTO LOCAL (cotações/pedidos) ──
+   rvSaveCotacoes/rvSavePedidos NUNCA deixam a lista encolher sozinhas —
+   se algo tentar gravar uma lista menor que a que já existe (sync antigo,
+   cache velho, bug futuro, o que for), mescla em vez de sobrescrever.
+   Só uma exclusão explícita (forceReplace=true) pode reduzir a lista. */
 function rvLoadCotacoes(){try{return JSON.parse(localStorage.getItem('av_cotacoes')||'[]');}catch(e){return[];}}
-function rvSaveCotacoes(d){localStorage.setItem('av_cotacoes',JSON.stringify(d));}
+function rvSaveCotacoes(d,forceReplace){
+  if(!forceReplace){
+    const cur=rvLoadCotacoes();
+    if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}
+  }
+  localStorage.setItem('av_cotacoes',JSON.stringify(d));
+}
 function rvLoadPedidos(){try{return JSON.parse(localStorage.getItem('av_pedidos')||'[]');}catch(e){return[];}}
-function rvSavePedidos(d){localStorage.setItem('av_pedidos',JSON.stringify(d));}
+function rvSavePedidos(d,forceReplace){
+  if(!forceReplace){
+    const cur=rvLoadPedidos();
+    if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}
+  }
+  localStorage.setItem('av_pedidos',JSON.stringify(d));
+}
 
 /* ── SUB-ABAS DA REVENDA ── */
 function rvShowTab(id){
@@ -1554,6 +1743,31 @@ function rv2LoadEmpresaLocal(){
   try{RV_EMPRESA=JSON.parse(localStorage.getItem('rv2_empresa')||'')||RV_EMPRESA;}catch(e){}
 }
 
+function rv2CalcCore(cliente,fornecedor,tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche){
+  if(!cliente||!fornecedor||qtd<=0||pv<=0)return null;
+  const fedPct=RV_EMPRESA.fedPct;
+  const regFor=REGIAO_MAP[fornecedor.estado]||'SE_S';
+  const regCli=REGIAO_MAP[cliente.estado]||'SE_S';
+  const icmsCredPct=TAB_CREDITO[tipo][fornecedor.regime][regFor];
+  const icmsDebPct=TAB_DEBITO[tipo][regCli];
+  const custoCompra=preco*qtd;
+  const credICMS=custoCompra*(icmsCredPct/100);
+  const custoTotal=custoCompra+cliche+freteTotal;  // frete é custo (já embutido no PV) — igual clichê, sem crédito de ICMS
+  const custoLiquido=custoTotal-credICMS;
+  const vendaProduto=pv*qtd;
+  const baseICMSvenda=vendaProduto;                // sem frete — o PV já é o preço final cobrado do cliente
+  const debICMS=baseICMSvenda*(icmsDebPct/100);
+  const comissao=vendaProduto*(comissaoPct/100);
+  const fed=vendaProduto*(fedPct/100);
+  const vendaTotal=vendaProduto;                   // receita = só o produto
+  const lucroTotal=vendaTotal-custoLiquido-debICMS-comissao-fed;
+  const margem=vendaTotal>0?lucroTotal/vendaTotal:0;
+  const saldoICMS=debICMS-credICMS;
+  const freteUnit=qtd>0?freteTotal/qtd:0;
+  return{cliente,fornecedor,tipo,qtd,preco,pv,regFor,regCli,icmsCredPct,icmsDebPct,fedPct,
+    comissaoPct,freteTotal,freteUnit,cliche,custoCompra,custoTotal,vendaProduto,baseICMSvenda,vendaTotal,
+    credICMS,debICMS,comissao,fed,custoLiquido,lucroTotal,margem,saldoICMS};
+}
 function rv2Calc(){
   const cliente=rv2GetCliente(),fornecedor=rv2GetFornecedor();
   const qtd=parseFloat(rvEl('rv2-qtd').value)||0;
@@ -1562,37 +1776,12 @@ function rv2Calc(){
   const comissaoPct=parseFloat(rvEl('rv2-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rv2-frete').value)||0;
   const cliche=parseFloat(rvEl('rv2-cliche').value)||0;
-  const fedPct=RV_EMPRESA.fedPct;
-  if(!cliente||!fornecedor||qtd<=0||pv<=0){
+  const r=rv2CalcCore(cliente,fornecedor,rv2Tipo,qtd,preco,pv,comissaoPct,freteTotal,cliche);
+  if(!r){
     rvEl('rv2-resumo').innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';
     rvEl('rv2-detalhe').innerHTML='';
     return null;
   }
-  const regFor=REGIAO_MAP[fornecedor.estado]||'SE_S';
-  const regCli=REGIAO_MAP[cliente.estado]||'SE_S';
-  const icmsCredPct=TAB_CREDITO[rv2Tipo][fornecedor.regime][regFor];
-  const icmsDebPct=TAB_DEBITO[rv2Tipo][regCli];
-
-  const custoCompra=preco*qtd;
-  const credICMS=custoCompra*(icmsCredPct/100);
-  const custoTotal=custoCompra+cliche+freteTotal;  // frete é custo (já embutido no PV) — igual clichê, sem crédito de ICMS
-  const custoLiquido=custoTotal-credICMS;
-
-  const vendaProduto=pv*qtd;
-  const baseICMSvenda=vendaProduto;                // sem frete — o PV já é o preço final cobrado do cliente
-  const debICMS=baseICMSvenda*(icmsDebPct/100);
-  const comissao=vendaProduto*(comissaoPct/100);
-  const fed=vendaProduto*(fedPct/100);
-  const vendaTotal=vendaProduto;                   // receita = só o produto
-
-  const lucroTotal=vendaTotal-custoLiquido-debICMS-comissao-fed;
-  const margem=vendaTotal>0?lucroTotal/vendaTotal:0;
-  const saldoICMS=debICMS-credICMS;
-  const freteUnit=qtd>0?freteTotal/qtd:0;
-
-  const r={cliente,fornecedor,tipo:rv2Tipo,qtd,preco,pv,regFor,regCli,icmsCredPct,icmsDebPct,fedPct,
-    comissaoPct,freteTotal,freteUnit,cliche,custoCompra,custoTotal,vendaProduto,baseICMSvenda,vendaTotal,
-    credICMS,debICMS,comissao,fed,custoLiquido,lucroTotal,margem,saldoICMS};
   rv2Render(r);
   return r;
 }
@@ -1682,6 +1871,50 @@ function rv2SaveCad(){
   toastSave('Cadastrado ✓');
 }
 
+/* ── GERENCIAR CADASTROS (editar/apagar cliente/fornecedor já salvos) ── */
+let rvCadListTipo='cliente';
+function rv2OpenCadList(tipo){
+  rvCadListTipo=tipo;
+  rvEl('rvcadlist-title').textContent=tipo==='cliente'?'Clientes cadastrados':'Fornecedores cadastrados';
+  rv2RenderCadList();
+  document.getElementById('ovl-rvcadlist').classList.add('open');
+}
+function rv2RenderCadList(){
+  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const body=rvEl('rvcadlist-body');
+  if(!lista.length){body.innerHTML='<p class="hint">Nenhum cadastro ainda.</p>';return;}
+  const estadosOpts=ESTADOS.map(([uf])=>uf).join(',');
+  body.innerHTML=`<table class="rv-data-table"><thead><tr>
+    <th>Nome</th><th>UF</th>${rvCadListTipo==='fornecedor'?'<th>Regime</th>':''}<th></th>
+  </tr></thead><tbody>`+lista.map((item,i)=>`<tr>
+    <td><input type="text" value="${esc(item.nome)}" style="width:100%;border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .4rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'nome',this.value)"></td>
+    <td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'estado',this.value)">${ESTADOS.map(([uf])=>`<option value="${uf}"${uf===item.estado?' selected':''}>${uf}</option>`).join('')}</select></td>
+    ${rvCadListTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>`:''}
+    <td><button class="btn-rvdel" onclick="rv2DeleteCad(${i})" title="Apagar">🗑</button></td>
+  </tr>`).join('')+'</tbody></table>';
+}
+function rv2UpdateCadField(idx,field,value){
+  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const item=lista[idx];if(!item)return;
+  if(field==='nome'){
+    const novoNome=value.trim();
+    if(!novoNome){toastSave('Nome não pode ficar vazio');rv2RenderCadList();return;}
+    if(lista.some((x,j)=>j!==idx&&x.nome.toLowerCase()===novoNome.toLowerCase())){toastSave('Já existe um cadastro com esse nome');rv2RenderCadList();return;}
+    item.nome=novoNome;
+  }else{item[field]=value;}
+  rv2SaveLocalCad();rv2PopulateSelects();rvSyncPush();
+  toastSave('Atualizado ✓');
+}
+function rv2DeleteCad(idx){
+  const lista=rvCadListTipo==='cliente'?RV_CLIENTES2:RV_FORNECEDORES2;
+  const item=lista[idx];if(!item)return;
+  if(!confirm(`Apagar "${item.nome}"? Cotações/pedidos já salvos não são afetados (guardam o nome como texto).`))return;
+  lista.splice(idx,1);
+  rv2SaveLocalCad();rv2PopulateSelects();rvSyncPush();
+  rv2RenderCadList();
+  toastSave('Apagado ✓');
+}
+
 /* ── HISTÓRICO DE COMPRAS DO CLIENTE ── */
 function rv2RenderHist(){
   const cliente=rv2GetCliente();
@@ -1738,6 +1971,76 @@ function rv2CriarPedido(){
   rvShowTab('pedidos');
 }
 
+/* ── EDITAR COTAÇÃO/PEDIDO JÁ SALVOS ── */
+let rvEditCtx=null; // {kind:'cotacao'|'pedido', id}
+let rvEditTipo='Nacional';
+function rvEditSetTipo(t){
+  rvEditTipo=t;
+  document.querySelectorAll('#rvedit-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
+  rv2EditPreview();
+}
+function rv2OpenEdit(kind,id){
+  const lista=kind==='cotacao'?rvLoadCotacoes():rvLoadPedidos();
+  const rec=lista.find(x=>x.id===id);
+  if(!rec){toastSave('Registro não encontrado');return;}
+  rvEditCtx={kind,id};
+  rvEl('rvedit-title').textContent=(kind==='cotacao'?'Editar Cotação — ':'Editar Pedido — ')+rec.data;
+  const selCli=rvEl('rvedit-cliente'),selForn=rvEl('rvedit-fornecedor');
+  selCli.innerHTML=RV_CLIENTES2.map(c=>`<option value="${esc(c.nome)}">${esc(c.nome)} (${c.estado})</option>`).join('');
+  selForn.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)} (${f.estado} · ${f.regime})</option>`).join('');
+  selCli.value=rec.cliente;selForn.value=rec.fornecedor;
+  rvEl('rvedit-qtd').value=rec.qtd;
+  rvEl('rvedit-preco').value=rec.preco;
+  rvEl('rvedit-pv').value=rec.pv;
+  rvEl('rvedit-comissao').value=rec.comissaoPct||0;
+  rvEl('rvedit-frete').value=rec.freteTotal||0;
+  rvEl('rvedit-cliche').value=rec.cliche||0;
+  rvEditSetTipo(rec.tipo||'Nacional');
+  document.getElementById('ovl-rvedit').classList.add('open');
+}
+function rv2EditPreview(){
+  const cliente=RV_CLIENTES2.find(c=>c.nome===rvEl('rvedit-cliente').value);
+  const fornecedor=RV_FORNECEDORES2.find(f=>f.nome===rvEl('rvedit-fornecedor').value);
+  const qtd=parseFloat(rvEl('rvedit-qtd').value)||0;
+  const preco=parseFloat(rvEl('rvedit-preco').value)||0;
+  const pv=parseFloat(rvEl('rvedit-pv').value)||0;
+  const comissaoPct=parseFloat(rvEl('rvedit-comissao').value)||0;
+  const freteTotal=parseFloat(rvEl('rvedit-frete').value)||0;
+  const cliche=parseFloat(rvEl('rvedit-cliche').value)||0;
+  const r=rv2CalcCore(cliente,fornecedor,rvEditTipo,qtd,preco,pv,comissaoPct,freteTotal,cliche);
+  const prev=rvEl('rvedit-preview');
+  if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e preencha os valores.</p>';return null;}
+  prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
+    <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Lucro recalculado</div>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--green)">${rvBrl(r.lucroTotal)} <span style="font-size:.7rem">(${(r.margem*100).toFixed(1).replace('.',',')}%)</span></div>
+  </div>`;
+  return r;
+}
+function rv2SaveEdit(){
+  const r=rv2EditPreview();
+  if(!r){toastSave('Preencha os dados corretamente antes de salvar');return;}
+  const{kind,id}=rvEditCtx;
+  const lista=kind==='cotacao'?rvLoadCotacoes():rvLoadPedidos();
+  const rec=lista.find(x=>x.id===id);
+  if(!rec){toastSave('Registro não encontrado');return;}
+  Object.assign(rec,{
+    cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
+    freteTotal:r.freteTotal,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    lucroTotal:r.lucroTotal,margem:r.margem
+  });
+  if(kind==='cotacao'){rvSaveCotacoes(lista);rvRenderCotacoes();}
+  else{rvSavePedidos(lista);rvRenderPedidos();}
+  rvSyncPush();
+  rv2RenderHist();
+  closeM('rvedit');
+  toastSave('Alterações salvas ✓');
+}
+['rvedit-qtd','rvedit-preco','rvedit-pv','rvedit-comissao','rvedit-frete','rvedit-cliche','rvedit-cliente','rvedit-fornecedor'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener(el.tagName==='SELECT'?'change':'input',rv2EditPreview);
+});
+
 /* ── COTAÇÕES / PEDIDOS (listas) ── */
 function rvRenderCotacoes(){
   const lista=rvLoadCotacoes();
@@ -1747,7 +2050,7 @@ function rvRenderCotacoes(){
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th>Qtd</th><th>Preço venda</th><th>Margem</th><th>Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
-    html+=`<tr>
+    html+=`<tr onclick="rv2OpenEdit('cotacao',${c.id})" style="cursor:pointer" title="Clique pra editar">
       <td style="white-space:nowrap">${esc(c.data)}</td>
       <td><strong>${esc(c.cliente)}</strong></td>
       <td>${esc(c.fornecedor)}</td>
@@ -1757,8 +2060,8 @@ function rvRenderCotacoes(){
       <td class="rv-num rv-pos">${((c.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(c.lucroTotal)}</td>
       <td style="white-space:nowrap">
-        <button class="btn-rvsm btn-conv" onclick="rvConverterEmPedido(${c.id})">→ Pedido</button>
-        <button class="btn-rvdel" onclick="rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
+        <button class="btn-rvsm btn-conv" onclick="event.stopPropagation();rvConverterEmPedido(${c.id})">→ Pedido</button>
+        <button class="btn-rvdel" onclick="event.stopPropagation();rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
       </td>
     </tr>`;
   });
@@ -1767,13 +2070,13 @@ function rvRenderCotacoes(){
 }
 function rvExcluirCotacao(id){
   if(!confirm('Excluir esta cotação?'))return;
-  rvSaveCotacoes(rvLoadCotacoes().filter(c=>c.id!==id));
+  rvSaveCotacoes(rvLoadCotacoes().filter(c=>c.id!==id),true);
   rvRenderCotacoes();
   rvSyncPush();
 }
 function rvLimparTodasCotacoes(){
   if(!confirm('Excluir TODAS as cotações?'))return;
-  rvSaveCotacoes([]);rvRenderCotacoes();
+  rvSaveCotacoes([],true);rvRenderCotacoes();
   rvSyncPush();
 }
 function rvConverterEmPedido(cotId){
@@ -1803,7 +2106,7 @@ function rvRenderPedidos(){
     const checks=RV_STATUS_STEPS.map(s=>
       `<label><input type="checkbox" ${p.status[s.key]?'checked':''} onchange="rvToggleStatus(${p.id},'${s.key}',this.checked)"> ${s.label}</label>`
     ).join('');
-    html+=`<tr>
+    html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
       <td style="white-space:nowrap">${esc(p.data)}</td>
       <td><strong>${esc(p.cliente)}</strong></td>
       <td>${esc(p.fornecedor)}</td>
@@ -1812,13 +2115,13 @@ function rvRenderPedidos(){
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
       <td>${badgeStatus(p.status)}
-        <details style="margin-top:.25rem">
+        <details style="margin-top:.25rem" onclick="event.stopPropagation()">
           <summary style="font-size:.6rem;color:var(--ink4);cursor:pointer">ver etapas</summary>
           <div class="status-checks" style="margin-top:.25rem">${checks}</div>
         </details>
       </td>
-      <td><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
-      <td><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
+      <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
+      <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
   });
   const totVenda=lista.reduce((a,p)=>a+(p.vendaTotal||0),0);
@@ -1853,13 +2156,13 @@ function rvUpdateObs(id,val){
 }
 function rvExcluirPedido(id){
   if(!confirm('Excluir este pedido?'))return;
-  rvSavePedidos(rvLoadPedidos().filter(p=>p.id!==id));
+  rvSavePedidos(rvLoadPedidos().filter(p=>p.id!==id),true);
   rvRenderPedidos();
   rvSyncPush();
 }
 function rvLimparTodosPedidos(){
   if(!confirm('Excluir TODOS os pedidos?'))return;
-  rvSavePedidos([]);rvRenderPedidos();
+  rvSavePedidos([],true);rvRenderPedidos();
   rvSyncPush();
 }
 
