@@ -146,6 +146,16 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 .toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;width:fit-content}
 .pill-toggle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .55rem;border:1.5px solid var(--bdr2);border-radius:20px;font-size:.6rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;margin-top:.35rem}
 .pill-toggle.active{background:var(--green);border-color:var(--green);color:#fff}
+.mc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;border:2px solid;cursor:pointer;transition:transform .12s;flex-shrink:0}
+.mc:hover{transform:scale(1.12)}
+.mc.done{background:var(--green);border-color:var(--green);color:#fff}
+.mc.est{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.mc.late{background:var(--red);border-color:var(--red);color:#fff}
+.mc.pending{background:var(--card);border-color:var(--bdr2);color:var(--bdr2)}
+.mst{display:flex;flex-direction:column;align-items:center;gap:2px}
+.mlbl{font-size:.5rem;color:var(--ink4);white-space:nowrap}
+.ml2{height:2px;background:var(--bdr2);flex-shrink:0;margin-top:12px}
+.ms-row{display:flex;align-items:flex-start;gap:0}
 .toggle-grp button{padding:.4rem 1.1rem;font-size:.74rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
 .toggle-grp button.active{background:var(--green);color:#fff}
 .ff input.inp-auto{border-color:var(--ltgrn);background:var(--ltgrn);color:var(--green);font-weight:600}
@@ -327,6 +337,8 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">⚙️ Calculadora</button>
       <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">📋 Cotações</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">📦 Pedidos</button>
+      <button class="rv-tab" id="rvtab-ci" onclick="rvShowTab('ci')">🏭 Controle Interno</button>
+      <button class="rv-tab" id="rvtab-fin" onclick="rvShowTab('fin')">💰 Financeiro</button>
     </div>
 
     <div id="rvpane-calc" class="rv-pane active">
@@ -429,6 +441,44 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       </div>
     </div>
 
+    <div id="rvpane-ci" class="rv-pane">
+      <div class="card">
+        <div class="collap-h open" style="cursor:default">
+          <div class="sh" style="margin:0">🏭 Controle Interno — Pedidos em produção</div>
+        </div>
+        <p style="font-size:.68rem;color:var(--ink3);padding:0 .9rem .6rem">Só aparecem aqui pedidos cujo fornecedor está marcado como <b>produtor</b> no cadastro. Clique numa bolinha pra registrar a data.</p>
+        <div style="overflow-x:auto"><div id="rv-ci-container"></div></div>
+      </div>
+    </div>
+
+    <div id="rvpane-fin" class="rv-pane">
+      <div class="card">
+        <div class="collap-h open" style="cursor:default">
+          <div class="sh" style="margin:0">💰 Financeiro — Pedidos em produção</div>
+        </div>
+        <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDITAR MARCO (Controle Interno de produção) -->
+<div class="ovl" id="ovl-ciedit" onclick="if(event.target===this)closeM('ciedit')">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-h"><span id="ciedit-title">Marco</span><button class="mcls" onclick="closeM('ciedit')">✕</button></div>
+    <div class="modal-b">
+      <div class="ff"><label>Data (DD/MM/AA)</label><input type="text" id="ciedit-data" placeholder="15/03/26"></div>
+      <div class="ff" style="margin-top:.5rem">
+        <label style="display:flex;align-items:center;gap:.4rem;font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;cursor:pointer">
+          <input type="checkbox" id="ciedit-confirmado" style="width:auto"> Já confirmado (não é mais previsão)
+        </label>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:1rem">
+        <button class="btn btn-p" style="flex:1" onclick="rvCISaveMarco()">Salvar</button>
+        <button class="btn btn-s" style="flex:1" onclick="rvCIClearMarco()">Limpar data</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -447,6 +497,9 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
           <button class="active" onclick="rv2SetCadRegime('LP')">Lucro Presumido</button>
           <button onclick="rv2SetCadRegime('SN')">Simples Nacional</button>
         </div>
+        <label style="display:flex;align-items:center;gap:.4rem;margin-top:.6rem;font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;cursor:pointer">
+          <input type="checkbox" id="rvcad-produtor" style="width:auto"> É produtor (fábrica) — pedidos dele entram no Controle Interno/Financeiro de produção
+        </label>
       </div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveCad()">Salvar cadastro</button>
 
@@ -1563,7 +1616,7 @@ function rvUnlockUI(){
   document.getElementById('ovl-rvlock').classList.remove('open');
   document.getElementById('rvlock-err').textContent='';
   document.getElementById('rvlock-pass').value='';
-  rvRenderCotacoes();rvRenderPedidos();
+  rvRenderCotacoes();rvRenderPedidos();rvRenderCI();rvRenderFin();
 }
 async function rvSyncPush(){
   if(!rvSyncPass||!authUser)return;
@@ -1690,9 +1743,14 @@ function rvShowTab(id){
   document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
   rvEl('rvpane-'+id).classList.add('active');
   rvEl('rvtab-'+id).classList.add('active');
-  if(id==='cotacoes'||id==='pedidos'){
+  if(id==='cotacoes'||id==='pedidos'||id==='ci'||id==='fin'){
     checkRvLock();
-    if(rvSyncPass){id==='cotacoes'?rvRenderCotacoes():rvRenderPedidos();}
+    if(rvSyncPass){
+      if(id==='cotacoes')rvRenderCotacoes();
+      else if(id==='pedidos')rvRenderPedidos();
+      else if(id==='ci')rvRenderCI();
+      else if(id==='fin')rvRenderFin();
+    }
   }else{
     document.getElementById('ovl-rvlock').classList.remove('open');
   }
@@ -1893,6 +1951,7 @@ function rv2OpenCad(tipo){
   rvEl('rvcad-estado').value='RJ';
   rvEl('rvcad-regime-wrap').style.display=tipo==='fornecedor'?'block':'none';
   document.querySelectorAll('#rvcad-regime-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.includes('Presumido')));
+  rvEl('rvcad-produtor').checked=false;
   rv2RenderCadList();
   document.getElementById('ovl-rvcad').classList.add('open');
   setTimeout(()=>rvEl('rvcad-nome').focus(),50);
@@ -1911,7 +1970,7 @@ function rv2SaveCad(){
     rv2PopulateSelects();rvEl('rv2-cliente').value=nome;rv2OnClienteChange();
   }else{
     if(RV_FORNECEDORES2.some(f=>f.nome.toLowerCase()===nome.toLowerCase())){toastSave('Fornecedor já cadastrado');return;}
-    RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime});
+    RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime,produtor:rvEl('rvcad-produtor').checked});
     rv2PopulateSelects();rvEl('rv2-fornecedor').value=nome;rv2Calc();
   }
   rv2SaveLocalCad();
@@ -1925,11 +1984,12 @@ function rv2RenderCadList(){
   const body=rvEl('rvcad-list-body');
   if(!lista.length){body.innerHTML='<p class="hint">Nenhum cadastro ainda.</p>';return;}
   body.innerHTML=`<table class="rv-data-table"><thead><tr>
-    <th>Nome</th><th>UF</th>${rv2CadTipo==='fornecedor'?'<th>Regime</th>':''}<th></th>
+    <th>Nome</th><th>UF</th>${rv2CadTipo==='fornecedor'?'<th>Regime</th><th>Produtor</th>':''}<th></th>
   </tr></thead><tbody>`+lista.map((item,i)=>`<tr>
     <td><input type="text" value="${esc(item.nome)}" style="width:100%;border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .4rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'nome',this.value)"></td>
     <td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'estado',this.value)">${ESTADOS.map(([uf])=>`<option value="${uf}"${uf===item.estado?' selected':''}>${uf}</option>`).join('')}</select></td>
-    ${rv2CadTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>`:''}
+    ${rv2CadTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>
+    <td style="text-align:center"><input type="checkbox" ${item.produtor?'checked':''} onchange="rv2UpdateCadField(${i},'produtor',this.checked)"></td>`:''}
     <td><button class="btn-rvdel" onclick="rv2DeleteCad(${i})" title="Apagar">🗑</button></td>
   </tr>`).join('')+'</tbody></table>';
 }
@@ -2192,6 +2252,108 @@ function rvRenderPedidos(){
   html+='</tbody></table>';
   cont.innerHTML=html;
 }
+/* ══════════════════════════════════════
+   CONTROLE INTERNO — produção (pedidos cujo fornecedor é "produtor")
+══════════════════════════════════════ */
+const RV_CI_LABELS=['Arte aprovada','Sinal recebido','Amostras aprovadas','Fim produção','Entrega efetuada'];
+const RV_CI_SHORT=['Arte','Sinal','Amostras','Fim Prod.','Entrega'];
+function rvNormDate(s){
+  if(!s)return null;
+  const m=String(s).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(!m)return null;
+  let[,d,mo,y]=m;d=d.padStart(2,'0');mo=mo.padStart(2,'0');if(y.length===4)y=y.slice(2);
+  return`${d}/${mo}/${y}`;
+}
+function rvDispToISO(s){
+  if(!s)return'';
+  const m=String(s).match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
+  if(!m)return'';
+  const[,d,mo,y]=m;return`20${y}-${mo}-${d}`;
+}
+function rvMkD(v,est){return{v:v?rvNormDate(v):null,est:!!est};}
+function rvIsProdutor(nomeFornecedor){
+  const f=RV_FORNECEDORES2.find(x=>x.nome===nomeFornecedor);
+  return!!(f&&f.produtor);
+}
+function rvGetCIPedidos(){return rvLoadPedidos().filter(p=>rvIsProdutor(p.fornecedor));}
+function rvCIIsLate(d){
+  if(!d||!d.v||!d.est)return false;
+  const iso=rvDispToISO(d.v);if(!iso)return false;
+  const today=new Date();today.setHours(0,0,0,0);
+  return new Date(iso+'T00:00')<today;
+}
+function rvRenderCI(){
+  const lista=rvGetCIPedidos();
+  const cont=rvEl('rv-ci-container');
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido de produção ainda.<br>Marque um fornecedor como "produtor" no cadastro pra ele aparecer aqui.</div>';return;}
+  let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th><th style="text-align:center">Marcos de Produção</th></tr></thead><tbody>';
+  lista.forEach(p=>{
+    if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+    const dots=p.ciDates.map((d,i)=>{
+      const cls=d.v&&!d.est?'done':d.v&&d.est?(rvCIIsLate(d)?'late':'est'):'pending';
+      const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
+      const connector=i>0?`<div class="ml2" style="width:16px"></div>`:'';
+      return`${connector}<div class="mst"><div class="mc ${cls}" onclick="rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl">${RV_CI_SHORT[i]}</span></div>`;
+    }).join('');
+    html+=`<tr>
+      <td style="white-space:nowrap">${esc(p.data)}</td>
+      <td><strong>${esc(p.cliente)}</strong></td>
+      <td>${esc(p.fornecedor)}</td>
+      <td class="rv-num">${(p.qtd||0).toLocaleString('pt-BR')}</td>
+      <td><div class="ms-row" style="justify-content:center">${dots}</div></td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  cont.innerHTML=html;
+}
+let rvCICtx=null; // {pedidoId, idx}
+function rvCIOpenMarco(pedidoId,idx){
+  const lista=rvLoadPedidos();
+  const p=lista.find(x=>x.id===pedidoId);
+  if(!p)return;
+  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  rvCICtx={pedidoId,idx};
+  const d=p.ciDates[idx];
+  rvEl('ciedit-title').textContent=RV_CI_LABELS[idx]+' — '+esc(p.cliente);
+  rvEl('ciedit-data').value=d.v||'';
+  rvEl('ciedit-confirmado').checked=d.v?!d.est:false;
+  document.getElementById('ovl-ciedit').classList.add('open');
+  setTimeout(()=>rvEl('ciedit-data').focus(),50);
+}
+function rvCISaveMarco(){
+  const{pedidoId,idx}=rvCICtx;
+  const lista=rvLoadPedidos();
+  const p=lista.find(x=>x.id===pedidoId);
+  if(!p)return;
+  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  const raw=rvEl('ciedit-data').value.trim();
+  const norm=rvNormDate(raw);
+  if(raw&&!norm){toastSave('Data inválida — use DD/MM/AA');return;}
+  const confirmado=rvEl('ciedit-confirmado').checked;
+  p.ciDates[idx]={v:norm,est:!confirmado};
+  rvSavePedidos(lista);
+  rvSyncPush();
+  rvRenderCI();
+  closeM('ciedit');
+  toastSave('Marco atualizado ✓');
+}
+function rvCIClearMarco(){
+  const{pedidoId,idx}=rvCICtx;
+  const lista=rvLoadPedidos();
+  const p=lista.find(x=>x.id===pedidoId);
+  if(!p)return;
+  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  p.ciDates[idx]={v:null,est:true};
+  rvSavePedidos(lista);
+  rvSyncPush();
+  rvRenderCI();
+  closeM('ciedit');
+  toastSave('Data removida');
+}
+function rvRenderFin(){
+  // implementação completa (lançamentos de pagamento/recebimento) vem na próxima leva
+}
+
 function rvToggleStatus(id,key,val){
   const lista=rvLoadPedidos();
   const p=lista.find(x=>x.id===id);
