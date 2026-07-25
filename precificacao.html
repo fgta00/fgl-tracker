@@ -146,6 +146,8 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
 .toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;width:fit-content}
 .pill-toggle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .55rem;border:1.5px solid var(--bdr2);border-radius:20px;font-size:.6rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;margin-top:.35rem}
 .pill-toggle.active{background:var(--green);border-color:var(--green);color:#fff}
+.pill-toggle-sm{display:inline-flex;align-items:center;padding:.32rem .4rem;border:1.5px solid var(--bdr2);border-radius:14px;font-size:.52rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;white-space:nowrap;line-height:1.1;text-align:center}
+.pill-toggle-sm.active{background:var(--green);border-color:var(--green);color:#fff}
 .mc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;border:2px solid;cursor:pointer;transition:transform .12s;flex-shrink:0}
 .mc:hover{transform:scale(1.12)}
 .mc.done{background:var(--green);border-color:var(--green);color:#fff}
@@ -373,8 +375,11 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
               <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
             </div>
-            <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()">
-              <button type="button" class="pill-toggle" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">Frete incluso</button>
+            <div class="ff"><label>Preço venda R$</label>
+              <div style="display:flex;align-items:stretch;gap:.3rem">
+                <input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()" style="width:68px;flex:none">
+                <button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">Frete<br>incluso</button>
+              </div>
             </div>
           </div>
 
@@ -383,8 +388,11 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
               <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores">＋</button>
             </div>
-            <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()">
-              <button type="button" class="pill-toggle" id="rv2-com-logo-btn" onclick="rv2ToggleComLogo()" title="Marca que o produto leva logo — lembra de preencher o clichê/molde nos encargos opcionais">Com logo</button>
+            <div class="ff"><label>Preço compra R$</label>
+              <div style="display:flex;align-items:stretch;gap:.3rem">
+                <input type="number" class="mono" id="rv2-preco" value="4.25" step="0.01" min="0" oninput="rv2Calc()" style="width:68px;flex:none">
+                <button type="button" class="pill-toggle-sm" id="rv2-com-logo-btn" onclick="rv2ToggleComLogo()" title="Marca que o produto leva logo — lembra de preencher o clichê/molde nos encargos opcionais">Com<br>logo</button>
+              </div>
             </div>
           </div>
 
@@ -531,14 +539,20 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
       <div class="ff"><label>Quantidade</label><input type="number" class="mono" id="rvedit-qtd" min="1" step="1"></div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
         <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
-        <div class="ff"><label>Preço venda R$</label><input type="number" class="mono" id="rvedit-pv" step="0.01" min="0">
-          <button type="button" class="pill-toggle" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">Frete incluso</button>
+        <div class="ff"><label>Preço venda R$</label>
+          <div style="display:flex;align-items:stretch;gap:.3rem">
+            <input type="number" class="mono" id="rvedit-pv" step="0.01" min="0" style="width:68px;flex:none">
+            <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">Frete<br>incluso</button>
+          </div>
         </div>
       </div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
         <div class="ff"><label>Fornecedor</label><select id="rvedit-fornecedor"></select></div>
-        <div class="ff"><label>Preço compra R$</label><input type="number" class="mono" id="rvedit-preco" step="0.01" min="0">
-          <button type="button" class="pill-toggle" id="rvedit-com-logo-btn" onclick="rvEditToggleComLogo()">Com logo</button>
+        <div class="ff"><label>Preço compra R$</label>
+          <div style="display:flex;align-items:stretch;gap:.3rem">
+            <input type="number" class="mono" id="rvedit-preco" step="0.01" min="0" style="width:68px;flex:none">
+            <button type="button" class="pill-toggle-sm" id="rvedit-com-logo-btn" onclick="rvEditToggleComLogo()">Com<br>logo</button>
+          </div>
         </div>
       </div>
       <div class="sep-lbl">Mercadoria</div>
@@ -557,7 +571,12 @@ header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,25
         <div class="ff" style="margin-top:.6rem"><label>Clichê / molde / logo total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
       </div>
       <div id="rvedit-preview" style="margin-top:.8rem"></div>
-      <div id="rvedit-detalhe" style="margin-top:.6rem"></div>
+      <div class="collap-h" onclick="toggleCollap(this,'rvedit-detalhe-body')" style="margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--bdr)">
+        <div class="sh" style="margin:0;font-size:.62rem">+ Ver detalhamento</div><span class="chev">▶</span>
+      </div>
+      <div class="collap-body" id="rvedit-detalhe-body">
+        <div id="rvedit-detalhe" style="margin-top:.6rem"></div>
+      </div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveEdit()">💾 Salvar alterações</button>
     </div>
   </div>
@@ -1906,13 +1925,18 @@ function rv2Render(r){
 }
 function rv2RenderDetalhe(r,targetId){
   const cmvClicheLinha=r.cliche>0?`<tr><td>(+) Clichê / molde / logo</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:'';
-  const freteLinha=r.freteTotal>0?`<tr><td>Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>`:'';
+  const freteLinha=r.freteDespesa>0?`<tr><td>Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteDespesa)}</td></tr>`:'';
   const comissaoLinha=r.comissaoPct>0?`<tr><td>Comissão (${r.comissaoPct}% s/ receita)</td><td class="num">${rvBrl(r.comissao)}</td></tr>`:'';
+  const vendaProdutoBruta=r.pv*r.qtd;
+  const freteReceitaLinha=r.freteIncluso&&r.freteTotal>0?`
+        <tr style="background:var(--ltgrn)"><td>Frete entrega cobrado à parte <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>
+        <tr class="rv-sub"><td>= Receita total</td><td class="num">${rvBrl(r.receita)}</td></tr>`:'';
   rvEl(targetId||'rv2-detalhe').innerHTML=`
     <table class="res-table">
       <tbody>
         <tr class="rv-sec"><td colspan="2">Receita de Venda</td></tr>
-        <tr><td>Venda produto (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(r.receita)}</td></tr>
+        <tr><td>Venda produto (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.pv)})</td><td class="num">${rvBrl(vendaProdutoBruta)}</td></tr>
+        ${freteReceitaLinha}
 
         <tr class="rv-sec"><td colspan="2">(−) CMV</td></tr>
         <tr><td>Compra (${r.qtd.toLocaleString('pt-BR')} × ${rvBrl(r.preco)})</td><td class="num">${rvBrl(r.custoCompra)}</td></tr>
@@ -2095,6 +2119,9 @@ function rv2OpenEdit(kind,id){
   if(!rec){toastSave('Registro não encontrado');return;}
   rvEditCtx={kind,id};
   rvEl('rvedit-title').textContent=(kind==='cotacao'?'Editar Cotação — ':'Editar Pedido — ')+rec.data;
+  const detH=document.getElementById('rvedit-detalhe-body')?.previousElementSibling;
+  if(detH)detH.classList.remove('open');
+  document.getElementById('rvedit-detalhe-body')?.classList.remove('open');
   const selCli=rvEl('rvedit-cliente'),selForn=rvEl('rvedit-fornecedor');
   selCli.innerHTML=RV_CLIENTES2.map(c=>`<option value="${esc(c.nome)}">${esc(c.nome)} (${c.estado})</option>`).join('');
   selForn.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)} (${f.estado} · ${f.regime})</option>`).join('');
