@@ -378,7 +378,7 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div class="ff"><label>Preço venda R$</label>
               <div style="display:flex;align-items:stretch;gap:.3rem">
                 <input type="number" class="mono" id="rv2-pv" value="8.65" step="0.01" min="0" oninput="rv2Calc()" style="flex:1;min-width:0">
-                <button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">Frete<br>incluso</button>
+                <button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">+ Frete</button>
               </div>
             </div>
           </div>
@@ -542,7 +542,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff"><label>Preço venda R$</label>
           <div style="display:flex;align-items:stretch;gap:.3rem">
             <input type="number" class="mono" id="rvedit-pv" step="0.01" min="0" style="flex:1;min-width:0">
-            <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">Frete<br>incluso</button>
+            <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">+ Frete</button>
           </div>
         </div>
       </div>
@@ -1507,18 +1507,25 @@ let _rvRevision=0;
 
 function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA};}
 function rvMergeById(localList,cloudList){
-  // Une por id em vez de sobrescrever — protege dados salvos localmente
-  // antes de nunca ter sincronizado (cenário: salvou uma cotação sem
-  // estar conectado ainda, depois conectou e a nuvem "ganhava" por engano)
+  // Une por id, e quando o mesmo id existe dos dois lados, quem tem
+  // updatedAt mais recente vence de verdade (não é mais "local sempre
+  // ganha" — isso causava um bug: cópia desatualizada sobrescrevendo
+  // uma edição mais nova feita por outra pessoa)
   const map=new Map();
   (cloudList||[]).forEach(x=>map.set(x.id,x));
-  (localList||[]).forEach(x=>map.set(x.id,x)); // local prevalece em empate de id (edição feita aqui é a mais recente)
+  (localList||[]).forEach(x=>{
+    const k=x.id,existing=map.get(k);
+    if(!existing||(x.updatedAt||0)>=(existing.updatedAt||0))map.set(k,x);
+  });
   return[...map.values()].sort((a,b)=>b.id-a.id);
 }
 function rvMergeByKey(localList,cloudList,keyFn){
   const map=new Map();
   (cloudList||[]).forEach(x=>map.set(keyFn(x),x));
-  (localList||[]).forEach(x=>map.set(keyFn(x),x)); // local prevalece em empate de chave
+  (localList||[]).forEach(x=>{
+    const k=keyFn(x),existing=map.get(k);
+    if(!existing||(x.updatedAt||0)>=(existing.updatedAt||0))map.set(k,x);
+  });
   return[...map.values()];
 }
 function rvApplySyncData(data){
@@ -1864,7 +1871,7 @@ function rv2CalcCore(cliente,fornecedor,tipo,qtd,preco,pv,comissaoPct,freteTotal
     credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
     // nomes antigos mantidos como alias — cotações/pedidos já salvos e o histórico continuam lendo a "margem final" (bottom line real)
     vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
-    lucroTotal:margemFinal,margem:pctMargemFinal,saldoICMS:debICMS-credICMS};
+    lucroTotal:margemLiquida,margem:pctMargemLiquida,saldoICMS:debICMS-credICMS};
 }
 function rv2Calc(){
   const cliente=rv2GetCliente(),fornecedor=rv2GetFornecedor();
@@ -1990,11 +1997,11 @@ function rv2SaveCad(){
   if(!nome){toastSave('Digite um nome');return;}
   if(rv2CadTipo==='cliente'){
     if(RV_CLIENTES2.some(c=>c.nome.toLowerCase()===nome.toLowerCase())){toastSave('Cliente já cadastrado');return;}
-    RV_CLIENTES2.push({nome,estado});
+    RV_CLIENTES2.push({nome,estado,updatedAt:Date.now()});
     rv2PopulateSelects();rvEl('rv2-cliente').value=nome;rv2OnClienteChange();
   }else{
     if(RV_FORNECEDORES2.some(f=>f.nome.toLowerCase()===nome.toLowerCase())){toastSave('Fornecedor já cadastrado');return;}
-    RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime,produtor:rvEl('rvcad-produtor').checked});
+    RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime,produtor:rvEl('rvcad-produtor').checked,updatedAt:Date.now()});
     rv2PopulateSelects();rvEl('rv2-fornecedor').value=nome;rv2Calc();
   }
   rv2SaveLocalCad();
@@ -2026,6 +2033,7 @@ function rv2UpdateCadField(idx,field,value){
     if(lista.some((x,j)=>j!==idx&&x.nome.toLowerCase()===novoNome.toLowerCase())){toastSave('Já existe um cadastro com esse nome');rv2RenderCadList();return;}
     item.nome=novoNome;
   }else{item[field]=value;}
+  item.updatedAt=Date.now();
   rv2SaveLocalCad();rv2PopulateSelects();rvSyncPush();
   toastSave('Atualizado ✓');
 }
@@ -2069,7 +2077,7 @@ function rv2RenderHist(){
 function rv2SalvarCotacao(){
   const r=rv2Calc();
   if(!r){toastSave('Preencha os dados antes de salvar');return;}
-  const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
+  const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
@@ -2083,7 +2091,7 @@ function rv2CriarPedido(){
   const r=rv2Calc();
   if(!r){toastSave('Preencha os dados antes de criar o pedido');return;}
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
-  const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),
+  const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
@@ -2169,7 +2177,7 @@ function rv2SaveEdit(){
     cliente:r.cliente.nome,fornecedor:r.fornecedor.nome,tipo:r.tipo,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
-    custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem
+    custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
   });
   if(kind==='cotacao'){rvSaveCotacoes(lista);rvRenderCotacoes();}
   else{rvSavePedidos(lista);rvRenderPedidos();}
@@ -2225,7 +2233,7 @@ function rvConverterEmPedido(cotId){
   const cot=rvLoadCotacoes().find(c=>c.id===cotId);
   if(!cot)return;
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
-  const pedido={...cot,id:Date.now(),cotId,status,obs:''};
+  const pedido={...cot,id:Date.now(),updatedAt:Date.now(),cotId,status,obs:''};
   const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
   rvSyncPush();
   rvShowTab('pedidos');
@@ -2234,7 +2242,21 @@ function rvRenderPedidos(){
   const lista=rvLoadPedidos();
   const cont=rvEl('rv-pedidos-container');
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação ou clique "Criar Pedido".</div>';return;}
-  function badgeStatus(st){
+  function badgeStatus(p){
+    if(rvIsProdutor(p.fornecedor)){
+      const dates=p.ciDates;
+      const CI_ICONS=['📝','💰','🔍','🏭','🚚'];
+      const CI_CLASS=['s-pendente','s-pendente','s-producao','s-producao','s-entregue'];
+      if(dates){
+        for(let i=dates.length-1;i>=0;i--){
+          if(dates[i]&&dates[i].v&&!dates[i].est){
+            return `<span class="badge-status ${CI_CLASS[i]}">${CI_ICONS[i]} ${esc(RV_CI_LABELS[i])}</span>`;
+          }
+        }
+      }
+      return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
+    }
+    const st=p.status;
     if(st.recebido)return '<span class="badge-status s-recebido">✅ Recebido</span>';
     if(st.entregue)return '<span class="badge-status s-entregue">🚚 Entregue</span>';
     if(st.producao)return '<span class="badge-status s-producao">🏭 Produção</span>';
@@ -2253,7 +2275,7 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td>${badgeStatus(p.status)}</td>
+      <td>${badgeStatus(p)}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
@@ -2351,6 +2373,7 @@ function rvCISaveMarco(){
   if(raw&&!norm){toastSave('Data inválida — use DD/MM/AA');return;}
   const confirmado=rvEl('ciedit-confirmado').checked;
   p.ciDates[idx]={v:norm,est:!confirmado};
+  p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvSyncPush();
   rvRenderCI();
@@ -2364,6 +2387,7 @@ function rvCIClearMarco(){
   if(!p)return;
   if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
   p.ciDates[idx]={v:null,est:true};
+  p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvSyncPush();
   rvRenderCI();
@@ -2379,6 +2403,7 @@ function rvToggleStatus(id,key,val){
   const p=lista.find(x=>x.id===id);
   if(!p)return;
   p.status[key]=val;
+  p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvRenderPedidos();
   rvSyncPush();
@@ -2388,6 +2413,7 @@ function rvUpdateObs(id,val){
   const p=lista.find(x=>x.id===id);
   if(!p)return;
   p.obs=val;
+  p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvSyncPush();
 }
