@@ -2245,9 +2245,6 @@ function rvRenderPedidos(){
     <th class="rv-num">Venda total</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Status</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
-    const checks=RV_STATUS_STEPS.map(s=>
-      `<label><input type="checkbox" ${p.status[s.key]?'checked':''} onchange="rvToggleStatus(${p.id},'${s.key}',this.checked)"> ${s.label}</label>`
-    ).join('');
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
       <td style="white-space:nowrap">${esc(p.data)}</td>
       <td><strong>${esc(p.cliente)}</strong></td>
@@ -2256,12 +2253,7 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td>${badgeStatus(p.status)}
-        <details style="margin-top:.25rem" onclick="event.stopPropagation()">
-          <summary style="font-size:.6rem;color:var(--ink4);cursor:pointer">ver etapas</summary>
-          <div class="status-checks" style="margin-top:.25rem">${checks}</div>
-        </details>
-      </td>
+      <td>${badgeStatus(p.status)}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
