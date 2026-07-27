@@ -17,7 +17,7 @@
   --grey:#5A6A76;--ltgry:#EDF1F4;
   --purple:#5B21B6;--ltpur:#EDE9FE;
   --teal:#0D6E6E;--ltteal:#CCEFEF;
-  --pre:#1D4ED8;--prod:#065F46;--del:#7C3400;
+  --pre:#1D4ED8;--prod:#065F46;--preemb:#4338CA;--del:#7C3400;
 }
 body.dark{
   --ink:#E8EDF2;--ink2:#D0D8E0;--ink3:#A0B0C0;--ink4:#708090;
@@ -103,6 +103,8 @@ td.L{text-align:left}td.W{white-space:normal}
 td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-offset:-1px;border-radius:3px;cursor:pointer}
 .pill{display:inline-block;padding:.14rem .52rem;border-radius:999px;font-size:.62rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
 .pg{background:var(--ltgrn);color:var(--green)}.pb{background:var(--ltblue);color:var(--blue)}
+.pin{background:#E0E7FF;color:#4338CA}
+body.dark .pin{background:#1E1B4B;color:#A5B4FC}
 .pa{background:var(--ltamb);color:var(--amber)}.pr{background:var(--ltred);color:var(--red)}
 .pgr{background:var(--ltgry);color:var(--grey)}.pp{background:var(--ltpur);color:var(--purple)}
 .pt{background:var(--ltteal);color:var(--teal)}
@@ -328,8 +330,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         <tr class="grp">
           <th colspan="5" style="background:#091A2A;text-align:center">PEDIDOS</th>
           <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
-          <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
+          <th colspan="2" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
+          <th colspan="2" style="background:var(--preemb)">PRÉ-EMBARQUE</th>
           <th colspan="3" style="background:var(--del)">ENTREGA</th>
         </tr>
         <tr class="ch">
@@ -344,6 +347,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Amostras<br>Em Mãos</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Produção<br>Lançada</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Prontidão<br>(CRD)</th>
+          <th style="min-width:68px;font-size:.64rem;line-height:1.2">Booking<br>Feito</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Embarque<br>On Board</th>
           <th style="min-width:58px">ETA</th>
           <th style="min-width:58px">No CD</th>
@@ -601,17 +605,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- MODAL GERENCIAR STATUS -->
 <div class="ovl" id="ovl-status" onclick="ovlOut(event,'status')">
   <div class="modal" style="width:860px">
-    <div class="mhdr"><h2>Gerenciar Status</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
+    <div class="mhdr"><h2>Gerenciar Cadastros</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
     <div class="mbody">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
-        <div>
-          <div class="sh">Status — Pedidos</div>
-          <div id="st-int-list" style="margin-bottom:.6rem"></div>
-          <div style="display:flex;gap:.4rem">
-            <input id="st-int-new" placeholder="Novo status…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
-            <button class="lbtn" style="height:32px" onclick="addStatus()">＋</button>
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
         <div>
           <div class="sh">Clientes</div>
           <div id="st-cli-list" style="margin-bottom:.6rem"></div>
@@ -887,14 +883,14 @@ initAuth();
 ══════════════════════════════════════ */
 let orders=[],payments=[],ledger=[],receipts=[];
 let _activeTab='internal';
-let SLST=['PRÉ-PRODUÇÃO','EM PRODUÇÃO','EMBARCADO','FINALIZADO','SUSPENSO'];
+let SLST=['PRÉ-PRODUÇÃO','EM PRODUÇÃO','PRÉ-EMBARQUE','EMBARCADO','FINALIZADO','SUSPENSO'];
 let CLIENTES=['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart'];
 let FORNECEDORES=['Thuan','TMC','Toan','Shanghai'];
 let PRODUTOS=['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Bambu','Saco Ráfia'];
 let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL'];
-// Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→emb, emb→eta, eta→cd]
-let MS_GAPS=[20,20,10,50,10,45,5];
-const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Embarque','Embarque → ETA','ETA → No CD'];
+// Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→book, book→emb, emb→eta, eta→cd]
+let MS_GAPS=[20,20,10,50,5,5,45,5];
+const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Booking','Booking → Embarque','Embarque → ETA','ETA → No CD'];
 let SNOOZED={}; // alertas adiados: {"pi:idx": "2026-07-01" (ISO até quando fica oculto)}
 
 /* ══════════════════════════════════════
@@ -907,11 +903,11 @@ function addDaysToDisp(disp,days){
 }
 // Auto-fill: a partir do milestone index `fromIdx`, preenche os seguintes como estimados
 function autoCascade(o,fromIdx){
-  if(!o||!o.dates||fromIdx<0||fromIdx>=7)return;
+  if(!o||!o.dates||fromIdx<0||fromIdx>=8)return;
   const base=o.dates[fromIdx];
   if(!base||!base.v)return;
   let cur=base.v;
-  for(let i=fromIdx;i<7;i++){
+  for(let i=fromIdx;i<8;i++){
     const next=addDaysToDisp(cur,MS_GAPS[i]);
     if(!next)break;
     const existing=o.dates[i+1];
@@ -923,17 +919,20 @@ function autoCascade(o,fromIdx){
   }
 }
 // Auto-status: determina status baseado nos milestones
+// Índices: 0 Arte, 1 Pedido, 2 Amostras, 3 Produção Lançada, 4 Prontidão, 5 Booking Feito, 6 Embarque, 7 ETA, 8 No CD
 function autoStatus(o){
   if(!o||!o.dates)return;
   const d=o.dates;
   const has=i=>d[i]&&d[i].v&&!d[i].est; // tem data confirmada
   const hasAny=i=>d[i]&&d[i].v; // tem data (confirmada ou estimada)
   // CD confirmado → FINALIZADO
-  if(has(7)){o.status='FINALIZADO';return;}
+  if(has(8)){o.status='FINALIZADO';return;}
   // Embarque confirmado → EMBARCADO
-  if(has(5)){o.status='EMBARCADO';return;}
-  // Produção lançada confirmada → EM PRODUÇÃO
-  if(has(3)){o.status='EM PRODUÇÃO';return;}
+  if(has(6)){o.status='EMBARCADO';return;}
+  // Booking feito confirmado → PRÉ-EMBARQUE
+  if(has(5)){o.status='PRÉ-EMBARQUE';return;}
+  // Produção lançada OU Prontidão confirmada → EM PRODUÇÃO
+  if(has(3)||has(4)){o.status='EM PRODUÇÃO';return;}
   // Tem algum milestone confirmado → PRÉ-PRODUÇÃO
   if(has(0)||has(1)||has(2)){o.status='PRÉ-PRODUÇÃO';return;}
 }
@@ -949,13 +948,13 @@ function nextAction(o){
   const today=new Date();today.setHours(0,0,0,0);
   // Achar a primeira etapa não confirmada (próxima a concluir)
   let nextIdx=-1;
-  for(let i=0;i<8;i++){if(!d[i]||!d[i].v||d[i].est){nextIdx=i;break;}}
+  for(let i=0;i<9;i++){if(!d[i]||!d[i].v||d[i].est){nextIdx=i;break;}}
   if(nextIdx===-1)return null; // tudo confirmado
 
-  const lbls=['Arte','Pedido','Amostras','Produção','Prontidão','Embarque','ETA','No CD'];
+  const lbls=['Arte','Pedido','Amostras','Produção','Prontidão','Booking','Embarque','ETA','No CD'];
   const fornName=o.supplier||'fornecedor';
   // Sugestões por etapa
-  const sugg=['Cobrar arte do cliente','Confirmar pedido / sinal','Cobrar amostras do '+fornName,'Confirmar lançamento de produção','Cobrar prontidão (CRD) do '+fornName,'Confirmar embarque com '+fornName,'Acompanhar chegada','Confirmar entrada no CD'];
+  const sugg=['Cobrar arte do cliente','Confirmar pedido / sinal','Cobrar amostras do '+fornName,'Confirmar lançamento de produção','Cobrar prontidão (CRD) do '+fornName,'Confirmar booking com '+fornName,'Confirmar embarque com '+fornName,'Acompanhar chegada','Confirmar entrada no CD'];
 
   // Data estimada da próxima etapa (se houver)
   const estDate=d[nextIdx]&&d[nextIdx].v?d[nextIdx].v:null;
@@ -1066,6 +1065,28 @@ function applyLoadedData(data){
   if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
   if(data.conteineres)CONTEINERES=data.conteineres;
   if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+  migrateBookingFeito();
+}
+// Migração: insere o marco "Booking Feito" (índice 5) em pedidos salvos antes dele existir,
+// e garante que SLST/MS_GAPS de sessões antigas ganhem o novo status/intervalo.
+function migrateBookingFeito(){
+  let changed=false;
+  orders.forEach(o=>{
+    if(o.dates&&o.dates.length===8){
+      o.dates.splice(5,0,mkD(null,true));
+      changed=true;
+    }
+  });
+  if(!SLST.includes('PRÉ-EMBARQUE')){
+    const idx=SLST.indexOf('EMBARCADO');
+    if(idx>=0)SLST.splice(idx,0,'PRÉ-EMBARQUE');else SLST.push('PRÉ-EMBARQUE');
+    changed=true;
+  }
+  if(MS_GAPS.length===7){
+    MS_GAPS.splice(4,0,5); // prn→book(5), o resto desloca; book→emb assume o valor antigo de prn→emb
+    changed=true;
+  }
+  if(changed)saveAll();
 }
 const SESS_TRACKER_PW='fgl_sess_tracker_pw';
 async function doLogin(pwOverride){
@@ -1163,12 +1184,12 @@ function syncLinked(){
   orders.forEach(o=>{
     const p=payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po));
     if(!p)return;
-    const oEtd=o.dates[5]?.v, pEtd=normDate(p.etd);
+    const oEtd=o.dates[6]?.v, pEtd=normDate(p.etd);
     if(oEtd&&oEtd!==pEtd){p.etd=oEtd;changed=true;}
-    else if(pEtd&&pEtd!==oEtd){o.dates[5]=mkD(pEtd,o.dates[5]?.est??true);changed=true;}
-    const oEta=o.dates[6]?.v, pEta=normDate(p.eta);
+    else if(pEtd&&pEtd!==oEtd){o.dates[6]=mkD(pEtd,o.dates[6]?.est??true);changed=true;}
+    const oEta=o.dates[7]?.v, pEta=normDate(p.eta);
     if(oEta&&oEta!==pEta){p.eta=oEta;changed=true;}
-    else if(pEta&&pEta!==oEta){o.dates[6]=mkD(pEta,o.dates[6]?.est??true);changed=true;}
+    else if(pEta&&pEta!==oEta){o.dates[7]=mkD(pEta,o.dates[7]?.est??true);changed=true;}
     if(o.client&&p.client!==o.client){p.client=o.client;changed=true;}
     else if(p.client&&!o.client){o.client=p.client;changed=true;}
     if(o.po&&o.po!=='—'&&p.po!==o.po){p.po=o.po;changed=true;}
@@ -1229,7 +1250,7 @@ function piReceived(pi){return receipts.filter(r=>r.pi===pi).reduce((a,r)=>a+r.a
 /* ══════════════════════════════════════
    STATUS
 ══════════════════════════════════════ */
-const SC={'PRÉ-PRODUÇÃO':{c:'pa'},'EM PRODUÇÃO':{c:'pp'},'EMBARCADO':{c:'pb'},'FINALIZADO':{c:'pg'},'SUSPENSO':{c:'pr'}};
+const SC={'PRÉ-PRODUÇÃO':{c:'pa'},'EM PRODUÇÃO':{c:'pp'},'PRÉ-EMBARQUE':{c:'pin'},'EMBARCADO':{c:'pb'},'FINALIZADO':{c:'pg'},'SUSPENSO':{c:'pr'}};
 const _finExp=new Set();
 
 // Helper: encontrar payment vinculado a um order (por pi OU po)
@@ -1257,7 +1278,7 @@ function changeSt(num,v){
 /* ══════════════════════════════════════
    MILESTONES
 ══════════════════════════════════════ */
-const MLBL=['Art','Ped','Amo','Prod','Prn','Emb','ETA','CD'];
+const MLBL=['Art','Ped','Amo','Prod','Prn','Book','Emb','ETA','CD'];
 function msIsLate(d){
   if(!d||!d.v||!d.est)return false;         // só se tem data E ainda é prevista (não confirmada)
   const iso=dispToISO(d.v);
@@ -1297,7 +1318,7 @@ function dCell(d){
 function daysCell(dates,status){
   if(status==='FINALIZADO')return`<div style="display:flex;flex-direction:column;align-items:center;gap:1px"><span class="dg">✓</span><span style="font-size:.55rem;color:var(--green);font-weight:600">OK</span></div>`;
   if(status==='SUSPENSO')return'<span style="color:var(--ink4);font-size:.68rem">⏸</span>';
-  const cd=dates[7],eta=dates[6];
+  const cd=dates[8],eta=dates[7];
   let d=null,lbl='ETA';
   if(cd&&cd.v&&!cd.est){d=cd;lbl='CD';}else if(eta&&eta.v){d=eta;lbl='ETA';}
   if(!d||!d.v)return'—';
@@ -1374,6 +1395,7 @@ function calcAlerts(){
 ══════════════════════════════════════ */
 function renderSummary(){
   const emb=orders.filter(o=>o.status==='EMBARCADO').length;
+  const preemb=orders.filter(o=>o.status==='PRÉ-EMBARQUE').length;
   const prod=orders.filter(o=>o.status==='EM PRODUÇÃO').length;
   const pre=orders.filter(o=>o.status==='PRÉ-PRODUÇÃO').length;
   const fin=orders.filter(o=>o.status==='FINALIZADO').length;
@@ -1382,6 +1404,7 @@ function renderSummary(){
   document.getElementById('int-sum').innerHTML=[
     {l:'Pré-Produção',v:pre,d:'var(--amber)',c:'var(--amber)'},
     {l:'Em Produção',v:prod,d:'var(--purple)',c:'var(--purple)'},
+    {l:'Pré-Embarque',v:preemb,d:'var(--preemb)',c:'var(--preemb)'},
     {l:'Embarcados',v:emb,d:'var(--teal)',c:'var(--teal)'},
     {l:'Finalizados',v:fin,d:'var(--green)',c:'var(--green)'},
     {l:'A Pagar Forn.',v:fUSD(totPagar),d:'var(--red)',c:'var(--red)'},
@@ -1492,7 +1515,7 @@ function renderInternal(){
    RENDER CLIENT
 ══════════════════════════════════════ */
 function etaCell(o){
-  const cd=o.dates[7],eta=o.dates[6];
+  const cd=o.dates[8],eta=o.dates[7];
   if(o.status==='FINALIZADO'){const v=cd?.v||eta?.v||'—';return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:.58rem;font-weight:700;color:var(--blue);text-transform:uppercase">Entregue</span><span class="dok" style="font-size:.8rem;font-weight:700">${esc(v)}</span></div>`;}
   if(o.status==='SUSPENSO')return'<span style="color:var(--ink4);font-size:.72rem">Em espera</span>';
   const d=cd?.v?cd:(eta?.v?eta:null);
@@ -1614,6 +1637,30 @@ function renderFinanceSummary(s){
     </div>`;
 }
 
+// Retorna a data (confirmada) que fez o pedido entrar no status atual, ou null
+function statusStartDate(o){
+  if(!o||!o.dates)return null;
+  const d=o.dates;
+  const pick=(...idxs)=>{
+    let best=null;
+    idxs.forEach(i=>{
+      if(d[i]&&d[i].v&&!d[i].est){
+        const iso=dispToISO(d[i].v);
+        if(iso&&(!best||iso>best.iso))best={iso,v:d[i].v};
+      }
+    });
+    return best?best.v:null;
+  };
+  switch(o.status){
+    case 'FINALIZADO':return pick(8);
+    case 'EMBARCADO':return pick(6);
+    case 'PRÉ-EMBARQUE':return pick(5);
+    case 'EM PRODUÇÃO':return pick(3,4);
+    case 'PRÉ-PRODUÇÃO':return pick(0,1,2);
+    default:return null;
+  }
+}
+
 /* buildFinanceCardViewModel: só LÊ orders/payments, nunca escreve neles.
    A sincronização de verdade (persistida) é feita por syncLinked(), em
    outro momento do ciclo de vida — aqui é só "qual valor eu mostro agora". */
@@ -1630,17 +1677,18 @@ function buildFinanceCardViewModel(p){
   const bcR=pctReceb>100?'var(--red)':pctReceb>=80?'var(--green)':pctReceb>=30?'var(--amber)':'var(--red)';
   const overPago=pctPago>100,overReceb=pctReceb>100;
   // Fonte de verdade pra exibição: order.dates primeiro, payment como fallback — SEM gravar de volta em p
-  const etdVal=linkedOrd?.dates[5]?.v||p.etd||'—';
-  const etaVal=linkedOrd?.dates[6]?.v||p.eta||'—';
+  const etdVal=linkedOrd?.dates[6]?.v||p.etd||'—';
+  const etaVal=linkedOrd?.dates[7]?.v||p.eta||'—';
   const etdDisp=etdVal!=='—'?(normDate(etdVal)||etdVal):'—';
   const etaDisp=etaVal!=='—'?(normDate(etaVal)||etaVal):'—';
   const client=linkedOrd?.client||p.client||'—';
   const supplier=linkedOrd?.supplier||p.supplier||'—';
   const po=(linkedOrd?.po&&linkedOrd.po!=='—')?linkedOrd.po:(p.po||'—');
   const stTxt=linkedOrd?linkedOrd.status:'—';
-  const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
+  const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','PRÉ-EMBARQUE':'var(--preemb)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
+  const stDate=linkedOrd?statusStartDate(linkedOrd):null;
   return{p,linkedOrd,totF,totV,qtyCalc,paid,recv,aPagar,aReceber,pctPago,pctReceb,mg,pctMg,bcP,bcR,
-    overPago,overReceb,etdDisp,etaDisp,client,supplier,po,stTxt,stPillCol};
+    overPago,overReceb,etdDisp,etaDisp,client,supplier,po,stTxt,stPillCol,stDate};
 }
 function renderFinanceCard(vm){
   const{p,linkedOrd}=vm;
@@ -1655,7 +1703,7 @@ function renderFinanceCard(vm){
             ${linkedOrd?.colecao?`<span style="color:var(--ink4)"> · </span><span style="color:var(--ink3)">${esc(linkedOrd.colecao)}</span>`:''}
           </div>
         </div>
-        <span style="font-size:.55rem;font-weight:600;color:${vm.stPillCol};background:${vm.stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(vm.stTxt)}</span>
+        <span style="font-size:.55rem;font-weight:600;color:${vm.stPillCol};background:${vm.stPillCol}18;padding:.12rem .4rem;border-radius:4px;white-space:nowrap">${esc(vm.stTxt)}${vm.stDate?` <span style="font-weight:400;opacity:.8">· ${esc(vm.stDate)}</span>`:''}</span>
       </div>
       <div style="font-size:.66rem;color:var(--ink2);margin-bottom:.1rem"><b>${esc(vm.supplier)}</b> <span style="color:var(--ink4)">→</span> ${esc(vm.client)}</div>
       <div style="font-size:.58rem;color:var(--ink4);font-family:'IBM Plex Mono';margin-bottom:.55rem">${fN(vm.qtyCalc)} un · ETD ${esc(vm.etdDisp)}${vm.etaDisp!=='—'?' · ETA '+esc(vm.etaDisp):''}</div>
@@ -2171,18 +2219,18 @@ function submitOrder(){
   }
 
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
-  const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-  if(etd&&etd!=='—')emptyDates[5]=mkD(etd,true);
+  const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
+  if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true);
   const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,...avFields};
   // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
-  if(emptyDates[5]&&emptyDates[5].v) autoCascade(newOrder,5);
+  if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
   // Restaurar ETD se usuário informou explicitamente (não sobrescrever)
-  if(etd&&etd!=='—')newOrder.dates[5]=mkD(etd,true);
+  if(etd&&etd!=='—')newOrder.dates[6]=mkD(etd,true);
   autoStatus(newOrder);
   orders.unshift(newOrder);
   if(pi&&prodRows.length>0){
-    const eta=newOrder.dates[6]&&newOrder.dates[6].v?newOrder.dates[6].v:'—'; // eta não tem campo próprio — vem do auto-cascade a partir do ETD
+    const eta=newOrder.dates[7]&&newOrder.dates[7].v?newOrder.dates[7].v:'—'; // eta não tem campo próprio — vem do auto-cascade a partir do ETD
     const existing=payments.find(x=>x.pi===pi);
     if(!existing)payments.unshift({pi,po,inv,client,clientInv:'',supplier:supplier||'—',status:'Mass P contracted',etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
     else{existing.po=po;existing.inv=inv;existing.client=client;existing.supplier=supplier||existing.supplier;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
@@ -2211,7 +2259,7 @@ function editFinField(pi,field,e){
 function editMS(num,di,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
   const d=o.dates[di];_epCtx={type:'ms',num,di};
-  const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Embarque ETD','ETA Brasil','Entrada CD'];
+  const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Booking Feito','Embarque ETD','ETA Brasil','Entrada CD'];
   document.getElementById('ep-ttl').textContent=MSFULL[di];
   document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
     <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
@@ -2307,8 +2355,8 @@ function epSave(){
         if(_epCtx.field==='client')o.client=val;
         if(_epCtx.field==='supplier')o.supplier=val;
         const nd=normDate(val);
-        if(_epCtx.field==='etd'&&nd) o.dates[5]=mkD(nd,o.dates[5]?.est??true);
-        if(_epCtx.field==='eta'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
+        if(_epCtx.field==='etd'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
+        if(_epCtx.field==='eta'&&nd) o.dates[7]=mkD(nd,o.dates[7]?.est??true);
       }
     }
   } else if(_epCtx.type==='led'){
@@ -2516,14 +2564,14 @@ function closeOvl(id){document.getElementById(`ovl-${id}`).classList.remove('ope
 ══════════════════════════════════════ */
 function csvEsc(v){const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;}
 function exportCSV(){
-  const hdr=['Num','PO','IP','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Embarque','ETA Brasil','Entrada CD','Notas'];
+  const hdr=['Num','PO','IP','Cliente','Produto','Contêiner','Total','Status','Arte','Pedido','Amostras','Prod.Lançada','Prontidão','Booking','Embarque','ETA Brasil','Entrada CD','Notas'];
   const rows=orders.map(o=>[o.num,csvEsc(o.po),csvEsc(o.pi||''),csvEsc(o.client),csvEsc(o.product),csvEsc(o.container||''),o.total,csvEsc(o.status),
-    csvEsc(o.dates[0]?.v||''),csvEsc(o.dates[1]?.v||''),csvEsc(o.dates[2]?.v||''),csvEsc(o.dates[3]?.v||''),csvEsc(o.dates[4]?.v||''),csvEsc(o.dates[5]?.v||''),csvEsc(o.dates[6]?.v||''),csvEsc(o.dates[7]?.v||''),csvEsc(o.notes||'')]);
+    csvEsc(o.dates[0]?.v||''),csvEsc(o.dates[1]?.v||''),csvEsc(o.dates[2]?.v||''),csvEsc(o.dates[3]?.v||''),csvEsc(o.dates[4]?.v||''),csvEsc(o.dates[5]?.v||''),csvEsc(o.dates[6]?.v||''),csvEsc(o.dates[7]?.v||''),csvEsc(o.dates[8]?.v||''),csvEsc(o.notes||'')]);
   dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].map(r=>r.join(',')).join('\n')),`fgl_${todayDisp().replace(/\//g,'-')}.csv`);
 }
 function exportClientCSV(){
   const hdr=['#','PO#','Cliente','Produto','Unidades','Status','ETA','Próxima Ação'];
-  const rows=orders.map(o=>[o.num,o.po,o.client,`"${o.product}"`,o.total,o.status,o.dates[7]?.v||o.dates[6]?.v||'—',`"${getNextAction(o)}"`]);
+  const rows=orders.map(o=>[o.num,o.po,o.client,`"${o.product}"`,o.total,o.status,o.dates[8]?.v||o.dates[7]?.v||'—',`"${getNextAction(o)}"`]);
   dlFile('data:text/csv;charset=utf-8,'+encodeURIComponent([hdr,...rows].map(r=>r.join(',')).join('\n')),`fgl_cli_${todayDisp().replace(/\//g,'-')}.csv`);
 }
 function dlFile(href,name){const a=document.createElement('a');a.href=href;a.download=name;a.click();}
@@ -2533,8 +2581,6 @@ function dlFile(href,name){const a=document.createElement('a');a.href=href;a.dow
 ══════════════════════════════════════ */
 function openStatusModal(){renderStatusLists();document.getElementById('ovl-status').classList.add('open');}
 function renderStatusLists(){
-  const SC_C={'PRÉ-PRODUÇÃO':'pa','EM PRODUÇÃO':'pp','EMBARCADO':'pb','FINALIZADO':'pg','SUSPENSO':'pr'};
-  document.getElementById('st-int-list').innerHTML=SLST.map((s,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span class="pill ${SC_C[s]||'pgr'}" style="flex:1;text-align:left;padding:.2rem .5rem">${esc(s)}</span><button onclick="renameStatus(${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteStatus(${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
   ['cli','forn','prod','cont'].forEach(tipo=>{
     const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
     document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
@@ -2556,17 +2602,6 @@ function renameMestre(tipo,i){
   const novo=prompt(`Renomear "${arr[i]}" para:`,arr[i]);if(!novo||novo.trim()===arr[i])return;
   arr[i]=novo.trim();saveAll();renderStatusLists();toast('Renomeado ✓');
 }
-function addStatus(){
-  const el=document.getElementById('st-int-new');const v=el.value.trim().toUpperCase();if(!v)return;
-  if(!SLST.includes(v))SLST.push(v);el.value='';saveAll();renderStatusLists();renderAll();toast('Status adicionado ✓');
-}
-function deleteStatus(i){if(SLST.length<=1)return;if(!confirm(`Deletar "${SLST[i]}"?`))return;SLST.splice(i,1);saveAll();renderStatusLists();renderAll();}
-function renameStatus(i){
-  const novo=prompt(`Renomear "${SLST[i]}" para:`,SLST[i]);if(!novo||novo.trim()===SLST[i])return;
-  const nc=novo.trim().toUpperCase();orders.forEach(o=>{if(o.status===SLST[i])o.status=nc;});
-  SLST[i]=nc;saveAll();renderStatusLists();renderAll();toast('Renomeado ✓');
-}
-
 /* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
