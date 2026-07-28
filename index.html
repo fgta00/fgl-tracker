@@ -328,9 +328,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <table id="int-tbl">
       <thead>
         <tr class="grp">
-          <th colspan="5" style="background:#091A2A;text-align:center">PEDIDOS</th>
+          <th colspan="4" style="background:#091A2A;text-align:center">PEDIDOS</th>
           <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
-          <th colspan="2" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
+          <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
           <th colspan="2" style="background:var(--preemb)">PRÉ-EMBARQUE</th>
           <th colspan="3" style="background:var(--del)">ENTREGA</th>
@@ -560,6 +560,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
           </div>
         </div>
+        <div class="ff"><label>Amostras</label>
+          <div class="toggle-grp" id="mo-amostras-toggle">
+            <button class="active" type="button" onclick="setAmostrasToggle(true)">ON</button>
+            <button type="button" onclick="setAmostrasToggle(false)">OFF</button>
+          </div>
+        </div>
         <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
         <div class="ff full">
           <div id="mo-prod-rows"></div>
@@ -645,8 +651,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       </div>
       <div style="margin-top:1.2rem">
         <div class="sh">⏱ Intervalos Padrão entre Milestones (dias)</div>
-        <div id="ms-gaps-list" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-bottom:.5rem"></div>
+        <div id="ms-gaps-list" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.5rem"></div>
         <div style="font-size:.6rem;color:var(--ink4)">Usado para auto-preenchimento de datas estimadas na cascata</div>
+      </div>
+      <div style="margin-top:1.2rem">
+        <div class="sh">📄 Prazos de Documentos/Pagamentos (dias a partir do marco de referência)</div>
+        <div id="doc-events-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.5rem"></div>
+        <div style="font-size:.6rem;color:var(--ink4)">Negativo = antes do marco. Aparece como aviso na Situação do pedido quando o marco de referência tiver data.</div>
       </div>
       <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
     </div>
@@ -890,6 +901,24 @@ let PRODUTOS=['Ecobag Raffia','Ecobag TNT','Ecobag Térmica','Carrinho','Copo Ba
 let CONTEINERES=['20" DRY CHINA','20" DRY VIETNÃ','40" HC CHINA','40" HC VIETNÃ','40" NOR CHINA','LCL'];
 // Intervalos padrão entre milestones (dias): [art→ped, ped→amo, amo→prod, prod→prn, prn→book, book→emb, emb→eta, eta→cd]
 let MS_GAPS=[20,20,10,50,5,5,45,5];
+// Eventos de documentos/pagamentos — prazos automáticos a partir de um marco (baseIdx) + offset (dias).
+// baseIdx: 0=Arte Recebida ... 6=Embarque(ETD). offset pode ser negativo (antes do marco).
+// cond: null (sempre existe) | 'amostrasOn' | 'amostrasOff' (só existe conforme o seletor Amostras do pedido)
+let DOC_EVENTS=[
+  {key:'pi_forn',      label:'Receber PI Fornecedor',                   baseIdx:0, offset:0,  cond:null},
+  {key:'pi_cli',       label:'Emitir PI Cliente',                       baseIdx:0, offset:2,  cond:null},
+  {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        baseIdx:6, offset:-2, cond:null},
+  {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                baseIdx:6, offset:5,  cond:null},
+  {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    baseIdx:6, offset:7,  cond:null},
+  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:10, cond:'amostrasOff'},
+  {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:25, cond:'amostrasOn'},
+  {key:'custo_amostras',label:'Receber Custo Amostras',                 baseIdx:0, offset:10, cond:'amostrasOn'},
+  {key:'sinal_forn',   label:'Pagar Sinal PI Fornecedor',               baseIdx:0, offset:15, cond:null},
+  {key:'balanco_cli',  label:'Receber Balanço Cliente',                 baseIdx:6, offset:17, cond:null},
+  {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null},
+  {key:'docs_orig',    label:'Receber Docs Originais',                  baseIdx:6, offset:30, cond:null},
+];
+const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Booking','Booking → Embarque','Embarque → ETA','ETA → No CD'];
 let SNOOZED={}; // alertas adiados: {"pi:idx": "2026-07-01" (ISO até quando fica oculto)}
 
@@ -941,6 +970,57 @@ function autoStatus(o){
    MOTOR DE PRÓXIMA AÇÃO / GARGALO
 ══════════════════════════════════════ */
 // Retorna {level:'ok'|'warn'|'crit', text, suggestion, key} ou null
+/* ══════════════════════════════════════
+   EVENTOS DE DOCUMENTOS/PAGAMENTOS
+   (prazos automáticos a partir de um marco + offset, com validação manual)
+══════════════════════════════════════ */
+function docEventsForOrder(o){
+  const amostrasOn=o.amostras!==false; // default true pra pedidos antigos sem o campo
+  return DOC_EVENTS.filter(ev=>{
+    if(ev.cond==='amostrasOn')return amostrasOn;
+    if(ev.cond==='amostrasOff')return !amostrasOn;
+    return true;
+  });
+}
+function docEventDueDate(o,ev){
+  const base=o.dates&&o.dates[ev.baseIdx];
+  if(!base||!base.v)return null;
+  return addDaysToDisp(base.v,ev.offset);
+}
+// Retorna {ev,due,daysUntil,level,doneDate} do evento pendente mais urgente, ou null se não houver nenhum
+function nextDocEvent(o){
+  if(!o.docDone)o.docDone={};
+  const evs=docEventsForOrder(o);
+  let best=null;
+  evs.forEach(ev=>{
+    if(o.docDone[ev.key])return; // já confirmado
+    const due=docEventDueDate(o,ev);
+    if(!due)return; // marco de referência ainda não tem data
+    const iso=dispToISO(due);
+    const today=new Date();today.setHours(0,0,0,0);
+    const dueD=new Date(iso+'T00:00');
+    const daysUntil=Math.round((dueD-today)/86400000);
+    const level=daysUntil<0?'crit':daysUntil<=3?'warn':'ok';
+    if(!best||daysUntil<best.daysUntil)best={ev,due,daysUntil,level};
+  });
+  return best;
+}
+function docEventConfirm(num,key,confirmed){
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  if(!o.docDone)o.docDone={};
+  if(confirmed)o.docDone[key]=todayDisp();else delete o.docDone[key];
+  saveAll();renderInternal();
+}
+function openDocEventModal(num,key){
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  const ev=DOC_EVENTS.find(x=>x.key===key);if(!ev)return;
+  const due=docEventDueDate(o,ev);
+  const done=o.docDone&&o.docDone[key];
+  if(!confirm(`${ev.label}\nPrazo: ${due||'—'} (a partir de ${DOC_BASE_LBL[ev.baseIdx]})\n\n${done?'Já confirmado em '+done+'.\n\nDesmarcar?':'Confirmar como feito hoje?'}`))return;
+  docEventConfirm(num,key,!done);
+  toast(done?'Desmarcado':'Confirmado ✓');
+}
+
 function nextAction(o){
   if(!o||!o.dates)return null;
   if(o.status==='FINALIZADO'||o.status==='SUSPENSO')return null;
@@ -1065,6 +1145,7 @@ function applyLoadedData(data){
   if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
   if(data.conteineres)CONTEINERES=data.conteineres;
   if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+  if(data.docEvents)DOC_EVENTS.forEach((ev,i)=>{if(data.docEvents[i]&&typeof data.docEvents[i].offset==='number')ev.offset=data.docEvents[i].offset;});
   migrateBookingFeito();
 }
 // Migração: insere o marco "Booking Feito" (índice 5) em pedidos salvos antes dele existir,
@@ -1200,7 +1281,7 @@ function syncLinked(){
 let _syncTimer=null;
 async function saveAll(){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED};
   const payload=await encryptJSON(_cryptoKey,data);
   const encrypted=JSON.stringify(payload);
   // 1. Sempre grava no localStorage (espelho local imediato)
@@ -1500,6 +1581,12 @@ function renderInternal(){
           </div>`;
         } else if(snoozed){
           inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
+        }
+        const de=nextDocEvent(o);
+        if(de){
+          const deCol=de.level==='crit'?'var(--red)':de.level==='warn'?'var(--amber)':'var(--teal)';
+          const deTxt=de.daysUntil<0?`${de.ev.label} atrasado ${Math.abs(de.daysUntil)}d`:de.daysUntil===0?`${de.ev.label} hoje`:`${de.ev.label} em ${de.daysUntil}d`;
+          inner+=`<div onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:.62rem;color:${deCol};background:${deCol}15;border-radius:4px;padding:.15rem .4rem;margin-top:1px" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</div>`;
         }
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
@@ -2131,6 +2218,11 @@ function rvAVSetRota(r){
   _avRota=r;
 }
 let _avRota='direta';
+let _moAmostras=true;
+function setAmostrasToggle(v){
+  _moAmostras=v;
+  document.querySelectorAll('#mo-amostras-toggle button').forEach(b=>b.classList.toggle('active',(b.textContent==='ON')===v));
+}
 function openOrderModal(num){
   _editNum=num;
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
@@ -2138,6 +2230,7 @@ function openOrderModal(num){
   document.getElementById('mo-prod-rows').innerHTML='';
   ['po','colecao','pi','data','sup','sup-inv','cont','etd','notes','av-cambio-venda','av-cambio-camadas','av-custo-rf','av-custo-trading','av-trading-nome'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   rvAVSetRota('direta');
+  setAmostrasToggle(true);
   if(num!==null){
     const o=orders.find(x=>x.num===num);
     if(o){
@@ -2145,6 +2238,7 @@ function openOrderModal(num){
       document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
       document.getElementById('mo-notes').value=o.notes||'';
       document.getElementById('mo-data').value=o.orderDate||'';
+      setAmostrasToggle(o.amostras!==false); // default true pra pedidos antigos (sem o campo)
       if(o.cambioVenda)document.getElementById('mo-av-cambio-venda').value=o.cambioVenda;
       if(o.cambioCamadas)document.getElementById('mo-av-cambio-camadas').value=o.cambioCamadas;
       if(o.custoImportacaoRF)document.getElementById('mo-av-custo-rf').value=o.custoImportacaoRF;
@@ -2193,6 +2287,7 @@ function submitOrder(){
     custoTrading:_avRota==='trading'?(parseFloat(document.getElementById('mo-av-custo-trading').value)||0):0,
     tradingNome:_avRota==='trading'?document.getElementById('mo-av-trading-nome').value.trim():''
   }:{};
+  const amostras=_moAmostras;
 
   if(!client){toast('⚠ Cliente obrigatório','err');return;}
   if(!supplier){toast('⚠ Fornecedor obrigatório','err');return;}
@@ -2205,7 +2300,7 @@ function submitOrder(){
       // Buscar payment ANTES de alterar pi/po
       const p=linkPay(o);
       const oldPi=o.pi;
-      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.container=container;o.notes=notes;o.orderDate=orderDate;
+      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.container=container;o.notes=notes;o.orderDate=orderDate;o.amostras=amostras;
       Object.assign(o,avFields);
       if(totalQty>0)o.total=totalQty;
       if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
@@ -2221,7 +2316,7 @@ function submitOrder(){
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
   if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true);
-  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,...avFields};
+  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
   // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
   if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
@@ -2587,6 +2682,10 @@ function renderStatusLists(){
   });
   // Render milestone gaps editor
   document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"></div>`).join('');
+  document.getElementById('doc-events-list').innerHTML=DOC_EVENTS.map((ev,i)=>`<div style="display:flex;align-items:center;gap:.4rem;border:1px solid var(--bdr);border-radius:6px;padding:.3rem .5rem">
+    <div style="flex:1;font-size:.66rem;line-height:1.25"><b>${esc(ev.label)}</b><div style="color:var(--ink4);font-size:.58rem">${DOC_BASE_LBL[ev.baseIdx]}${ev.cond?' · só '+(ev.cond==='amostrasOn'?'c/ amostras':'s/ amostras'):''}</div></div>
+    <input type="number" value="${ev.offset}" style="width:50px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.2rem;font-family:'IBM Plex Mono';font-size:.72rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
+  </div>`).join('');
 }
 function addMestre(tipo){
   const id='st-'+tipo+'-new';const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
@@ -2668,7 +2767,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,snoozed:SNOOZED};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
