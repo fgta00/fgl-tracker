@@ -339,7 +339,6 @@ body.dark .rv-tabs{background:#0A0F1A}
       <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">Calculadora</button>
       <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">Cotações</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">Pedidos</button>
-      <button class="rv-tab" id="rvtab-ci" onclick="rvShowTab('ci')">Controle de Produção</button>
       <button class="rv-tab" id="rvtab-fin" onclick="rvShowTab('fin')">Financeiro</button>
     </div>
 
@@ -446,16 +445,6 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="sh" style="margin:0">Pedidos confirmados</div>
         </div>
         <div style="overflow-x:auto"><div id="rv-pedidos-container"></div></div>
-      </div>
-    </div>
-
-    <div id="rvpane-ci" class="rv-pane">
-      <div class="card">
-        <div class="collap-h open" style="cursor:default">
-          <div class="sh" style="margin:0">Controle de Produção — Pedidos em produção</div>
-        </div>
-        <p style="font-size:.68rem;color:var(--ink3);padding:0 .9rem .6rem">Só aparecem aqui pedidos cujo fornecedor está marcado como <b>produtor</b> no cadastro. Clique numa bolinha pra registrar a data.</p>
-        <div style="overflow-x:auto"><div id="rv-ci-container"></div></div>
       </div>
     </div>
 
@@ -1642,7 +1631,7 @@ function rvUnlockUI(){
   document.getElementById('ovl-rvlock').classList.remove('open');
   document.getElementById('rvlock-err').textContent='';
   document.getElementById('rvlock-pass').value='';
-  rvRenderCotacoes();rvRenderPedidos();rvRenderCI();rvRenderFin();
+  rvRenderCotacoes();rvRenderPedidos();rvRenderFin();
 }
 async function rvSyncPush(){
   if(!rvSyncPass||!authUser)return;
@@ -1769,12 +1758,11 @@ function rvShowTab(id){
   document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
   rvEl('rvpane-'+id).classList.add('active');
   rvEl('rvtab-'+id).classList.add('active');
-  if(id==='cotacoes'||id==='pedidos'||id==='ci'||id==='fin'){
+  if(id==='cotacoes'||id==='pedidos'||id==='fin'){
     checkRvLock();
     if(rvSyncPass){
       if(id==='cotacoes')rvRenderCotacoes();
       else if(id==='pedidos')rvRenderPedidos();
-      else if(id==='ci')rvRenderCI();
       else if(id==='fin')rvRenderFin();
     }
   }else{
@@ -2264,7 +2252,7 @@ function rvRenderPedidos(){
   }
   let html=`<table class="rv-data-table"><thead><tr>
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Status</th><th>Obs</th><th></th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
@@ -2276,6 +2264,7 @@ function rvRenderPedidos(){
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
       <td>${badgeStatus(p)}</td>
+      <td>${rvIsProdutor(p.fornecedor)?rvMilestoneDotsHTML(p):'<span style="color:var(--ink4);font-size:.65rem">—</span>'}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
@@ -2323,30 +2312,17 @@ function rvCIIsLate(d){
   const today=new Date();today.setHours(0,0,0,0);
   return new Date(iso+'T00:00')<today;
 }
-function rvRenderCI(){
-  const lista=rvGetCIPedidos();
-  const cont=rvEl('rv-ci-container');
-  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido de produção ainda.<br>Marque um fornecedor como "produtor" no cadastro pra ele aparecer aqui.</div>';return;}
-  let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th><th style="text-align:center">Marcos de Produção</th></tr></thead><tbody>';
-  lista.forEach(p=>{
-    if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
-    const dots=p.ciDates.map((d,i)=>{
-      const cls=d.v&&!d.est?'done':d.v&&d.est?(rvCIIsLate(d)?'late':'est'):'pending';
-      const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
-      const connector=i>0?`<div class="ml2" style="width:16px"></div>`:'';
-      const dateColor=cls==='late'?'var(--red)':cls==='done'?'var(--green)':cls==='est'?'#B85C00':'var(--ink4)';
-      return`${connector}<div class="mst"><div class="mc ${cls}" onclick="rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl">${RV_CI_SHORT[i]}</span><span class="mlbl" style="color:${dateColor};font-weight:700">${d.v?esc(d.v):'—'}</span></div>`;
-    }).join('');
-    html+=`<tr>
-      <td style="white-space:nowrap">${esc(p.data)}</td>
-      <td><strong>${esc(p.cliente)}</strong></td>
-      <td>${esc(p.fornecedor)}</td>
-      <td class="rv-num">${(p.qtd||0).toLocaleString('pt-BR')}</td>
-      <td><div class="ms-row" style="justify-content:center">${dots}</div></td>
-    </tr>`;
-  });
-  html+='</tbody></table>';
-  cont.innerHTML=html;
+// Monta os pontinhos de marcos de produção pra um pedido — usado dentro da própria tabela de Pedidos
+function rvMilestoneDotsHTML(p){
+  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  const dots=p.ciDates.map((d,i)=>{
+    const cls=d.v&&!d.est?'done':d.v&&d.est?(rvCIIsLate(d)?'late':'est'):'pending';
+    const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
+    const connector=i>0?`<div class="ml2" style="width:12px"></div>`:'';
+    const dateColor=cls==='late'?'var(--red)':cls==='done'?'var(--green)':cls==='est'?'#B85C00':'var(--ink4)';
+    return`${connector}<div class="mst"><div class="mc ${cls}" style="width:20px;height:20px;font-size:.6rem" onclick="event.stopPropagation();rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl" style="font-size:.48rem">${RV_CI_SHORT[i]}</span><span class="mlbl" style="color:${dateColor};font-weight:700;font-size:.48rem">${d.v?esc(d.v):'—'}</span></div>`;
+  }).join('');
+  return `<div class="ms-row" style="justify-content:center" onclick="event.stopPropagation()">${dots}</div>`;
 }
 let rvCICtx=null; // {pedidoId, idx}
 function rvCIOpenMarco(pedidoId,idx){
@@ -2376,7 +2352,7 @@ function rvCISaveMarco(){
   p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvSyncPush();
-  rvRenderCI();
+  rvRenderPedidos();
   closeM('ciedit');
   toastSave('Marco atualizado ✓');
 }
@@ -2390,7 +2366,7 @@ function rvCIClearMarco(){
   p.updatedAt=Date.now();
   rvSavePedidos(lista);
   rvSyncPush();
-  rvRenderCI();
+  rvRenderPedidos();
   closeM('ciedit');
   toastSave('Data removida');
 }
