@@ -2557,12 +2557,6 @@ function rvRenderPedidos(){
     if(st.producao)return 'Produção';
     return 'Confirmado';
   }
-  function badgeStatus(p){
-    const CI_ICONS={'Arte aprovada':'📝','Sinal recebido':'💰','Amostras aprovadas':'🔍','Fim produção':'🏭','Entrega efetuada':'🚚'};
-    const CI_CLASS={'Arte aprovada':'s-pendente','Sinal recebido':'s-pendente','Amostras aprovadas':'s-producao','Fim produção':'s-producao','Entrega efetuada':'s-entregue','Confirmado':'s-pendente','Recebido':'s-recebido','Entregue':'s-entregue','Produção':'s-producao'};
-    const lbl=statusLabel(p);
-    return `<span class="badge-status ${CI_CLASS[lbl]||'s-pendente'}">${CI_ICONS[lbl]||'⏳'} ${esc(lbl)}</span>`;
-  }
   const wrapCl=document.getElementById('msf-ped-cl-wrap');
   if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('ped-cl','Todos Clientes');
   msfPopulate('ped-cl',[...new Set(todos.map(p=>p.cliente))].sort(),'Todos Clientes',rvRenderPedidos);
@@ -2570,8 +2564,8 @@ function rvRenderPedidos(){
   if(wrapForn&&!wrapForn.innerHTML)wrapForn.innerHTML=msfHtml('ped-forn','Todos Fornecedores');
   msfPopulate('ped-forn',[...new Set(todos.map(p=>p.fornecedor))].sort(),'Todos Fornecedores',rvRenderPedidos);
   const wrapSt=document.getElementById('msf-ped-st-wrap');
-  if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('ped-st','Todos Status');
-  msfPopulate('ped-st',[...new Set(todos.map(statusLabel))].sort(),'Todos Status',rvRenderPedidos);
+  if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('ped-st','Todos Marcos');
+  msfPopulate('ped-st',[...new Set(todos.map(statusLabel))].sort(),'Todos Marcos',rvRenderPedidos);
   const q=norm(document.getElementById('ped-q')?.value);
   const lista=todos.filter(p=>{
     const t=norm(`${p.cliente} ${p.fornecedor}`);
@@ -2581,7 +2575,7 @@ function rvRenderPedidos(){
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido encontrado com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
@@ -2592,7 +2586,6 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td>${badgeStatus(p)}</td>
       <td>${rvIsProdutor(p.fornecedor)?rvMilestoneDotsHTML(p):'<span style="color:var(--ink4);font-size:.65rem">—</span>'}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
