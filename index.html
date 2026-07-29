@@ -2912,18 +2912,20 @@ function setupIntStickyHeader(){
         _intClone.innerHTML='';
         _intCloneTable=document.createElement('table');
         _intCloneTable.style.cssText='border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:11.5px;margin:0';
+        _intCloneTable.appendChild(document.createElement('colgroup'));
         _intCloneTable.appendChild(thead.cloneNode(true));
         _intClone.appendChild(_intCloneTable);
       }
-      const realRow=thead.querySelector('tr.ch');
-      const cloneRow=_intCloneTable.querySelector('tr.ch');
-      if(realRow&&cloneRow){
-        [...realRow.children].forEach((c,i)=>{
-          const w=c.getBoundingClientRect().width;
-          const cc=cloneRow.children[i];
-          if(cc){cc.style.width=w+'px';cc.style.minWidth=w+'px';cc.style.maxWidth=w+'px';}
-        });
-      }
+      // table-layout:fixed usa as larguras da 1ª linha da tabela pra definir as colunas — como a
+      // 1ª linha do clone é o .grp (colspan, sem largura própria), preciso de um <colgroup> explícito
+      // com a largura real de cada coluna, tirada de uma linha de DADOS de verdade (1 <td> por coluna,
+      // sem colspan) — é a única fonte confiável de largura por coluna.
+      const dataRow=table.querySelector('tbody tr');
+      const refCells=dataRow?[...dataRow.children]:[...thead.querySelector('tr.ch').children];
+      const colgroup=_intCloneTable.querySelector('colgroup');
+      while(colgroup.children.length<refCells.length)colgroup.appendChild(document.createElement('col'));
+      while(colgroup.children.length>refCells.length)colgroup.removeChild(colgroup.lastChild);
+      refCells.forEach((c,i)=>{colgroup.children[i].style.width=c.getBoundingClientRect().width+'px';});
       _intCloneTable.style.width=table.getBoundingClientRect().width+'px';
       _intClone.style.display='block';
       _intClone.style.top=freezeTop+'px';
