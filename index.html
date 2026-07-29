@@ -103,8 +103,8 @@ tr:hover .del-row{opacity:1}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}
 thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14)}
 thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2)}
-#int-tbl thead .grp th{position:sticky;top:var(--sticky-grp-top,98px);z-index:250}
-#int-tbl thead .ch th{position:sticky;top:var(--sticky-ch-top,121px);z-index:250}
+/* sticky nativo removido pro #int-tbl — tem bugs teimosos entre navegadores.
+   Substituído por clone fixo controlado via JS, ver setupIntStickyHeader() */
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
@@ -2880,28 +2880,70 @@ function renderAll(){
   const nAlerts=calcAlerts().length;
   const tabInt=document.querySelectorAll('.stab')[0];
   if(tabInt)tabInt.innerHTML=nAlerts>0?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`:'Controle Interno';
-  updateStickyOffsets();
+  if(window._intStickySync)_intStickySync();
 }
-// Mede de verdade a altura do cabeçalho principal + sub-cabeçalho (em vez de chutar px fixos)
-// e ajusta onde o cabeçalho da tabela gruda ao rolar — assim ele sempre gruda exatamente
-// no ponto em que sumiria atrás do cabeçalho principal, sem sobrepor a primeira linha.
-function updateStickyOffsets(){
-  const header=document.querySelector('header');
-  const subheader=document.querySelector('.subheader');
-  if(!header||!subheader)return;
-  const headerH=header.offsetHeight;
-  const subH=subheader.offsetHeight;
-  document.documentElement.style.setProperty('--sticky-grp-top',(headerH+subH)+'px');
-  const grpRow=document.querySelector('#int-tbl thead .grp');
-  const grpRowH=grpRow?grpRow.offsetHeight:24;
-  document.documentElement.style.setProperty('--sticky-ch-top',(headerH+subH+grpRowH)+'px');
+/* ══════════════════════════════════════
+   CABEÇALHO FIXO DO CONTROLE INTERNO — clone controlado via JS
+   (o position:sticky nativo do navegador tem bugs conhecidos e teimosos
+   dentro de <table>/<thead>, então em vez de depender dele, clonamos o
+   cabeçalho pra um <div> com position:fixed, medido e posicionado à mão)
+══════════════════════════════════════ */
+let _intClone=null,_intCloneTable=null;
+function setupIntStickyHeader(){
+  const table=document.getElementById('int-tbl');
+  if(!table)return;
+  const wrapEl=table.closest('.tw');
+  if(!wrapEl)return;
+  if(!_intClone){
+    _intClone=document.createElement('div');
+    _intClone.id='int-sticky-clone';
+    _intClone.style.cssText='position:fixed;overflow:hidden;z-index:260;display:none;box-shadow:0 3px 12px rgba(0,0,0,.18);pointer-events:none';
+    document.body.appendChild(_intClone);
+  }
+  function sync(){
+    const rect=wrapEl.getBoundingClientRect();
+    const header=document.querySelector('header'),sub=document.querySelector('.subheader');
+    const freezeTop=(header?header.offsetHeight:52)+(sub?sub.offsetHeight:46);
+    const thead=table.querySelector('thead');
+    if(!thead){_intClone.style.display='none';return;}
+    const theadH=thead.offsetHeight;
+    if(rect.width>0&&rect.top<freezeTop&&rect.bottom>freezeTop+theadH){
+      if(!_intCloneTable){
+        _intClone.innerHTML='';
+        _intCloneTable=document.createElement('table');
+        _intCloneTable.style.cssText='border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:11.5px;margin:0';
+        _intCloneTable.appendChild(thead.cloneNode(true));
+        _intClone.appendChild(_intCloneTable);
+      }
+      const realRow=thead.querySelector('tr.ch');
+      const cloneRow=_intCloneTable.querySelector('tr.ch');
+      if(realRow&&cloneRow){
+        [...realRow.children].forEach((c,i)=>{
+          const w=c.getBoundingClientRect().width;
+          const cc=cloneRow.children[i];
+          if(cc){cc.style.width=w+'px';cc.style.minWidth=w+'px';cc.style.maxWidth=w+'px';}
+        });
+      }
+      _intCloneTable.style.width=table.getBoundingClientRect().width+'px';
+      _intClone.style.display='block';
+      _intClone.style.top=freezeTop+'px';
+      _intClone.style.left=rect.left+'px';
+      _intClone.style.width=wrapEl.clientWidth+'px';
+      _intClone.style.height=theadH+'px';
+      _intClone.scrollLeft=wrapEl.scrollLeft;
+    }else{
+      _intClone.style.display='none';
+      _intCloneTable=null; // força reclonar da próxima vez (pega qualquer mudança de conteúdo/coluna)
+    }
+  }
+  window.addEventListener('scroll',sync,{passive:true});
+  window.addEventListener('resize',sync);
+  wrapEl.addEventListener('scroll',()=>{if(_intClone.style.display!=='none')_intClone.scrollLeft=wrapEl.scrollLeft;},{passive:true});
+  window._intStickySync=sync;
+  sync();
 }
-window.addEventListener('resize',updateStickyOffsets);
-// Fontes web carregam de forma assíncrona e podem mudar a altura do cabeçalho
-// alguns px depois da primeira medição — reforça a medição quando elas terminarem de carregar.
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>requestAnimationFrame(updateStickyOffsets));
-requestAnimationFrame(()=>requestAnimationFrame(updateStickyOffsets));
-setTimeout(updateStickyOffsets,600);
+document.addEventListener('DOMContentLoaded',setupIntStickyHeader);
+if(document.readyState==='complete'||document.readyState==='interactive')setupIntStickyHeader();
 
 // Enter salva, Escape fecha
 document.addEventListener('keydown',e=>{
