@@ -2213,8 +2213,8 @@ function rv2RenderHist(){
   const cont=rvEl('rv2-hist-table');
   if(!cliente){cont.innerHTML='';return;}
   const registros=[
-    ...rvLoadCotacoes().filter(c=>c.cliente===cliente.nome).map(c=>({...c,origem:'Cotação'})),
-    ...rvLoadPedidos().filter(p=>p.cliente===cliente.nome).map(p=>({...p,origem:'Pedido'}))
+    ...rvLoadCotacoesActive().filter(c=>c.cliente===cliente.nome).map(c=>({...c,origem:'Cotação'})),
+    ...rvLoadPedidosActive().filter(p=>p.cliente===cliente.nome).map(p=>({...p,origem:'Pedido'}))
   ].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   if(!registros.length){cont.innerHTML='<p class="hint">Nenhuma compra registrada ainda pra esse cliente.</p>';return;}
   let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Origem</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Lucro %</th><th class="rv-num">Lucro</th></tr></thead><tbody>';
@@ -2353,7 +2353,7 @@ function rv2SaveEdit(){
 
 /* ── COTAÇÕES / PEDIDOS (listas) ── */
 function rvRenderCotacoes(){
-  const todas=rvLoadCotacoes();
+  const todas=rvLoadCotacoesActive();
   const cont=rvEl('rv-cotacoes-container');
   const wrapCl=document.getElementById('msf-cot-cl-wrap');
   if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('cot-cl','Todos Clientes');
@@ -2393,15 +2393,25 @@ function rvRenderCotacoes(){
   html+='</tbody></table>';
   cont.innerHTML=html;
 }
+// Retornam só os registros ativos (não apagados) — usar em toda tela/lista/filtro.
+// rvLoadCotacoes()/rvLoadPedidos() "crus" continuam existindo pra edição/lookup por id.
+function rvLoadCotacoesActive(){return rvLoadCotacoes().filter(c=>!c.deleted);}
+function rvLoadPedidosActive(){return rvLoadPedidos().filter(p=>!p.deleted);}
 function rvExcluirCotacao(id){
   if(!confirm('Excluir esta cotação?'))return;
-  rvSaveCotacoes(rvLoadCotacoes().filter(c=>c.id!==id),true);
+  const lista=rvLoadCotacoes();
+  const rec=lista.find(c=>c.id===id);
+  if(rec){rec.deleted=true;rec.updatedAt=Date.now();}
+  rvSaveCotacoes(lista,true);
   rvRenderCotacoes();
   rvSyncPush();
 }
 function rvLimparTodasCotacoes(){
   if(!confirm('Excluir TODAS as cotações?'))return;
-  rvSaveCotacoes([],true);rvRenderCotacoes();
+  const lista=rvLoadCotacoes();
+  const agora=Date.now();
+  lista.forEach(c=>{c.deleted=true;c.updatedAt=agora;});
+  rvSaveCotacoes(lista,true);rvRenderCotacoes();
   rvSyncPush();
 }
 function rvConverterEmPedido(cotId){
@@ -2539,7 +2549,7 @@ function rvCPSave(){
 }
 
 function rvRenderPedidos(){
-  const todos=rvLoadPedidos();
+  const todos=rvLoadPedidosActive();
   const cont=rvEl('rv-pedidos-container');
   function statusLabel(p){
     if(rvIsProdutor(p.fornecedor)){
@@ -2627,7 +2637,7 @@ function rvIsProdutor(nomeFornecedor){
   const f=RV_FORNECEDORES2.find(x=>x.nome===nomeFornecedor);
   return!!(f&&f.produtor);
 }
-function rvGetCIPedidos(){return rvLoadPedidos().filter(p=>rvIsProdutor(p.fornecedor));}
+function rvGetCIPedidos(){return rvLoadPedidosActive().filter(p=>rvIsProdutor(p.fornecedor));}
 function rvCIIsLate(d){
   if(!d||!d.v||!d.est)return false;
   const iso=rvDispToISO(d.v);if(!iso)return false;
@@ -2699,7 +2709,7 @@ function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId
 function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId).reduce((a,r)=>a+r.amount,0);}
 function rvRenderFin(){
   const cont=rvEl('rv-fin-container');
-  const lista=rvLoadPedidos().filter(p=>p.planoPagamento);
+  const lista=rvLoadPedidosActive().filter(p=>p.planoPagamento);
   // ── resumo geral ──
   let totCompra=0,totVenda=0,totPagar=0,totReceber=0,totPago=0,totRecebido=0;
   lista.forEach(p=>{
@@ -2866,13 +2876,19 @@ function rvUpdateObs(id,val){
 }
 function rvExcluirPedido(id){
   if(!confirm('Excluir este pedido?'))return;
-  rvSavePedidos(rvLoadPedidos().filter(p=>p.id!==id),true);
+  const lista=rvLoadPedidos();
+  const rec=lista.find(p=>p.id===id);
+  if(rec){rec.deleted=true;rec.updatedAt=Date.now();}
+  rvSavePedidos(lista,true);
   rvRenderPedidos();
   rvSyncPush();
 }
 function rvLimparTodosPedidos(){
   if(!confirm('Excluir TODOS os pedidos?'))return;
-  rvSavePedidos([],true);rvRenderPedidos();
+  const lista=rvLoadPedidos();
+  const agora=Date.now();
+  lista.forEach(p=>{p.deleted=true;p.updatedAt=agora;});
+  rvSavePedidos(lista,true);rvRenderPedidos();
   rvSyncPush();
 }
 
