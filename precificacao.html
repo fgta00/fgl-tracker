@@ -40,8 +40,20 @@ header .spacer{flex:1}
 .sh{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:.6rem}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem 1.15rem;margin-bottom:1rem}
 .ff{display:flex;flex-direction:column;gap:.25rem}
+.tb{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.tb input{border:1.5px solid var(--bdr2);border-radius:7px;padding:.35rem .6rem;font-family:'IBM Plex Sans';font-size:.76rem;color:var(--ink);background:var(--card);outline:none}
 .ff label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
 .ff input,.ff select{border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.82rem;color:var(--ink);background:var(--card);outline:none;width:100%}
+.msf{position:relative;display:inline-block}
+.msf-btn{font-family:'IBM Plex Sans';font-size:.76rem;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .62rem;background:var(--card);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap;min-width:120px}
+.msf-btn.msf-active{border-color:var(--blue);color:var(--blue);font-weight:600}
+.msf-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:400;background:var(--card);border:1.5px solid var(--bdr2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);width:220px;max-height:320px;display:flex;flex-direction:column;overflow:hidden}
+.msf-search{margin:.4rem;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-size:.72rem;background:var(--card);color:var(--ink)}
+.msf-options{overflow-y:auto;flex:1;padding:0 .3rem .3rem}
+.msf-opt{display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;font-size:.72rem;cursor:pointer;border-radius:5px;color:var(--ink2)}
+.msf-opt:hover{background:var(--ltgry)}
+.msf-opt input{width:auto;margin:0}
+.msf-selectall{border-bottom:1px solid var(--bdr);margin:0 .3rem .2rem;padding-bottom:.4rem;font-weight:600}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ff input.mono{font-family:'IBM Plex Mono'}
 .ff input:focus,.ff select:focus{border-color:var(--blue)}
@@ -436,6 +448,12 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="collap-h open" style="cursor:default">
           <div class="sh" style="margin:0">Cotações salvas</div>
         </div>
+        <div class="tb" style="padding:0 .9rem .7rem">
+          <input id="cot-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderCotacoes()" style="flex:1">
+          <span id="msf-cot-cl-wrap"></span>
+          <span id="msf-cot-forn-wrap"></span>
+          <span id="msf-cot-tipo-wrap"></span>
+        </div>
         <div style="overflow-x:auto"><div id="rv-cotacoes-container"></div></div>
       </div>
     </div>
@@ -444,6 +462,12 @@ body.dark .rv-tabs{background:#0A0F1A}
       <div class="card">
         <div class="collap-h open" style="cursor:default">
           <div class="sh" style="margin:0">Pedidos confirmados</div>
+        </div>
+        <div class="tb" style="padding:0 .9rem .7rem">
+          <input id="ped-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderPedidos()" style="flex:1">
+          <span id="msf-ped-cl-wrap"></span>
+          <span id="msf-ped-forn-wrap"></span>
+          <span id="msf-ped-st-wrap"></span>
         </div>
         <div style="overflow-x:auto"><div id="rv-pedidos-container"></div></div>
       </div>
@@ -455,8 +479,14 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="collap-h open" style="cursor:default">
           <div class="sh" style="margin:0">Financeiro — Pedidos com condições definidas</div>
         </div>
+        <div class="tb" style="padding:0 .9rem .7rem">
+          <input id="finr-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderFin()" style="flex:1">
+          <span id="msf-finr-cl-wrap"></span>
+          <span id="msf-finr-forn-wrap"></span>
+        </div>
         <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
       </div>
+
     </div>
 
   </div>
@@ -777,6 +807,92 @@ function renderProds(){
 }
 function upd(i,k,v){prods[i][k]=(k==='desc'||k==='ncm'||k==='sku')?v:(parseFloat(v)||0);recalc();}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+/* ══════════════════════════════════════
+   MULTI-SELECT FILTER (estilo Excel: busca + selecionar todos + checkboxes)
+   selected===null representa "todos" (sem filtro ativo)
+══════════════════════════════════════ */
+const MSF={};
+function msfHtml(id,label){
+  return`<div class="msf" id="msf-${id}">
+    <button type="button" class="msf-btn" id="msf-btn-${id}" onclick="msfToggle('${id}')">${esc(label)}</button>
+    <div class="msf-panel" id="msf-panel-${id}" style="display:none">
+      <input type="text" class="msf-search" placeholder="🔍 Buscar" oninput="msfRenderOptions('${id}',this.value)">
+      <label class="msf-opt msf-selectall"><input type="checkbox" id="msf-selall-${id}" onchange="msfToggleAll('${id}',this.checked)"> (Selecionar Todos)</label>
+      <div class="msf-options" id="msf-options-${id}"></div>
+    </div>
+  </div>`;
+}
+function msfPopulate(id,options,label,onChange){
+  const isNew=!MSF[id];
+  if(isNew)MSF[id]={options:[],selected:null,onChange,label};
+  const st=MSF[id];
+  st.options=options;st.label=label;st.onChange=onChange;
+  if(st.selected){
+    const filtered=new Set([...st.selected].filter(v=>options.includes(v)));
+    st.selected=filtered.size===options.length?null:filtered;
+  }
+  msfRenderButton(id);
+  const panel=document.getElementById('msf-panel-'+id);
+  if(panel&&panel.style.display!=='none')msfRenderOptions(id);
+}
+function msfRenderButton(id){
+  const btn=document.getElementById('msf-btn-'+id);if(!btn)return;
+  const st=MSF[id];if(!st)return;
+  let txt;
+  if(st.selected===null)txt=st.label;
+  else if(st.selected.size===0)txt='Nenhum selecionado';
+  else txt=`${st.selected.size} selecionado${st.selected.size!==1?'s':''}`;
+  btn.innerHTML=esc(txt)+' <span style="float:right;opacity:.6">▾</span>';
+  btn.classList.toggle('msf-active',st.selected!==null);
+}
+function msfRenderOptions(id,searchQ){
+  const cont=document.getElementById('msf-options-'+id);if(!cont)return;
+  const st=MSF[id];if(!st)return;
+  const q=norm(searchQ||'');
+  const opts=st.options.filter(o=>!q||norm(o).includes(q));
+  const selAllCk=document.getElementById('msf-selall-'+id);
+  if(selAllCk)selAllCk.checked=st.selected===null;
+  cont.innerHTML=opts.length?opts.map(o=>{
+    const checked=st.selected===null||st.selected.has(o);
+    const safe=esc(o).replace(/'/g,"\\'");
+    return`<label class="msf-opt"><input type="checkbox" ${checked?'checked':''} onchange="msfToggleOne('${id}','${safe}',this.checked)">${esc(o)}</label>`;
+  }).join(''):'<div style="padding:.5rem;color:var(--ink4);font-size:.7rem;text-align:center">nada encontrado</div>';
+}
+function msfToggle(id){
+  const wasOpen=document.getElementById('msf-panel-'+id).style.display!=='none';
+  document.querySelectorAll('.msf-panel').forEach(p=>p.style.display='none');
+  if(!wasOpen){
+    document.getElementById('msf-panel-'+id).style.display='flex';
+    const search=document.querySelector('#msf-panel-'+id+' .msf-search');
+    if(search){search.value='';setTimeout(()=>search.focus(),30);}
+    msfRenderOptions(id);
+  }
+}
+function msfToggleAll(id,checked){
+  MSF[id].selected=checked?null:new Set();
+  msfRenderOptions(id);msfRenderButton(id);
+  MSF[id].onChange();
+}
+function msfToggleOne(id,value,checked){
+  const st=MSF[id];
+  if(st.selected===null)st.selected=new Set(st.options);
+  if(checked)st.selected.add(value);else st.selected.delete(value);
+  if(st.selected.size===st.options.length)st.selected=null;
+  const selAllCk=document.getElementById('msf-selall-'+id);
+  if(selAllCk)selAllCk.checked=st.selected===null;
+  msfRenderButton(id);
+  st.onChange();
+}
+function msfMatch(id,value){
+  const st=MSF[id];
+  if(!st||st.selected===null)return true;
+  return st.selected.has(value);
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.msf'))document.querySelectorAll('.msf-panel').forEach(p=>p.style.display='none');
+});
 
 let _ncmIdx=-1;
 function openNCM(i){
@@ -2237,9 +2353,24 @@ function rv2SaveEdit(){
 
 /* ── COTAÇÕES / PEDIDOS (listas) ── */
 function rvRenderCotacoes(){
-  const lista=rvLoadCotacoes();
+  const todas=rvLoadCotacoes();
   const cont=rvEl('rv-cotacoes-container');
-  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
+  const wrapCl=document.getElementById('msf-cot-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('cot-cl','Todos Clientes');
+  msfPopulate('cot-cl',[...new Set(todas.map(c=>c.cliente))].sort(),'Todos Clientes',rvRenderCotacoes);
+  const wrapForn=document.getElementById('msf-cot-forn-wrap');
+  if(wrapForn&&!wrapForn.innerHTML)wrapForn.innerHTML=msfHtml('cot-forn','Todos Fornecedores');
+  msfPopulate('cot-forn',[...new Set(todas.map(c=>c.fornecedor))].sort(),'Todos Fornecedores',rvRenderCotacoes);
+  const wrapTipo=document.getElementById('msf-cot-tipo-wrap');
+  if(wrapTipo&&!wrapTipo.innerHTML)wrapTipo.innerHTML=msfHtml('cot-tipo','Todos Tipos');
+  msfPopulate('cot-tipo',[...new Set(todas.map(c=>c.tipo))].sort(),'Todos Tipos',rvRenderCotacoes);
+  const q=norm(document.getElementById('cot-q')?.value);
+  const lista=todas.filter(c=>{
+    const t=norm(`${c.cliente} ${c.fornecedor}`);
+    return(!q||t.includes(q))&&msfMatch('cot-cl',c.cliente)&&msfMatch('cot-forn',c.fornecedor)&&msfMatch('cot-tipo',c.tipo);
+  });
+  if(!todas.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação encontrada com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
@@ -2367,7 +2498,19 @@ function rvCPRenderSum(tipo){
   const sumEl=rvEl('cp-'+(tipo==='fornecedor'?'forn':tipo==='beneficiador'?'benef':'cli')+'-sum');
   const soma=rows.reduce((a,r)=>a+(r.pct||0),0);
   const ok=Math.abs(soma-100)<0.05;
-  sumEl.innerHTML=`Soma: <b style="color:${ok?'var(--green)':'var(--red)'}">${soma.toFixed(1)}%</b>${ok?' ✓':' — precisa somar 100%'}`;
+  if(ok){
+    sumEl.innerHTML=`Soma: <b style="color:var(--green)">${soma.toFixed(1)}%</b> ✓`;
+    return;
+  }
+  const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
+  const tot=p?rvCPTotais(p)[tipo]:0;
+  const faltaPct=100-soma;
+  const faltaValor=tot*faltaPct/100;
+  const sobrou=faltaPct<0;
+  sumEl.innerHTML=`Soma: <b style="color:var(--red)">${soma.toFixed(1)}%</b>
+    <span style="display:inline-block;margin-left:.4rem;background:var(--ltred);color:var(--red);font-weight:700;padding:.15rem .5rem;border-radius:5px">
+      ${sobrou?'excedeu em':'falta'} ${Math.abs(faltaPct).toFixed(1)}% (${rvBrl(Math.abs(faltaValor))})
+    </span>`;
 }
 function rvCPSave(){
   const partes=['fornecedor','cliente'];
@@ -2396,29 +2539,46 @@ function rvCPSave(){
 }
 
 function rvRenderPedidos(){
-  const lista=rvLoadPedidos();
+  const todos=rvLoadPedidos();
   const cont=rvEl('rv-pedidos-container');
-  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação ou clique "Criar Pedido".</div>';return;}
-  function badgeStatus(p){
+  function statusLabel(p){
     if(rvIsProdutor(p.fornecedor)){
       const dates=p.ciDates;
-      const CI_ICONS=['📝','💰','🔍','🏭','🚚'];
-      const CI_CLASS=['s-pendente','s-pendente','s-producao','s-producao','s-entregue'];
       if(dates){
         for(let i=dates.length-1;i>=0;i--){
-          if(dates[i]&&dates[i].v&&!dates[i].est){
-            return `<span class="badge-status ${CI_CLASS[i]}">${CI_ICONS[i]} ${esc(RV_CI_LABELS[i])}</span>`;
-          }
+          if(dates[i]&&dates[i].v&&!dates[i].est)return RV_CI_LABELS[i];
         }
       }
-      return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
+      return 'Confirmado';
     }
     const st=p.status;
-    if(st.recebido)return '<span class="badge-status s-recebido">✅ Recebido</span>';
-    if(st.entregue)return '<span class="badge-status s-entregue">🚚 Entregue</span>';
-    if(st.producao)return '<span class="badge-status s-producao">🏭 Produção</span>';
-    return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
+    if(st.recebido)return 'Recebido';
+    if(st.entregue)return 'Entregue';
+    if(st.producao)return 'Produção';
+    return 'Confirmado';
   }
+  function badgeStatus(p){
+    const CI_ICONS={'Arte aprovada':'📝','Sinal recebido':'💰','Amostras aprovadas':'🔍','Fim produção':'🏭','Entrega efetuada':'🚚'};
+    const CI_CLASS={'Arte aprovada':'s-pendente','Sinal recebido':'s-pendente','Amostras aprovadas':'s-producao','Fim produção':'s-producao','Entrega efetuada':'s-entregue','Confirmado':'s-pendente','Recebido':'s-recebido','Entregue':'s-entregue','Produção':'s-producao'};
+    const lbl=statusLabel(p);
+    return `<span class="badge-status ${CI_CLASS[lbl]||'s-pendente'}">${CI_ICONS[lbl]||'⏳'} ${esc(lbl)}</span>`;
+  }
+  const wrapCl=document.getElementById('msf-ped-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('ped-cl','Todos Clientes');
+  msfPopulate('ped-cl',[...new Set(todos.map(p=>p.cliente))].sort(),'Todos Clientes',rvRenderPedidos);
+  const wrapForn=document.getElementById('msf-ped-forn-wrap');
+  if(wrapForn&&!wrapForn.innerHTML)wrapForn.innerHTML=msfHtml('ped-forn','Todos Fornecedores');
+  msfPopulate('ped-forn',[...new Set(todos.map(p=>p.fornecedor))].sort(),'Todos Fornecedores',rvRenderPedidos);
+  const wrapSt=document.getElementById('msf-ped-st-wrap');
+  if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('ped-st','Todos Status');
+  msfPopulate('ped-st',[...new Set(todos.map(statusLabel))].sort(),'Todos Status',rvRenderPedidos);
+  const q=norm(document.getElementById('ped-q')?.value);
+  const lista=todos.filter(p=>{
+    const t=norm(`${p.cliente} ${p.fornecedor}`);
+    return(!q||t.includes(q))&&msfMatch('ped-cl',p.cliente)&&msfMatch('ped-forn',p.fornecedor)&&msfMatch('ped-st',statusLabel(p));
+  });
+  if(!todos.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação ou clique "Criar Pedido".</div>';return;}
+  if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido encontrado com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
     <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
@@ -2578,7 +2738,19 @@ function rvRenderFin(){
       </div>
     </div>`;
   if(!lista.length){cont.innerHTML='<p class="hint">Nenhum pedido com condições de pagamento definidas ainda. As condições são pedidas automaticamente ao criar um pedido.</p>';return;}
-  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+lista.map(p=>{
+  const wrapCl=document.getElementById('msf-finr-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('finr-cl','Todos Clientes');
+  msfPopulate('finr-cl',[...new Set(lista.map(p=>p.cliente))].sort(),'Todos Clientes',rvRenderFin);
+  const wrapForn=document.getElementById('msf-finr-forn-wrap');
+  if(wrapForn&&!wrapForn.innerHTML)wrapForn.innerHTML=msfHtml('finr-forn','Todos Fornecedores');
+  msfPopulate('finr-forn',[...new Set(lista.map(p=>p.fornecedor))].sort(),'Todos Fornecedores',rvRenderFin);
+  const q=norm(document.getElementById('finr-q')?.value);
+  const listaFiltrada=lista.filter(p=>{
+    const t=norm(`${p.cliente} ${p.fornecedor}`);
+    return(!q||t.includes(q))&&msfMatch('finr-cl',p.cliente)&&msfMatch('finr-forn',p.fornecedor);
+  });
+  if(!listaFiltrada.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado com esses filtros.</p>';return;}
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+listaFiltrada.map(p=>{
     const tot=rvCPTotais(p);
     const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
     const bar=(label,pago,total,color)=>{
