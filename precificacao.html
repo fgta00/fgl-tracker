@@ -222,6 +222,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 .rv-data-table{width:100%;border-collapse:collapse;font-size:.74rem}
 .rv-data-table th{background:var(--navy);color:#fff;padding:.45rem .55rem;text-align:left;font-size:.62rem;font-weight:600;white-space:nowrap}
 .rv-data-table th.rv-num{text-align:right}
+.rv-data-table tr.rv-th-center th{text-align:center}
 .rv-data-table td{padding:.4rem .55rem;border-bottom:1px solid var(--bdr);vertical-align:middle}
 .rv-data-table tr:last-child td{border-bottom:none}
 .rv-data-table tr:hover td{background:var(--ltgry)}
@@ -449,9 +450,10 @@ body.dark .rv-tabs{background:#0A0F1A}
     </div>
 
     <div id="rvpane-fin" class="rv-pane">
+      <div id="rv-fin-summary" style="margin-bottom:.9rem"></div>
       <div class="card">
         <div class="collap-h open" style="cursor:default">
-          <div class="sh" style="margin:0">Financeiro — Pedidos em produção</div>
+          <div class="sh" style="margin:0">Financeiro — Pedidos com condições definidas</div>
         </div>
         <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
       </div>
@@ -576,7 +578,7 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="modal" style="max-width:640px">
     <div class="modal-h"><span id="cp-title">Condições de Pagamento e Recebimento</span><button class="mcls" onclick="closeM('condpagto')">✕</button></div>
     <div class="modal-b">
-      <p style="font-size:.68rem;color:var(--ink3);margin-bottom:.8rem">Defina em quantos dias após o pedido cada parcela vence, e o % (ou valor) dela — até somar 100% do total de cada parte. A Ref padronizada (SINAL/BALANÇO/AMOSTRAS) ajuda a organizar os lançamentos depois.</p>
+      <p style="font-size:.68rem;color:var(--ink3);margin-bottom:.8rem">Defina em quantos dias após o pedido cada parcela vence, e o % (ou valor) dela — até somar 100% do total de cada parte. A Ref padronizada (SINAL/SALDO/AMOSTRAS) ajuda a organizar os lançamentos depois.</p>
 
       <div class="fsep">🏭 Pagar ao Fornecedor — <span id="cp-forn-nome"></span> — Total <b id="cp-forn-total"></b></div>
       <div id="cp-forn-rows"></div>
@@ -604,7 +606,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
 <div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
   <div class="modal" style="max-width:600px">
-    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="mcls" onclick="closeM('finr')">✕</button></div>
+    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" onclick="closeM('finr')">✕</button></div>
     <div class="modal-b" id="finr-body"></div>
   </div>
 </div>
@@ -2238,7 +2240,7 @@ function rvRenderCotacoes(){
   const lista=rvLoadCotacoes();
   const cont=rvEl('rv-cotacoes-container');
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
-  let html=`<table class="rv-data-table"><thead><tr>
+  let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
@@ -2286,7 +2288,7 @@ function rvConverterEmPedido(cotId){
    CONDIÇÕES DE PAGAMENTO E RECEBIMENTO
    (definidas na criação do pedido — parcelas em dias + % até somar o total)
 ══════════════════════════════════════ */
-const RV_FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS'];
+const RV_FIN_REF_TAGS=['SINAL','SALDO','AMOSTRAS'];
 let rvCPPedidoId=null;
 let rvCPParcelas={fornecedor:[],beneficiador:[],cliente:[]};
 function rvCPTotais(p){
@@ -2324,7 +2326,7 @@ function rvOpenCondPagto(pedidoId){
   document.getElementById('ovl-condpagto').classList.add('open');
 }
 function rvCPAddParcela(tipo){
-  rvCPParcelas[tipo].push({dias:0,pct:0,ref:'BALANÇO'});
+  rvCPParcelas[tipo].push({dias:0,pct:0,ref:'SALDO'});
   rvCPRenderRows(tipo);
 }
 function rvCPRemoveParcela(tipo,idx){
@@ -2332,8 +2334,17 @@ function rvCPRemoveParcela(tipo,idx){
   rvCPRenderRows(tipo);
 }
 function rvCPUpdateParcela(tipo,idx,field,value){
-  rvCPParcelas[tipo][idx][field]=field==='ref'?value:(parseFloat(value)||0);
-  rvCPRenderSum(tipo);
+  const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
+  const tot=p?rvCPTotais(p)[tipo]:0;
+  if(field==='ref'){rvCPParcelas[tipo][idx].ref=value;}
+  else if(field==='dias'){rvCPParcelas[tipo][idx].dias=parseFloat(value)||0;}
+  else if(field==='pct'){
+    rvCPParcelas[tipo][idx].pct=parseFloat(value)||0;
+  }else if(field==='valor'){
+    const valor=parseFloat(value)||0;
+    rvCPParcelas[tipo][idx].pct=tot>0?(valor/tot*100):0;
+  }
+  rvCPRenderRows(tipo); // re-renderiza pra atualizar o campo espelhado (% ↔ valor)
 }
 function rvCPRenderRows(tipo){
   const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
@@ -2342,9 +2353,9 @@ function rvCPRenderRows(tipo){
   const cont=rvEl('cp-'+(tipo==='fornecedor'?'forn':tipo==='beneficiador'?'benef':'cli')+'-rows');
   cont.innerHTML=rows.map((r,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
     <div style="width:70px"><input type="number" value="${r.dias}" min="0" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem" onchange="rvCPUpdateParcela('${tipo}',${i},'dias',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">dias após</div></div>
-    <div style="width:60px"><input type="number" value="${r.pct}" min="0" max="100" step="0.1" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem" onchange="rvCPUpdateParcela('${tipo}',${i},'pct',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">%</div></div>
-    <div style="flex:1;font-size:.68rem;color:var(--ink3);font-family:'IBM Plex Mono'">${rvBrl(tot*r.pct/100)}</div>
-    <select style="width:110px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.68rem" onchange="rvCPUpdateParcela('${tipo}',${i},'ref',this.value)">
+    <div style="width:55px"><input type="number" value="${r.pct.toFixed(2).replace(/\.?0+$/,'')}" min="0" max="100" step="0.1" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem" onchange="rvCPUpdateParcela('${tipo}',${i},'pct',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">%</div></div>
+    <div style="width:90px"><input type="number" value="${(tot*r.pct/100).toFixed(2)}" min="0" step="0.01" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem;font-family:'IBM Plex Mono'" onchange="rvCPUpdateParcela('${tipo}',${i},'valor',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">R$</div></div>
+    <select style="width:100px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.68rem" onchange="rvCPUpdateParcela('${tipo}',${i},'ref',this.value)">
       ${RV_FIN_REF_TAGS.map(t=>`<option value="${t}"${r.ref===t?' selected':''}>${t}</option>`).join('')}
     </select>
     <button onclick="rvCPRemoveParcela('${tipo}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem">✕</button>
@@ -2379,6 +2390,7 @@ function rvCPSave(){
   rvSavePedidos(lista);
   rvSyncPush();
   closeM('condpagto');
+  if(rvFinCurPedidoId===rvCPPedidoId)rvOpenFinPopupR(rvCPPedidoId);
   rvRenderFin();
   toastSave('Condições salvas ✓');
 }
@@ -2407,7 +2419,7 @@ function rvRenderPedidos(){
     if(st.producao)return '<span class="badge-status s-producao">🏭 Produção</span>';
     return '<span class="badge-status s-pendente">⏳ Confirmado</span>';
   }
-  let html=`<table class="rv-data-table"><thead><tr>
+  let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
     <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
@@ -2535,6 +2547,36 @@ function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId
 function rvRenderFin(){
   const cont=rvEl('rv-fin-container');
   const lista=rvLoadPedidos().filter(p=>p.planoPagamento);
+  // ── resumo geral ──
+  let totCompra=0,totVenda=0,totPagar=0,totReceber=0,totPago=0,totRecebido=0;
+  lista.forEach(p=>{
+    const tot=rvCPTotais(p);
+    const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
+    totCompra+=tot.fornecedor+(p.comLogo?tot.beneficiador:0);
+    totVenda+=tot.cliente;
+    totPagar+=Math.max(0,tot.fornecedor-pagoForn)+(p.comLogo?Math.max(0,tot.beneficiador-pagoBenef):0);
+    totReceber+=Math.max(0,tot.cliente-recCli);
+    totPago+=pagoForn+pagoBenef;
+    totRecebido+=recCli;
+  });
+  const margem=totVenda-totCompra;
+  const saldo=totReceber-totPagar;
+  const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.62rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.4rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
+  const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.25rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.65rem;color:var(--ink3)">${lbl}</span><span style="font-size:.7rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
+  rvEl('rv-fin-summary').innerHTML=`
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch">
+      <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1rem 1.2rem">
+        ${big('A Pagar',rvBrl(totPagar),'var(--red)')}
+        ${big('A Receber',rvBrl(totReceber),'var(--green)')}
+        ${big('Saldo Líquido',rvBrl(saldo),saldo>=0?'var(--green)':'var(--red)')}
+      </div>
+      <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.7rem 1rem">
+        ${small('Total Compra',rvBrl(totCompra),'var(--ink2)')}
+        ${small('Total Venda',rvBrl(totVenda),'var(--teal)')}
+        ${small('Margem Bruta',rvBrl(margem)+(totVenda>0?' ('+Math.round(margem/totVenda*100)+'%)':''),margem>=0?'var(--green)':'var(--red)')}
+        ${small('Pago / Recebido',rvBrl(totPago)+' / '+rvBrl(totRecebido),'var(--ink2)')}
+      </div>
+    </div>`;
   if(!lista.length){cont.innerHTML='<p class="hint">Nenhum pedido com condições de pagamento definidas ainda. As condições são pedidas automaticamente ao criar um pedido.</p>';return;}
   cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+lista.map(p=>{
     const tot=rvCPTotais(p);
@@ -2563,9 +2605,11 @@ function rvFinPartyRows(pedidoId,party,total,isReceipt){
       <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`).join('')
     +'</tbody></table>';
 }
+let rvFinCurPedidoId=null;
 function rvOpenFinPopupR(pedidoId){
   const p=rvLoadPedidos().find(x=>x.id===pedidoId);
   if(!p){toastSave('Pedido não encontrado');return;}
+  rvFinCurPedidoId=pedidoId;
   const tot=rvCPTotais(p);
   rvEl('finr-title').textContent=`Financeiro — ${p.cliente} (${p.data})`;
   const partySection=(label,party,total,isReceipt)=>{

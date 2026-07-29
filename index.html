@@ -81,6 +81,16 @@ main{max-width:2400px;margin:0 auto;padding:1rem 1.2rem}
 .sval{font-size:1.18rem;font-weight:700;line-height:1;font-family:'IBM Plex Mono'}
 .tb{display:flex;gap:.45rem;margin-bottom:.75rem;align-items:center;flex-wrap:wrap}
 .tb input,.tb select{font-family:'IBM Plex Sans';font-size:.76rem;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .62rem;background:var(--card);color:var(--ink);outline:none;transition:border-color .15s}
+.msf{position:relative;display:inline-block}
+.msf-btn{font-family:'IBM Plex Sans';font-size:.76rem;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .62rem;background:var(--card);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap;min-width:120px}
+.msf-btn.msf-active{border-color:var(--blue);color:var(--blue);font-weight:600}
+.msf-panel{position:absolute;top:calc(100% + 4px);left:0;z-index:400;background:var(--card);border:1.5px solid var(--bdr2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);width:220px;max-height:320px;display:flex;flex-direction:column;overflow:hidden}
+.msf-search{margin:.4rem;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-size:.72rem;background:var(--card);color:var(--ink)}
+.msf-options{overflow-y:auto;flex:1;padding:0 .3rem .3rem}
+.msf-opt{display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;font-size:.72rem;cursor:pointer;border-radius:5px;color:var(--ink2)}
+.msf-opt:hover{background:var(--ltgry)}
+.msf-opt input{width:auto;margin:0}
+.msf-selectall{border-bottom:1px solid var(--bdr);margin:0 .3rem .2rem;padding-bottom:.4rem;font-weight:600}
 .tb input:focus,.tb select:focus{border-color:var(--blue)}
 .finfo{font-size:.67rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ml{margin-left:auto;display:flex;gap:.4rem}
@@ -89,10 +99,10 @@ main{max-width:2400px;margin:0 auto;padding:1rem 1.2rem}
 .bsm.d{color:var(--red)}.bsm.d:hover{background:var(--ltred);border-color:var(--red)}
 tr .del-row{opacity:0;transition:opacity .15s}
 tr:hover .del-row{opacity:1}
-.tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;overflow-y:visible;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:collapse;font-size:11.5px}
-thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14);position:sticky;top:98px;z-index:250}
-thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2);position:sticky;top:121px;z-index:250}
+thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14);position:sticky;top:var(--sticky-grp-top,98px);z-index:250}
+thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2);position:sticky;top:var(--sticky-ch-top,121px);z-index:250}
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
@@ -313,8 +323,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
   <div class="sbar" id="int-sum"></div>
   <div class="tb">
     <input id="int-q" placeholder="🔍 Buscar PO, cliente, produto…" oninput="renderInternal()">
-    <select id="int-st" onchange="renderInternal()"><option value="">Todos os Status</option></select>
-    <select id="int-cl" onchange="renderInternal()"><option value="">Todos os Clientes</option></select>
+    <span id="msf-int-st-wrap"></span>
+    <span id="msf-int-cl-wrap"></span>
     <span class="finfo" id="int-cnt"></span>
     <div class="ml" style="display:flex;gap:.5rem;align-items:center">
       <div class="toggle-grp ci-subview-toggle">
@@ -364,8 +374,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <div id="view-client" style="display:none">
   <div class="tb">
     <input id="cli-q" placeholder="🔍 Buscar PO, produto…" oninput="renderClient()">
-    <select id="cli-st" onchange="renderClient()"><option value="">Todos os Status</option></select>
-    <select id="cli-cl" onchange="renderClient()"><option value="">Todos os Clientes</option></select>
+    <span id="msf-cli-st-wrap"></span>
+    <span id="msf-cli-cl-wrap"></span>
     <span class="finfo" id="cli-cnt"></span>
     <div class="ml" style="display:flex;gap:.5rem;align-items:center">
       <div class="toggle-grp ci-subview-toggle">
@@ -403,9 +413,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
   </div>
   <div class="tb">
     <input id="fin-q" placeholder="🔍 IP, PO, FO…" oninput="renderFinanceiro()" style="width:120px;min-width:80px">
-    <select id="fin-st" onchange="renderFinanceiro()"><option value="">Todos Status</option></select>
-    <select id="fin-sup" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
-    <select id="fin-cl" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
+    <span id="msf-fin-st-wrap"></span>
+    <span id="msf-fin-sup-wrap"></span>
+    <span id="msf-fin-cl-wrap"></span>
     <span class="finfo" id="fin-cnt"></span>
   </div>
   <div id="fin-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:.9rem;margin-bottom:1.4rem"></div>
@@ -439,8 +449,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <div id="l-ctx" style="font-size:.66rem;color:var(--ink3);margin:-.3rem 0 .7rem;padding:0 .3rem;min-height:1rem"></div>
       <div class="tb" style="margin-bottom:.6rem">
         <input id="led-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
-        <select id="led-sup-f" onchange="renderFinanceiro()"><option value="">Todos Fornecedores</option></select>
-        <select id="led-pi-f" onchange="renderFinanceiro()"><option value="">Todos IP</option></select>
+        <span id="msf-led-sup-f-wrap"></span>
+        <span id="msf-led-pi-f-wrap"></span>
         <input id="led-from" type="date" oninput="renderFinanceiro()">
         <span style="font-size:.72rem;color:var(--ink4)">até</span>
         <input id="led-to" type="date" oninput="renderFinanceiro()">
@@ -486,8 +496,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <div id="r-ctx" style="font-size:.66rem;color:var(--ink3);margin:-.3rem 0 .7rem;padding:0 .3rem;min-height:1rem"></div>
       <div class="tb" style="margin-bottom:.6rem">
         <input id="rec-q" placeholder="🔍" oninput="renderFinanceiro()" style="width:72px;min-width:60px">
-        <select id="rec-cli-f" onchange="renderFinanceiro()"><option value="">Todos Clientes</option></select>
-        <select id="rec-pi-f" onchange="renderFinanceiro()"><option value="">Todos IP</option></select>
+        <span id="msf-rec-cli-f-wrap"></span>
+        <span id="msf-rec-pi-f-wrap"></span>
         <input id="rec-from" type="date" oninput="renderFinanceiro()">
         <span style="font-size:.72rem;color:var(--ink4)">até</span>
         <input id="rec-to" type="date" oninput="renderFinanceiro()">
@@ -829,6 +839,92 @@ let _cryptoKey=null; // guarda a SENHA do cofre (não a CryptoKey) — reusada a
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ══════════════════════════════════════
+   MULTI-SELECT FILTER (estilo Excel: busca + selecionar todos + checkboxes)
+   selected===null representa "todos" (sem filtro ativo, mais barato que guardar tudo)
+══════════════════════════════════════ */
+const MSF={};
+function msfHtml(id,label){
+  return`<div class="msf" id="msf-${id}">
+    <button type="button" class="msf-btn" id="msf-btn-${id}" onclick="msfToggle('${id}')">${esc(label)}</button>
+    <div class="msf-panel" id="msf-panel-${id}" style="display:none">
+      <input type="text" class="msf-search" placeholder="🔍 Buscar" oninput="msfRenderOptions('${id}',this.value)">
+      <label class="msf-opt msf-selectall"><input type="checkbox" id="msf-selall-${id}" onchange="msfToggleAll('${id}',this.checked)"> (Selecionar Todos)</label>
+      <div class="msf-options" id="msf-options-${id}"></div>
+    </div>
+  </div>`;
+}
+function msfPopulate(id,options,label,onChange){
+  const isNew=!MSF[id];
+  if(isNew)MSF[id]={options:[],selected:null,onChange,label};
+  const st=MSF[id];
+  st.options=options;st.label=label;st.onChange=onChange;
+  if(st.selected){ // remove seleções de valores que não existem mais na lista atual
+    const filtered=new Set([...st.selected].filter(v=>options.includes(v)));
+    st.selected=filtered.size===options.length?null:filtered;
+  }
+  msfRenderButton(id);
+  const panel=document.getElementById('msf-panel-'+id);
+  if(panel&&panel.style.display!=='none')msfRenderOptions(id);
+}
+function msfRenderButton(id){
+  const btn=document.getElementById('msf-btn-'+id);if(!btn)return;
+  const st=MSF[id];if(!st)return;
+  let txt;
+  if(st.selected===null)txt=st.label;
+  else if(st.selected.size===0)txt='Nenhum selecionado';
+  else txt=`${st.selected.size} selecionado${st.selected.size!==1?'s':''}`;
+  btn.innerHTML=esc(txt)+' <span style="float:right;opacity:.6">▾</span>';
+  btn.classList.toggle('msf-active',st.selected!==null);
+}
+function msfRenderOptions(id,searchQ){
+  const cont=document.getElementById('msf-options-'+id);if(!cont)return;
+  const st=MSF[id];if(!st)return;
+  const q=norm(searchQ||'');
+  const opts=st.options.filter(o=>!q||norm(o).includes(q));
+  const selAllCk=document.getElementById('msf-selall-'+id);
+  if(selAllCk)selAllCk.checked=st.selected===null;
+  cont.innerHTML=opts.length?opts.map(o=>{
+    const checked=st.selected===null||st.selected.has(o);
+    const safe=esc(o).replace(/'/g,"\\'");
+    return`<label class="msf-opt"><input type="checkbox" ${checked?'checked':''} onchange="msfToggleOne('${id}','${safe}',this.checked)">${esc(o)}</label>`;
+  }).join(''):'<div style="padding:.5rem;color:var(--ink4);font-size:.7rem;text-align:center">nada encontrado</div>';
+}
+function msfToggle(id){
+  const wasOpen=document.getElementById('msf-panel-'+id).style.display!=='none';
+  document.querySelectorAll('.msf-panel').forEach(p=>p.style.display='none');
+  if(!wasOpen){
+    document.getElementById('msf-panel-'+id).style.display='flex';
+    const search=document.querySelector('#msf-panel-'+id+' .msf-search');
+    if(search){search.value='';setTimeout(()=>search.focus(),30);}
+    msfRenderOptions(id);
+  }
+}
+function msfToggleAll(id,checked){
+  MSF[id].selected=checked?null:new Set();
+  msfRenderOptions(id);msfRenderButton(id);
+  MSF[id].onChange();
+}
+function msfToggleOne(id,value,checked){
+  const st=MSF[id];
+  if(st.selected===null)st.selected=new Set(st.options);
+  if(checked)st.selected.add(value);else st.selected.delete(value);
+  if(st.selected.size===st.options.length)st.selected=null;
+  const selAllCk=document.getElementById('msf-selall-'+id);
+  if(selAllCk)selAllCk.checked=st.selected===null;
+  msfRenderButton(id);
+  st.onChange();
+}
+function msfMatch(id,value){
+  const st=MSF[id];
+  if(!st||st.selected===null)return true;
+  return st.selected.has(value);
+}
+function msfHasFilter(id){const st=MSF[id];return st&&st.selected!==null;}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.msf'))document.querySelectorAll('.msf-panel').forEach(p=>p.style.display='none');
+});
 
 const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 function normDate(v){
@@ -1536,27 +1632,26 @@ function renderSummary(){
    RENDER INTERNAL
 ══════════════════════════════════════ */
 function populateStatusDropdowns(){
-  ['int-st','cli-st'].forEach(id=>{
-    const sel=document.getElementById(id);if(!sel)return;
-    const cur=sel.value;
-    sel.innerHTML='<option value="">Todos os Status</option>'+SLST.map(s=>`<option value="${esc(s)}"${s===cur?' selected':''}>${esc(s)}</option>`).join('');
-  });
+  const wrapSt=document.getElementById('msf-int-st-wrap');
+  if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('int-st','Todos os Status');
+  msfPopulate('int-st',SLST.slice(),'Todos os Status',renderInternal);
+  const wrapCliSt=document.getElementById('msf-cli-st-wrap');
+  if(wrapCliSt&&!wrapCliSt.innerHTML)wrapCliSt.innerHTML=msfHtml('cli-st','Todos os Status');
+  msfPopulate('cli-st',SLST.slice(),'Todos os Status',renderClient);
 }
 function renderInternal(){
   const q=norm(document.getElementById('int-q')?.value);
-  const st=document.getElementById('int-st')?.value||'';
-  const cl=document.getElementById('int-cl')?.value||'';
+  const wrapCl=document.getElementById('msf-int-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('int-cl','Todos os Clientes');
+  const clients=[...new Set(orders.map(o=>o.client))].sort();
+  msfPopulate('int-cl',clients,'Todos os Clientes',renderInternal);
   const flt=orders.filter(o=>{
     const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi} ${o.supplier||''} ${linkPay(o)?.inv||''}`);
-    return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);
+    return(!q||t.includes(q))&&msfMatch('int-st',o.status)&&msfMatch('int-cl',o.client);
   });
   const fltS=applySortOrd(flt);
   document.getElementById('int-cnt').textContent=`${flt.length} pedidos`;
   updateSortHeaders();
-  const clSel=document.getElementById('int-cl');
-  const curCl=clSel.value;
-  const clients=[...new Set(orders.map(o=>o.client))].sort();
-  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${esc(c)}"${c===curCl?' selected':''}>${esc(c)}</option>`).join('');
   document.getElementById('int-body').innerHTML=fltS.map((o,i)=>{
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L">
@@ -1674,14 +1769,12 @@ function getNextAction(o){
 }
 function renderClient(){
   const q=norm(document.getElementById('cli-q')?.value);
-  const st=document.getElementById('cli-st')?.value||'';
-  const cl=document.getElementById('cli-cl')?.value||'';
-  const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&(!st||o.status===st)&&(!cl||o.client===cl);});
-  document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
-  const clSel=document.getElementById('cli-cl');
-  const curCl=clSel.value;
+  const wrapCl=document.getElementById('msf-cli-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('cli-cl','Todos os Clientes');
   const clients=[...new Set(orders.map(o=>o.client))].sort();
-  clSel.innerHTML='<option value="">Todos os Clientes</option>'+clients.map(c=>`<option value="${esc(c)}"${c===curCl?' selected':''}>${esc(c)}</option>`).join('');
+  msfPopulate('cli-cl',clients,'Todos os Clientes',renderClient);
+  const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&msfMatch('cli-st',o.status)&&msfMatch('cli-cl',o.client);});
+  document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
     let rowStyle='';
     if(o.status==='FINALIZADO')rowStyle=' style="background:#F0FAF5"';
@@ -1711,31 +1804,31 @@ function renderClient(){
    momento do ciclo de vida, não durante a renderização)
 ══════════════════════════════════════ */
 function getFinanceFilters(){
-  return{
-    q:norm(document.getElementById('fin-q')?.value),
-    st:document.getElementById('fin-st')?.value||'',
-    cl:document.getElementById('fin-cl')?.value||'',
-    fsup:document.getElementById('fin-sup')?.value||''
-  };
+  return{q:norm(document.getElementById('fin-q')?.value)};
 }
 function getFilteredFinancePayments(filters){
-  const{q,st,cl,fsup}=filters;
+  const{q}=filters;
   return payments.filter(p=>{
     const t=norm(`${p.pi} ${p.po} ${p.inv||''} ${p.supplier} ${p.client||''}`);
     const linkedO=linkOrd(p);
     const effStatus=linkedO?linkedO.status:p.status;
-    return(!q||t.includes(q))&&(!st||effStatus===st)&&(!fsup||p.supplier===fsup)&&(!cl||p.client===cl);
+    return(!q||t.includes(q))&&msfMatch('fin-st',effStatus)&&msfMatch('fin-sup',p.supplier)&&msfMatch('fin-cl',p.client||'');
   });
 }
 function getSortedFinancePayments(list){return applySortPay(list);}
 
 function populateFinanceFilters(){
-  const finStSel=document.getElementById('fin-st');
-  if(finStSel){const v=finStSel.value;finStSel.innerHTML='<option value="">Todos Status</option>'+SLST.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
-  const fSupSel=document.getElementById('fin-sup');
-  if(fSupSel){const v=fSupSel.value;const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();fSupSel.innerHTML='<option value="">Todos Fornecedores</option>'+sups.map(s=>`<option value="${esc(s)}"${s===v?' selected':''}>${esc(s)}</option>`).join('');}
-  const clSel=document.getElementById('fin-cl');
-  if(clSel){const v=clSel.value;const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();clSel.innerHTML='<option value="">Todos Clientes</option>'+cls.map(c=>`<option value="${esc(c)}"${c===v?' selected':''}>${esc(c)}</option>`).join('');}
+  const wrapSt=document.getElementById('msf-fin-st-wrap');
+  if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('fin-st','Todos Status');
+  msfPopulate('fin-st',SLST.slice(),'Todos Status',renderFinanceiro);
+  const wrapSup=document.getElementById('msf-fin-sup-wrap');
+  if(wrapSup&&!wrapSup.innerHTML)wrapSup.innerHTML=msfHtml('fin-sup','Todos Fornecedores');
+  const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();
+  msfPopulate('fin-sup',sups,'Todos Fornecedores',renderFinanceiro);
+  const wrapCl=document.getElementById('msf-fin-cl-wrap');
+  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('fin-cl','Todos Clientes');
+  const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();
+  msfPopulate('fin-cl',cls,'Todos Clientes',renderFinanceiro);
 }
 
 function calculateFinanceSummary(){
@@ -1940,24 +2033,20 @@ const transactionConfigs={
 
 function filterTransactions(config){
   const list=config.getList();
-  const entitySel=document.getElementById(config.entityFilterId);
-  const piSel=document.getElementById(config.piFilterId);
-  const curEntity=entitySel?.value||'',curPi=piSel?.value||'';
-  if(entitySel){
-    const vals=[...new Set(list.map(x=>x[config.entityField]||'').filter(Boolean))].sort();
-    entitySel.innerHTML=`<option value="">${config.entityFilterLabel}</option>`+vals.map(v=>`<option value="${esc(v)}"${v===curEntity?' selected':''}>${esc(v)}</option>`).join('');
-  }
-  if(piSel){
-    const pis=[...new Set(list.map(x=>x.pi))].sort();
-    piSel.innerHTML='<option value="">Todos IP</option>'+pis.map(p=>`<option value="${esc(p)}"${p===curPi?' selected':''}>${esc(p)}</option>`).join('');
-  }
+  const wrapEntity=document.getElementById('msf-'+config.entityFilterId+'-wrap');
+  if(wrapEntity&&!wrapEntity.innerHTML)wrapEntity.innerHTML=msfHtml(config.entityFilterId,config.entityFilterLabel);
+  const vals=[...new Set(list.map(x=>x[config.entityField]||'').filter(Boolean))].sort();
+  msfPopulate(config.entityFilterId,vals,config.entityFilterLabel,()=>renderTransactions(config));
+  const wrapPi=document.getElementById('msf-'+config.piFilterId+'-wrap');
+  if(wrapPi&&!wrapPi.innerHTML)wrapPi.innerHTML=msfHtml(config.piFilterId,'Todos IP');
+  const pis=[...new Set(list.map(x=>x.pi))].sort();
+  msfPopulate(config.piFilterId,pis,'Todos IP',()=>renderTransactions(config));
   const q=norm(document.getElementById(config.qId)?.value);
-  const entityVal=entitySel?.value||'',piVal=piSel?.value||'';
   const fromV=document.getElementById(config.fromId)?.value||'',toV=document.getElementById(config.toId)?.value||'';
   return list.filter(x=>{
     if(q&&!norm(config.searchFields(x)).includes(q))return false;
-    if(entityVal&&x[config.entityField]!==entityVal)return false;
-    if(piVal&&x.pi!==piVal)return false;
+    if(!msfMatch(config.entityFilterId,x[config.entityField]||''))return false;
+    if(!msfMatch(config.piFilterId,x.pi))return false;
     if(fromV||toV){const iso=dispToISO(x.date);if(fromV&&iso<fromV)return false;if(toV&&iso>toV)return false;}
     return true;
   });
@@ -2789,7 +2878,23 @@ function renderAll(){
   const nAlerts=calcAlerts().length;
   const tabInt=document.querySelectorAll('.stab')[0];
   if(tabInt)tabInt.innerHTML=nAlerts>0?`Controle Interno <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${nAlerts}</span>`:'Controle Interno';
+  updateStickyOffsets();
 }
+// Mede de verdade a altura do cabeçalho principal + sub-cabeçalho (em vez de chutar px fixos)
+// e ajusta onde o cabeçalho da tabela gruda ao rolar — assim ele sempre gruda exatamente
+// no ponto em que sumiria atrás do cabeçalho principal, sem sobrepor a primeira linha.
+function updateStickyOffsets(){
+  const header=document.querySelector('header');
+  const subheader=document.querySelector('.subheader');
+  if(!header||!subheader)return;
+  const headerH=header.offsetHeight;
+  const subH=subheader.offsetHeight;
+  document.documentElement.style.setProperty('--sticky-grp-top',(headerH+subH)+'px');
+  const grpRow=document.querySelector('thead .grp');
+  const grpRowH=grpRow?grpRow.offsetHeight:24;
+  document.documentElement.style.setProperty('--sticky-ch-top',(headerH+subH+grpRowH)+'px');
+}
+window.addEventListener('resize',updateStickyOffsets);
 
 // Enter salva, Escape fecha
 document.addEventListener('keydown',e=>{
