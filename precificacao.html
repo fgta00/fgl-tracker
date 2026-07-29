@@ -571,6 +571,44 @@ body.dark .rv-tabs{background:#0A0F1A}
   </div>
 </div>
 
+<!-- CONDIÇÕES DE PAGAMENTO E RECEBIMENTO — definidas na criação do pedido -->
+<div class="ovl" id="ovl-condpagto" onclick="if(event.target===this)closeM('condpagto')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-h"><span id="cp-title">Condições de Pagamento e Recebimento</span><button class="mcls" onclick="closeM('condpagto')">✕</button></div>
+    <div class="modal-b">
+      <p style="font-size:.68rem;color:var(--ink3);margin-bottom:.8rem">Defina em quantos dias após o pedido cada parcela vence, e o % (ou valor) dela — até somar 100% do total de cada parte. A Ref padronizada (SINAL/BALANÇO/AMOSTRAS) ajuda a organizar os lançamentos depois.</p>
+
+      <div class="fsep">🏭 Pagar ao Fornecedor — <span id="cp-forn-nome"></span> — Total <b id="cp-forn-total"></b></div>
+      <div id="cp-forn-rows"></div>
+      <button class="btn btn-s" style="font-size:.65rem;margin-top:.3rem" onclick="rvCPAddParcela('fornecedor')">＋ parcela</button>
+      <div style="font-size:.65rem;margin-top:.2rem" id="cp-forn-sum"></div>
+
+      <div id="cp-benef-wrap" style="display:none">
+        <div class="fsep" style="margin-top:1.1rem">🎨 Pagar ao Beneficiador (logo) — Total <b id="cp-benef-total"></b></div>
+        <div class="ff"><label>Beneficiador (fornecedor cadastrado)</label><select id="cp-benef-select"></select></div>
+        <div id="cp-benef-rows" style="margin-top:.4rem"></div>
+        <button class="btn btn-s" style="font-size:.65rem;margin-top:.3rem" onclick="rvCPAddParcela('beneficiador')">＋ parcela</button>
+        <div style="font-size:.65rem;margin-top:.2rem" id="cp-benef-sum"></div>
+      </div>
+
+      <div class="fsep" style="margin-top:1.1rem">👤 Receber do Cliente — <span id="cp-cli-nome"></span> — Total <b id="cp-cli-total"></b></div>
+      <div id="cp-cli-rows"></div>
+      <button class="btn btn-s" style="font-size:.65rem;margin-top:.3rem" onclick="rvCPAddParcela('cliente')">＋ parcela</button>
+      <div style="font-size:.65rem;margin-top:.2rem" id="cp-cli-sum"></div>
+
+      <button class="btn btn-p" style="width:100%;margin-top:1.2rem" onclick="rvCPSave()">💾 Salvar condições</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
+<div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="mcls" onclick="closeM('finr')">✕</button></div>
+    <div class="modal-b" id="finr-body"></div>
+  </div>
+</div>
+
 <!-- SEGURANÇA — trocar senha da conta e dos cofres -->
 <div class="ovl" id="ovl-security" onclick="if(event.target===this)closeM('security')">
   <div class="modal" style="max-width:420px">
@@ -1494,7 +1532,7 @@ let rvSyncPass=null;
 let _rvSyncTimer=null;
 let _rvRevision=0;
 
-function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA};}
+function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),ledgerR:rvLoadLedgerR(),receiptsR:rvLoadReceiptsR(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA};}
 function rvMergeById(localList,cloudList){
   // Une por id, e quando o mesmo id existe dos dois lados, quem tem
   // updatedAt mais recente vence de verdade (não é mais "local sempre
@@ -1520,6 +1558,8 @@ function rvMergeByKey(localList,cloudList,keyFn){
 function rvApplySyncData(data){
   if(Array.isArray(data.cotacoes))rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes));
   if(Array.isArray(data.pedidos))rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos));
+  if(Array.isArray(data.ledgerR))rvSaveLedgerR(rvMergeById(rvLoadLedgerR(),data.ledgerR));
+  if(Array.isArray(data.receiptsR))rvSaveReceiptsR(rvMergeById(rvLoadReceiptsR(),data.receiptsR));
   if(Array.isArray(data.clientes2))RV_CLIENTES2=rvMergeByKey(RV_CLIENTES2,data.clientes2,c=>(c.nome||'').toLowerCase().trim());
   if(Array.isArray(data.fornecedores2))RV_FORNECEDORES2=rvMergeByKey(RV_FORNECEDORES2,data.fornecedores2,f=>(f.nome||'').toLowerCase().trim());
   if(data.empresa&&typeof data.empresa.fedPct==='number'){
@@ -1661,9 +1701,11 @@ async function rvRecoverAndRetry(){
     const cloud=await rvCloudGet();
     if(!cloud||!cloud.blob)return false;
     const data=await decryptJSON(rvSyncPass,JSON.parse(cloud.blob));
-    // mescla: cotações/pedidos por id (não perde nada de ninguém); cadastros/empresa ficam com a versão local (é a que acabamos de editar)
+    // mescla: cotações/pedidos/lançamentos por id (não perde nada de ninguém); cadastros/empresa ficam com a versão local (é a que acabamos de editar)
     rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes||[]));
     rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos||[]));
+    rvSaveLedgerR(rvMergeById(rvLoadLedgerR(),data.ledgerR||[]));
+    rvSaveReceiptsR(rvMergeById(rvLoadReceiptsR(),data.receiptsR||[]));
     _rvRevision=cloud.revision||_rvRevision;
     const payload=await encryptJSON(rvSyncPass,rvCollectSyncData());
     const payloadStr=JSON.stringify(payload);
@@ -1750,6 +1792,17 @@ function rvSavePedidos(d,forceReplace){
     if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}
   }
   localStorage.setItem('av_pedidos',JSON.stringify(d));
+}
+// Lançamentos reais de pagamento/recebimento (contra o plano de condições de cada pedido)
+function rvLoadLedgerR(){try{return JSON.parse(localStorage.getItem('av_ledger')||'[]');}catch(e){return[];}}
+function rvSaveLedgerR(d,forceReplace){
+  if(!forceReplace){const cur=rvLoadLedgerR();if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}}
+  localStorage.setItem('av_ledger',JSON.stringify(d));
+}
+function rvLoadReceiptsR(){try{return JSON.parse(localStorage.getItem('av_receipts')||'[]');}catch(e){return[];}}
+function rvSaveReceiptsR(d,forceReplace){
+  if(!forceReplace){const cur=rvLoadReceiptsR();if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}}
+  localStorage.setItem('av_receipts',JSON.stringify(d));
 }
 
 /* ── SUB-ABAS DA REVENDA ── */
@@ -2089,6 +2142,7 @@ function rv2CriarPedido(){
   rv2RenderHist();
   toastSave('Pedido criado ✓');
   rvShowTab('pedidos');
+  rvOpenCondPagto(pedido.id);
 }
 
 /* ── EDITAR COTAÇÃO/PEDIDO JÁ SALVOS ── */
@@ -2225,7 +2279,110 @@ function rvConverterEmPedido(cotId){
   const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
   rvSyncPush();
   rvShowTab('pedidos');
+  rvOpenCondPagto(pedido.id);
 }
+
+/* ══════════════════════════════════════
+   CONDIÇÕES DE PAGAMENTO E RECEBIMENTO
+   (definidas na criação do pedido — parcelas em dias + % até somar o total)
+══════════════════════════════════════ */
+const RV_FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS'];
+let rvCPPedidoId=null;
+let rvCPParcelas={fornecedor:[],beneficiador:[],cliente:[]};
+function rvCPTotais(p){
+  return{
+    fornecedor:(p.preco||0)*(p.qtd||0),
+    beneficiador:p.cliche||0,
+    cliente:p.vendaTotal||0
+  };
+}
+function rvOpenCondPagto(pedidoId){
+  const p=rvLoadPedidos().find(x=>x.id===pedidoId);
+  if(!p){toastSave('Pedido não encontrado');return;}
+  rvCPPedidoId=pedidoId;
+  const tot=rvCPTotais(p);
+  rvEl('cp-forn-nome').textContent=p.fornecedor;
+  rvEl('cp-forn-total').textContent=rvBrl(tot.fornecedor);
+  rvEl('cp-cli-nome').textContent=p.cliente;
+  rvEl('cp-cli-total').textContent=rvBrl(tot.cliente);
+  const showBenef=!!p.comLogo;
+  rvEl('cp-benef-wrap').style.display=showBenef?'block':'none';
+  if(showBenef){
+    rvEl('cp-benef-total').textContent=rvBrl(tot.beneficiador);
+    const sel=rvEl('cp-benef-select');
+    sel.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)}</option>`).join('');
+    if(p.planoPagamento&&p.planoPagamento.beneficiadorNome)sel.value=p.planoPagamento.beneficiadorNome;
+  }
+  // Carrega plano existente, ou começa com 1 parcela de 100% em dia 0 pra cada parte
+  const existing=p.planoPagamento;
+  rvCPParcelas={
+    fornecedor:(existing&&existing.fornecedor&&existing.fornecedor.length)?JSON.parse(JSON.stringify(existing.fornecedor)):[{dias:0,pct:100,ref:'SINAL'}],
+    beneficiador:(existing&&existing.beneficiador&&existing.beneficiador.length)?JSON.parse(JSON.stringify(existing.beneficiador)):[{dias:0,pct:100,ref:'SINAL'}],
+    cliente:(existing&&existing.cliente&&existing.cliente.length)?JSON.parse(JSON.stringify(existing.cliente)):[{dias:0,pct:100,ref:'SINAL'}],
+  };
+  ['fornecedor','beneficiador','cliente'].forEach(rvCPRenderRows);
+  document.getElementById('ovl-condpagto').classList.add('open');
+}
+function rvCPAddParcela(tipo){
+  rvCPParcelas[tipo].push({dias:0,pct:0,ref:'BALANÇO'});
+  rvCPRenderRows(tipo);
+}
+function rvCPRemoveParcela(tipo,idx){
+  rvCPParcelas[tipo].splice(idx,1);
+  rvCPRenderRows(tipo);
+}
+function rvCPUpdateParcela(tipo,idx,field,value){
+  rvCPParcelas[tipo][idx][field]=field==='ref'?value:(parseFloat(value)||0);
+  rvCPRenderSum(tipo);
+}
+function rvCPRenderRows(tipo){
+  const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
+  const tot=p?rvCPTotais(p)[tipo]:0;
+  const rows=rvCPParcelas[tipo];
+  const cont=rvEl('cp-'+(tipo==='fornecedor'?'forn':tipo==='beneficiador'?'benef':'cli')+'-rows');
+  cont.innerHTML=rows.map((r,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
+    <div style="width:70px"><input type="number" value="${r.dias}" min="0" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem" onchange="rvCPUpdateParcela('${tipo}',${i},'dias',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">dias após</div></div>
+    <div style="width:60px"><input type="number" value="${r.pct}" min="0" max="100" step="0.1" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.72rem" onchange="rvCPUpdateParcela('${tipo}',${i},'pct',this.value)"><div style="font-size:.5rem;color:var(--ink4);text-align:center">%</div></div>
+    <div style="flex:1;font-size:.68rem;color:var(--ink3);font-family:'IBM Plex Mono'">${rvBrl(tot*r.pct/100)}</div>
+    <select style="width:110px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-size:.68rem" onchange="rvCPUpdateParcela('${tipo}',${i},'ref',this.value)">
+      ${RV_FIN_REF_TAGS.map(t=>`<option value="${t}"${r.ref===t?' selected':''}>${t}</option>`).join('')}
+    </select>
+    <button onclick="rvCPRemoveParcela('${tipo}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem">✕</button>
+  </div>`).join('');
+  rvCPRenderSum(tipo);
+}
+function rvCPRenderSum(tipo){
+  const rows=rvCPParcelas[tipo];
+  const sumEl=rvEl('cp-'+(tipo==='fornecedor'?'forn':tipo==='beneficiador'?'benef':'cli')+'-sum');
+  const soma=rows.reduce((a,r)=>a+(r.pct||0),0);
+  const ok=Math.abs(soma-100)<0.05;
+  sumEl.innerHTML=`Soma: <b style="color:${ok?'var(--green)':'var(--red)'}">${soma.toFixed(1)}%</b>${ok?' ✓':' — precisa somar 100%'}`;
+}
+function rvCPSave(){
+  const partes=['fornecedor','cliente'];
+  const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
+  if(p&&p.comLogo)partes.push('beneficiador');
+  for(const tipo of partes){
+    const soma=rvCPParcelas[tipo].reduce((a,r)=>a+(r.pct||0),0);
+    if(Math.abs(soma-100)>=0.05){toastSave(`As parcelas de ${tipo} precisam somar 100% (está em ${soma.toFixed(1)}%)`);return;}
+  }
+  const lista=rvLoadPedidos();
+  const rec=lista.find(x=>x.id===rvCPPedidoId);
+  if(!rec){toastSave('Pedido não encontrado');return;}
+  rec.planoPagamento={
+    fornecedor:rvCPParcelas.fornecedor,
+    beneficiador:rec.comLogo?rvCPParcelas.beneficiador:[],
+    beneficiadorNome:rec.comLogo?rvEl('cp-benef-select').value:'',
+    cliente:rvCPParcelas.cliente
+  };
+  rec.updatedAt=Date.now();
+  rvSavePedidos(lista);
+  rvSyncPush();
+  closeM('condpagto');
+  rvRenderFin();
+  toastSave('Condições salvas ✓');
+}
+
 function rvRenderPedidos(){
   const lista=rvLoadPedidos();
   const cont=rvEl('rv-pedidos-container');
@@ -2370,8 +2527,113 @@ function rvCIClearMarco(){
   closeM('ciedit');
   toastSave('Data removida');
 }
+/* ══════════════════════════════════════
+   FINANCEIRO REVENDA — cards + lançamentos reais contra o plano de condições
+══════════════════════════════════════ */
+function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party).reduce((a,l)=>a+l.amount,0);}
+function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId).reduce((a,r)=>a+r.amount,0);}
 function rvRenderFin(){
-  // implementação completa (lançamentos de pagamento/recebimento) vem na próxima leva
+  const cont=rvEl('rv-fin-container');
+  const lista=rvLoadPedidos().filter(p=>p.planoPagamento);
+  if(!lista.length){cont.innerHTML='<p class="hint">Nenhum pedido com condições de pagamento definidas ainda. As condições são pedidas automaticamente ao criar um pedido.</p>';return;}
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+lista.map(p=>{
+    const tot=rvCPTotais(p);
+    const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
+    const bar=(label,pago,total,color)=>{
+      const pct=total>0?Math.min(100,Math.round(pago/total*100)):0;
+      return `<div style="margin-bottom:.35rem">
+        <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--ink3)"><span>${label} ${pct}%</span><span>${rvBrl(pago)} / ${rvBrl(total)}</span></div>
+        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    };
+    return `<div class="card" style="padding:.8rem .9rem;cursor:pointer" onclick="rvOpenFinPopupR(${p.id})">
+      <div style="font-weight:700;font-size:.78rem;margin-bottom:.1rem">${esc(p.cliente)}</div>
+      <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.5rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
+      ${bar('Pagar Fornecedor',pagoForn,tot.fornecedor,'var(--red)')}
+      ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'#B85C00'):''}
+      ${bar('Receber Cliente',recCli,tot.cliente,'var(--green)')}
+    </div>`;
+  }).join('')+`</div>`;
+}
+function rvFinPartyRows(pedidoId,party,total,isReceipt){
+  const list=isReceipt?rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId):rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party);
+  if(!list.length)return '<p class="hint" style="margin:.3rem 0">Nenhum lançamento ainda.</p>';
+  return `<table class="rv-data-table" style="margin-top:.3rem"><thead><tr><th>Data</th><th class="rv-num">Valor</th><th>Ref</th><th>Notas</th><th></th></tr></thead><tbody>`+
+    list.map(l=>`<tr><td>${esc(l.date)}</td><td class="rv-num">${rvBrl(l.amount)}</td><td>${esc(l.ref||'—')}</td><td style="font-size:.65rem;color:var(--ink3)">${esc(l.notes||'')}</td>
+      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`).join('')
+    +'</tbody></table>';
+}
+function rvOpenFinPopupR(pedidoId){
+  const p=rvLoadPedidos().find(x=>x.id===pedidoId);
+  if(!p){toastSave('Pedido não encontrado');return;}
+  const tot=rvCPTotais(p);
+  rvEl('finr-title').textContent=`Financeiro — ${p.cliente} (${p.data})`;
+  const partySection=(label,party,total,isReceipt)=>{
+    const paid=isReceipt?rvPartyRecebido(pedidoId):rvPartyPago(pedidoId,party);
+    const planParcelas=isReceipt?p.planoPagamento.cliente:p.planoPagamento[party];
+    const planTxt=(planParcelas||[]).map(pc=>`${pc.dias}d: ${pc.pct}% (${rvBrl(total*pc.pct/100)}) · ${pc.ref}`).join(' · ');
+    return `<div style="margin-top:1rem">
+      <div class="fsep">${label} — ${rvBrl(paid)} / ${rvBrl(total)}</div>
+      <div style="font-size:.6rem;color:var(--ink4);margin-bottom:.3rem">Plano: ${esc(planTxt)}</div>
+      ${rvFinPartyRows(pedidoId,party,total,isReceipt)}
+      <div style="display:flex;gap:.4rem;margin-top:.4rem">
+        <input type="date" id="finr-${party}-date" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
+        <input type="number" id="finr-${party}-valor" placeholder="Valor" style="width:90px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
+        <select id="finr-${party}-ref" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">${RV_FIN_REF_TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+        <input type="text" id="finr-${party}-notas" placeholder="notas…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
+        <button class="btn btn-p" style="font-size:.65rem;padding:.3rem .6rem" onclick="${isReceipt?`rvAddReceiptR(${pedidoId})`:`rvAddLedgerR(${pedidoId},'${party}')`}">＋</button>
+      </div>
+    </div>`;
+  };
+  let html=partySection('🏭 Pagar Fornecedor','fornecedor',tot.fornecedor,false);
+  if(p.comLogo)html+=partySection('🎨 Pagar Beneficiador','beneficiador',tot.beneficiador,false);
+  html+=partySection('👤 Receber Cliente','cliente',tot.cliente,true);
+  rvEl('finr-body').innerHTML=html;
+  document.getElementById('ovl-finr').classList.add('open');
+}
+function rvAddLedgerR(pedidoId,party){
+  const date=rvEl(`finr-${party}-date`).value;
+  const valor=parseFloat(rvEl(`finr-${party}-valor`).value);
+  const ref=rvEl(`finr-${party}-ref`).value;
+  const notas=rvEl(`finr-${party}-notas`).value.trim();
+  if(!date||!valor){toastSave('Preencha data e valor');return;}
+  const [y,m,d]=date.split('-');
+  const lista=rvLoadLedgerR();
+  lista.unshift({id:Date.now(),updatedAt:Date.now(),pedidoId,party,amount:valor,date:`${d}/${m}/${y}`,ref,notes:notas});
+  rvSaveLedgerR(lista);
+  rvSyncPush();
+  rvOpenFinPopupR(pedidoId);
+  rvRenderFin();
+  toastSave('Lançado ✓');
+}
+function rvAddReceiptR(pedidoId){
+  const date=rvEl(`finr-cliente-date`).value;
+  const valor=parseFloat(rvEl(`finr-cliente-valor`).value);
+  const ref=rvEl(`finr-cliente-ref`).value;
+  const notas=rvEl(`finr-cliente-notas`).value.trim();
+  if(!date||!valor){toastSave('Preencha data e valor');return;}
+  const [y,m,d]=date.split('-');
+  const lista=rvLoadReceiptsR();
+  lista.unshift({id:Date.now(),updatedAt:Date.now(),pedidoId,amount:valor,date:`${d}/${m}/${y}`,ref,notes:notas});
+  rvSaveReceiptsR(lista);
+  rvSyncPush();
+  rvOpenFinPopupR(pedidoId);
+  rvRenderFin();
+  toastSave('Lançado ✓');
+}
+function rvDelLedgerR(id,pedidoId){
+  if(!confirm('Apagar este lançamento?'))return;
+  rvSaveLedgerR(rvLoadLedgerR().filter(l=>l.id!==id),true);
+  rvSyncPush();
+  rvOpenFinPopupR(pedidoId);
+  rvRenderFin();
+}
+function rvDelReceiptR(id,pedidoId){
+  if(!confirm('Apagar este lançamento?'))return;
+  rvSaveReceiptsR(rvLoadReceiptsR().filter(r=>r.id!==id),true);
+  rvSyncPush();
+  rvOpenFinPopupR(pedidoId);
+  rvRenderFin();
 }
 
 function rvToggleStatus(id,key,val){
