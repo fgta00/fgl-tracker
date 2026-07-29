@@ -146,7 +146,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 .toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;width:fit-content}
 .pill-toggle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .55rem;border:1.5px solid var(--bdr2);border-radius:20px;font-size:.6rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;margin-top:.35rem}
 .pill-toggle.active{background:var(--green);border-color:var(--green);color:#fff}
-.pill-toggle-sm{display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;height:38px;flex-shrink:0;border:1.5px solid var(--bdr2);border-radius:6px;font-size:.48rem;font-weight:600;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;line-height:1.15;text-align:center;padding:.15rem}
+.pill-toggle-sm{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:38px;flex-shrink:0;border:1.5px solid var(--bdr2);border-radius:6px;font-size:.6rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--ink3);transition:.15s;line-height:1.15;text-align:center;padding:.15rem}
 .pill-toggle-sm span{font-size:.85rem;line-height:1}
 .pill-toggle-sm.active{background:var(--green);border-color:var(--green);color:#fff}
 .mc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;border:2px solid;cursor:pointer;transition:transform .12s;flex-shrink:0}
@@ -2185,7 +2185,7 @@ function rvRenderCotacoes(){
   const cont=rvEl('rv-cotacoes-container');
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr>
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Ações</th>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
     html+=`<tr onclick="rv2OpenEdit('cotacao',${c.id})" style="cursor:pointer" title="Clique pra editar">
@@ -2252,7 +2252,7 @@ function rvRenderPedidos(){
   }
   let html=`<table class="rv-data-table"><thead><tr>
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Status</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">

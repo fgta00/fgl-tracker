@@ -91,8 +91,8 @@ tr .del-row{opacity:0;transition:opacity .15s}
 tr:hover .del-row{opacity:1}
 .tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:collapse;font-size:11.5px}
-thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14)}
-thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2)}
+thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14);position:sticky;top:98px;z-index:250}
+thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem;font-weight:600;padding:.42rem .5rem;text-align:center;white-space:nowrap;border-right:1px solid rgba(255,255,255,.07);border-bottom:2px solid var(--bdr2);position:sticky;top:121px;z-index:250}
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
@@ -431,7 +431,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <option value="trading">Trading</option>
           </select></div>
           <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:#F0F7FF;cursor:not-allowed"></div>
-          <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC…"></div>
+          <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
           <div class="ff"><label>Notas</label><input id="l-notes" placeholder="Notas…"></div>
           <button class="lbtn" onclick="addLedger()">＋ Lançar</button>
         </div>
@@ -477,7 +477,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div class="ff"><label id="r-amt-lbl">Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
           <div class="ff"><label>IP</label><select id="r-pi" onchange="onRpiChange()"><option value="">— IP —</option></select></div>
           <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:#F0FAF5;cursor:not-allowed"></div>
-          <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC…"></div>
+          <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
+          <datalist id="fin-ref-tags"><option value="SINAL"><option value="BALANÇO"><option value="AMOSTRAS"></datalist>
           <div class="ff"><label>Notas</label><input id="r-notes" placeholder="Notas…"></div>
           <button class="lbtn grn" onclick="addReceipt()">＋ Lançar</button>
         </div>
@@ -910,14 +911,16 @@ let DOC_EVENTS=[
   {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        baseIdx:6, offset:-2, cond:null},
   {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                baseIdx:6, offset:5,  cond:null},
   {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    baseIdx:6, offset:7,  cond:null},
-  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:10, cond:'amostrasOff'},
-  {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:25, cond:'amostrasOn'},
-  {key:'custo_amostras',label:'Receber Custo Amostras',                 baseIdx:0, offset:10, cond:'amostrasOn'},
-  {key:'sinal_forn',   label:'Pagar Sinal PI Fornecedor',               baseIdx:0, offset:15, cond:null},
-  {key:'balanco_cli',  label:'Receber Balanço Cliente',                 baseIdx:6, offset:17, cond:null},
-  {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null},
+  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:10, cond:'amostrasOff', finRef:'SINAL', finType:'receipt'},
+  {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:25, cond:'amostrasOn',  finRef:'SINAL', finType:'receipt'},
+  {key:'custo_amostras',label:'Receber Custo Amostras',                 baseIdx:0, offset:10, cond:'amostrasOn',  finRef:'AMOSTRAS', finType:'receipt'},
+  {key:'pagar_custo_amostras',label:'Pagar Custo Amostras',              baseIdx:0, offset:11, cond:'amostrasOn', finRef:'AMOSTRAS', finType:'payment'},
+  {key:'sinal_forn',   label:'Pagar Sinal PI Fornecedor',               baseIdx:0, offset:15, cond:null,          finRef:'SINAL', finType:'payment'},
+  {key:'balanco_cli',  label:'Receber Balanço Cliente',                 baseIdx:6, offset:17, cond:null,          finRef:'BALANÇO', finType:'receipt'},
+  {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
   {key:'docs_orig',    label:'Receber Docs Originais',                  baseIdx:6, offset:30, cond:null},
 ];
+const FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS']; // tags padronizadas — usar no campo Ref de Ledger/Receipts pra auto-validar a notificação correspondente
 const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Booking','Booking → Embarque','Embarque → ETA','ETA → No CD'];
 let SNOOZED={}; // alertas adiados: {"pi:idx": "2026-07-01" (ISO até quando fica oculto)}
@@ -988,12 +991,34 @@ function docEventDueDate(o,ev){
   return addDaysToDisp(base.v,ev.offset);
 }
 // Retorna {ev,due,daysUntil,level,doneDate} do evento pendente mais urgente, ou null se não houver nenhum
-function nextDocEvent(o){
+// Se o evento tem finRef/finType, considera confirmado automaticamente quando existir
+// um lançamento de Financeiro (ledger=pagamento / receipts=recebimento) pro mesmo IP/PO
+// com Ref igual à tag padronizada — sem precisar confirmar manualmente em Controle Interno.
+function docEventFinAutoDone(o,ev){
+  if(!ev.finRef)return false;
+  const p=linkPay(o);if(!p)return false;
+  const list=ev.finType==='receipt'?receipts:ledger;
+  return list.some(x=>x.pi===p.pi&&(x.ref||'').trim().toUpperCase()===ev.finRef);
+}
+// Saldo em aberto (R$/US$) usado no parêntese das notificações de BALANÇO
+function docEventBalanco(o,ev){
+  if(ev.finRef!=='BALANÇO')return null;
+  const p=linkPay(o);if(!p)return null;
+  if(ev.finType==='receipt'){
+    const saldo=pTotalVenda(p)-piReceived(p.pi);
+    return saldo>0?fUSD(saldo):null;
+  }else{
+    const saldo=pTotalForn(p)-piPaid(p.pi);
+    return saldo>0?fUSD(saldo):null;
+  }
+}
+function docEventsPending(o){
   if(!o.docDone)o.docDone={};
   const evs=docEventsForOrder(o);
-  let best=null;
+  const list=[];
   evs.forEach(ev=>{
-    if(o.docDone[ev.key])return; // já confirmado
+    if(o.docDone[ev.key])return; // já confirmado manualmente
+    if(docEventFinAutoDone(o,ev))return; // já confirmado automaticamente via Financeiro
     const due=docEventDueDate(o,ev);
     if(!due)return; // marco de referência ainda não tem data
     const iso=dispToISO(due);
@@ -1001,9 +1026,23 @@ function nextDocEvent(o){
     const dueD=new Date(iso+'T00:00');
     const daysUntil=Math.round((dueD-today)/86400000);
     const level=daysUntil<0?'crit':daysUntil<=3?'warn':'ok';
-    if(!best||daysUntil<best.daysUntil)best={ev,due,daysUntil,level};
+    list.push({ev,due,daysUntil,level});
   });
-  return best;
+  list.sort((a,b)=>a.daysUntil-b.daysUntil);
+  return list;
+}
+function nextDocEvent(o){
+  const list=docEventsPending(o);
+  return list.length?list[0]:null;
+}
+let DOC_EVENT_CURSOR={}; // {orderNum: índice atual na lista de pendentes, só navegação em tela — não persiste}
+function docEventNavBack(num,event){
+  event.stopPropagation();
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  const list=docEventsPending(o);if(!list.length)return;
+  const cur=DOC_EVENT_CURSOR[num]||0;
+  DOC_EVENT_CURSOR[num]=(cur+1)%list.length; // avança na lista de "menos urgentes" (volta no tempo)
+  renderInternal();
 }
 function docEventConfirm(num,key,confirmed){
   const o=orders.find(x=>x.num===num);if(!o)return;
@@ -1582,16 +1621,21 @@ function renderInternal(){
         } else if(snoozed){
           inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
         }
-        const de=nextDocEvent(o);
-        if(de){
+        const deList=docEventsPending(o);
+        if(deList.length){
+          const cur=Math.min(DOC_EVENT_CURSOR[o.num]||0,deList.length-1);
+          const de=deList[cur];
           const deCol=de.level==='crit'?'var(--red)':de.level==='warn'?'var(--amber)':'var(--teal)';
-          const deTxt=de.daysUntil<0?`${de.ev.label} atrasado ${Math.abs(de.daysUntil)}d`:de.daysUntil===0?`${de.ev.label} hoje`:`${de.ev.label} em ${de.daysUntil}d`;
-          inner+=`<div onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:.62rem;color:${deCol};background:${deCol}15;border-radius:4px;padding:.15rem .4rem;margin-top:1px" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</div>`;
+          const bal=docEventBalanco(o,de.ev);
+          const balTxt=bal?` (${bal})`:'';
+          const deTxt=de.daysUntil<0?`${de.ev.label}${balTxt} atrasado ${Math.abs(de.daysUntil)}d`:de.daysUntil===0?`${de.ev.label}${balTxt} hoje`:`${de.ev.label}${balTxt} em ${de.daysUntil}d`;
+          const backArrow=deList.length>1?`<span onclick="docEventNavBack(${o.num},event)" title="Ver notificação anterior (${cur+1}/${deList.length})" style="cursor:pointer;padding:0 2px;color:${deCol};opacity:.7">◀</span>`:'';
+          inner+=`<div style="cursor:pointer;display:flex;align-items:center;gap:1px;font-size:.62rem;color:${deCol};background:${deCol}15;border-radius:4px;padding:.15rem .3rem;margin-top:1px">${backArrow}<span onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</span></div>`;
         }
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
-      <td style="vertical-align:top;padding-top:.5rem">${daysCell(o.dates,o.status)}</td>
+      <td style="vertical-align:middle">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
@@ -2675,17 +2719,53 @@ function dlFile(href,name){const a=document.createElement('a');a.href=href;a.dow
    STATUS MANAGEMENT
 ══════════════════════════════════════ */
 function openStatusModal(){renderStatusLists();document.getElementById('ovl-status').classList.add('open');}
+// Médias reais observadas — baseadas em pedidos FINALIZADOS, pra orientar ajuste dos intervalos padrão
+function computeAvgMilestoneGaps(){
+  const fin=orders.filter(o=>o.status==='FINALIZADO'&&o.dates);
+  const gaps=Array.from({length:8},()=>[]);
+  fin.forEach(o=>{
+    for(let i=0;i<8;i++){
+      const a=o.dates[i],b=o.dates[i+1];
+      if(a&&a.v&&b&&b.v){
+        const isoA=dispToISO(a.v),isoB=dispToISO(b.v);
+        if(isoA&&isoB){const d=Math.round((new Date(isoB)-new Date(isoA))/86400000);if(d>=0)gaps[i].push(d);}
+      }
+    }
+  });
+  return gaps.map(arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):null);
+}
+function computeAvgDocGaps(){
+  const fin=orders.filter(o=>o.status==='FINALIZADO'&&o.dates);
+  return DOC_EVENTS.map(ev=>{
+    const samples=[];
+    fin.forEach(o=>{
+      const base=o.dates[ev.baseIdx];
+      const doneDate=o.docDone&&o.docDone[ev.key];
+      if(base&&base.v&&doneDate){
+        const isoA=dispToISO(base.v),isoB=dispToISO(doneDate);
+        if(isoA&&isoB)samples.push(Math.round((new Date(isoB)-new Date(isoA))/86400000));
+      }
+    });
+    return samples.length?{avg:Math.round(samples.reduce((a,b)=>a+b,0)/samples.length),n:samples.length}:null;
+  });
+}
 function renderStatusLists(){
   ['cli','forn','prod','cont'].forEach(tipo=>{
     const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
     document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
   });
   // Render milestone gaps editor
-  document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"></div>`).join('');
-  document.getElementById('doc-events-list').innerHTML=DOC_EVENTS.map((ev,i)=>`<div style="display:flex;align-items:center;gap:.4rem;border:1px solid var(--bdr);border-radius:6px;padding:.3rem .5rem">
-    <div style="flex:1;font-size:.66rem;line-height:1.25"><b>${esc(ev.label)}</b><div style="color:var(--ink4);font-size:.58rem">${DOC_BASE_LBL[ev.baseIdx]}${ev.cond?' · só '+(ev.cond==='amostrasOn'?'c/ amostras':'s/ amostras'):''}</div></div>
+  document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>{
+    const avg=computeAvgMilestoneGaps()[i];
+    return`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"><div style="font-size:.52rem;color:${avg!==null?'var(--teal)':'var(--ink4)'};margin-top:.15rem">média real: ${avg!==null?avg+'d':'—'}</div></div>`;
+  }).join('');
+  document.getElementById('doc-events-list').innerHTML=DOC_EVENTS.map((ev,i)=>{
+    const avg=computeAvgDocGaps()[i];
+    return`<div style="display:flex;align-items:center;gap:.4rem;border:1px solid var(--bdr);border-radius:6px;padding:.3rem .5rem">
+    <div style="flex:1;font-size:.66rem;line-height:1.25"><b>${esc(ev.label)}</b><div style="color:var(--ink4);font-size:.58rem">${DOC_BASE_LBL[ev.baseIdx]}${ev.cond?' · só '+(ev.cond==='amostrasOn'?'c/ amostras':'s/ amostras'):''}${avg?` · média real: <span style="color:var(--teal);font-weight:600">${avg.avg}d</span> (${avg.n} fechado${avg.n>1?'s':''})`:''}</div></div>
     <input type="number" value="${ev.offset}" style="width:50px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.2rem;font-family:'IBM Plex Mono';font-size:.72rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
-  </div>`).join('');
+  </div>`;
+  }).join('');
 }
 function addMestre(tipo){
   const id='st-'+tipo+'-new';const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
