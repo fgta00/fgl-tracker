@@ -1687,6 +1687,7 @@ function rvApplySyncData(data){
   rv2SaveLocalCad();
   rv2PopulateSelects();
   rvRenderCotacoes();rvRenderPedidos();
+  if(document.getElementById('rv-fin-container'))rvRenderFin();
 }
 function updateRvSyncStatus(msg){
   const el=document.getElementById('rv-sync-status');
@@ -1703,6 +1704,32 @@ async function rvCloudGet(){
     if(error){console.warn('rvCloudGet:',error.message);return null;}
     return data;
   }catch(e){console.warn(e);return null;}
+}
+// Busca a versão mais recente da nuvem e MESCLA com o que está local (nunca sobrescreve —
+// usa a mesma lógica de merge por updatedAt de rvApplySyncData). Chamado toda vez que a
+// pessoa entra em Cotações/Pedidos/Financeiro, e também periodicamente enquanto fica nessas
+// telas — antes disso, o cofre só era lido da nuvem UMA vez por sessão (no primeiro desbloqueio),
+// e nunca mais, então cada pessoa ficava presa numa "foto" do momento em que abriu.
+let _rvRefreshing=false;
+async function rvRefreshFromCloud(){
+  if(!rvSyncPass||_rvRefreshing)return;
+  _rvRefreshing=true;
+  try{
+    const cloud=await rvCloudGet();
+    if(cloud&&cloud.blob){
+      const data=await decryptJSON(rvSyncPass,JSON.parse(cloud.blob));
+      _rvRevision=cloud.revision||_rvRevision;
+      rvApplySyncData(data);
+    }
+  }catch(e){console.warn('rvRefreshFromCloud:',e);}
+  _rvRefreshing=false;
+}
+let _rvAutoRefreshTimer=null;
+function rvStartAutoRefresh(){
+  if(_rvAutoRefreshTimer)return;
+  _rvAutoRefreshTimer=setInterval(()=>{
+    if(rvSyncPass&&['cotacoes','pedidos','fin'].includes(_rvCurTab))rvRefreshFromCloud();
+  },30000); // a cada 30s, só enquanto estiver numa dessas telas
 }
 async function rvCloudSave(blobStr){
   if(!_supaOK||!authUser)return{ok:false,reason:'no-auth'};
@@ -1924,7 +1951,9 @@ function rvSaveReceiptsR(d,forceReplace){
 }
 
 /* ── SUB-ABAS DA REVENDA ── */
+let _rvCurTab='calc';
 function rvShowTab(id){
+  _rvCurTab=id;
   document.querySelectorAll('.rv-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
   rvEl('rvpane-'+id).classList.add('active');
@@ -1932,6 +1961,13 @@ function rvShowTab(id){
   if(id==='cotacoes'||id==='pedidos'||id==='fin'){
     checkRvLock();
     if(rvSyncPass){
+      rvStartAutoRefresh();
+      rvRefreshFromCloud().then(()=>{
+        if(id==='cotacoes')rvRenderCotacoes();
+        else if(id==='pedidos')rvRenderPedidos();
+        else if(id==='fin')rvRenderFin();
+      });
+      // renderiza já com o que tem local, sem esperar a rede — a atualização acima re-renderiza quando chegar
       if(id==='cotacoes')rvRenderCotacoes();
       else if(id==='pedidos')rvRenderPedidos();
       else if(id==='fin')rvRenderFin();
