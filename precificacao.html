@@ -1791,9 +1791,11 @@ async function tryRvUnlock(pwOverride){
     const data=await decryptJSON(pw,payload); // senha errada OU sem permissão (RLS) cai no catch
     rvSyncPass=pw;_rvRevision=cloud.revision||1;
     sessionStorage.setItem(SESS_RV_PW,pw);
-    rvApplySyncData(data);
-    if(fromCloud){localStorage.setItem('rv_sync_vault',vaultToUse);setLocalTs('rv_sync_vault');}
-    else{await rvCloudSave(vaultToUse);}
+    rvApplySyncData(data); // mescla nuvem + local (protege dado local não sincronizado ainda)
+    // Sempre reenvia pra nuvem depois de mesclar — se essa pessoa tinha algo só local
+    // (criado antes de conectar), isso garante que sobe pra nuvem agora, em vez de
+    // ficar preso no navegador dela até a próxima edição por acaso disparar o envio.
+    await rvSyncPush(true);
     updateRvSyncStatus();
     rvUnlockUI();
     toastSave('Dados compartilhados conectados ✓');
@@ -1818,7 +1820,7 @@ function rvUnlockUI(){
   document.getElementById('rvlock-pass').value='';
   rvRenderCotacoes();rvRenderPedidos();rvRenderFin();
 }
-async function rvSyncPush(){
+async function rvSyncPush(immediate){
   if(!rvSyncPass||!authUser)return;
   const payload=await encryptJSON(rvSyncPass,rvCollectSyncData());
   const payloadStr=JSON.stringify(payload);
@@ -1826,7 +1828,7 @@ async function rvSyncPush(){
   setLocalTs('rv_sync_vault');
   updateRvSyncStatus('☁ Salvando…');
   clearTimeout(_rvSyncTimer);
-  _rvSyncTimer=setTimeout(async()=>{
+  const doSave=async()=>{
     const r=await rvCloudSave(payloadStr);
     if(r.ok){updateRvSyncStatus();return;}
     if(r.reason==='conflict'){
@@ -1839,7 +1841,9 @@ async function rvSyncPush(){
       updateRvSyncStatus('⚠ Cotações/Pedidos: só local (falha ao sincronizar)');
       alert('⚠ Não deu pra sincronizar com a nuvem agora.\n\nSeus dados estão salvos aqui neste navegador, mas ainda não chegaram no cofre compartilhado — quem estiver do outro lado não vai ver essa mudança ainda.\n\nTente de novo em alguns instantes (recarregue a página se persistir).');
     }
-  },1200);
+  };
+  if(immediate)await doSave();
+  else _rvSyncTimer=setTimeout(doSave,1200);
 }
 async function rvRecoverAndRetry(){
   try{
