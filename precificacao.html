@@ -2233,7 +2233,7 @@ function rv2UpdateCadField(idx,field,value){
     item.nome=novoNome;
   }else{item[field]=value;}
   item.updatedAt=Date.now();
-  rv2SaveLocalCad();rv2PopulateSelects();rvSyncPush();
+  rv2SaveLocalCad();rv2PopulateSelects();rvSyncPush(true);
   toastSave('Atualizado ✓');
 }
 function rv2DeleteCad(idx){
@@ -2674,7 +2674,8 @@ function rvDispToISO(s){
 }
 function rvMkD(v,est){return{v:v?rvNormDate(v):null,est:!!est};}
 function rvIsProdutor(nomeFornecedor){
-  const f=RV_FORNECEDORES2.find(x=>x.nome===nomeFornecedor);
+  const alvo=(nomeFornecedor||'').toLowerCase().trim();
+  const f=RV_FORNECEDORES2.find(x=>(x.nome||'').toLowerCase().trim()===alvo);
   return!!(f&&f.produtor);
 }
 function rvGetCIPedidos(){return rvLoadPedidosActive().filter(p=>rvIsProdutor(p.fornecedor));}
