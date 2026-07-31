@@ -621,8 +621,6 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div id="rvedit-cp-cli-rows"></div>
             <button class="btn btn-s" style="font-size:.62rem;margin-top:.3rem" onclick="rvCPAddParcela('cliente')">＋ parcela</button>
             <div style="font-size:.62rem;margin-top:.2rem" id="rvedit-cp-cli-sum"></div>
-
-            <button class="btn btn-p" style="width:100%;margin-top:.8rem;font-size:.68rem" onclick="rvCPSave()">💾 Salvar condições de pagamento</button>
           </div>
         </div>
       </div>
@@ -2408,6 +2406,16 @@ function rv2SaveEdit(){
   const r=rv2EditPreview();
   if(!r){toastSave('Preencha os dados corretamente antes de salvar');return;}
   const{kind,id}=rvEditCtx;
+  // Se for pedido, valida as condições de pagamento também antes de salvar qualquer coisa
+  if(kind==='pedido'){
+    const pCheck=rvLoadPedidos().find(x=>x.id===id);
+    const partes=['fornecedor','cliente'];
+    if(pCheck&&pCheck.comLogo)partes.push('beneficiador');
+    for(const tipo of partes){
+      const soma=rvCPParcelas[tipo].reduce((a,x)=>a+(x.pct||0),0);
+      if(Math.abs(soma-100)>=0.05){toastSave(`As parcelas de ${tipo} (pagamento/recebimento) precisam somar 100% (está em ${soma.toFixed(1)}%)`);return;}
+    }
+  }
   const lista=kind==='cotacao'?rvLoadCotacoes():rvLoadPedidos();
   const rec=lista.find(x=>x.id===id);
   if(!rec){toastSave('Registro não encontrado');return;}
@@ -2417,8 +2425,16 @@ function rv2SaveEdit(){
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
     custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
   });
+  if(kind==='pedido'){
+    rec.planoPagamento={
+      fornecedor:rvCPParcelas.fornecedor,
+      beneficiador:rec.comLogo?rvCPParcelas.beneficiador:[],
+      beneficiadorNome:rec.comLogo?(rvEl(rvCPIds('beneficiador').select)?.value||''):'',
+      cliente:rvCPParcelas.cliente
+    };
+  }
   if(kind==='cotacao'){rvSaveCotacoes(lista);rvRenderCotacoes();}
-  else{rvSavePedidos(lista);rvRenderPedidos();}
+  else{rvSavePedidos(lista);rvRenderPedidos();rvRenderFin();}
   rvSyncPush();
   rv2RenderHist();
   closeM('rvedit');
