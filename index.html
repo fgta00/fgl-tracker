@@ -622,6 +622,20 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <div class="toast" id="toast"></div>
 
 <!-- MODAL GERENCIAR STATUS -->
+<div class="ovl" id="ovl-docevent" onclick="ovlOut(event,'docevent')">
+  <div class="modal" style="width:360px">
+    <div class="mhdr"><h2 id="de-title">Notificação</h2><button class="mcls" onclick="closeOvl('docevent')">✕</button></div>
+    <div class="mbody">
+      <p id="de-info" style="font-size:.72rem;color:var(--ink3);margin-bottom:.7rem"></p>
+      <label style="font-size:.68rem;color:var(--ink3);display:block;margin-bottom:.2rem">Data em que foi feito</label>
+      <input type="text" id="de-date" placeholder="15/Mar/26" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Mono';font-size:.8rem;margin-bottom:.8rem">
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btnp" style="flex:1" onclick="docEventModalSave()">✓ Confirmar</button>
+        <button class="btn btns" id="de-unconfirm-btn" style="flex:1" onclick="docEventModalUnconfirm()">Desmarcar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="ovl" id="ovl-status" onclick="ovlOut(event,'status')">
   <div class="modal" style="width:860px">
     <div class="mhdr"><h2>Gerenciar Cadastros</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
@@ -669,7 +683,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       </div>
       <div style="margin-top:1.2rem">
         <div class="sh">📄 Prazos de Documentos/Pagamentos (dias a partir do marco de referência)</div>
-        <div id="doc-events-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.5rem"></div>
+        <div id="doc-events-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:.5rem"></div>
         <div style="font-size:.6rem;color:var(--ink4)">Negativo = antes do marco. Aparece como aviso na Situação do pedido quando o marco de referência tiver data.</div>
       </div>
       <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
@@ -1017,6 +1031,7 @@ let DOC_EVENTS=[
   {key:'balanco_cli',  label:'Receber Balanço Cliente',                 baseIdx:6, offset:17, cond:null,          finRef:'BALANÇO', finType:'receipt'},
   {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
   {key:'docs_orig',    label:'Receber Docs Originais',                  baseIdx:6, offset:30, cond:null},
+  {key:'carton_mark',  label:'Enviar Carton Mark',                      baseIdx:0, offset:30, cond:null},
 ];
 const FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS']; // tags padronizadas — usar no campo Ref de Ledger/Receipts pra auto-validar a notificação correspondente
 const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
@@ -1142,20 +1157,39 @@ function docEventNavBack(num,event){
   DOC_EVENT_CURSOR[num]=(cur+1)%list.length; // avança na lista de "menos urgentes" (volta no tempo)
   renderInternal();
 }
-function docEventConfirm(num,key,confirmed){
+function docEventConfirm(num,key,confirmed,customDate){
   const o=orders.find(x=>x.num===num);if(!o)return;
   if(!o.docDone)o.docDone={};
-  if(confirmed)o.docDone[key]=todayDisp();else delete o.docDone[key];
+  if(confirmed)o.docDone[key]=customDate||todayDisp();else delete o.docDone[key];
   saveAll();renderInternal();
 }
+let _deCtx=null; // {num,key}
 function openDocEventModal(num,key){
   const o=orders.find(x=>x.num===num);if(!o)return;
   const ev=DOC_EVENTS.find(x=>x.key===key);if(!ev)return;
   const due=docEventDueDate(o,ev);
   const done=o.docDone&&o.docDone[key];
-  if(!confirm(`${ev.label}\nPrazo: ${due||'—'} (a partir de ${DOC_BASE_LBL[ev.baseIdx]})\n\n${done?'Já confirmado em '+done+'.\n\nDesmarcar?':'Confirmar como feito hoje?'}`))return;
-  docEventConfirm(num,key,!done);
-  toast(done?'Desmarcado':'Confirmado ✓');
+  _deCtx={num,key};
+  document.getElementById('de-title').textContent=ev.label;
+  document.getElementById('de-info').textContent=`Prazo: ${due||'—'} (a partir de ${DOC_BASE_LBL[ev.baseIdx]})`;
+  document.getElementById('de-date').value=done||todayDisp();
+  document.getElementById('de-unconfirm-btn').style.display=done?'block':'none';
+  document.getElementById('ovl-docevent').classList.add('open');
+}
+function docEventModalSave(){
+  if(!_deCtx)return;
+  const v=document.getElementById('de-date').value.trim();
+  const nv=normDate(v);
+  if(v&&!nv){toast('Data inválida — use DD/Mmm/AA');return;}
+  docEventConfirm(_deCtx.num,_deCtx.key,true,nv||todayDisp());
+  closeOvl('docevent');
+  toast('Confirmado ✓');
+}
+function docEventModalUnconfirm(){
+  if(!_deCtx)return;
+  docEventConfirm(_deCtx.num,_deCtx.key,false);
+  closeOvl('docevent');
+  toast('Desmarcado');
 }
 
 function nextAction(o){
@@ -1726,8 +1760,8 @@ function renderInternal(){
           const bal=docEventBalanco(o,de.ev);
           const balTxt=bal?` (${bal})`:'';
           const deTxt=de.daysUntil<0?`${de.ev.label}${balTxt} atrasado ${Math.abs(de.daysUntil)}d`:de.daysUntil===0?`${de.ev.label}${balTxt} hoje`:`${de.ev.label}${balTxt} em ${de.daysUntil}d`;
-          const backArrow=deList.length>1?`<span onclick="docEventNavBack(${o.num},event)" title="Ver notificação anterior (${cur+1}/${deList.length})" style="cursor:pointer;padding:0 2px;color:${deCol};opacity:.7">◀</span>`:'';
-          inner+=`<div style="cursor:pointer;display:flex;align-items:center;gap:1px;font-size:.62rem;color:${deCol};background:${deCol}15;border-radius:4px;padding:.15rem .3rem;margin-top:1px">${backArrow}<span onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</span></div>`;
+          const backArrow=deList.length>1?`<span onclick="docEventNavBack(${o.num},event)" title="Ver notificação anterior (${cur+1}/${deList.length})" style="cursor:pointer;padding:0 2px;color:#fff;opacity:.8">◀</span>`:'';
+          inner+=`<div style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:.72rem;font-weight:700;color:#fff;background:${deCol};border-radius:5px;padding:.28rem .5rem;margin-top:3px;box-shadow:0 1px 4px rgba(0,0,0,.15)">${backArrow}<span onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</span></div>`;
         }
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
@@ -1921,7 +1955,10 @@ function renderFinanceCard(vm){
   return`<div onclick="openFinPopup('${esc(p.pi)}')" style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1.05rem;cursor:pointer;transition:box-shadow .15s,border-color .15s" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)';this.style.borderColor='var(--bdr2)'" onmouseout="this.style.boxShadow='';this.style.borderColor='var(--bdr)'">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">
         <div>
-          <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy)">${esc(p.pi)}</div>
+          <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy);display:flex;align-items:center;gap:.3rem">
+            ${esc(p.pi)}
+            ${linkedOrd?`<button onclick="event.stopPropagation();openOrderModal(${linkedOrd.num})" title="Editar pedido (ficha completa)" style="background:none;border:none;padding:0;font-size:.68rem;cursor:pointer;opacity:.5;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">✏️</button>`:''}
+          </div>
           <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--ink3)">
             <span style="color:var(--blue)">${esc(vm.po||'—')}</span>
             <span style="color:var(--ink4)"> · </span>
@@ -2308,14 +2345,14 @@ let _editNum=null;
 function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
-  row.style.cssText='flex-wrap:wrap;gap:.25rem .35rem';
-  row.innerHTML=`<span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="flex:3;min-width:160px">
-    <span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="flex:1.5;min-width:80px">
-    <span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="flex:1;min-width:65px">
-    <span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="flex:1;min-width:65px">
-    <span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="flex:1;min-width:65px">
-    <span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="flex:.8;min-width:55px">
-    <span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="flex:.8;min-width:55px">
+  row.style.cssText='display:grid;grid-template-columns:2.3fr 1fr .8fr .9fr .9fr .7fr .7fr auto;gap:.3rem;align-items:end';
+  row.innerHTML=`<div><span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="width:100%"></div>
+    <div><span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="width:100%"></div>
+    <div><span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="width:100%"></div>
+    <div><span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
+    <div><span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
+    <div><span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
+    <div><span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
     <button class="rm" onclick="this.parentElement.remove();updatePreview()">✕</button>`;
   container.appendChild(row);updatePreview();
 }
@@ -2852,9 +2889,22 @@ function renderStatusLists(){
   }).join('');
   document.getElementById('doc-events-list').innerHTML=DOC_EVENTS.map((ev,i)=>{
     const avg=computeAvgDocGaps()[i];
-    return`<div style="display:flex;align-items:center;gap:.4rem;border:1px solid var(--bdr);border-radius:6px;padding:.3rem .5rem">
-    <div style="flex:1;font-size:.66rem;line-height:1.25"><b>${esc(ev.label)}</b><div style="color:var(--ink4);font-size:.58rem">${DOC_BASE_LBL[ev.baseIdx]}${ev.cond?' · só '+(ev.cond==='amostrasOn'?'c/ amostras':'s/ amostras'):''}${avg?` · média real: <span style="color:var(--teal);font-weight:600">${avg.avg}d</span> (${avg.n} fechado${avg.n>1?'s':''})`:''}</div></div>
-    <input type="number" value="${ev.offset}" style="width:50px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.2rem;font-family:'IBM Plex Mono';font-size:.72rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
+    return`<div style="border:1px solid var(--bdr);border-radius:6px;padding:.4rem .5rem">
+    <input type="text" value="${esc(ev.label)}" onchange="DOC_EVENTS[${i}].label=this.value;saveAll();renderInternal()" style="width:100%;border:none;border-bottom:1px dashed var(--bdr2);font-weight:700;font-size:.68rem;margin-bottom:.3rem;background:transparent;padding:0 0 .15rem;color:var(--ink)">
+    <div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.2rem">
+      <select onchange="DOC_EVENTS[${i}].baseIdx=parseInt(this.value);saveAll();renderInternal()" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.6rem">
+        ${DOC_BASE_LBL.map((lbl,bi)=>`<option value="${bi}"${ev.baseIdx===bi?' selected':''}>${esc(lbl)}</option>`).join('')}
+      </select>
+      <span style="font-size:.62rem;color:var(--ink3)">+</span>
+      <input type="number" value="${ev.offset}" style="width:44px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-family:'IBM Plex Mono';font-size:.68rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
+      <span style="font-size:.62rem;color:var(--ink3)">dias</span>
+    </div>
+    <select onchange="DOC_EVENTS[${i}].cond=this.value||null;saveAll();renderInternal()" style="width:100%;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.58rem;margin-bottom:.2rem">
+      <option value=""${!ev.cond?' selected':''}>Sempre se aplica</option>
+      <option value="amostrasOn"${ev.cond==='amostrasOn'?' selected':''}>Só se Amostras = ON</option>
+      <option value="amostrasOff"${ev.cond==='amostrasOff'?' selected':''}>Só se Amostras = OFF</option>
+    </select>
+    <div style="font-size:.55rem;color:var(--ink4)">${avg?`Média real: <span style="color:var(--teal);font-weight:600">${avg.avg}d</span> (${avg.n} fechado${avg.n>1?'s':''})`:'Sem dados de fechados ainda'}</div>
   </div>`;
   }).join('');
 }
