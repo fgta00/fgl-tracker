@@ -2152,6 +2152,10 @@ function rv2Render(r){
     <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
       <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
       <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--ink3);margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--bdr)">
+      <span>Margem Final <span style="color:var(--ink4)">(depois da apuração de ICMS)</span></span>
+      <b style="font-family:'IBM Plex Mono';color:${r.margemFinal>=0?'var(--green)':'var(--red)'}">${rvBrl(r.margemFinal)} (${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</b>
     </div>`;
   if(rv2DetalheOpen)rv2RenderDetalhe(r);
 }
@@ -2466,12 +2470,13 @@ function rvRenderCotacoes(){
   if(!todas.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação encontrada com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th>Ações</th>
+    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
+    const jaConvertida=!!c.pedidoId;
     html+=`<tr onclick="rv2OpenEdit('cotacao',${c.id})" style="cursor:pointer" title="Clique pra editar">
       <td style="white-space:nowrap">${esc(c.data)}</td>
-      <td><strong>${esc(c.cliente)}</strong></td>
+      <td><strong>${esc(c.cliente)}</strong>${jaConvertida?' <span style="font-size:.58rem;font-weight:700;color:var(--green);background:var(--ltgrn);padding:.1rem .4rem;border-radius:4px;white-space:nowrap">✓ virou pedido</span>':''}</td>
       <td>${esc(c.fornecedor)}</td>
       <td>${esc(c.tipo)}</td>
       <td class="rv-num">${(c.qtd||0).toLocaleString('pt-BR')}</td>
@@ -2479,7 +2484,7 @@ function rvRenderCotacoes(){
       <td class="rv-num rv-pos">${((c.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(c.lucroTotal)}</td>
       <td style="white-space:nowrap">
-        <button class="btn-rvsm btn-conv" onclick="event.stopPropagation();rvConverterEmPedido(${c.id})">→ Pedido</button>
+        ${jaConvertida?'':`<button class="btn-rvsm btn-conv" onclick="event.stopPropagation();rvConverterEmPedido(${c.id})">→ Pedido</button>`}
         <button class="btn-rvdel" onclick="event.stopPropagation();rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
       </td>
     </tr>`;
@@ -2509,11 +2514,14 @@ function rvLimparTodasCotacoes(){
   rvSyncPush();
 }
 function rvConverterEmPedido(cotId){
-  const cot=rvLoadCotacoes().find(c=>c.id===cotId);
+  const cotacoes=rvLoadCotacoes();
+  const cot=cotacoes.find(c=>c.id===cotId);
   if(!cot)return;
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
   const pedido={...cot,id:Date.now(),updatedAt:Date.now(),cotId,status,obs:''};
   const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
+  cot.pedidoId=pedido.id;cot.updatedAt=Date.now(); // marca a cotação de origem como já convertida
+  rvSaveCotacoes(cotacoes,true);
   rvSyncPush();
   rvShowTab('pedidos');
   rvOpenCondPagto(pedido.id);
@@ -2689,7 +2697,7 @@ function rvRenderPedidos(){
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido encontrado com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem Líquida</th><th class="rv-num">Lucro</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
@@ -2810,8 +2818,17 @@ function rvCIClearMarco(){
 /* ══════════════════════════════════════
    FINANCEIRO REVENDA — cards + lançamentos reais contra o plano de condições
 ══════════════════════════════════════ */
-function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party).reduce((a,l)=>a+l.amount,0);}
-function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId).reduce((a,r)=>a+r.amount,0);}
+function rvDateIsFuture(dispDate){
+  const parts=(dispDate||'').split('/');
+  if(parts.length!==3)return false;
+  const[d,m,y]=parts;
+  const iso=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  const today=new Date();today.setHours(0,0,0,0);
+  const dt=new Date(iso+'T00:00');
+  return dt.getTime()>today.getTime();
+}
+function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party&&!rvDateIsFuture(l.date)).reduce((a,l)=>a+l.amount,0);}
+function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId&&!rvDateIsFuture(r.date)).reduce((a,r)=>a+r.amount,0);}
 function rvRenderFin(){
   const cont=rvEl('rv-fin-container');
   const lista=rvLoadPedidosActive().filter(p=>p.planoPagamento);
@@ -2881,8 +2898,13 @@ function rvFinPartyRows(pedidoId,party,total,isReceipt){
   const list=isReceipt?rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId):rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party);
   if(!list.length)return '<p class="hint" style="margin:.3rem 0">Nenhum lançamento ainda.</p>';
   return `<table class="rv-data-table" style="margin-top:.3rem"><thead><tr><th>Data</th><th class="rv-num">Valor</th><th>Ref</th><th>Notas</th><th></th></tr></thead><tbody>`+
-    list.map(l=>`<tr><td>${esc(l.date)}</td><td class="rv-num">${rvBrl(l.amount)}</td><td>${esc(l.ref||'—')}</td><td style="font-size:.65rem;color:var(--ink3)">${esc(l.notes||'')}</td>
-      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`).join('')
+    list.map(l=>{
+      const futuro=rvDateIsFuture(l.date);
+      return`<tr>
+      <td>${esc(l.date)}${futuro?' <span style="font-size:.55rem;font-weight:700;color:var(--amber);background:var(--ltamb);padding:.05rem .35rem;border-radius:4px" title="Data ainda não chegou — não entra no total pago/recebido até lá">agendado</span>':''}</td>
+      <td class="rv-num">${rvBrl(l.amount)}</td><td>${esc(l.ref||'—')}</td><td style="font-size:.65rem;color:var(--ink3)">${esc(l.notes||'')}</td>
+      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`;
+    }).join('')
     +'</tbody></table>';
 }
 let rvFinCurPedidoId=null;
