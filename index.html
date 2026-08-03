@@ -2244,6 +2244,50 @@ function addReceipt(){
   document.getElementById('r-pi').value='';document.getElementById('r-cli').value='';
   document.getElementById('r-amt-lbl').textContent='Valor USD';
 }
+function finPopupAddPayment(pi){
+  const rawDate=document.getElementById('fp-l-date').value.trim();
+  let amt=parseFloat(document.getElementById('fp-l-amt').value);
+  const layerEl=document.getElementById('fp-l-layer');
+  const layer=layerEl?(layerEl.value||'fy'):'fy';
+  const ref=document.getElementById('fp-l-ref').value.trim();
+  if(!rawDate){toast('⚠ Informe uma data','err');return;}
+  const dateDisp=normDate(rawDate);
+  if(!dateDisp){toast('⚠ Data inválida','err');return;}
+  if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
+  const p=payments.find(x=>x.pi===pi);if(!p)return;
+  let amountBRL=null,fxApplied=null;
+  if(layer!=='fy'){
+    const o=orders.find(x=>x.pi===pi);
+    fxApplied=o&&o.cambioCamadas;
+    if(!fxApplied){toast('⚠ Defina o "Câmbio camadas" nessa IP antes de lançar','err');return;}
+    amountBRL=amt;amt=amountBRL/fxApplied;
+  }
+  const n=Math.max(...ledger.map(l=>l.n),190)+1;
+  pushUndo('Lançar pagamento #'+n);
+  ledger.push({n,date:dateDisp,amount:amt,pi,supplier:p.supplier||pi,ref:ref||'—',notes:'',layer,...(amountBRL!=null?{amountBRL,fxApplied}:{})});
+  saveAll();renderFinanceiro();openFinPopup(pi);toast(`Lançamento #${n} ✓`);
+}
+function finPopupAddReceipt(pi){
+  const rawDate=document.getElementById('fp-r-date').value.trim();
+  let amt=parseFloat(document.getElementById('fp-r-amt').value);
+  const ref=document.getElementById('fp-r-ref').value.trim();
+  if(!rawDate){toast('⚠ Informe uma data','err');return;}
+  const dateDisp=normDate(rawDate);
+  if(!dateDisp){toast('⚠ Data inválida','err');return;}
+  if(!amt||amt<=0){toast('⚠ Valor inválido','err');return;}
+  const p=payments.find(x=>x.pi===pi);if(!p)return;
+  let amountBRL=null,fxApplied=null;
+  if(isIpC(pi)){
+    const o=orders.find(x=>x.pi===pi);
+    fxApplied=o&&o.cambioVenda;
+    if(!fxApplied){toast('⚠ Defina o "Câmbio venda cliente" nessa IP antes de lançar','err');return;}
+    amountBRL=amt;amt=amountBRL/fxApplied;
+  }
+  const n=Math.max(...receipts.map(r=>r.n),0)+1;
+  pushUndo('Lançar recebimento #'+n);
+  receipts.push({n,date:dateDisp,amount:amt,pi,client:p.client||'',ref:ref||'—',notes:'',...(amountBRL!=null?{amountBRL,fxApplied}:{})});
+  saveAll();renderFinanceiro();openFinPopup(pi);toast(`Recebimento #${n} ✓`);
+}
 function delLedger(n){
   if(!confirm('Apagar lançamento?'))return;
   pushUndo('Apagar lançamento #'+n); // FIX #2
@@ -2725,6 +2769,14 @@ function openFinPopup(pi){
         </div>`;
       });
     } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum pagamento lançado</div>`;
+    h+=`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
+      <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
+        <input type="text" id="fp-l-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+        <input type="number" id="fp-l-amt" placeholder="Valor US$" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+      </div>
+      <input type="text" id="fp-l-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+      <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
+    </div>`;
   } else {
     const av=ordAVLayers(o);
     const layers=[{k:'fy',lbl:'FY (mercadoria)',tot:pTotalForn(p),col:'var(--red)'},{k:'rf',lbl:'RF (importação)',tot:av.rf,col:'var(--purple)'}];
@@ -2747,6 +2799,21 @@ function openFinPopup(pi){
       } else h+=`<div style="font-size:.58rem;color:var(--ink4);font-style:italic;padding:.15rem .3rem">Nenhum lançamento</div>`;
       h+=`</div>`;
     });
+    h+=`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
+      <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
+        <input type="text" id="fp-l-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+        <input type="number" id="fp-l-amt" placeholder="${o?.rotaAV?'Valor (US$ ou R$)':'Valor US$'}" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+      </div>
+      <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
+        <select id="fp-l-layer" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.64rem">
+          <option value="fy">FY (mercadoria) — US$</option>
+          <option value="rf">RF (importação) — R$</option>
+          ${o.rotaAV==='trading'?`<option value="trading">Trading — R$</option>`:''}
+        </select>
+        <input type="text" id="fp-l-ref" placeholder="Ref" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem">
+      </div>
+      <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
+    </div>`;
   }
   h+=`</div>`;
 
@@ -2761,6 +2828,14 @@ function openFinPopup(pi){
       </div>`;
     });
   } else h+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;padding:.3rem">Nenhum recebimento lançado</div>`;
+  h+=`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
+    <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
+      <input type="text" id="fp-r-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+      <input type="number" id="fp-r-amt" placeholder="${isC?'Valor (US$ ou R$)':'Valor US$'}" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
+    </div>
+    <input type="text" id="fp-r-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+    <button class="bsm" style="width:100%;background:var(--green);color:#fff;border-color:var(--green)" onclick="finPopupAddReceipt('${esc(pi)}')">＋ Lançar recebimento</button>
+  </div>`;
   h+=`</div></div>`;
 
   // Totais — linha própria abaixo das duas colunas, sempre alinhados entre si
