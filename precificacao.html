@@ -260,12 +260,12 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="logo"><span class="leaf">🌿</span>FGL</div>
   <div class="tabs">
     <button class="tab" id="tab-import" onclick="showTab('import')" style="display:none">Importação</button>
-    <button class="tab active" id="tab-revenda" onclick="showTab('revenda')">Revenda</button>
+    <button class="tab active" id="tab-revenda" onclick="showTab('revenda')">PROD NAC</button>
     <a class="tab" id="tab-tracker" href="index.html" style="display:none;text-decoration:none">PROD INTERNACIONAL</a>
   </div>
   <div class="spacer"></div>
   <span id="save-status"></span>
-  <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba Revenda pra desbloquear)" style="cursor:default">☁</span>
+  <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD NAC pra desbloquear)" style="cursor:default">☁</span>
   <button class="hbtn" id="auth-status" onclick="onAuthButtonClick()">👤 Minha conta</button>
   <button class="hbtn" id="btn-security" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres" style="display:none">🔐 Segurança</button>
   <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
@@ -358,7 +358,7 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div id="rvpane-calc" class="rv-pane active">
       <div class="card" style="background:var(--green);color:#fff;padding:.8rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
         <div>
-          <div style="font-size:1rem;font-weight:700">Revenda — Ânima Verde</div>
+          <div style="font-size:1rem;font-weight:700">PROD NAC — Ânima Verde</div>
           <div style="font-size:.68rem;color:#B8E0C8;margin-top:.1rem">RJ · Lucro Presumido · comprador–revendedor</div>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
@@ -684,13 +684,13 @@ body.dark .rv-tabs{background:#0A0F1A}
       <input type="password" id="sec-import-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
       <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeImportVaultPw()">Trocar senha do cofre (Importação)</button>
 
-      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — Revenda compartilhada</div>
+      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — PROD NAC compartilhada</div>
       <p style="font-size:.68rem;color:var(--red);margin:.3rem 0 .5rem" id="sec-rv-hint">⚠ Afeta todo mundo com acesso (você e sua gerente). Combine antes de trocar — quem não souber a senha nova fica sem acesso até você avisar. Precisa estar conectado nesta sessão pra poder trocar.</p>
       <input type="password" id="sec-rv-pw1" placeholder="Nova senha do cofre" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
       <input type="password" id="sec-rv-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
-      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (Revenda)</button>
+      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (PROD NAC)</button>
 
-      <div class="fsep" style="margin-top:1.2rem">Acesso ao cofre da Revenda</div>
+      <div class="fsep" style="margin-top:1.2rem">Acesso ao cofre da PROD NAC</div>
       <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem">Adiciona alguém pelo e-mail — a pessoa precisa já ter criado a própria conta antes.</p>
       <button class="btn btn-s" style="width:100%" onclick="rvAddMember()">＋ Add user</button>
     </div>
@@ -780,7 +780,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         onkeydown="if(event.key==='Enter')tryUnlock()">
       <div id="lock-err" style="color:var(--red);font-size:.72rem;margin-top:.4rem;min-height:1.2em"></div>
       <button class="btn btn-p" style="width:100%;margin-top:.7rem" onclick="tryUnlock()">Entrar</button>
-      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora desta caixa para voltar à Revenda.</p>
+      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora desta caixa para voltar à PROD NAC.</p>
     </div>
   </div>
 </div>
@@ -1545,10 +1545,10 @@ async function secChangeImportVaultPw(){
 }
 async function secChangeRvVaultPw(){
   const newPw=rvEl('sec-rv-pw1').value,confirmPw=rvEl('sec-rv-pw2').value;
-  if(!rvSyncPass){alert('Conecte no cofre compartilhado da Revenda primeiro (abra Cotações ou Pedidos).');return;}
+  if(!rvSyncPass){alert('Conecte no cofre compartilhado da PROD NAC primeiro (abra Cotações ou Pedidos).');return;}
   if(!newPw||newPw.length<4){alert('Digite uma senha nova com pelo menos 4 caracteres.');return;}
   if(newPw!==confirmPw){alert('As duas senhas novas não coincidem.');return;}
-  if(!confirm('Trocar a senha do cofre COMPARTILHADO da Revenda?\n\nTodo mundo com acesso (você e sua gerente) vai precisar da senha NOVA a partir de agora. Combine com ela antes — senão ela fica sem conseguir entrar até você avisar.'))return;
+  if(!confirm('Trocar a senha do cofre COMPARTILHADO da PROD NAC?\n\nTodo mundo com acesso (você e sua gerente) vai precisar da senha NOVA a partir de agora. Combine com ela antes — senão ela fica sem conseguir entrar até você avisar.'))return;
   try{
     const payload=await encryptJSON(newPw,rvCollectSyncData());
     const payloadStr=JSON.stringify(payload);
@@ -1558,7 +1558,7 @@ async function secChangeRvVaultPw(){
     sessionStorage.setItem(SESS_RV_PW,newPw);
     localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
     rvEl('sec-rv-pw1').value='';rvEl('sec-rv-pw2').value='';
-    toastSave('Senha do cofre (Revenda) alterada ✓ — avise quem mais tem acesso');
+    toastSave('Senha do cofre (PROD NAC) alterada ✓ — avise quem mais tem acesso');
   }catch(e){console.warn(e);alert('Erro ao trocar a senha do cofre. Tente de novo.');}
 }
 
@@ -1721,7 +1721,7 @@ function updateRvSyncStatus(msg){
   if(msg){el.title='Cotações/Pedidos compartilhados: '+msg;return;}
   if(!authUser){el.title='Cotações/Pedidos compartilhados: entre com sua conta primeiro';el.style.color='';return;}
   if(rvSyncPass){el.title='Cotações/Pedidos compartilhados: conectado ✓ (sincroniza sozinho)';el.style.color='#8FE3A8';}
-  else{el.title='Cotações/Pedidos compartilhados: bloqueados (abra a aba Revenda pra desbloquear)';el.style.color='';}
+  else{el.title='Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD NAC pra desbloquear)';el.style.color='';}
 }
 async function rvCloudGet(){
   if(!_supaOK||!authUser)return null;
@@ -2139,9 +2139,9 @@ function rv2Render(r){
   rvEl('rv2-resumo').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
       <div class="card" style="background:var(--ltgrn);padding:.7rem .8rem;border:none">
-        <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Margem líquida</div>
-        <div style="font-size:1.3rem;font-weight:700;color:var(--green)">${rvBrl(r.margemLiquida)}</div>
-        <div style="font-size:.68rem;color:var(--green)">${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}% · antes da apuração de ICMS</div>
+        <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Margem final</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--green)">${rvBrl(r.margemFinal)}</div>
+        <div style="font-size:.68rem;color:var(--green)">${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}% · depois da apuração de ICMS</div>
       </div>
       <div class="card" style="background:var(--ltblue);padding:.7rem .8rem;border:none">
         <div style="font-size:.6rem;color:var(--blue);font-weight:700;text-transform:uppercase">Venda total</div>
@@ -2154,8 +2154,8 @@ function rv2Render(r){
       <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--ink3);margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--bdr)">
-      <span>Margem Final <span style="color:var(--ink4)">(depois da apuração de ICMS)</span></span>
-      <b style="font-family:'IBM Plex Mono';color:${r.margemFinal>=0?'var(--green)':'var(--red)'}">${rvBrl(r.margemFinal)} (${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</b>
+      <span>Margem Líquida <span style="color:var(--ink4)">(antes da apuração de ICMS)</span></span>
+      <b style="font-family:'IBM Plex Mono';color:${r.margemLiquida>=0?'var(--green)':'var(--red)'}">${rvBrl(r.margemLiquida)} (${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</b>
     </div>`;
   if(rv2DetalheOpen)rv2RenderDetalhe(r);
 }
