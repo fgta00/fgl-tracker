@@ -686,6 +686,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
         <div id="doc-events-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:.5rem"></div>
         <div style="font-size:.6rem;color:var(--ink4)">Negativo = antes do marco. Aparece como aviso na Situação do pedido quando o marco de referência tiver data.</div>
       </div>
+      <div style="margin-top:1.2rem">
+        <div class="sh">📅 Linha do Tempo (marcos + prazos, em dias a partir da Arte Recebida)</div>
+        <div style="overflow-x:auto;border:1px solid var(--bdr);border-radius:8px;padding:1.6rem .8rem 1.2rem;background:var(--card)">
+          <div id="doc-timeline" style="position:relative;height:70px"></div>
+        </div>
+        <div style="font-size:.6rem;color:var(--ink4);margin-top:.3rem">🔵 marcos de produção · 🟠 prazos de documentos/pagamentos — posições calculadas a partir dos intervalos e prazos configurados acima</div>
+      </div>
       <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
     </div>
   </div>
@@ -1032,6 +1039,7 @@ let DOC_EVENTS=[
   {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
   {key:'docs_orig',    label:'Receber Docs Originais',                  baseIdx:6, offset:30, cond:null},
   {key:'carton_mark',  label:'Enviar Carton Mark',                      baseIdx:0, offset:30, cond:null},
+  {key:'coord_frete',  label:'Coordenar Frete (FF c/ origem/destino)',  baseIdx:4, offset:-15, cond:null},
 ];
 const FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS']; // tags padronizadas — usar no campo Ref de Ledger/Receipts pra auto-validar a notificação correspondente
 const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
@@ -3003,6 +3011,40 @@ function renderStatusLists(){
     </details>
   </div>`;
   }).join('');
+  renderDocTimeline();
+}
+// Linha do tempo: posiciona marcos (fixos, via MS_GAPS acumulado) e prazos de documentos
+// (marco de referência + offset) num eixo horizontal de dias, a partir da Arte Recebida (dia 0).
+function renderDocTimeline(){
+  const cont=document.getElementById('doc-timeline');
+  if(!cont)return;
+  // dia acumulado de cada um dos 9 marcos
+  const msDay=[0];
+  for(let i=0;i<8;i++)msDay.push(msDay[i]+(MS_GAPS[i]||0));
+  // dia de cada prazo de documento (marco base + offset — pode ser negativo)
+  const evDay=DOC_EVENTS.map(ev=>msDay[ev.baseIdx]+ev.offset);
+  const minDay=Math.min(0,...evDay);
+  const maxDay=Math.max(msDay[8],...evDay);
+  const span=maxDay-minDay||1;
+  const pxPerDay=Math.max(3,Math.min(6,900/span)); // não deixa nem muito espremido nem gigantesco
+  const totalW=Math.ceil(span*pxPerDay)+80;
+  cont.style.width=totalW+'px';
+  const x=day=>40+(day-minDay)*pxPerDay;
+  let html=`<div style="position:absolute;left:0;right:0;top:32px;height:2px;background:var(--bdr2)"></div>`;
+  // marcos (linha de cima, pontos maiores)
+  MLBL.forEach((lbl,i)=>{
+    const px=x(msDay[i]);
+    html+=`<div style="position:absolute;left:${px}px;top:26px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--blue);border:2px solid var(--card)" title="${DOC_BASE_LBL[i]} — dia ${msDay[i]}"></div>
+      <div style="position:absolute;left:${px}px;top:44px;transform:translateX(-50%);font-size:.5rem;color:var(--blue);font-weight:700;white-space:nowrap">${esc(lbl)}</div>
+      <div style="position:absolute;left:${px}px;top:56px;transform:translateX(-50%);font-size:.46rem;color:var(--ink4);white-space:nowrap">d${msDay[i]}</div>`;
+  });
+  // prazos de documentos (ficam ACIMA da linha, alternando altura pra não empilhar)
+  DOC_EVENTS.forEach((ev,i)=>{
+    const px=x(evDay[i]);
+    const alterna=i%2===0?0:-13;
+    html+=`<div style="position:absolute;left:${px}px;top:${8+alterna}px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--amber);border:2px solid var(--card)" title="${esc(ev.label)} — dia ${evDay[i]}"></div>`;
+  });
+  cont.innerHTML=html;
 }
 function addMestre(tipo){
   const id='st-'+tipo+'-new';const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
