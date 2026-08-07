@@ -260,12 +260,12 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="logo"><span class="leaf">🌿</span>FGL</div>
   <div class="tabs">
     <button class="tab" id="tab-import" onclick="showTab('import')" style="display:none">Importação</button>
-    <button class="tab active" id="tab-revenda" onclick="showTab('revenda')">PROD NAC</button>
-    <a class="tab" id="tab-tracker" href="index.html" style="display:none;text-decoration:none">PROD INTERNACIONAL</a>
+    <button class="tab active" id="tab-revenda" onclick="showTab('revenda')">PROD BR</button>
+    <a class="tab" id="tab-tracker" href="index.html" style="display:none;text-decoration:none">PROD ASIA</a>
   </div>
   <div class="spacer"></div>
   <span id="save-status"></span>
-  <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD NAC pra desbloquear)" style="cursor:default">☁</span>
+  <span class="hbtn" id="rv-sync-status" title="Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD BR pra desbloquear)" style="cursor:default">☁</span>
   <button class="hbtn" id="auth-status" onclick="onAuthButtonClick()">👤 Minha conta</button>
   <button class="hbtn" id="btn-security" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres" style="display:none">🔐 Segurança</button>
   <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
@@ -358,7 +358,7 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div id="rvpane-calc" class="rv-pane active">
       <div class="card" style="background:var(--green);color:#fff;padding:.8rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
         <div>
-          <div style="font-size:1rem;font-weight:700">PROD NAC — Ânima Verde</div>
+          <div style="font-size:1rem;font-weight:700">PROD BR — Ânima Verde</div>
           <div style="font-size:.68rem;color:#B8E0C8;margin-top:.1rem">RJ · Lucro Presumido · comprador–revendedor</div>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
@@ -483,6 +483,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <input id="finr-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderFin()" style="flex:1">
           <span id="msf-finr-cl-wrap"></span>
           <span id="msf-finr-forn-wrap"></span>
+          <button class="btn btn-s" onclick="rvOpenCalPopup()" title="Calendário de pagamentos/recebimentos">📅</button>
         </div>
         <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
       </div>
@@ -668,6 +669,26 @@ body.dark .rv-tabs{background:#0A0F1A}
 </div>
 
 <!-- SEGURANÇA — trocar senha da conta e dos cofres -->
+<!-- CALENDÁRIO — pagamentos/recebimentos agendados e feitos -->
+<div class="ovl" id="ovl-rvcal" onclick="if(event.target===this)closeM('rvcal')">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-h"><span>Calendário — Pagamentos e Recebimentos</span><button class="mcls" onclick="closeM('rvcal')">✕</button></div>
+    <div class="modal-b">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(-1)">◀</button>
+        <h3 id="rvcal-title" style="font-size:.95rem;font-weight:700;color:var(--ink);margin:0"></h3>
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(1)">▶</button>
+      </div>
+      <div id="rvcal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:6px;overflow:hidden"></div>
+      <div style="display:flex;gap:14px;margin-top:.6rem;font-size:.6rem;color:var(--ink3)">
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:3px"></span>Pagar fornecedor/beneficiador</span>
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:3px"></span>Receber cliente</span>
+        <span style="opacity:.55">Opaco = já feito · Sólido = agendado (data futura)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="ovl" id="ovl-security" onclick="if(event.target===this)closeM('security')">
   <div class="modal" style="max-width:420px">
     <div class="modal-h"><span>Segurança</span><button class="mcls" onclick="closeM('security')">✕</button></div>
@@ -684,13 +705,13 @@ body.dark .rv-tabs{background:#0A0F1A}
       <input type="password" id="sec-import-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
       <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeImportVaultPw()">Trocar senha do cofre (Importação)</button>
 
-      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — PROD NAC compartilhada</div>
+      <div class="fsep" style="margin-top:1.2rem">Senha do cofre — PROD BR compartilhada</div>
       <p style="font-size:.68rem;color:var(--red);margin:.3rem 0 .5rem" id="sec-rv-hint">⚠ Afeta todo mundo com acesso (você e sua gerente). Combine antes de trocar — quem não souber a senha nova fica sem acesso até você avisar. Precisa estar conectado nesta sessão pra poder trocar.</p>
       <input type="password" id="sec-rv-pw1" placeholder="Nova senha do cofre" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);margin-bottom:.4rem;background:var(--card);color:var(--ink)">
       <input type="password" id="sec-rv-pw2" placeholder="Confirmar nova senha" style="width:100%;padding:.5rem .7rem;border-radius:7px;border:1.5px solid var(--bdr2);background:var(--card);color:var(--ink)">
-      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (PROD NAC)</button>
+      <button class="btn btn-p" style="width:100%;margin-top:.6rem" onclick="secChangeRvVaultPw()">Trocar senha do cofre (PROD BR)</button>
 
-      <div class="fsep" style="margin-top:1.2rem">Acesso ao cofre da PROD NAC</div>
+      <div class="fsep" style="margin-top:1.2rem">Acesso ao cofre da PROD BR</div>
       <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem">Adiciona alguém pelo e-mail — a pessoa precisa já ter criado a própria conta antes.</p>
       <button class="btn btn-s" style="width:100%" onclick="rvAddMember()">＋ Add user</button>
     </div>
@@ -780,7 +801,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         onkeydown="if(event.key==='Enter')tryUnlock()">
       <div id="lock-err" style="color:var(--red);font-size:.72rem;margin-top:.4rem;min-height:1.2em"></div>
       <button class="btn btn-p" style="width:100%;margin-top:.7rem" onclick="tryUnlock()">Entrar</button>
-      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora desta caixa para voltar à PROD NAC.</p>
+      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora desta caixa para voltar à PROD BR.</p>
     </div>
   </div>
 </div>
@@ -1545,10 +1566,10 @@ async function secChangeImportVaultPw(){
 }
 async function secChangeRvVaultPw(){
   const newPw=rvEl('sec-rv-pw1').value,confirmPw=rvEl('sec-rv-pw2').value;
-  if(!rvSyncPass){alert('Conecte no cofre compartilhado da PROD NAC primeiro (abra Cotações ou Pedidos).');return;}
+  if(!rvSyncPass){alert('Conecte no cofre compartilhado da PROD BR primeiro (abra Cotações ou Pedidos).');return;}
   if(!newPw||newPw.length<4){alert('Digite uma senha nova com pelo menos 4 caracteres.');return;}
   if(newPw!==confirmPw){alert('As duas senhas novas não coincidem.');return;}
-  if(!confirm('Trocar a senha do cofre COMPARTILHADO da PROD NAC?\n\nTodo mundo com acesso (você e sua gerente) vai precisar da senha NOVA a partir de agora. Combine com ela antes — senão ela fica sem conseguir entrar até você avisar.'))return;
+  if(!confirm('Trocar a senha do cofre COMPARTILHADO da PROD BR?\n\nTodo mundo com acesso (você e sua gerente) vai precisar da senha NOVA a partir de agora. Combine com ela antes — senão ela fica sem conseguir entrar até você avisar.'))return;
   try{
     const payload=await encryptJSON(newPw,rvCollectSyncData());
     const payloadStr=JSON.stringify(payload);
@@ -1558,7 +1579,7 @@ async function secChangeRvVaultPw(){
     sessionStorage.setItem(SESS_RV_PW,newPw);
     localStorage.setItem('rv_sync_vault',payloadStr);setLocalTs('rv_sync_vault');
     rvEl('sec-rv-pw1').value='';rvEl('sec-rv-pw2').value='';
-    toastSave('Senha do cofre (PROD NAC) alterada ✓ — avise quem mais tem acesso');
+    toastSave('Senha do cofre (PROD BR) alterada ✓ — avise quem mais tem acesso');
   }catch(e){console.warn(e);alert('Erro ao trocar a senha do cofre. Tente de novo.');}
 }
 
@@ -1721,7 +1742,7 @@ function updateRvSyncStatus(msg){
   if(msg){el.title='Cotações/Pedidos compartilhados: '+msg;return;}
   if(!authUser){el.title='Cotações/Pedidos compartilhados: entre com sua conta primeiro';el.style.color='';return;}
   if(rvSyncPass){el.title='Cotações/Pedidos compartilhados: conectado ✓ (sincroniza sozinho)';el.style.color='#8FE3A8';}
-  else{el.title='Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD NAC pra desbloquear)';el.style.color='';}
+  else{el.title='Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD BR pra desbloquear)';el.style.color='';}
 }
 async function rvCloudGet(){
   if(!_supaOK||!authUser)return null;
@@ -2894,6 +2915,66 @@ function rvRenderFin(){
     </div>`;
   }).join('')+`</div>`;
 }
+/* ── CALENDÁRIO — pagamentos/recebimentos agendados e feitos ── */
+const RV_MO=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let _rvCalMonth=new Date().getMonth(),_rvCalYear=new Date().getFullYear();
+function rvOpenCalPopup(){
+  _rvCalMonth=new Date().getMonth();_rvCalYear=new Date().getFullYear();
+  rvRenderCalendar();
+  document.getElementById('ovl-rvcal').classList.add('open');
+}
+function rvCalNav(delta){
+  _rvCalMonth+=delta;
+  if(_rvCalMonth<0){_rvCalMonth=11;_rvCalYear--;}
+  if(_rvCalMonth>11){_rvCalMonth=0;_rvCalYear++;}
+  rvRenderCalendar();
+}
+function rvCalDateParts(dispDate){ // DD/MM/AAAA -> {d,m,y}
+  const p=(dispDate||'').split('/');
+  if(p.length!==3)return null;
+  return{d:parseInt(p[0],10),m:parseInt(p[1],10)-1,y:parseInt(p[2],10)};
+}
+function rvRenderCalendar(){
+  document.getElementById('rvcal-title').textContent=RV_MO[_rvCalMonth]+' '+_rvCalYear;
+  const firstDay=new Date(_rvCalYear,_rvCalMonth,1).getDay();
+  const daysInMonth=new Date(_rvCalYear,_rvCalMonth+1,0).getDate();
+  const isDark=document.body.classList.contains('dark');
+  const bgCell=isDark?'#1B2535':'#fff';const bgOther=isDark?'#111827':'#F8FAFC';
+  const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const pedidosAtivos=rvLoadPedidosActive();
+  const pedidoById={};pedidosAtivos.forEach(p=>pedidoById[p.id]=p);
+  const events={};
+  const addEv=(dispDate,tipo,p,valor,ref)=>{
+    const parts=rvCalDateParts(dispDate);if(!parts)return;
+    if(parts.m!==_rvCalMonth||parts.y!==_rvCalYear)return;
+    if(!events[parts.d])events[parts.d]=[];
+    events[parts.d].push({tipo,cliente:p?p.cliente:'',fornecedor:p?p.fornecedor:'',valor,ref,futuro:rvDateIsFuture(dispDate),pedidoId:p?p.id:null});
+  };
+  rvLoadLedgerR().forEach(l=>{const p=pedidoById[l.pedidoId];if(!p)return;addEv(l.date,'pagar',p,l.amount,l.ref);});
+  rvLoadReceiptsR().forEach(r=>{const p=pedidoById[r.pedidoId];if(!p)return;addEv(r.date,'receber',p,r.amount,r.ref);});
+  let h='';
+  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
+  const startOff=(firstDay===0?6:firstDay-1);
+  for(let i=0;i<startOff;i++)h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
+  const today=new Date();
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=d===today.getDate()&&_rvCalMonth===today.getMonth()&&_rvCalYear===today.getFullYear();
+    const evts=events[d]||[];
+    h+=`<div style="background:${bgCell};padding:3px 4px;min-height:60px;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
+    h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px">${d}</div>`;
+    evts.forEach(e=>{
+      const col=e.tipo==='pagar'?'var(--red)':'var(--green)';
+      const nome=e.tipo==='pagar'?e.fornecedor:e.cliente;
+      h+=`<div onclick="closeM('rvcal');${e.pedidoId?`rvOpenFinPopupR(${e.pedidoId})`:''}" style="font-size:.62rem;padding:2px 4px;margin-bottom:2px;border-radius:3px;background:${col}${e.futuro?'':'18'};color:${e.futuro?'#fff':col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" title="${e.futuro?'Agendado':'Feito'} — ${esc(nome)} — ${rvBrl(e.valor)}${e.ref?' — '+esc(e.ref):''}"><b>${rvBrl(e.valor)}</b> ${esc(nome)}</div>`;
+    });
+    h+='</div>';
+  }
+  const totalCells=startOff+daysInMonth;
+  const rem=totalCells%7===0?0:7-totalCells%7;
+  for(let i=0;i<rem;i++)h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
+  document.getElementById('rvcal-grid').innerHTML=h;
+}
+
 function rvFinPartyRows(pedidoId,party,total,isReceipt){
   const list=isReceipt?rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId):rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party);
   if(!list.length)return '<p class="hint" style="margin:.3rem 0">Nenhum lançamento ainda.</p>';
