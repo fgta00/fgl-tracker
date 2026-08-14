@@ -296,6 +296,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         <span><b>OEM entra no FOB</b> — soma ao preço FOB unitário (÷ qtd) e passa a compor a base de impostos. Desmarcado: OEM fica <i>por fora</i> do FOB/impostos, mas continua somando no custo total.</span>
       </label>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem">
+        <span class="cbm-badge">Unidades: <b id="un-tot">0</b></span>
         <span class="cbm-badge">CBM: <b id="cbm-tot">0,000</b> m³</span>
         <span class="cbm-badge">Caixas: <b id="cx-tot">0</b></span>
         <span class="cbm-badge">Peso: <b id="peso-tot">0</b> kg</span>
@@ -309,9 +310,9 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
       <div class="ff"><label>Câmbio US$ DI</label><input class="mono" id="fx" type="number" step="0.0001" value="5.50" oninput="recalc()"><span class="formula">usado no CIF: FOB+Seguro+Frete</span></div>
       <div class="ff"><label>Câmbio frete (ref.)</label><input class="mono" id="fxFrete" type="number" step="0.0001" value="5.665" oninput="recalc()"><span class="formula">não entra no CIF/impostos</span></div>
-      <div class="ff" style="justify-content:flex-end"><label>Frete intl US$</label><input class="mono" id="frete" type="number" step="1" value="3500" oninput="recalc()"></div>
-      <div class="ff" style="justify-content:flex-end"><label>Modal</label><select id="modal" onchange="recalc()"><option value="FCL">FCL (cheio)</option><option value="LCL">LCL (fracionado)</option></select></div>
-      <div class="ff" style="justify-content:flex-end"><button class="btn btn-s" onclick="openExpenses()" style="white-space:nowrap">⚙ Despesas destino</button></div>
+      <div class="ff"><label>Frete intl US$</label><input class="mono" id="frete" type="number" step="1" value="3500" oninput="recalc()"><span class="formula">&nbsp;</span></div>
+      <div class="ff"><label>Modal</label><select id="modal" onchange="recalc()"><option value="FCL">FCL (cheio)</option><option value="LCL">LCL (fracionado)</option></select><span class="formula">&nbsp;</span></div>
+      <div class="ff" style="justify-content:flex-end"><button class="btn btn-s" onclick="openExpenses()" style="white-space:nowrap">⚙ Despesas destino</button><span class="formula">&nbsp;</span></div>
     </div>
     <small class="hint" style="display:block;margin-top:.5rem">CIF = FOB + Seguro + Frete, todos convertidos pelo <b>câmbio US$ DI</b> (mesmo câmbio da mercadoria) — é a base de II/IPI/PIS/COFINS. O <b>câmbio de frete</b> fica só como referência (não afeta o CIF nem os impostos). Preencha <b>Margem-alvo</b> (custo→preço) ou <b>Preço de venda</b> (preço→margem). O último editado manda.</small>
   </div>
@@ -1167,6 +1168,7 @@ function priceMarginFY(c){const m=val('fyMarg')/100;return{preco:m<1?c/(1-m):c,m
 /* ════════ RECALC ════════ */
 function recalc(){
   const pk=packing();
+  document.getElementById('un-tot').textContent=pk.qtyTot.toLocaleString('pt-BR');
   document.getElementById('cbm-tot').textContent=f3(pk.cbm);
   document.getElementById('cx-tot').textContent=pk.caixas.toLocaleString('pt-BR');
   document.getElementById('peso-tot').textContent=Math.round(pk.peso).toLocaleString('pt-BR');
@@ -1239,6 +1241,30 @@ function renderCmp(fy,av,tr,fyPM,avPM,trPM,fx){
   h+=R('Custo unitário (líquido)',f3(fy.custoUnit)+' US$',f3(av.custoUnit)+' R$',f3(tr.custoUnit)+' R$','hero');
   h+=R('↳ caixa por unidade','—',f3(av.caixaUnit)+' R$',f3(tr.caixaUnit)+' R$','sub');
   h+=R('↳ moeda oposta',f3(fy.custoUnit*fx)+' R$',f3(av.custoUnit/fx)+' US$',f3(tr.custoUnit/fx)+' US$','sub');
+
+  // ── RESULTADO: FOB / Frete-Seguro / CIF / Custo Importação / Custo Trading / Total ──
+  // Por construção, Total = FOB+Frete/Seguro+CustoImportação+CustoTrading sempre bate exatamente
+  // com o "Custo unitário (líquido)" de cima — é só uma forma diferente de fatiar o mesmo número.
+  const qty=fy.qtyTot||1;
+  const fobFY=fy.custoTotalUSD;
+  const fobAV=av.fobBRL, fsAV=av.cif-av.fobBRL, cifAV=av.cif, ciAV=av.custoLiquido-av.cif, ctAV=0, totAV=av.custoLiquido;
+  const fobTR=tr.fobBRL, fsTR=tr.cif-tr.fobBRL, cifTR=tr.cif, ciTR=tr.custoImport-tr.cif, ctTR=tr.custoLiquido-tr.cif-ciTR, totTR=tr.custoLiquido;
+  const RB=(lbl,fyV,avV,trV,extra='')=>{
+    let hh=R(lbl,fyV===null?'—':fU(fyV),fR(avV),fR(trV),extra);
+    hh+=R('<span style="font-size:.55rem">↳ unit. / moeda oposta</span>',
+      fyV===null?'—':f3(fyV/qty)+' US$ · '+f3(fyV*fx/qty)+' R$',
+      f3(avV/qty)+' R$ · '+f3(avV/fx)+' US$',
+      f3(trV/qty)+' R$ · '+f3(trV/fx)+' US$','sub');
+    return hh;
+  };
+  h+=C('sec','💵 Resultado — FOB · Frete/Seguro · CIF · Importação · Trading (total e unitário, $ e R$)');
+  h+=RB('FOB',fobFY,fobAV,fobTR);
+  h+=RB('Frete/Seguro',null,fsAV,fsTR);
+  h+=RB('CIF (=FOB+Frete/Seguro)',null,cifAV,cifTR,'liq');
+  h+=RB('Custo Importação',null,ciAV,ciTR);
+  h+=RB('Custo Trading',null,ctAV,ctTR);
+  h+=RB('<b>Total</b> (=FOB+Frete/Seg.+Importação+Trading)',fobFY,totAV,totTR,'hero');
+
   h+=C('sec',_mode==='price'?'Margem (a partir do preço informado)':'Preço sugerido (margem-alvo)');
   h+=R('Preço unitário',f3(fyPM.preco)+' US$',f3(avPM.preco)+' R$',f3(trPM.preco)+' R$','hero');
   h+=R('↳ moeda oposta',f3(fyPM.preco*fx)+' R$',f3(avPM.preco/fx)+' US$',f3(trPM.preco/fx)+' US$','sub');
