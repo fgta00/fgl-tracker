@@ -1564,7 +1564,8 @@ function msCompact(dates,num){
   });
   return h+'</div>';
 }
-function msHTML(dates,num){
+function msHTML(dates,num,o){
+  const evsForOrder=o?docEventsForOrder(o):[];
   return dates.map((d,i)=>{
     const cls=d.v&&!d.est?'done':d.v&&d.est?(msIsLate(d)?'late':'est'):'pending';
     const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
@@ -1575,7 +1576,29 @@ function msHTML(dates,num){
       const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
       if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
         gap=`<span style="font-size:.62rem;color:var(--ink3);font-family:'IBM Plex Mono';line-height:1;font-weight:500">${dd}d</span>`;}}
-    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
+    // ── prazos de documentos/pagamentos associados a esse marco (baseIdx===i) — mini pontos em paralelo ──
+    let docDots='';
+    const evsAqui=evsForOrder.filter(ev=>ev.baseIdx===i);
+    if(evsAqui.length&&o){
+      const dots=evsAqui.map(ev=>{
+        const done=o.docDone&&o.docDone[ev.key];
+        let col,tip;
+        if(done){col='var(--green)';tip=`${ev.label} — feito ${done}`;}
+        else{
+          const due=docEventDueDate(o,ev);
+          if(!due){col='var(--bdr2)';tip=`${ev.label} — aguardando data de ${DOC_BASE_LBL[ev.baseIdx]}`;}
+          else{
+            const daysUntil=Math.round((new Date(dispToISO(due)+'T00:00')-new Date(new Date().toDateString()))/864e5);
+            if(daysUntil<0){col='var(--red)';tip=`${ev.label} — atrasado ${Math.abs(daysUntil)}d (venceu ${due})`;}
+            else if(daysUntil<=3){col='var(--amber)';tip=`${ev.label} — vence em ${daysUntil}d (${due})`;}
+            else{col='var(--ink4)';tip=`${ev.label} — previsto ${due}`;}
+          }
+        }
+        return`<span onclick="openDocEventModal(${o.num},'${ev.key}');event.stopPropagation()" title="${esc(tip)}" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};cursor:pointer;margin:0 1px"></span>`;
+      }).join('');
+      docDots=`<div style="display:flex;flex-wrap:wrap;justify-content:center;max-width:38px;margin-top:1px;line-height:0">${dots}</div>`;
+    }
+    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span>${docDots}</div></td>`;
   }).join('');
 }
 /* Gantt functions for Timeline tab */
@@ -1783,7 +1806,7 @@ function renderInternal(){
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
       <td style="vertical-align:middle">${daysCell(o.dates,o.status)}</td>
-      ${msHTML(o.dates,o.num)}
+      ${msHTML(o.dates,o.num,o)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
   }).join('');
@@ -1993,8 +2016,9 @@ function renderFinanceCard(vm){
         const pRf=av.rf,paidRf=piPaid(p.pi,'rf');
         const pTr=av.trading,paidTr=piPaid(p.pi,'trading');
         const pct=(paid,tot)=>tot>0?Math.round(paid/tot*100):(tot===0&&paid>0?100:0);
-        const parts=[`FY ${pct(paidFy,pFy)}%`,`RF ${pct(paidRf,pRf)}%`];
-        if(linkedOrd.rotaAV==='trading')parts.push(`Trading ${pct(paidTr,pTr)}%`);
+        const fmt=(lbl,paid,tot)=>{const pc=pct(paid,tot);return pc>100?`<span style="color:var(--red);font-weight:700">${lbl} ${pc}% ⚠</span>`:`${lbl} ${pc}%`;};
+        const parts=[fmt('FY',paidFy,pFy),fmt('RF',paidRf,pRf)];
+        if(linkedOrd.rotaAV==='trading')parts.push(fmt('Trading',paidTr,pTr));
         return `<div style="font-size:.56rem;color:var(--ink3);background:var(--ltgry);border-radius:5px;padding:.2rem .4rem;margin-bottom:.4rem">🇧🇷 ${linkedOrd.rotaAV==='trading'?'Via Trading':'Direta'} — ${parts.join(' · ')}</div>`;
       })()}
       <div style="margin-bottom:.35rem">
