@@ -2150,20 +2150,21 @@ function rvSacachoRender(){
   rvEl('rv-sac-refdate-view').textContent=RV_SACACHO.refDate;
   document.getElementById('rv-sac-editbtn').textContent=rvSacachoEditing?'💾 Salvar':'✏️ Editar';
   const cont=rvEl('rv-sac-table');
+  const nCols=RV_SACACHO.grupos.length;
   if(rvSacachoEditing){
     cont.innerHTML=`<div class="ff" style="margin-bottom:.6rem"><label style="font-size:.6rem">Preços de referência em</label><input type="text" id="rv-sac-refdate-edit" value="${esc(RV_SACACHO.refDate==='—'?'':RV_SACACHO.refDate)}" placeholder="ex: Ago/26" style="font-size:.72rem;padding:.3rem .5rem"></div>`+
-      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">`+
+      `<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:.9rem;align-items:start">`+
       RV_SACACHO.grupos.map((g,gi)=>`<div>
-        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.2rem">${esc(g.nome)}</div>
-        ${g.itens.map((it,ii)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.2rem">
+        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.3rem;white-space:nowrap">${esc(g.nome)}</div>
+        ${g.itens.map((it,ii)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.25rem">
           <span style="font-size:.68rem;color:var(--ink2)">${esc(it.label)}</span>
-          <input type="number" id="rv-sac-p-${gi}-${ii}" value="${it.preco}" step="0.01" min="0" style="width:70px;text-align:right;font-size:.68rem;padding:.15rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;font-family:'IBM Plex Mono'">
+          <input type="number" id="rv-sac-p-${gi}-${ii}" value="${it.preco}" step="0.01" min="0" style="width:62px;text-align:right;font-size:.68rem;padding:.15rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;font-family:'IBM Plex Mono'">
         </div>`).join('')}
       </div>`).join('')+`</div>`;
   }else{
-    cont.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">`+
+    cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:.9rem;align-items:start">`+
       RV_SACACHO.grupos.map(g=>`<div>
-        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.2rem">${esc(g.nome)}</div>
+        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.3rem;white-space:nowrap">${esc(g.nome)}</div>
         <table class="rv-data-table" style="font-size:.68rem"><tbody>
           ${g.itens.map(it=>`<tr><td>${esc(it.label)}</td><td class="rv-num">${rvBrl(it.preco)}</td></tr>`).join('')}
         </tbody></table>
