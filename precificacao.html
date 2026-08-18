@@ -420,14 +420,25 @@ body.dark .rv-tabs{background:#0A0F1A}
           </div>
         </div>
 
-        <!-- CARD DIREITO: RESULTADO -->
-        <div class="card">
-          <div class="sh" style="margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
-            <span>Resultado</span>
-            <button class="btn btn-s no-print" style="font-size:.6rem;padding:.22rem .55rem" id="rv2-detalhe-btn" onclick="rv2ToggleDetalhe()">Ver detalhado</button>
+        <!-- CARD DIREITO: RESULTADO + REFERÊNCIA -->
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="card">
+            <div class="sh" style="margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
+              <span>Resultado</span>
+              <button class="btn btn-s no-print" style="font-size:.6rem;padding:.22rem .55rem" id="rv2-detalhe-btn" onclick="rv2ToggleDetalhe()">Ver detalhado</button>
+            </div>
+            <div id="rv2-resumo"><p class="hint">Selecione cliente e fornecedor pra calcular.</p></div>
+            <div id="rv2-detalhe" style="display:none;margin-top:.6rem"></div>
           </div>
-          <div id="rv2-resumo"><p class="hint">Selecione cliente e fornecedor pra calcular.</p></div>
-          <div id="rv2-detalhe" style="display:none;margin-top:.6rem"></div>
+
+          <div class="card no-print">
+            <div class="sh" style="margin-bottom:.3rem;display:flex;justify-content:space-between;align-items:center">
+              <span>📋 Referência — Sacacho 40x35x20cm</span>
+              <button class="btn btn-s" style="font-size:.58rem;padding:.2rem .5rem" onclick="rvSacachoToggleEdit()" id="rv-sac-editbtn">✏️ Editar</button>
+            </div>
+            <div style="font-size:.6rem;color:var(--ink4);margin-bottom:.5rem">Preços de referência em <span id="rv-sac-refdate-view">—</span></div>
+            <div id="rv-sac-table"></div>
+          </div>
         </div>
       </div>
 
@@ -1711,7 +1722,7 @@ let rvSyncPass=null;
 let _rvSyncTimer=null;
 let _rvRevision=0;
 
-function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),ledgerR:rvLoadLedgerR(),receiptsR:rvLoadReceiptsR(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA};}
+function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),ledgerR:rvLoadLedgerR(),receiptsR:rvLoadReceiptsR(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA,sacacho:RV_SACACHO};}
 function rvMergeById(localList,cloudList){
   // Une por id, e quando o mesmo id existe dos dois lados, quem tem
   // updatedAt mais recente vence de verdade (não é mais "local sempre
@@ -1744,6 +1755,11 @@ function rvApplySyncData(data){
   if(data.empresa&&typeof data.empresa.fedPct==='number'){
     RV_EMPRESA=data.empresa;
     localStorage.setItem('rv2_empresa',JSON.stringify(RV_EMPRESA));
+  }
+  if(data.sacacho&&Array.isArray(data.sacacho.grupos)&&(data.sacacho.updatedAt||0)>=(RV_SACACHO.updatedAt||0)){
+    RV_SACACHO=data.sacacho;
+    rvSacachoSaveLocal();
+    if(document.getElementById('rv-sac-table')&&!rvSacachoEditing)rvSacachoRender();
   }
   rv2SaveLocalCad();
   rv2PopulateSelects();
@@ -2092,6 +2108,69 @@ function rv2LoadEmpresaLocal(){
   try{RV_EMPRESA=JSON.parse(localStorage.getItem('rv2_empresa')||'')||RV_EMPRESA;}catch(e){}
 }
 
+/* ══════════════════════════════════════
+   TABELA DE REFERÊNCIA — SACACHO (editável, com data de referência)
+   Persiste local e sincroniza no cofre compartilhado (mesmo lugar de cotações/pedidos)
+   pra ficar igual pros dois usuários.
+══════════════════════════════════════ */
+let RV_SACACHO={
+  refDate:'—',
+  grupos:[
+    {nome:'Cast 3 cores',itens:[{label:'1k',preco:4.60},{label:'3k a 5k',preco:4.45}]},
+    {nome:'Digital Cast',itens:[{label:'300',preco:10.30},{label:'500',preco:9.90},{label:'1000',preco:9.40}]},
+    {nome:'Boop Invertido',itens:[{label:'1k',preco:8.95},{label:'2k',preco:6.95},{label:'3k',preco:6.40},{label:'5k',preco:6.10},{label:'10k',preco:5.90},{label:'20k',preco:5.80},{label:'30k',preco:5.60},{label:'50k',preco:5.40}]},
+  ]
+};
+let rvSacachoEditing=false;
+function rvSacachoLoad(){
+  try{const saved=JSON.parse(localStorage.getItem('rv_sacacho')||'');if(saved&&saved.grupos)RV_SACACHO=saved;}catch(e){}
+}
+function rvSacachoSaveLocal(){
+  localStorage.setItem('rv_sacacho',JSON.stringify(RV_SACACHO));
+}
+function rvSacachoToggleEdit(){
+  if(rvSacachoEditing){
+    // saindo do modo edição: lê os campos, salva local + nuvem
+    RV_SACACHO.refDate=rvEl('rv-sac-refdate-edit').value.trim()||'—';
+    RV_SACACHO.grupos.forEach((g,gi)=>{
+      g.itens.forEach((it,ii)=>{
+        const inp=document.getElementById(`rv-sac-p-${gi}-${ii}`);
+        if(inp)it.preco=parseFloat(inp.value)||0;
+      });
+    });
+    RV_SACACHO.updatedAt=Date.now();
+    rvSacachoSaveLocal();
+    if(typeof rvSyncPush==='function')rvSyncPush(true);
+    toastSave('Tabela Sacacho atualizada ✓');
+  }
+  rvSacachoEditing=!rvSacachoEditing;
+  rvSacachoRender();
+}
+function rvSacachoRender(){
+  rvEl('rv-sac-refdate-view').textContent=RV_SACACHO.refDate;
+  document.getElementById('rv-sac-editbtn').textContent=rvSacachoEditing?'💾 Salvar':'✏️ Editar';
+  const cont=rvEl('rv-sac-table');
+  if(rvSacachoEditing){
+    cont.innerHTML=`<div class="ff" style="margin-bottom:.6rem"><label style="font-size:.6rem">Preços de referência em</label><input type="text" id="rv-sac-refdate-edit" value="${esc(RV_SACACHO.refDate==='—'?'':RV_SACACHO.refDate)}" placeholder="ex: Ago/26" style="font-size:.72rem;padding:.3rem .5rem"></div>`+
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">`+
+      RV_SACACHO.grupos.map((g,gi)=>`<div>
+        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.2rem">${esc(g.nome)}</div>
+        ${g.itens.map((it,ii)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.2rem">
+          <span style="font-size:.68rem;color:var(--ink2)">${esc(it.label)}</span>
+          <input type="number" id="rv-sac-p-${gi}-${ii}" value="${it.preco}" step="0.01" min="0" style="width:70px;text-align:right;font-size:.68rem;padding:.15rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;font-family:'IBM Plex Mono'">
+        </div>`).join('')}
+      </div>`).join('')+`</div>`;
+  }else{
+    cont.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">`+
+      RV_SACACHO.grupos.map(g=>`<div>
+        <div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.2rem">${esc(g.nome)}</div>
+        <table class="rv-data-table" style="font-size:.68rem"><tbody>
+          ${g.itens.map(it=>`<tr><td>${esc(it.label)}</td><td class="rv-num">${rvBrl(it.preco)}</td></tr>`).join('')}
+        </tbody></table>
+      </div>`).join('')+`</div>`;
+  }
+}
+
 function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId){
   containerId=containerId||'rv2-prod-rows';
   const cont=rvEl(containerId);
@@ -2349,7 +2428,7 @@ function rv2RenderHist(){
   if(!registros.length){cont.innerHTML='<p class="hint">Nenhuma compra registrada ainda pra esse cliente.</p>';return;}
   let html='<table class="rv-data-table"><thead><tr><th>Data</th><th>Origem</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Lucro %</th><th class="rv-num">Lucro</th></tr></thead><tbody>';
   registros.forEach(r=>{
-    html+=`<tr>
+    html+=`<tr onclick="rv2OpenEdit('${r.origem==='Cotação'?'cotacao':'pedido'}',${r.id})" style="cursor:pointer" title="Clique pra editar">
       <td>${esc(r.data||'—')}</td>
       <td>${r.origem}</td>
       <td class="rv-num">${(r.qtd||0).toLocaleString('pt-BR')}</td>
@@ -3146,6 +3225,8 @@ function rvInit(){
   rv2PopulateSelects();
   updateRvSyncStatus();
   rv2AddProdRow('',1000,4.25,8.65);
+  rvSacachoLoad();
+  rvSacachoRender();
 }
 
 addProd({ncm:'4202.92.00'});

@@ -1565,7 +1565,6 @@ function msCompact(dates,num){
   return h+'</div>';
 }
 function msHTML(dates,num,o){
-  const evsForOrder=o?docEventsForOrder(o):[];
   return dates.map((d,i)=>{
     const cls=d.v&&!d.est?'done':d.v&&d.est?(msIsLate(d)?'late':'est'):'pending';
     const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
@@ -1576,29 +1575,7 @@ function msHTML(dates,num,o){
       const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
       if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
         gap=`<span style="font-size:.62rem;color:var(--ink3);font-family:'IBM Plex Mono';line-height:1;font-weight:500">${dd}d</span>`;}}
-    // ── prazos de documentos/pagamentos associados a esse marco (baseIdx===i) — mini pontos em paralelo ──
-    let docDots='';
-    const evsAqui=evsForOrder.filter(ev=>ev.baseIdx===i);
-    if(evsAqui.length&&o){
-      const dots=evsAqui.map(ev=>{
-        const done=o.docDone&&o.docDone[ev.key];
-        let col,tip;
-        if(done){col='var(--green)';tip=`${ev.label} — feito ${done}`;}
-        else{
-          const due=docEventDueDate(o,ev);
-          if(!due){col='var(--bdr2)';tip=`${ev.label} — aguardando data de ${DOC_BASE_LBL[ev.baseIdx]}`;}
-          else{
-            const daysUntil=Math.round((new Date(dispToISO(due)+'T00:00')-new Date(new Date().toDateString()))/864e5);
-            if(daysUntil<0){col='var(--red)';tip=`${ev.label} — atrasado ${Math.abs(daysUntil)}d (venceu ${due})`;}
-            else if(daysUntil<=3){col='var(--amber)';tip=`${ev.label} — vence em ${daysUntil}d (${due})`;}
-            else{col='var(--ink4)';tip=`${ev.label} — previsto ${due}`;}
-          }
-        }
-        return`<span onclick="openDocEventModal(${o.num},'${ev.key}');event.stopPropagation()" title="${esc(tip)}" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};cursor:pointer;margin:0 1px"></span>`;
-      }).join('');
-      docDots=`<div style="display:flex;flex-wrap:wrap;justify-content:center;max-width:38px;margin-top:1px;line-height:0">${dots}</div>`;
-    }
-    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span>${docDots}</div></td>`;
+    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
   }).join('');
 }
 /* Gantt functions for Timeline tab */
