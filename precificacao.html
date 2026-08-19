@@ -433,7 +433,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
           <div class="card no-print">
             <div class="sh" style="margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
-              <span>📋 Referência — Sacacho 40x35x20cm <span style="font-weight:400;color:var(--ink4);text-transform:none;font-size:.62rem">· ref. <span id="rv-sac-refdate-view">—</span></span></span>
+              <span>📋 Referência — Sacacho 40x35x20cm <span style="font-weight:400;color:var(--ink4);text-transform:none;font-size:.72rem">· ref. <span id="rv-sac-refdate-view">—</span></span></span>
               <button class="btn btn-s" style="font-size:.58rem;padding:.2rem .5rem" onclick="rvSacachoToggleEdit()" id="rv-sac-editbtn">✏️ Editar</button>
             </div>
             <div id="rv-sac-table"></div>
@@ -2153,13 +2153,13 @@ function rvSacachoRender(){
   const metade=arr=>[arr.slice(0,Math.ceil(arr.length/2)),arr.slice(Math.ceil(arr.length/2))];
   if(rvSacachoEditing){
     const editRow=(g,gi,it,ii)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin-bottom:.25rem">
-          <span style="font-size:.68rem;color:var(--ink2)">${esc(it.label)}</span>
-          <input type="number" id="rv-sac-p-${gi}-${ii}" value="${it.preco}" step="0.01" min="0" style="width:62px;text-align:right;font-size:.68rem;padding:.15rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;font-family:'IBM Plex Mono'">
+          <span style="font-size:.8rem;color:var(--ink2)">${esc(it.label)}</span>
+          <input type="number" id="rv-sac-p-${gi}-${ii}" value="${it.preco}" step="0.01" min="0" style="width:72px;text-align:right;font-size:.8rem;padding:.15rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;font-family:'IBM Plex Mono'">
         </div>`;
-    cont.innerHTML=`<div class="ff" style="margin-bottom:.6rem"><label style="font-size:.6rem">Preços de referência em</label><input type="text" id="rv-sac-refdate-edit" value="${esc(RV_SACACHO.refDate==='—'?'':RV_SACACHO.refDate)}" placeholder="ex: Ago/26" style="font-size:.72rem;padding:.3rem .5rem"></div>`+
+    cont.innerHTML=`<div class="ff" style="margin-bottom:.6rem"><label style="font-size:.7rem">Preços de referência em</label><input type="text" id="rv-sac-refdate-edit" value="${esc(RV_SACACHO.refDate==='—'?'':RV_SACACHO.refDate)}" placeholder="ex: Ago/26" style="font-size:.8rem;padding:.35rem .5rem"></div>`+
       `<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:.9rem;align-items:start">`+
       RV_SACACHO.grupos.map((g,gi)=>{
-        const titulo=`<div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.3rem;white-space:nowrap">${esc(g.nome)}</div>`;
+        const titulo=`<div style="font-size:.8rem;font-weight:700;color:var(--ink3);margin-bottom:.4rem;white-space:nowrap">${esc(g.nome)}</div>`;
         if(g.itens.length>5){ // grupo grande — divide em 2 sub-colunas internas (ex: Boop 1k-5k / 10k-50k)
           const idx=g.itens.map((it,ii)=>ii);
           const[i1,i2]=metade(idx);
@@ -2171,10 +2171,10 @@ function rvSacachoRender(){
         return`<div>${titulo}${g.itens.map((it,ii)=>editRow(g,gi,it,ii)).join('')}</div>`;
       }).join('')+`</div>`;
   }else{
-    const viewTable=itens=>`<table class="rv-data-table" style="font-size:.68rem"><tbody>${itens.map(it=>`<tr><td>${esc(it.label)}</td><td class="rv-num">${rvBrl(it.preco)}</td></tr>`).join('')}</tbody></table>`;
+    const viewTable=itens=>`<table class="rv-data-table" style="font-size:.8rem"><tbody>${itens.map(it=>`<tr><td>${esc(it.label)}</td><td class="rv-num">${rvBrl(it.preco)}</td></tr>`).join('')}</tbody></table>`;
     cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(${nCols},1fr);gap:.9rem;align-items:start">`+
       RV_SACACHO.grupos.map(g=>{
-        const titulo=`<div style="font-size:.68rem;font-weight:700;color:var(--ink3);margin-bottom:.3rem;white-space:nowrap">${esc(g.nome)}</div>`;
+        const titulo=`<div style="font-size:.8rem;font-weight:700;color:var(--ink3);margin-bottom:.4rem;white-space:nowrap">${esc(g.nome)}</div>`;
         if(g.itens.length>5){ // grupo grande — divide em 2 sub-colunas internas (ex: Boop 1k-5k / 10k-50k)
           const[i1,i2]=metade(g.itens);
           return`<div>${titulo}<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 .5rem">
