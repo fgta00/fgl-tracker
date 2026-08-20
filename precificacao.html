@@ -2606,7 +2606,22 @@ function rv2SaveEdit(){
 });
 
 /* ── COTAÇÕES / PEDIDOS (listas) ── */
+// Reconcilia cotações já convertidas ANTES dessa marcação existir — casa pelo vínculo
+// cotId (que o pedido sempre teve desde a conversão) e preenche pedidoId retroativamente.
+function rvReconciliarConversoes(){
+  const cotacoes=rvLoadCotacoes();
+  const pedidos=rvLoadPedidosActive();
+  let mudou=false;
+  cotacoes.forEach(c=>{
+    if(c.pedidoId||c.deleted)return;
+    const ped=pedidos.find(p=>p.cotId===c.id);
+    if(ped){c.pedidoId=ped.id;c.updatedAt=Date.now();mudou=true;}
+  });
+  if(mudou){rvSaveCotacoes(cotacoes,true);if(typeof rvSyncPush==='function')rvSyncPush();}
+  return mudou;
+}
 function rvRenderCotacoes(){
+  rvReconciliarConversoes();
   const todas=rvLoadCotacoesActive();
   const cont=rvEl('rv-cotacoes-container');
   const wrapCl=document.getElementById('msf-cot-cl-wrap');
