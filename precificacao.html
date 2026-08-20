@@ -2985,6 +2985,68 @@ function rvDateIsFuture(dispDate){
 }
 function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party&&!rvDateIsFuture(l.date)).reduce((a,l)=>a+l.amount,0);}
 function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId&&!rvDateIsFuture(r.date)).reduce((a,r)=>a+r.amount,0);}
+
+/* ══════════════════════════════════════
+   NOTIFICAÇÃO DE VENCIMENTO — compara o cronograma de parcelas (dias após o pedido)
+   com o que já foi de fato pago/recebido, pra avisar quando uma parcela está
+   atrasada ou vence em breve. Não rastreia parcela individual (só existe o total
+   pago/recebido acumulado), então o aviso é sobre "quanto deveria ter sido pago
+   até hoje, considerando o cronograma" vs "quanto foi pago de verdade".
+══════════════════════════════════════ */
+function rvParseDataBR(dataStr){ // "DD/MM/AAAA" -> Date
+  const p=(dataStr||'').split('/');
+  if(p.length!==3)return null;
+  return new Date(parseInt(p[2],10),parseInt(p[1],10)-1,parseInt(p[0],10));
+}
+function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'beneficiador'|'cliente' -> {status,valor,dias}|null
+  const plano=p.planoPagamento?p.planoPagamento[tipo]:null;
+  if(!plano||!plano.length)return null;
+  const tot=rvCPTotais(p)[tipo];
+  if(tot<=0)return null;
+  const pago=tipo==='cliente'?rvPartyRecebido(p.id):rvPartyPago(p.id,tipo);
+  const dataPedido=rvParseDataBR(p.data);
+  if(!dataPedido)return null;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  let pctVencidoAteHoje=0,proxima=null;
+  plano.forEach(parc=>{
+    const venc=new Date(dataPedido);venc.setDate(venc.getDate()+(parc.dias||0));
+    if(venc<=hoje)pctVencidoAteHoje+=(parc.pct||0);
+    else if(!proxima||venc<proxima.venc)proxima={venc,pct:parc.pct};
+  });
+  const deveriaTerPago=tot*pctVencidoAteHoje/100;
+  const faltante=deveriaTerPago-pago;
+  if(faltante>0.5)return{status:'atrasado',valor:faltante};
+  if(proxima){
+    const dias=Math.ceil((proxima.venc-hoje)/86400000);
+    if(dias<=5)return{status:'em_breve',valor:tot*proxima.pct/100,dias};
+  }
+  return null;
+}
+// Retorna a notificação mais urgente entre fornecedor/beneficiador/cliente de um pedido, ou null
+function rvParcelaStatusPedido(p){
+  const tipos=['fornecedor','cliente'];
+  if(p.comLogo)tipos.push('beneficiador');
+  let pior=null;
+  tipos.forEach(tipo=>{
+    const st=rvParcelaStatus(p,tipo);
+    if(!st)return;
+    st.tipo=tipo;
+    if(!pior||(st.status==='atrasado'&&pior.status!=='atrasado')||(st.status===pior.status&&(st.dias||0)<(pior.dias||99)))pior=st;
+  });
+  return pior;
+}
+function rvParcelaStatusBadge(p){
+  const st=rvParcelaStatusPedido(p);
+  if(!st)return'';
+  const lbl={fornecedor:'Pagar fornecedor',beneficiador:'Pagar beneficiador',cliente:'Receber cliente'}[st.tipo];
+  const col=st.status==='atrasado'?'var(--red)':'var(--amber)';
+  const txt=st.status==='atrasado'?`${lbl} atrasado — falta ${rvBrl(st.valor)}`:`${lbl} vence em ${st.dias}d — ${rvBrl(st.valor)}`;
+  return`<div style="font-size:.62rem;font-weight:700;color:#fff;background:${col};border-radius:5px;padding:.22rem .5rem;margin-bottom:.4rem">⏰ ${esc(txt)}</div>`;
+}
+function rvCountVencimentos(){
+  return rvLoadPedidosActive().filter(p=>p.planoPagamento&&rvParcelaStatusPedido(p)).length;
+}
+
 function rvRenderFin(){
   const cont=rvEl('rv-fin-container');
   const lista=rvLoadPedidosActive().filter(p=>p.planoPagamento);
@@ -3030,7 +3092,7 @@ function rvRenderFin(){
     const t=norm(`${p.cliente} ${p.fornecedor}`);
     return(!q||t.includes(q))&&msfMatch('finr-cl',p.cliente)&&msfMatch('finr-forn',p.fornecedor);
   });
-  if(!listaFiltrada.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado com esses filtros.</p>';return;}
+  if(!listaFiltrada.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado com esses filtros.</p>';rvUpdateFinBadge();return;}
   cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+listaFiltrada.map(p=>{
     const tot=rvCPTotais(p);
     const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
@@ -3044,11 +3106,19 @@ function rvRenderFin(){
     return `<div class="card" style="padding:.8rem .9rem;cursor:pointer" onclick="rvOpenFinPopupR(${p.id})">
       <div style="font-weight:700;font-size:.78rem;margin-bottom:.1rem">${esc(p.cliente)}</div>
       <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.5rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
+      ${rvParcelaStatusBadge(p)}
       ${bar('Pagar Fornecedor',pagoForn,tot.fornecedor,'var(--red)')}
       ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'#B85C00'):''}
       ${bar('Receber Cliente',recCli,tot.cliente,'var(--green)')}
     </div>`;
   }).join('')+`</div>`;
+  rvUpdateFinBadge();
+}
+function rvUpdateFinBadge(){
+  const tab=document.getElementById('rvtab-fin');
+  if(!tab)return;
+  const n=rvCountVencimentos();
+  tab.innerHTML=n>0?`Financeiro <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${n}</span>`:'Financeiro';
 }
 /* ── CALENDÁRIO — pagamentos/recebimentos agendados e feitos ── */
 const RV_MO=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
