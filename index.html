@@ -1859,14 +1859,14 @@ function renderInternal(){
         const bgTint=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
         let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;flex:1">`;
         inner+=`<div style="display:flex;align-items:center;gap:8px">
-          ${(o.status==='FINALIZADO'||o.status==='SUSPENSO')?statusSel(o.num,o.status):`<span style="flex-shrink:0">${daysCell(o.dates,o.status)}</span>`}
-          ${a&&!snoozed?`<div style="display:flex;flex-direction:column;gap:1px;text-align:left">
-            <div style="display:flex;align-items:center;gap:4px">
+          <div style="flex:1;min-width:0">${a&&!snoozed?`<div style="display:flex;flex-direction:column;gap:1px;text-align:center">
+            <div style="display:flex;align-items:center;justify-content:center;gap:4px">
               <span style="font-size:.74rem;font-weight:700;color:${a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)'};line-height:1.25">${esc(a.text)}</span>
               <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
             <div style="font-size:.62rem;color:var(--ink3);line-height:1.25">→ ${esc(a.suggestion)}</div>
-          </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:''}
+          </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;justify-content:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:''}</div>
+          <span style="flex-shrink:0">${(o.status==='FINALIZADO'||o.status==='SUSPENSO')?statusSel(o.num,o.status):daysCell(o.dates,o.status)}</span>
         </div>`;
         inner+=docEventsChecklistHTML(o);
         inner+=`</div>`;
@@ -3068,38 +3068,49 @@ function renderStatusLists(){
     const avg=computeAvgMilestoneGaps()[i];
     return`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"><div style="font-size:.52rem;color:${avg!==null?'var(--teal)':'var(--ink4)'};margin-top:.15rem">média real: ${avg!==null?avg+'d':'—'}</div></div>`;
   }).join('');
-  document.getElementById('doc-events-list').innerHTML=DOC_EVENTS
-    .map((ev,i)=>({ev,i})) // guarda o índice original antes de ordenar, pra onchange continuar apontando pro item certo
-    .sort((a,b)=>(a.ev.baseIdx-b.ev.baseIdx)||(a.ev.offset-b.ev.offset))
-    .map(({ev,i})=>{
-    const avg=computeAvgDocGaps()[i];
-    const ocorrencias=orders.filter(o=>o.docDone&&o.docDone[ev.key]).map(o=>({num:o.num,pi:o.pi||'#'+o.num,date:o.docDone[ev.key]})).sort((a,b)=>dispToISO(b.date).localeCompare(dispToISO(a.date)));
-    return`<div style="border:1px solid var(--bdr);border-radius:6px;padding:.4rem .5rem">
-    <input type="text" value="${esc(ev.label)}" onchange="DOC_EVENTS[${i}].label=this.value;saveAll();renderInternal()" style="width:100%;border:none;border-bottom:1px dashed var(--bdr2);font-weight:700;font-size:.68rem;margin-bottom:.3rem;background:transparent;padding:0 0 .15rem;color:var(--ink)">
-    <div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.2rem">
-      <select onchange="DOC_EVENTS[${i}].baseIdx=parseInt(this.value);saveAll();renderInternal()" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.6rem">
-        ${DOC_BASE_LBL.map((lbl,bi)=>`<option value="${bi}"${ev.baseIdx===bi?' selected':''}>${esc(lbl)}</option>`).join('')}
-      </select>
-      <span style="font-size:.62rem;color:var(--ink3)">+</span>
-      <input type="number" value="${ev.offset}" style="width:44px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-family:'IBM Plex Mono';font-size:.68rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
-      <span style="font-size:.62rem;color:var(--ink3)">dias</span>
-    </div>
-    <select onchange="DOC_EVENTS[${i}].cond=this.value||null;saveAll();renderInternal()" style="width:100%;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.58rem;margin-bottom:.2rem">
-      <option value=""${!ev.cond?' selected':''}>Sempre se aplica</option>
-      <option value="amostrasOn"${ev.cond==='amostrasOn'?' selected':''}>Só se Amostras = ON</option>
-      <option value="amostrasOff"${ev.cond==='amostrasOff'?' selected':''}>Só se Amostras = OFF</option>
-    </select>
-    <div style="font-size:.55rem;color:var(--ink4);margin-bottom:.3rem">${avg?`Média real: <span style="color:var(--teal);font-weight:600">${avg.avg}d</span> (${avg.n} fechado${avg.n>1?'s':''})`:'Sem dados de fechados ainda'}</div>
-    <details>
-      <summary style="font-size:.55rem;color:var(--blue);cursor:pointer">📋 Ver ocorrências (${ocorrencias.length})</summary>
-      <div style="margin-top:.3rem;max-height:150px;overflow-y:auto">
-        ${ocorrencias.length?ocorrencias.map(oc=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;padding:.15rem 0;border-bottom:1px solid var(--bdr)">
-          <span style="font-family:'IBM Plex Mono';font-size:.58rem;color:var(--ink3)">${esc(oc.pi)}</span>
-          <input type="text" value="${esc(oc.date)}" style="width:80px;text-align:center;border:1.5px solid var(--bdr2);border-radius:4px;padding:.1rem;font-family:'IBM Plex Mono';font-size:.6rem" onchange="docEventEditOccurrence(${oc.num},'${ev.key}',this.value)">
-        </div>`).join(''):'<div style="font-size:.55rem;color:var(--ink4);padding:.2rem 0">Nenhuma ainda</div>'}
+  const fasesOrdem=['pre','prod','entrega'];
+  document.getElementById('doc-events-list').innerHTML=fasesOrdem.map(fase=>{
+    const itensFase=DOC_EVENTS
+      .map((ev,i)=>({ev,i}))
+      .filter(({ev})=>ev.fase===fase)
+      .sort((a,b)=>a.ev.offset-b.ev.offset);
+    if(!itensFase.length)return'';
+    const cards=itensFase.map(({ev,i})=>{
+      const avg=computeAvgDocGaps()[i];
+      const ocorrencias=orders.filter(o=>o.docDone&&o.docDone[ev.key]).map(o=>({num:o.num,pi:o.pi||'#'+o.num,date:o.docDone[ev.key]})).sort((a,b)=>dispToISO(b.date).localeCompare(dispToISO(a.date)));
+      return`<div style="border:1px solid var(--bdr);border-radius:6px;padding:.4rem .5rem">
+      <div style="display:flex;align-items:baseline;gap:.3rem;margin-bottom:.2rem">
+        <input type="text" value="${esc(ev.short)}" onchange="DOC_EVENTS[${i}].short=this.value;saveAll();renderInternal()" style="flex:1;min-width:0;border:none;border-bottom:1px dashed var(--bdr2);font-weight:700;font-size:.68rem;background:transparent;padding:0 0 .1rem;color:var(--ink)">
+        ${ev.lado?`<span style="font-size:.5rem;color:var(--ink4);flex-shrink:0">${ev.lado==='forn'?'Forn':'Cli'}${ev.par?' · par: '+esc(ev.par):''}</span>`:''}
       </div>
-    </details>
-  </div>`;
+      <input type="text" value="${esc(ev.label)}" onchange="DOC_EVENTS[${i}].label=this.value;saveAll();renderInternal()" style="width:100%;border:none;font-size:.56rem;color:var(--ink4);background:transparent;padding:0;margin-bottom:.3rem" title="Nome completo (aparece nos detalhes/tooltip)">
+      <div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.2rem">
+        <select onchange="DOC_EVENTS[${i}].baseIdx=parseInt(this.value);saveAll();renderInternal()" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.6rem">
+          ${DOC_BASE_LBL.map((lbl,bi)=>`<option value="${bi}"${ev.baseIdx===bi?' selected':''}>${esc(lbl)}</option>`).join('')}
+        </select>
+        <span style="font-size:.62rem;color:var(--ink3)">+</span>
+        <input type="number" value="${ev.offset}" style="width:44px;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-family:'IBM Plex Mono';font-size:.68rem" onchange="DOC_EVENTS[${i}].offset=parseInt(this.value)||0;saveAll();renderInternal()">
+        <span style="font-size:.62rem;color:var(--ink3)">dias</span>
+      </div>
+      <select onchange="DOC_EVENTS[${i}].cond=this.value||null;saveAll();renderInternal()" style="width:100%;border:1.5px solid var(--bdr2);border-radius:5px;padding:.15rem;font-size:.58rem;margin-bottom:.2rem">
+        <option value=""${!ev.cond?' selected':''}>Sempre se aplica</option>
+        <option value="amostrasOn"${ev.cond==='amostrasOn'?' selected':''}>Só se Amostras = ON</option>
+        <option value="amostrasOff"${ev.cond==='amostrasOff'?' selected':''}>Só se Amostras = OFF</option>
+      </select>
+      <div style="font-size:.55rem;color:var(--ink4);margin-bottom:.3rem">${avg?`Média real: <span style="color:var(--teal);font-weight:600">${avg.avg}d</span> (${avg.n} fechado${avg.n>1?'s':''})`:'Sem dados de fechados ainda'}</div>
+      <details>
+        <summary style="font-size:.55rem;color:var(--blue);cursor:pointer">📋 Ver ocorrências (${ocorrencias.length})</summary>
+        <div style="margin-top:.3rem;max-height:150px;overflow-y:auto">
+          ${ocorrencias.length?ocorrencias.map(oc=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.3rem;padding:.15rem 0;border-bottom:1px solid var(--bdr)">
+            <span style="font-family:'IBM Plex Mono';font-size:.58rem;color:var(--ink3)">${esc(oc.pi)}</span>
+            <input type="text" value="${esc(oc.date)}" style="width:80px;text-align:center;border:1.5px solid var(--bdr2);border-radius:4px;padding:.1rem;font-family:'IBM Plex Mono';font-size:.6rem" onchange="docEventEditOccurrence(${oc.num},'${ev.key}',this.value)">
+          </div>`).join(''):'<div style="font-size:.55rem;color:var(--ink4);padding:.2rem 0">Nenhuma ainda</div>'}
+        </div>
+      </details>
+    </div>`;
+    }).join('');
+    return`<div style="grid-column:1/-1;font-size:.6rem;font-weight:700;color:var(--teal);letter-spacing:.05em;margin-top:.4rem">${FASE_LBL[fase]}</div>
+    <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem">${cards}</div>`;
   }).join('');
   renderDocTimeline();
 }
