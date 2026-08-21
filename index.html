@@ -1025,22 +1025,23 @@ let MS_GAPS=[20,20,10,50,5,5,45,5];
 // baseIdx: 0=Arte Recebida ... 6=Embarque(ETD). offset pode ser negativo (antes do marco).
 // cond: null (sempre existe) | 'amostrasOn' | 'amostrasOff' (só existe conforme o seletor Amostras do pedido)
 let DOC_EVENTS=[
-  {key:'pi_forn',      label:'Receber PI Fornecedor',                   baseIdx:0, offset:0,  cond:null},
-  {key:'pi_cli',       label:'Emitir PI Cliente',                       baseIdx:0, offset:2,  cond:null},
-  {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        baseIdx:6, offset:-2, cond:null},
-  {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                baseIdx:6, offset:5,  cond:null},
-  {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    baseIdx:6, offset:7,  cond:null},
-  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:10, cond:'amostrasOff', finRef:'SINAL', finType:'receipt'},
-  {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                baseIdx:0, offset:25, cond:'amostrasOn',  finRef:'SINAL', finType:'receipt'},
-  {key:'custo_amostras',label:'Receber Custo Amostras',                 baseIdx:0, offset:10, cond:'amostrasOn',  finRef:'AMOSTRAS', finType:'receipt'},
-  {key:'pagar_custo_amostras',label:'Pagar Custo Amostras',              baseIdx:0, offset:11, cond:'amostrasOn', finRef:'AMOSTRAS', finType:'payment'},
-  {key:'sinal_forn',   label:'Pagar Sinal PI Fornecedor',               baseIdx:0, offset:15, cond:null,          finRef:'SINAL', finType:'payment'},
-  {key:'balanco_cli',  label:'Receber Balanço Cliente',                 baseIdx:6, offset:17, cond:null,          finRef:'BALANÇO', finType:'receipt'},
-  {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
-  {key:'docs_orig',    label:'Receber Docs Originais',                  baseIdx:6, offset:30, cond:null},
-  {key:'carton_mark',  label:'Enviar Carton Mark',                      baseIdx:0, offset:30, cond:null},
-  {key:'coord_frete',  label:'Coordenar Frete (FF c/ origem/destino)',  baseIdx:4, offset:-15, cond:null},
+  {key:'pi_forn',      label:'Receber PI Fornecedor',                   short:'PI Forn',      fase:'pre', baseIdx:0, offset:0,  cond:null},
+  {key:'pi_cli',       label:'Emitir PI Cliente',                       short:'PI Cli',       fase:'pre', baseIdx:0, offset:2,  cond:null},
+  {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        short:'Draft PL',     fase:'prod', baseIdx:6, offset:-2, cond:null},
+  {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                short:'CI/PL Forn',   fase:'entrega', baseIdx:6, offset:5,  cond:null},
+  {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    short:'CI/PL Cli',    fase:'entrega', baseIdx:6, offset:7,  cond:null},
+  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                short:'Sinal Cli',    fase:'pre', baseIdx:0, offset:10, cond:'amostrasOff', finRef:'SINAL', finType:'receipt'},
+  {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                short:'Sinal Cli',    fase:'pre', baseIdx:0, offset:25, cond:'amostrasOn',  finRef:'SINAL', finType:'receipt'},
+  {key:'custo_amostras',label:'Receber Custo Amostras',                 short:'Custo Amostra (receber)', fase:'pre', baseIdx:0, offset:10, cond:'amostrasOn',  finRef:'AMOSTRAS', finType:'receipt'},
+  {key:'pagar_custo_amostras',label:'Pagar Custo Amostras',              short:'Custo Amostra (pagar)',   fase:'pre', baseIdx:0, offset:11, cond:'amostrasOn', finRef:'AMOSTRAS', finType:'payment'},
+  {key:'sinal_forn',   label:'Pagar Sinal PI Fornecedor',               short:'Sinal Forn',   fase:'pre', baseIdx:0, offset:15, cond:null,          finRef:'SINAL', finType:'payment'},
+  {key:'balanco_cli',  label:'Receber Balanço Cliente',                 short:'Balanço Cli',  fase:'entrega', baseIdx:6, offset:17, cond:null,          finRef:'BALANÇO', finType:'receipt'},
+  {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                short:'Balanço Forn', fase:'entrega', baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
+  {key:'docs_orig',    label:'Receber Docs Originais',                  short:'Docs Originais', fase:'entrega', baseIdx:6, offset:30, cond:null},
+  {key:'carton_mark',  label:'Enviar Carton Mark',                      short:'Carton Mark',  fase:'prod', baseIdx:0, offset:30, cond:null},
+  {key:'coord_frete',  label:'Coordenar Frete (FF c/ origem/destino)',  short:'Frete (contratar)', fase:'prod', baseIdx:4, offset:-15, cond:null},
 ];
+const FASE_LBL={pre:'PRÉ',prod:'PRODUÇÃO',entrega:'ENTREGA'};
 const FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS']; // tags padronizadas — usar no campo Ref de Ledger/Receipts pra auto-validar a notificação correspondente
 const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Booking','Booking → Embarque','Embarque → ETA','ETA → No CD'];
@@ -1105,6 +1106,42 @@ function docEventsForOrder(o){
     if(ev.cond==='amostrasOff')return !amostrasOn;
     return true;
   });
+}
+// Checklist visual por fase (PRÉ/PRODUÇÃO/ENTREGA) — substitui o badge único de "próxima notificação".
+// Mostra todos os prazos aplicáveis a esse pedido de uma vez, agrupados, com check quando feito
+// e contagem de dias (atrasado/faltam) coloridos no padrão já usado no resto do app.
+function docEventsChecklistHTML(o){
+  const evs=docEventsForOrder(o);
+  const fases=['pre','prod','entrega'];
+  return fases.map(fase=>{
+    const list=evs.filter(ev=>ev.fase===fase);
+    if(!list.length)return'';
+    const rows=list.map(ev=>{
+      const done=o.docDone&&o.docDone[ev.key];
+      let col,txt;
+      if(done){col='var(--green)';txt='✓';}
+      else{
+        const due=docEventDueDate(o,ev);
+        if(!due){col='var(--bdr2)';txt='—';}
+        else{
+          const daysUntil=Math.round((new Date(dispToISO(due)+'T00:00')-new Date(new Date().toDateString()))/864e5);
+          if(daysUntil<0){col='var(--red)';txt=`${Math.abs(daysUntil)}d atr.`;}
+          else if(daysUntil<=3){col='var(--amber)';txt=daysUntil===0?'hoje':`${daysUntil}d`;}
+          else{col='var(--ink4)';txt=`${daysUntil}d`;}
+        }
+      }
+      const icon=done?'☑':'☐';
+      return`<div onclick="openDocEventModal(${o.num},'${ev.key}');event.stopPropagation()" title="${esc(ev.label)}" style="display:flex;align-items:center;gap:3px;cursor:pointer;padding:1px 0">
+        <span style="color:${col};font-size:.72rem;line-height:1;flex-shrink:0">${icon}</span>
+        <span style="font-size:.58rem;color:var(--ink2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ev.short)}</span>
+        <span style="font-size:.55rem;color:${col};font-weight:700;white-space:nowrap;flex-shrink:0">${txt}</span>
+      </div>`;
+    }).join('');
+    return`<div style="border:1px solid var(--bdr);border-radius:6px;padding:.3rem .4rem;margin-top:3px;background:var(--card);max-width:190px">
+      <div style="font-size:.5rem;font-weight:700;color:var(--ink4);letter-spacing:.05em;margin-bottom:2px">${FASE_LBL[fase]}</div>
+      ${rows}
+    </div>`;
+  }).join('');
 }
 function docEventDueDate(o,ev){
   const base=o.dates&&o.dates[ev.baseIdx];
@@ -1768,17 +1805,7 @@ function renderInternal(){
         } else if(snoozed){
           inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
         }
-        const deList=docEventsPending(o);
-        if(deList.length){
-          const cur=Math.min(DOC_EVENT_CURSOR[o.num]||0,deList.length-1);
-          const de=deList[cur];
-          const deCol=de.level==='crit'?'var(--red)':de.level==='warn'?'var(--amber)':'var(--teal)';
-          const bal=docEventBalanco(o,de.ev);
-          const balTxt=bal?` (${bal})`:'';
-          const deTxt=de.daysUntil<0?`${de.ev.label}${balTxt} atrasado ${Math.abs(de.daysUntil)}d`:de.daysUntil===0?`${de.ev.label}${balTxt} hoje`:`${de.ev.label}${balTxt} em ${de.daysUntil}d`;
-          const backArrow=deList.length>1?`<span onclick="docEventNavBack(${o.num},event)" title="Ver notificação anterior (${cur+1}/${deList.length})" style="cursor:pointer;padding:0 2px;color:#fff;opacity:.8">◀</span>`:'';
-          inner+=`<div style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:.72rem;font-weight:700;color:#fff;background:${deCol};border-radius:5px;padding:.28rem .5rem;margin-top:3px;box-shadow:0 1px 4px rgba(0,0,0,.15)">${backArrow}<span onclick="openDocEventModal(${o.num},'${de.ev.key}');event.stopPropagation()" title="Prazo automático a partir de ${DOC_BASE_LBL[de.ev.baseIdx]} — clique pra confirmar">📄 ${esc(deTxt)}</span></div>`;
-        }
+        inner+=docEventsChecklistHTML(o);
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
