@@ -341,7 +341,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       <thead>
         <tr class="grp">
           <th colspan="4" style="background:#091A2A;text-align:center">PEDIDOS</th>
-          <th colspan="2" style="background:#1A4A70">PROGRESSO</th>
+          <th colspan="1" style="background:#1A4A70">PROGRESSO</th>
           <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
           <th colspan="2" style="background:var(--preemb)">PRÉ-EMBARQUE</th>
@@ -352,8 +352,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th class="L" style="min-width:150px">AV/FY · Cliente · Fornecedor · Coleção</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
-          <th style="min-width:200px">Situação</th>
-          <th style="min-width:58px">Dias ETA</th>
+          <th style="min-width:400px">Situação</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Arte<br>Recebida</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Amostras<br>Em Mãos</th>
@@ -1027,7 +1026,7 @@ let MS_GAPS=[20,20,10,50,5,5,45,5];
 let DOC_EVENTS=[
   {key:'pi_forn',      label:'Receber PI Fornecedor',                   short:'PI Forn',      fase:'pre', par:'PI',      lado:'forn', baseIdx:0, offset:0,  cond:null},
   {key:'pi_cli',       label:'Emitir PI Cliente',                       short:'PI Cli',       fase:'pre', par:'PI',      lado:'cli',  baseIdx:0, offset:2,  cond:null},
-  {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        short:'Draft PL',     fase:'prod', par:null, lado:null, baseIdx:6, offset:-2, cond:null},
+  {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        short:'PL/BL',        fase:'prod', par:null, lado:null, baseIdx:6, offset:-2, cond:null},
   {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                short:'CI Forn',      fase:'entrega', par:'CI', lado:'forn', baseIdx:6, offset:5,  cond:null},
   {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    short:'CI Cli',       fase:'entrega', par:'CI', lado:'cli',  baseIdx:6, offset:7,  cond:null},
   {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                short:'Sinal Cli',    fase:'pre', par:'Sinal', lado:'cli',  baseIdx:0, offset:10, cond:'amostrasOff', finRef:'SINAL', finType:'receipt'},
@@ -1039,9 +1038,9 @@ let DOC_EVENTS=[
   {key:'balanco_forn', label:'Pagar Balanço Fornecedor',                short:'Balanço Forn', fase:'entrega', par:'PGTO', lado:'forn', baseIdx:6, offset:20, cond:null,          finRef:'BALANÇO', finType:'payment'},
   {key:'docs_orig',    label:'Receber Docs Originais',                  short:'Docs Originais', fase:'entrega', par:null, lado:null, baseIdx:6, offset:30, cond:null},
   {key:'carton_mark',  label:'Enviar Carton Mark',                      short:'Carton Mark',  fase:'prod', par:null, lado:null, baseIdx:0, offset:30, cond:null},
-  {key:'coord_frete',  label:'Coordenar Frete (FF c/ origem/destino)',  short:'Frete (contratar)', fase:'prod', par:null, lado:null, baseIdx:4, offset:-15, cond:null},
+  {key:'coord_frete',  label:'Coordenar Frete (FF c/ origem/destino)',  short:'Frete',         fase:'prod', par:null, lado:null, baseIdx:4, offset:-15, cond:null},
 ];
-const FASE_LBL={pre:'PRÉ',prod:'PRODUÇÃO',entrega:'ENTREGA'};
+const FASE_LBL={pre:'PRÉ',prod:'PROD',entrega:'ENT'};
 const FIN_REF_TAGS=['SINAL','BALANÇO','AMOSTRAS']; // tags padronizadas — usar no campo Ref de Ledger/Receipts pra auto-validar a notificação correspondente
 const DOC_BASE_LBL=['Arte Recebida','Pedido Confirmado','Amostras Em Mãos','Produção Lançada','Prontidão (CRD)','Booking Feito','Embarque (ETD)','ETA','No CD'];
 const MS_GAP_LABELS=['Arte → Pedido','Pedido → Amostras','Amostras → Produção','Produção → Prontidão','Prontidão → Booking','Booking → Embarque','Embarque → ETA','ETA → No CD'];
@@ -1156,13 +1155,7 @@ function docEventTogglePhase(num,fase,event){
 function docEventsChecklistHTML(o){
   const evs=docEventsForOrder(o);
   const fases=['pre','prod','entrega'];
-  if(!DOC_PHASE_OPEN[o.num]){
-    DOC_PHASE_OPEN[o.num]={};
-    for(const fase of fases){
-      const list=evs.filter(e=>e.fase===fase);
-      if(list.length&&!list.every(e=>o.docDone&&o.docDone[e.key])){DOC_PHASE_OPEN[o.num][fase]=true;break;}
-    }
-  }
+  if(!DOC_PHASE_OPEN[o.num])DOC_PHASE_OPEN[o.num]={}; // tudo começa fechado — só abre se a pessoa clicar
   const segCounts=fases.map(fase=>{
     const list=evs.filter(e=>e.fase===fase);
     return{fase,feitos:list.filter(e=>o.docDone&&o.docDone[e.key]).length,total:list.length};
@@ -1864,25 +1857,21 @@ function renderInternal(){
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
         const bgTint=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
-        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;align-items:center;text-align:center;flex:1">`;
-        inner+=`<div>${statusSel(o.num,o.status)}</div>`;
-        if(a&&!snoozed){
-          const col=a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-          inner+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;flex:1">`;
+        inner+=`<div style="display:flex;align-items:center;gap:8px">
+          ${(o.status==='FINALIZADO'||o.status==='SUSPENSO')?statusSel(o.num,o.status):`<span style="flex-shrink:0">${daysCell(o.dates,o.status)}</span>`}
+          ${a&&!snoozed?`<div style="display:flex;flex-direction:column;gap:1px;text-align:left">
             <div style="display:flex;align-items:center;gap:4px">
-              <span style="font-size:.76rem;font-weight:700;color:${col};line-height:1.3">${esc(a.text)}</span>
-              <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.72rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
+              <span style="font-size:.74rem;font-weight:700;color:${a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)'};line-height:1.25">${esc(a.text)}</span>
+              <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
-            <div style="font-size:.64rem;color:var(--ink3);line-height:1.3">→ ${esc(a.suggestion)}</div>
-          </div>`;
-        } else if(snoozed){
-          inner+=`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`;
-        }
+            <div style="font-size:.62rem;color:var(--ink3);line-height:1.25">→ ${esc(a.suggestion)}</div>
+          </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:''}
+        </div>`;
         inner+=docEventsChecklistHTML(o);
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
-      <td style="vertical-align:middle">${daysCell(o.dates,o.status)}</td>
       ${msHTML(o.dates,o.num,o)}
       <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
     </tr>`;
