@@ -1116,30 +1116,28 @@ function docEventsChecklistHTML(o){
   return fases.map(fase=>{
     const list=evs.filter(ev=>ev.fase===fase);
     if(!list.length)return'';
-    const rows=list.map(ev=>{
+    const dots=list.map(ev=>{
       const done=o.docDone&&o.docDone[ev.key];
-      let col,txt;
-      if(done){col='var(--green)';txt='✓';}
+      let col,icon,txt;
+      if(done){col='var(--green)';icon='✓';txt='';}
       else{
         const due=docEventDueDate(o,ev);
-        if(!due){col='var(--bdr2)';txt='—';}
+        if(!due){col='var(--bdr2)';icon='';txt='—';}
         else{
           const daysUntil=Math.round((new Date(dispToISO(due)+'T00:00')-new Date(new Date().toDateString()))/864e5);
-          if(daysUntil<0){col='var(--red)';txt=`${Math.abs(daysUntil)}d atr.`;}
-          else if(daysUntil<=3){col='var(--amber)';txt=daysUntil===0?'hoje':`${daysUntil}d`;}
-          else{col='var(--ink4)';txt=`${daysUntil}d`;}
+          if(daysUntil<0){col='var(--red)';icon='●';txt=`${Math.abs(daysUntil)}d atr`;}
+          else if(daysUntil<=3){col='var(--amber)';icon='●';txt=daysUntil===0?'hoje':`${daysUntil}d`;}
+          else{col='var(--ink4)';icon='●';txt=`${daysUntil}d`;}
         }
       }
-      const icon=done?'☑':'☐';
-      return`<div onclick="openDocEventModal(${o.num},'${ev.key}');event.stopPropagation()" title="${esc(ev.label)}" style="display:flex;align-items:center;gap:3px;cursor:pointer;padding:1px 0">
-        <span style="color:${col};font-size:.72rem;line-height:1;flex-shrink:0">${icon}</span>
-        <span style="font-size:.58rem;color:var(--ink2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(ev.short)}</span>
-        <span style="font-size:.55rem;color:${col};font-weight:700;white-space:nowrap;flex-shrink:0">${txt}</span>
+      return`<div onclick="openDocEventModal(${o.num},'${ev.key}');event.stopPropagation()" title="${esc(ev.label)}" style="display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-width:30px">
+        <div style="width:15px;height:15px;border-radius:50%;background:${col};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.6rem;line-height:1">${icon}</div>
+        <span style="font-size:.46rem;color:${col};font-weight:700;white-space:nowrap">${txt}</span>
       </div>`;
     }).join('');
-    return`<div style="border:1px solid var(--bdr);border-radius:6px;padding:.3rem .4rem;margin-top:3px;background:var(--card);max-width:190px">
-      <div style="font-size:.5rem;font-weight:700;color:var(--ink4);letter-spacing:.05em;margin-bottom:2px">${FASE_LBL[fase]}</div>
-      ${rows}
+    return`<div style="display:flex;align-items:flex-start;gap:2px;margin-top:2px">
+      <span style="font-size:.46rem;font-weight:700;color:var(--ink4);letter-spacing:.03em;width:28px;flex-shrink:0;padding-top:3px">${FASE_LBL[fase]}</span>
+      <div style="display:flex;gap:3px;flex-wrap:wrap">${dots}</div>
     </div>`;
   }).join('');
 }
@@ -1200,6 +1198,14 @@ function docEventNavBack(num,event){
   const list=docEventsPending(o);if(!list.length)return;
   const cur=DOC_EVENT_CURSOR[num]||0;
   DOC_EVENT_CURSOR[num]=(cur+1)%list.length; // avança na lista de "menos urgentes" (volta no tempo)
+  renderInternal();
+}
+function docEventNavFwd(num,event){
+  event.stopPropagation();
+  const o=orders.find(x=>x.num===num);if(!o)return;
+  const list=docEventsPending(o);if(!list.length)return;
+  const cur=DOC_EVENT_CURSOR[num]||0;
+  DOC_EVENT_CURSOR[num]=(cur-1+list.length)%list.length; // volta na lista (mais urgente)
   renderInternal();
 }
 function docEventConfirm(num,key,confirmed,customDate){
