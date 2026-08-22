@@ -548,8 +548,9 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="modal" style="max-width:640px">
     <div class="modal-h"><span id="crm-cust-title">Cliente</span><button class="mcls" onclick="closeM('crmcustomer')">✕</button></div>
     <div class="modal-b">
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.6rem">
         <div class="ff"><label>Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
+        <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
         <div class="ff"><label>Razão social</label><input type="text" id="crm-cust-legal" placeholder="opcional"></div>
       </div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
@@ -2386,10 +2387,10 @@ function crmRenderCustomers(){
   const q=norm(document.getElementById('crm-cli-q')?.value);
   const tagsByCustomer=id=>CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)?.name).filter(Boolean);
   const lista=CRM_CUSTOMERS.filter(c=>{
-    const t=norm(`${c.display_name} ${c.legal_name||''} ${c.document||''}`);
+    const t=norm(`${c.display_name} ${c.trade_name||''} ${c.legal_name||''} ${c.document||''}`);
     const tagNames=tagsByCustomer(c.id);
     return(!q||t.includes(q))&&tagNames.every(tn=>msfMatch('crm-tag',tn))&&(tagNames.length?tagNames.some(tn=>msfMatch('crm-tag',tn)):true);
-  }).sort((a,b)=>a.display_name.localeCompare(b.display_name));
+  }).sort((a,b)=>(a.trade_name||a.display_name).localeCompare(b.trade_name||b.display_name));
   document.getElementById('crm-cli-cnt').textContent=`${lista.length} cliente${lista.length!==1?'s':''}`;
   if(!lista.length){cont.innerHTML='<p class="hint">Nenhum cliente encontrado. Clique em "＋ Novo Cliente" pra cadastrar o primeiro.</p>';return;}
   const statusLbl={active:'Ativo',prospect:'Prospect',inactive:'Inativo'};
@@ -2397,9 +2398,10 @@ function crmRenderCustomers(){
   cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.7rem">`+lista.map(c=>{
     const tagNames=tagsByCustomer(c.id);
     const nPeople=CRM_PEOPLE.filter(p=>p.customer_id===c.id).length;
+    const nomePrincipal=c.trade_name||c.display_name;
     return`<div class="card" style="padding:.7rem .85rem;cursor:pointer" onclick="crmOpenCustomerEdit('${c.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
-        <div style="font-weight:700;font-size:.8rem">${esc(c.display_name)}</div>
+        <div style="font-weight:700;font-size:.8rem">${esc(nomePrincipal)}</div>
         <span style="font-size:.55rem;font-weight:700;color:${statusCol[c.status]||'var(--ink4)'};background:${statusCol[c.status]||'var(--ink4)'}18;padding:.1rem .4rem;border-radius:4px;white-space:nowrap">${statusLbl[c.status]||c.status}</span>
       </div>
       ${c.legal_name?`<div style="font-size:.62rem;color:var(--ink4)">${esc(c.legal_name)}</div>`:''}
@@ -2415,6 +2417,7 @@ function crmOpenCustomerEdit(id){
   document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
   document.getElementById('crm-cust-name').value=c?.display_name||'';
+  document.getElementById('crm-cust-trade').value=c?.trade_name||'';
   document.getElementById('crm-cust-legal').value=c?.legal_name||'';
   document.getElementById('crm-cust-doc').value=c?.document||'';
   document.getElementById('crm-cust-status').value=c?.status||'active';
@@ -2470,6 +2473,7 @@ async function crmSaveCustomer(){
   if(!display_name){toastSave('Nome do cliente é obrigatório');return;}
   const payload={
     display_name,
+    trade_name:document.getElementById('crm-cust-trade').value.trim()||null,
     legal_name:document.getElementById('crm-cust-legal').value.trim()||null,
     document:document.getElementById('crm-cust-doc').value.trim()||null,
     status:document.getElementById('crm-cust-status').value,
@@ -2579,6 +2583,9 @@ function crmSetActMode(mode){
 function crmOpenActionModalById(customerId,actionId){
   crmOpenActionModal(customerId,CRM_ACTIONS.find(a=>a.id===actionId)||null);
 }
+// TODO (refinamentos de UI registrados, aprovados pra depois — não implementar agora):
+// 1) "+ Ação" deveria expor os 2 modos (Registrar/Agendar) direto, sem precisar abrir o modal primeiro pra só então escolher.
+// 2) Dentro do modal de ação, os dados do cliente deviam ficar recolhidos/minimizados — a ação em si é o foco, não o cadastro do cliente.
 // action=null → registrar ação nova (modo log ou schedule, à escolha). action=objeto → completar (se status='planned') ou editar (se já 'done').
 function crmOpenActionModal(customerId,action){
   crmActCtx={customerId,actionId:action?.id||null,type:action?.type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false,mode:'log'};
@@ -2743,7 +2750,7 @@ function crmRenderMinhaSemana(){
     const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
     return`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem">
       <div style="min-width:0">
-        <div style="font-size:.72rem"><b>${esc(c?.display_name||'?')}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
+        <div style="font-size:.72rem"><b>${esc(c?.trade_name||c?.display_name||'?')}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
         <div style="font-size:.7rem;color:var(--ink2)">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
       </div>
       <div style="display:flex;gap:.3rem;flex-shrink:0">
