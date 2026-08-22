@@ -504,13 +504,19 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
       <div id="crm-content" style="display:none">
         <div class="rv-tabs no-print" style="display:flex;align-items:center;margin-bottom:.9rem;border-bottom:1px solid var(--bdr)">
-          <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')" style="color:var(--ink2)">Minha Semana</button>
-          <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')" style="color:var(--ink2)">Clientes</button>
-          <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')" style="color:var(--ink2)">Projetos Estratégicos</button>
+          <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
+          <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
+          <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos Estratégicos</button>
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
-          <div class="card" style="text-align:center;padding:2rem"><p class="hint">Minha Semana chega numa próxima fase — depois de Clientes/CRM Actions estarem prontos.</p></div>
+          <div class="card">
+            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
+              <div class="sh" style="margin:0">Minha Semana</div>
+              <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
+            </div>
+            <div id="crm-semana-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
+          </div>
         </div>
 
         <div id="crmpane-clientes" class="rv-pane">
@@ -582,7 +588,58 @@ body.dark .rv-tabs{background:#0A0F1A}
         <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
       </div>
 
+      <div id="crm-cust-timeline-section" style="display:none">
+        <div class="fsep" style="margin-top:.9rem;display:flex;justify-content:space-between;align-items:center">
+          <span>Timeline</span>
+          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
+        </div>
+        <div class="tb" style="padding:.3rem 0;gap:.4rem">
+          <span id="msf-crm-acttype-wrap"></span>
+          <select id="crm-tl-periodo" onchange="crmRenderTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
+            <option value="7">últimos 7 dias</option>
+            <option value="30" selected>últimos 30 dias</option>
+            <option value="90">últimos 90 dias</option>
+            <option value="9999">tudo</option>
+          </select>
+        </div>
+        <div id="crm-cust-timeline"></div>
+      </div>
+
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRM — REGISTRAR/EDITAR AÇÃO (CRM Action) -->
+<div class="ovl" id="ovl-crmaction" onclick="if(event.target===this)closeM('crmaction')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h"><span id="crm-act-title">Registrar Ação</span><button class="mcls" onclick="closeM('crmaction')">✕</button></div>
+    <div class="modal-b">
+      <label style="font-size:.68rem;color:var(--ink3);display:block;margin-bottom:.3rem">Tipo</label>
+      <div id="crm-act-type-pills" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.7rem"></div>
+
+      <div id="crm-act-direction-wrap" style="display:none;margin-bottom:.7rem">
+        <label style="font-size:.68rem;color:var(--ink3);display:block;margin-bottom:.3rem">Direção</label>
+        <div class="toggle-grp" id="crm-act-direction-toggle">
+          <button type="button" class="active" onclick="crmSetActDirection('outbound')">Enviei / liguei</button>
+          <button type="button" onclick="crmSetActDirection('inbound')">Recebi</button>
+        </div>
+      </div>
+
+      <div class="ff"><label>Quando aconteceu</label><input type="datetime-local" id="crm-act-occurred"></div>
+
+      <div class="ff" style="margin-top:.6rem"><label>Resumo / resultado</label><input type="text" id="crm-act-summary" placeholder="ex: confirmou interesse na proposta, vai decidir semana que vem" autofocus></div>
+      <div class="ff" style="margin-top:.5rem"><label>Detalhes (opcional)</label><textarea id="crm-act-details" rows="2" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
+
+      <div class="collap-h" onclick="crmToggleNextAction()" style="margin-top:.8rem;padding-top:.6rem;border-top:1px solid var(--bdr);cursor:pointer">
+        <div class="sh" style="margin:0;font-size:.62rem" id="crm-act-next-label">+ Próxima ação</div><span class="chev" id="crm-act-next-chev">▶</span>
+      </div>
+      <div id="crm-act-next-body" style="display:none;margin-top:.5rem">
+        <div class="ff"><label>O que fazer</label><input type="text" id="crm-act-next-summary" placeholder="ex: ligar pra fechar pedido"></div>
+        <div class="ff" style="margin-top:.5rem"><label>Quando</label><input type="date" id="crm-act-next-date"></div>
+      </div>
+
+      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveAction()">💾 Salvar</button>
     </div>
   </div>
 </div>
@@ -2220,7 +2277,14 @@ let rvSacachoEditing=false;
    admin via SQL (sem auto-cadastro) — ver crmCheckAccess().
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
-let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[];
+let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[];
+const CRM_ACTION_TYPES=[
+  {v:'whatsapp',lbl:'WhatsApp',hasDir:true},{v:'phone',lbl:'Ligação',hasDir:true},{v:'email',lbl:'E-mail',hasDir:true},
+  {v:'meeting',lbl:'Reunião',hasDir:false},{v:'visit',lbl:'Visita',hasDir:false},{v:'proposal',lbl:'Proposta',hasDir:false},
+  {v:'sample',lbl:'Amostra',hasDir:false},{v:'followup',lbl:'Follow-up',hasDir:false},{v:'other',lbl:'Outro',hasDir:false},
+];
+let crmActCtx={customerId:null,actionId:null,type:'whatsapp',direction:'outbound',nextOpen:false};
+let crmSemanaHorizonte=7;
 let crmEditCtx={customerId:null,tags:[],people:[],refs:[]}; // estado de trabalho do modal de edição
 
 async function crmCheckAccess(){
@@ -2265,22 +2329,29 @@ function crmShowSubTab(id,skipReclick){
   if(id==='clientes'){
     crmRenderCustomers(); // mostra já com o que tem local, sem esperar a rede
     crmLoadAll();         // busca fresco e re-renderiza quando chegar
+  }else if(id==='semana'){
+    crmRenderMinhaSemana();
+    crmLoadAll();
   }
 }
 async function crmLoadAll(){
-  const[cust,tags,ctags,people,refs]=await Promise.all([
+  const[cust,tags,ctags,people,refs,actions]=await Promise.all([
     _supa.from('crm_customers').select('*').eq('deleted',false),
     _supa.from('crm_tags').select('*'),
     _supa.from('crm_customer_tags').select('*'),
     _supa.from('crm_people').select('*').eq('deleted',false),
     _supa.from('crm_customer_external_refs').select('*').eq('deleted',false),
+    _supa.from('crm_actions').select('*').eq('deleted',false),
   ]);
   CRM_CUSTOMERS=cust.data||[];
   CRM_TAGS=tags.data||[];
   CRM_CUSTOMER_TAGS=ctags.data||[];
   CRM_PEOPLE=people.data||[];
   CRM_EXTERNAL_REFS=refs.data||[];
+  CRM_ACTIONS=actions.data||[];
   crmRenderCustomers();
+  if(document.getElementById('crmpane-semana')?.classList.contains('active'))crmRenderMinhaSemana();
+  if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
 }
 function crmRenderCustomers(){
   const cont=document.getElementById('crm-customers-container');
@@ -2328,6 +2399,8 @@ function crmOpenCustomerEdit(id){
   crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):[];
   crmEditCtx.refs=id?CRM_EXTERNAL_REFS.filter(r=>r.customer_id===id).map(r=>({...r})):[];
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();
+  document.getElementById('crm-cust-timeline-section').style.display=id?'block':'none';
+  if(id){document.getElementById('crm-tl-periodo').value='30';crmRenderTimeline();}
   document.getElementById('ovl-crmcustomer').classList.add('open');
 }
 function crmRenderCustTags(){
@@ -2442,6 +2515,183 @@ async function crmSaveCustomer(){
 async function crmLinkExists(table,match){
   const{data}=await _supa.from(table).select('*').match(match).maybeSingle();
   return!!data;
+}
+
+/* ══════════════════════════════════════
+   CRM ACTIONS — Fase 2
+   Salvar/completar ação usa a RPC crm_save_action (atômica no Postgres: ação +
+   próxima ação, ou as duas falham juntas). Reagendar/dispensar/editar-sem-completar
+   são updates simples de 1 linha só (já atômicos por natureza no Postgres).
+══════════════════════════════════════ */
+function crmActTimeLocal(d){ // Date -> "AAAA-MM-DDTHH:MM" (fuso local, pro input datetime-local)
+  const pad=n=>String(n).padStart(2,'0');
+  return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function crmRenderActTypePills(){
+  document.getElementById('crm-act-type-pills').innerHTML=CRM_ACTION_TYPES.map(t=>
+    `<button type="button" onclick="crmSetActType('${t.v}')" class="btn ${crmActCtx.type===t.v?'btn-p':'btn-s'}" style="font-size:.66rem;padding:.25rem .55rem">${t.lbl}</button>`
+  ).join('');
+  const hasDir=CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir;
+  document.getElementById('crm-act-direction-wrap').style.display=hasDir?'block':'none';
+}
+function crmSetActType(v){crmActCtx.type=v;crmRenderActTypePills();}
+function crmSetActDirection(v){
+  crmActCtx.direction=v;
+  document.querySelectorAll('#crm-act-direction-toggle button').forEach(b=>b.classList.toggle('active',(v==='outbound')===(b.textContent.includes('Enviei'))));
+}
+function crmToggleNextAction(force){
+  crmActCtx.nextOpen=force!==undefined?force:!crmActCtx.nextOpen;
+  document.getElementById('crm-act-next-body').style.display=crmActCtx.nextOpen?'block':'none';
+  document.getElementById('crm-act-next-chev').textContent=crmActCtx.nextOpen?'▼':'▶';
+  document.getElementById('crm-act-next-label').textContent=crmActCtx.nextOpen?'– Próxima ação':'+ Próxima ação';
+}
+function crmOpenActionModalById(customerId,actionId){
+  crmOpenActionModal(customerId,CRM_ACTIONS.find(a=>a.id===actionId)||null);
+}
+// action=null → registrar ação nova. action=objeto → completar (se status='planned') ou editar (se já 'done').
+function crmOpenActionModal(customerId,action){
+  crmActCtx={customerId,actionId:action?.id||null,type:action?.type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false};
+  const completando=action&&action.status==='planned';
+  document.getElementById('crm-act-title').textContent=completando?'Concluir Ação':(action?'Editar Ação':'Registrar Ação');
+  crmRenderActTypePills();
+  if(CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir)crmSetActDirection(crmActCtx.direction);
+  document.getElementById('crm-act-occurred').value=crmActTimeLocal(new Date());
+  document.getElementById('crm-act-summary').value=completando?'':(action?.summary||'');
+  document.getElementById('crm-act-details').value=action?.details||'';
+  crmToggleNextAction(false);
+  document.getElementById('crm-act-next-summary').value='';
+  document.getElementById('crm-act-next-date').value='';
+  document.getElementById('ovl-crmaction').classList.add('open');
+}
+async function crmSaveAction(){
+  const summary=document.getElementById('crm-act-summary').value.trim();
+  if(!summary){toastSave('Preencha o resumo/resultado');return;}
+  const occurredLocal=document.getElementById('crm-act-occurred').value;
+  if(!occurredLocal){toastSave('Preencha quando aconteceu');return;}
+  const occurredISO=new Date(occurredLocal).toISOString();
+  const hasDir=CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir;
+  const nextSummary=crmActCtx.nextOpen?document.getElementById('crm-act-next-summary').value.trim():'';
+  const nextDate=crmActCtx.nextOpen?document.getElementById('crm-act-next-date').value:'';
+  if(crmActCtx.nextOpen&&(!nextSummary||!nextDate)){toastSave('Preencha o quê e quando da próxima ação (ou feche essa seção)');return;}
+  const{data,error}=await _supa.rpc('crm_save_action',{
+    p_customer_id:crmActCtx.customerId,
+    p_type:crmActCtx.type,
+    p_direction:hasDir?crmActCtx.direction:null,
+    p_occurred_at:occurredISO,
+    p_summary:summary,
+    p_details:document.getElementById('crm-act-details').value.trim()||null,
+    p_responsible_user_id:authUser.id,
+    p_next_summary:nextSummary||null,
+    p_next_due_date:nextDate||null,
+    p_action_id:crmActCtx.actionId,
+  });
+  if(error){toastSave('Erro ao salvar ação: '+error.message);return;}
+  closeM('crmaction');
+  toastSave('Ação salva ✓');
+  await crmLoadAll();
+}
+async function crmRescheduleAction(id){
+  const nova=prompt('Nova data (AAAA-MM-DD):');
+  if(!nova)return;
+  const{error}=await _supa.from('crm_actions').update({due_date:nova}).eq('id',id);
+  if(error){toastSave('Erro: '+error.message);return;}
+  toastSave('Reagendado ✓');
+  await crmLoadAll();
+}
+async function crmDismissAction(id){
+  if(!confirm('Dispensar essa próxima ação? Ela some da agenda, mas continua no histórico do cliente.'))return;
+  const{error}=await _supa.from('crm_actions').update({status:'dismissed'}).eq('id',id);
+  if(error){toastSave('Erro: '+error.message);return;}
+  toastSave('Dispensada');
+  await crmLoadAll();
+}
+async function crmDeleteAction(id){
+  if(!confirm('Excluir esse registro? Fica marcado como excluído, não some do banco (auditoria).'))return;
+  const{error}=await _supa.from('crm_actions').update({deleted:true}).eq('id',id);
+  if(error){toastSave('Erro: '+error.message);return;}
+  toastSave('Excluído');
+  await crmLoadAll();
+}
+
+const CRM_TYPE_LBL={whatsapp:'WhatsApp',phone:'Ligação',email:'E-mail',meeting:'Reunião',visit:'Visita',proposal:'Proposta',sample:'Amostra',followup:'Follow-up',other:'Outro'};
+const CRM_TYPE_ICON={whatsapp:'💬',phone:'📞',email:'✉️',meeting:'🤝',visit:'📍',proposal:'📄',sample:'📦',followup:'🔁',other:'•'};
+function crmFmtDate(iso){ // ISO -> DD/MM/AA HH:MM
+  const d=new Date(iso);
+  const pad=n=>String(n).padStart(2,'0');
+  return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function crmRenderTimeline(){
+  const cont=document.getElementById('crm-cust-timeline');
+  if(!cont||!crmEditCtx.customerId)return;
+  const wrap=document.getElementById('msf-crm-acttype-wrap');
+  if(wrap&&!wrap.innerHTML)wrap.innerHTML=msfHtml('crm-acttype','Todos Tipos');
+  msfPopulate('crm-acttype',CRM_ACTION_TYPES.map(t=>t.lbl),'Todos Tipos',crmRenderTimeline);
+  const dias=parseInt(document.getElementById('crm-tl-periodo').value,10);
+  const limite=new Date();limite.setDate(limite.getDate()-dias);
+  const feitas=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='done'&&msfMatch('crm-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
+    .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
+  if(!feitas.length){cont.innerHTML='<p class="hint" style="margin-top:.4rem">Nenhuma ação registrada nesse período.</p>';return;}
+  cont.innerHTML=feitas.map(a=>{
+    const proxima=CRM_ACTIONS.find(x=>x.parent_action_id===a.id&&!x.deleted);
+    return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-top:.4rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
+        <div style="font-size:.72rem"><b>${CRM_TYPE_ICON[a.type]||'•'} ${esc(CRM_TYPE_LBL[a.type]||a.type)}</b>${a.direction?` <span style="color:var(--ink4);font-size:.6rem">(${a.direction==='inbound'?'recebida':'enviada'})</span>`:''}</div>
+        <span style="font-size:.6rem;color:var(--ink4);white-space:nowrap">${crmFmtDate(a.occurred_at)}</span>
+      </div>
+      <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem">${esc(a.summary)}</div>
+      ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem">${esc(a.details)}</div>`:''}
+      ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'}">
+        ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
+      </div>`:''}
+      <button onclick="crmDeleteAction('${a.id}')" title="Excluir" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.62rem;margin-top:.3rem;padding:0">excluir</button>
+    </div>`;
+  }).join('');
+}
+
+function crmToggleHorizonte30(){
+  crmSemanaHorizonte=crmSemanaHorizonte===7?30:7;
+  document.getElementById('crm-semana-horizonte-btn').textContent=crmSemanaHorizonte===7?'Ver próximos 30 dias':'Ver só 7 dias';
+  crmRenderMinhaSemana();
+}
+function crmRenderMinhaSemana(){
+  const cont=document.getElementById('crm-semana-container');
+  if(!cont)return;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const limite=new Date(hoje);limite.setDate(limite.getDate()+crmSemanaHorizonte);
+  const planejadas=CRM_ACTIONS.filter(a=>a.status==='planned'&&a.due_date);
+  const atrasadas=[],hojeArr=[],proximas=[];
+  planejadas.forEach(a=>{
+    const d=new Date(a.due_date+'T00:00');
+    if(d<hoje)atrasadas.push(a);
+    else if(d.getTime()===hoje.getTime())hojeArr.push(a);
+    else if(d<=limite)proximas.push(a);
+  });
+  [atrasadas,hojeArr,proximas].forEach(arr=>arr.sort((a,b)=>a.due_date.localeCompare(b.due_date)));
+  const rowHtml=a=>{
+    const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem">
+      <div style="min-width:0">
+        <div style="font-size:.72rem"><b>${esc(c?.display_name||'?')}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
+        <div style="font-size:.7rem;color:var(--ink2)">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
+      </div>
+      <div style="display:flex;gap:.3rem;flex-shrink:0">
+        <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModalById('${a.customer_id}','${a.id}')">Concluir</button>
+        <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmRescheduleAction('${a.id}')">Reagendar</button>
+        <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--red)" onclick="crmDismissAction('${a.id}')">Dispensar</button>
+      </div>
+    </div>`;
+  };
+  const bloco=(titulo,arr,cor)=>arr.length?`<div style="margin-bottom:1rem">
+    <div style="font-size:.62rem;font-weight:700;color:${cor};letter-spacing:.04em;margin-bottom:.4rem">${titulo} (${arr.length})</div>
+    ${arr.map(rowHtml).join('')}
+  </div>`:'';
+  const html=bloco('ATRASADAS',atrasadas,'var(--red)')+bloco('HOJE',hojeArr,'var(--blue)')+bloco(crmSemanaHorizonte===7?'PRÓXIMOS 7 DIAS':'PRÓXIMOS 30 DIAS',proximas,'var(--ink3)');
+  cont.innerHTML=html||'<p class="hint">Nada planejado — tudo em dia por aqui 🎉</p>';
+}
+function crmFmtDate2(iso){ // "AAAA-MM-DD" -> "DD/Mmm"
+  const MO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const p=iso.split('-');
+  return`${p[2]}/${MO[parseInt(p[1],10)-1]}`;
 }
 
 function rvSacachoLoad(){
