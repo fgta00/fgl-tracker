@@ -358,6 +358,7 @@ body.dark .rv-tabs{background:#0A0F1A}
       <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">Cotações</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">Pedidos</button>
       <button class="rv-tab" id="rvtab-fin" onclick="rvShowTab('fin')">Financeiro</button>
+      <button class="rv-tab" id="rvtab-crm" onclick="rvShowTab('crm')">CRM</button>
     </div>
 
     <div id="rvpane-calc" class="rv-pane active">
@@ -495,6 +496,94 @@ body.dark .rv-tabs{background:#0A0F1A}
 
     </div>
 
+    <div id="rvpane-crm" class="rv-pane">
+      <div id="crm-noaccess" class="card" style="display:none;text-align:center;padding:2rem">
+        <div style="font-size:1.5rem;margin-bottom:.5rem">🔒</div>
+        <div class="sh" style="margin-bottom:.4rem">Sem acesso ao CRM ainda</div>
+        <p class="hint">Essa área é liberada por convite — peça pro administrador te adicionar.</p>
+      </div>
+      <div id="crm-content" style="display:none">
+        <div class="rv-tabs no-print" style="display:flex;align-items:center;margin-bottom:.9rem;border-bottom:1px solid var(--bdr)">
+          <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')" style="color:var(--ink2)">Minha Semana</button>
+          <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')" style="color:var(--ink2)">Clientes</button>
+          <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')" style="color:var(--ink2)">Projetos Estratégicos</button>
+        </div>
+
+        <div id="crmpane-semana" class="rv-pane active">
+          <div class="card" style="text-align:center;padding:2rem"><p class="hint">Minha Semana chega numa próxima fase — depois de Clientes/CRM Actions estarem prontos.</p></div>
+        </div>
+
+        <div id="crmpane-clientes" class="rv-pane">
+          <div class="card">
+            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
+              <div class="sh" style="margin:0">Clientes</div>
+              <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+            </div>
+            <div class="tb" style="padding:0 .9rem .7rem">
+              <input id="crm-cli-q" placeholder="🔍 Buscar cliente…" oninput="crmRenderCustomers()" style="flex:1">
+              <span id="msf-crm-tag-wrap"></span>
+            </div>
+            <div id="crm-cli-cnt" style="padding:0 .9rem .4rem;font-size:.7rem;color:var(--ink4)"></div>
+            <div id="crm-customers-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
+          </div>
+        </div>
+
+        <div id="crmpane-projetos" class="rv-pane">
+          <div class="card" style="text-align:center;padding:2rem"><p class="hint">Projetos Estratégicos chega numa próxima fase.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CRM — EDITAR/CRIAR CLIENTE (Customer 360 mínimo) -->
+<div class="ovl" id="ovl-crmcustomer" onclick="if(event.target===this)closeM('crmcustomer')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-h"><span id="crm-cust-title">Cliente</span><button class="mcls" onclick="closeM('crmcustomer')">✕</button></div>
+    <div class="modal-b">
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="ff"><label>Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
+        <div class="ff"><label>Razão social</label><input type="text" id="crm-cust-legal" placeholder="opcional"></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
+        <div class="ff"><label>Status</label>
+          <select id="crm-cust-status">
+            <option value="active">Ativo</option>
+            <option value="prospect">Prospect</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="ff" style="margin-top:.6rem"><label>Notas</label><textarea id="crm-cust-notes" rows="2" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
+
+      <div class="fsep" style="margin-top:.9rem">Tags</div>
+      <div id="crm-cust-tags" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem"></div>
+      <div style="display:flex;gap:.4rem">
+        <input type="text" id="crm-tag-new" placeholder="nova tag…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
+        <button class="btn btn-s" onclick="crmAddTagToCustomer()">＋</button>
+      </div>
+
+      <div class="fsep" style="margin-top:.9rem">Pessoas</div>
+      <div id="crm-cust-people"></div>
+      <button class="btn btn-s" style="font-size:.66rem;margin-top:.3rem" onclick="crmAddPersonRow()">＋ Adicionar pessoa</button>
+
+      <div class="fsep" style="margin-top:.9rem">Referências externas <span style="font-weight:400;color:var(--ink4);font-size:.6rem">(vínculo com outros cadastros — evita duplicar cliente)</span></div>
+      <div id="crm-cust-refs"></div>
+      <div style="display:flex;gap:.4rem;margin-top:.3rem">
+        <select id="crm-ref-source" style="width:140px">
+          <option value="rv_clientes2">Cliente PROD BR</option>
+          <option value="tiny">Tiny/Olist</option>
+          <option value="prod_asia">PROD ASIA</option>
+          <option value="wix">Wix</option>
+        </select>
+        <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
+        <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
+      </div>
+
+      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
+    </div>
   </div>
 </div>
 
@@ -2052,6 +2141,9 @@ function rvShowTab(id){
       else if(id==='pedidos')rvRenderPedidos();
       else if(id==='fin')rvRenderFin();
     }
+  }else if(id==='crm'){
+    document.getElementById('ovl-rvlock').classList.remove('open');
+    crmCheckAccess();
   }else{
     document.getElementById('ovl-rvlock').classList.remove('open');
   }
@@ -2121,6 +2213,237 @@ let RV_SACACHO={
   ]
 };
 let rvSacachoEditing=false;
+/* ══════════════════════════════════════
+   CRM — Milestone 1: identidade do cliente (crm_customers, external_refs, tags, people)
+   Tabelas Postgres próprias (sem cifra client-side), protegidas por RLS — não usa o
+   sistema de vault/senha do resto da Precificação. Membership é controlada só por
+   admin via SQL (sem auto-cadastro) — ver crmCheckAccess().
+══════════════════════════════════════ */
+let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
+let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[];
+let crmEditCtx={customerId:null,tags:[],people:[],refs:[]}; // estado de trabalho do modal de edição
+
+async function crmCheckAccess(){
+  if(!authUser||!_supaOK){
+    document.getElementById('crm-noaccess').style.display='block';
+    document.getElementById('crm-content').style.display='none';
+    return;
+  }
+  if(CRM_ROLE===null){
+    const{data,error}=await _supa.from('crm_user_roles').select('role').eq('user_id',authUser.id).maybeSingle();
+    CRM_ROLE=(!error&&data)?data.role:false;
+  }
+  if(!CRM_ROLE){
+    document.getElementById('crm-noaccess').style.display='block';
+    document.getElementById('crm-content').style.display='none';
+    return;
+  }
+  document.getElementById('crm-noaccess').style.display='none';
+  document.getElementById('crm-content').style.display='block';
+  crmShowSubTab('semana',true);
+  crmLoadAll();
+  crmStartAutoRefresh();
+}
+// Atualização periódica enquanto a aba CRM estiver ativa — mesma ideia de rvStartAutoRefresh,
+// já que o CRM lê direto da tabela (sem cache local tipo vault) e outra pessoa pode editar
+// ao mesmo tempo. Sem Realtime por enquanto, só polling — critério aprovado era "aparece sem
+// precisar recarregar a página", não "em tempo real".
+let _crmAutoRefreshTimer=null;
+function crmStartAutoRefresh(){
+  if(_crmAutoRefreshTimer)return;
+  _crmAutoRefreshTimer=setInterval(()=>{
+    if(CRM_ROLE&&_rvCurTab==='crm')crmLoadAll();
+  },30000);
+}
+function crmShowSubTab(id,skipReclick){
+  if(!skipReclick){
+    document.querySelectorAll('#crm-content .rv-pane').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('#crm-content > .rv-tabs .rv-tab').forEach(b=>b.classList.remove('active'));
+    document.getElementById('crmpane-'+id).classList.add('active');
+    document.getElementById('crmtab-'+id).classList.add('active');
+  }
+  if(id==='clientes'){
+    crmRenderCustomers(); // mostra já com o que tem local, sem esperar a rede
+    crmLoadAll();         // busca fresco e re-renderiza quando chegar
+  }
+}
+async function crmLoadAll(){
+  const[cust,tags,ctags,people,refs]=await Promise.all([
+    _supa.from('crm_customers').select('*').eq('deleted',false),
+    _supa.from('crm_tags').select('*'),
+    _supa.from('crm_customer_tags').select('*'),
+    _supa.from('crm_people').select('*').eq('deleted',false),
+    _supa.from('crm_customer_external_refs').select('*').eq('deleted',false),
+  ]);
+  CRM_CUSTOMERS=cust.data||[];
+  CRM_TAGS=tags.data||[];
+  CRM_CUSTOMER_TAGS=ctags.data||[];
+  CRM_PEOPLE=people.data||[];
+  CRM_EXTERNAL_REFS=refs.data||[];
+  crmRenderCustomers();
+}
+function crmRenderCustomers(){
+  const cont=document.getElementById('crm-customers-container');
+  if(!cont)return;
+  const wrapTag=document.getElementById('msf-crm-tag-wrap');
+  if(wrapTag&&!wrapTag.innerHTML)wrapTag.innerHTML=msfHtml('crm-tag','Todas Tags');
+  msfPopulate('crm-tag',CRM_TAGS.map(t=>t.name).sort(),'Todas Tags',crmRenderCustomers);
+  const q=norm(document.getElementById('crm-cli-q')?.value);
+  const tagsByCustomer=id=>CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)?.name).filter(Boolean);
+  const lista=CRM_CUSTOMERS.filter(c=>{
+    const t=norm(`${c.display_name} ${c.legal_name||''} ${c.document||''}`);
+    const tagNames=tagsByCustomer(c.id);
+    return(!q||t.includes(q))&&tagNames.every(tn=>msfMatch('crm-tag',tn))&&(tagNames.length?tagNames.some(tn=>msfMatch('crm-tag',tn)):true);
+  }).sort((a,b)=>a.display_name.localeCompare(b.display_name));
+  document.getElementById('crm-cli-cnt').textContent=`${lista.length} cliente${lista.length!==1?'s':''}`;
+  if(!lista.length){cont.innerHTML='<p class="hint">Nenhum cliente encontrado. Clique em "＋ Novo Cliente" pra cadastrar o primeiro.</p>';return;}
+  const statusLbl={active:'Ativo',prospect:'Prospect',inactive:'Inativo'};
+  const statusCol={active:'var(--green)',prospect:'var(--blue)',inactive:'var(--ink4)'};
+  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.7rem">`+lista.map(c=>{
+    const tagNames=tagsByCustomer(c.id);
+    const nPeople=CRM_PEOPLE.filter(p=>p.customer_id===c.id).length;
+    return`<div class="card" style="padding:.7rem .85rem;cursor:pointer" onclick="crmOpenCustomerEdit('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
+        <div style="font-weight:700;font-size:.8rem">${esc(c.display_name)}</div>
+        <span style="font-size:.55rem;font-weight:700;color:${statusCol[c.status]||'var(--ink4)'};background:${statusCol[c.status]||'var(--ink4)'}18;padding:.1rem .4rem;border-radius:4px;white-space:nowrap">${statusLbl[c.status]||c.status}</span>
+      </div>
+      ${c.legal_name?`<div style="font-size:.62rem;color:var(--ink4)">${esc(c.legal_name)}</div>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem">
+        ${tagNames.map(tn=>`<span style="font-size:.56rem;background:var(--ltblue);color:var(--blue);padding:.08rem .35rem;border-radius:4px">${esc(tn)}</span>`).join('')}
+      </div>
+      <div style="font-size:.58rem;color:var(--ink4);margin-top:.4rem">${nPeople} pessoa${nPeople!==1?'s':''}</div>
+    </div>`;
+  }).join('')+`</div>`;
+}
+function crmOpenCustomerEdit(id){
+  crmEditCtx={customerId:id,tags:[],people:[],refs:[]};
+  document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
+  const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
+  document.getElementById('crm-cust-name').value=c?.display_name||'';
+  document.getElementById('crm-cust-legal').value=c?.legal_name||'';
+  document.getElementById('crm-cust-doc').value=c?.document||'';
+  document.getElementById('crm-cust-status').value=c?.status||'active';
+  document.getElementById('crm-cust-notes').value=c?.notes||'';
+  crmEditCtx.tags=id?CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)).filter(Boolean).map(t=>t.name):[];
+  crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):[];
+  crmEditCtx.refs=id?CRM_EXTERNAL_REFS.filter(r=>r.customer_id===id).map(r=>({...r})):[];
+  crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();
+  document.getElementById('ovl-crmcustomer').classList.add('open');
+}
+function crmRenderCustTags(){
+  document.getElementById('crm-cust-tags').innerHTML=crmEditCtx.tags.map(tn=>`<span style="font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem">${esc(tn)}<span onclick="crmEditCtx.tags=crmEditCtx.tags.filter(t=>t!=='${esc(tn).replace(/'/g,"\\'")}');crmRenderCustTags()" style="cursor:pointer;color:var(--red)">✕</span></span>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma tag ainda</span>';
+}
+function crmAddTagToCustomer(){
+  const inp=document.getElementById('crm-tag-new');
+  const name=inp.value.trim();
+  if(!name)return;
+  if(!crmEditCtx.tags.includes(name))crmEditCtx.tags.push(name);
+  inp.value='';
+  crmRenderCustTags();
+}
+function crmRenderCustPeople(){
+  document.getElementById('crm-cust-people').innerHTML=crmEditCtx.people.map((p,i)=>`<div style="display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:.3rem;margin-bottom:.3rem;align-items:center">
+    <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .4rem;font-size:.7rem">
+    <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .4rem;font-size:.7rem">
+    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .3rem;font-size:.68rem">
+      <option value="">—</option>
+      ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
+    </select>
+    <button onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+  </div>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma pessoa ainda</span>';
+}
+function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:''});crmRenderCustPeople();}
+function crmRenderCustRefs(){
+  const lbl={rv_clientes2:'PROD BR',tiny:'Tiny/Olist',prod_asia:'PROD ASIA',wix:'Wix'};
+  document.getElementById('crm-cust-refs').innerHTML=crmEditCtx.refs.map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.2rem 0;border-bottom:1px solid var(--bdr)">
+    <span style="font-size:.68rem"><b>${lbl[r.source]||r.source}</b>: ${esc(r.external_id)} ${r.confidence==='suggested'?'<span style="color:var(--amber);font-size:.58rem">(sugerido)</span>':''}</span>
+    <button onclick="crmEditCtx.refs.splice(${i},1);crmRenderCustRefs()" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+  </div>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma referência ainda</span>';
+}
+function crmAddExternalRef(){
+  const source=document.getElementById('crm-ref-source').value;
+  const val=document.getElementById('crm-ref-value').value.trim();
+  if(!val)return;
+  crmEditCtx.refs.push({source,external_id:val,confidence:'confirmed'});
+  document.getElementById('crm-ref-value').value='';
+  crmRenderCustRefs();
+}
+async function crmSaveCustomer(){
+  const display_name=document.getElementById('crm-cust-name').value.trim();
+  if(!display_name){toastSave('Nome do cliente é obrigatório');return;}
+  const payload={
+    display_name,
+    legal_name:document.getElementById('crm-cust-legal').value.trim()||null,
+    document:document.getElementById('crm-cust-doc').value.trim()||null,
+    status:document.getElementById('crm-cust-status').value,
+    notes:document.getElementById('crm-cust-notes').value.trim()||null,
+    owner_user_id:authUser.id,
+  };
+  let customerId=crmEditCtx.customerId;
+  if(customerId){
+    const{error}=await _supa.from('crm_customers').update(payload).eq('id',customerId);
+    if(error){toastSave('Erro ao salvar: '+error.message);return;}
+  }else{
+    const{data,error}=await _supa.from('crm_customers').insert(payload).select().single();
+    if(error){toastSave('Erro ao criar: '+error.message);return;}
+    customerId=data.id;
+  }
+  // tags: garante que existem em crm_tags, depois sincroniza o vínculo customer↔tag
+  for(const tn of crmEditCtx.tags){
+    let tag=CRM_TAGS.find(t=>t.name===tn);
+    if(!tag){
+      const{data}=await _supa.from('crm_tags').insert({name:tn}).select().single();
+      if(data){tag=data;CRM_TAGS.push(data);}
+    }
+    if(tag&&!await crmLinkExists('crm_customer_tags',{customer_id:customerId,tag_id:tag.id})){
+      await _supa.from('crm_customer_tags').insert({customer_id:customerId,tag_id:tag.id});
+    }
+  }
+  const tagsAtuais=CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===customerId);
+  for(const ct of tagsAtuais){
+    const tagName=CRM_TAGS.find(t=>t.id===ct.tag_id)?.name;
+    if(tagName&&!crmEditCtx.tags.includes(tagName)){
+      await _supa.from('crm_customer_tags').delete().eq('customer_id',customerId).eq('tag_id',ct.tag_id);
+    }
+  }
+  // pessoas: upsert simples (quem tem id atualiza, quem não tem insere; quem sumiu da lista vira soft-delete)
+  const idsPessoasMantidas=[];
+  for(const p of crmEditCtx.people){
+    if(!p.name)continue;
+    if(p.id){
+      await _supa.from('crm_people').update({name:p.name,role:p.role||null,relationship_type:p.relationship_type||null}).eq('id',p.id);
+      idsPessoasMantidas.push(p.id);
+    }else{
+      const{data}=await _supa.from('crm_people').insert({customer_id:customerId,name:p.name,role:p.role||null,relationship_type:p.relationship_type||null}).select().single();
+      if(data)idsPessoasMantidas.push(data.id);
+    }
+  }
+  const pessoasOriginais=CRM_PEOPLE.filter(p=>p.customer_id===customerId);
+  for(const p of pessoasOriginais){
+    if(!idsPessoasMantidas.includes(p.id))await _supa.from('crm_people').update({deleted:true}).eq('id',p.id);
+  }
+  // referências externas: insere as novas (sem id ainda) e desfaz (soft-delete) as removidas da lista.
+  // Nunca é DELETE físico — dá pra desfazer um vínculo errado sem perder o rastro de auditoria.
+  const idsRefsMantidas=[];
+  for(const r of crmEditCtx.refs){
+    if(r.id){idsRefsMantidas.push(r.id);continue;}
+    const{data,error}=await _supa.from('crm_customer_external_refs').insert({customer_id:customerId,source:r.source,external_id:r.external_id,confidence:r.confidence||'confirmed',linked_by:authUser.id}).select().single();
+    if(error){toastSave('Referência não salva (já existe ativa em outro cliente?): '+error.message);continue;}
+    if(data)idsRefsMantidas.push(data.id);
+  }
+  const refsOriginais=CRM_EXTERNAL_REFS.filter(r=>r.customer_id===customerId&&!r.deleted);
+  for(const r of refsOriginais){
+    if(!idsRefsMantidas.includes(r.id))await _supa.from('crm_customer_external_refs').update({deleted:true}).eq('id',r.id);
+  }
+  closeM('crmcustomer');
+  toastSave('Cliente salvo ✓');
+  await crmLoadAll();
+}
+async function crmLinkExists(table,match){
+  const{data}=await _supa.from(table).select('*').match(match).maybeSingle();
+  return!!data;
+}
+
 function rvSacachoLoad(){
   try{const saved=JSON.parse(localStorage.getItem('rv_sacacho')||'');if(saved&&saved.grupos)RV_SACACHO=saved;}catch(e){}
 }
