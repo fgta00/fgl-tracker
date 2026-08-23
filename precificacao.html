@@ -523,7 +523,10 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="card">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
               <div class="sh" style="margin:0">Clientes</div>
-              <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+              <div style="display:flex;gap:.4rem">
+                <button class="btn btn-s" id="crm-review-btn" style="font-size:.68rem;padding:.3rem .6rem;display:none" onclick="crmOpenReviewQueue()">🔍 Revisão Tiny <span id="crm-review-count" style="background:var(--amber);color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.6rem;margin-left:.2rem"></span></button>
+                <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+              </div>
             </div>
             <div class="tb" style="padding:0 .9rem .7rem">
               <input id="crm-cli-q" placeholder="🔍 Buscar cliente…" oninput="crmRenderCustomers()" style="flex:1">
@@ -607,6 +610,17 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
 
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRM — REVISÃO TINY (fila permanente de resolução humana) -->
+<div class="ovl" id="ovl-crmreview" onclick="if(event.target===this)closeM('crmreview')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-h"><span>Revisão Tiny <span id="crm-review-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" onclick="closeM('crmreview')">✕</button></div>
+    <div class="modal-b">
+      <p class="hint" style="margin-bottom:.7rem">Casos que o matching automático não resolveu sozinho. Você decide — vincular a um cliente existente, criar um novo, ou manter só como registro bruto (não vira cliente CRM).</p>
+      <div id="crm-review-list"></div>
     </div>
   </div>
 </div>
@@ -2359,24 +2373,43 @@ function crmShowSubTab(id,skipReclick){
     crmLoadAll();
   }
 }
+// Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
+// 1000 linhas do PostgREST. Mesmo bug que achamos e corrigimos no script Python de
+// importação Tiny; agora que a base de crm_customers ficou grande (Fase 3), a lista do
+// CRM também precisava disso, senão corta clientes silenciosamente sem avisar ninguém.
+async function crmFetchAll(table, selectStr, eqFilters){
+  let all=[],start=0;const pageSize=1000;
+  while(true){
+    let q=_supa.from(table).select(selectStr);
+    if(eqFilters)for(const[k,v]of Object.entries(eqFilters))q=q.eq(k,v);
+    q=q.range(start,start+pageSize-1);
+    const{data,error}=await q;
+    if(error){console.error('crmFetchAll',table,error);break;}
+    all=all.concat(data||[]);
+    if(!data||data.length<pageSize)break;
+    start+=pageSize;
+  }
+  return all;
+}
 async function crmLoadAll(){
   const[cust,tags,ctags,people,refs,actions]=await Promise.all([
-    _supa.from('crm_customers').select('*').eq('deleted',false),
-    _supa.from('crm_tags').select('*'),
-    _supa.from('crm_customer_tags').select('*'),
-    _supa.from('crm_people').select('*').eq('deleted',false),
-    _supa.from('crm_customer_external_refs').select('*').eq('deleted',false),
-    _supa.from('crm_actions').select('*').eq('deleted',false),
+    crmFetchAll('crm_customers','*',{deleted:false}),
+    crmFetchAll('crm_tags','*'),
+    crmFetchAll('crm_customer_tags','*'),
+    crmFetchAll('crm_people','*',{deleted:false}),
+    crmFetchAll('crm_customer_external_refs','*',{deleted:false}),
+    crmFetchAll('crm_actions','*',{deleted:false}),
   ]);
-  CRM_CUSTOMERS=cust.data||[];
-  CRM_TAGS=tags.data||[];
-  CRM_CUSTOMER_TAGS=ctags.data||[];
-  CRM_PEOPLE=people.data||[];
-  CRM_EXTERNAL_REFS=refs.data||[];
-  CRM_ACTIONS=actions.data||[];
+  CRM_CUSTOMERS=cust;
+  CRM_TAGS=tags;
+  CRM_CUSTOMER_TAGS=ctags;
+  CRM_PEOPLE=people;
+  CRM_EXTERNAL_REFS=refs;
+  CRM_ACTIONS=actions;
   crmRenderCustomers();
   if(document.getElementById('crmpane-semana')?.classList.contains('active'))crmRenderMinhaSemana();
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
+  crmLoadReviewQueue();
 }
 function crmRenderCustomers(){
   const cont=document.getElementById('crm-customers-container');
@@ -2543,6 +2576,115 @@ async function crmSaveCustomer(){
 async function crmLinkExists(table,match){
   const{data}=await _supa.from(table).select('*').match(match).maybeSingle();
   return!!data;
+}
+
+/* ══════════════════════════════════════
+   CRM — REVISÃO TINY (fila permanente de resolução humana)
+   Nunca decide sozinho: só mostra os candidatos (achados por CNPJ ou nome, mesma lógica
+   de normalização do script de importação) e deixa a pessoa escolher. Não reroda o
+   matching em lote, não mexe nos 2.705 contatos já reconciliados — cada resolução aqui
+   afeta só 1 tiny_id por vez.
+══════════════════════════════════════ */
+let CRM_REVIEW_QUEUE=[];
+function crmNormalizeName(s){ // mesma lógica do normalize_name() do script Python
+  return(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+}
+async function crmLoadReviewQueue(){
+  CRM_REVIEW_QUEUE=await crmFetchAll('crm_tiny_match_review','*',{status:'pending'});
+  crmRenderReviewBadge();
+}
+function crmRenderReviewBadge(){
+  const btn=document.getElementById('crm-review-btn');
+  const cnt=document.getElementById('crm-review-count');
+  if(!btn||!cnt)return;
+  const n=CRM_REVIEW_QUEUE.length;
+  btn.style.display=n>0?'inline-flex':'none';
+  cnt.textContent=n;
+}
+async function crmOpenReviewQueue(){
+  await crmLoadReviewQueue();
+  document.getElementById('crm-review-title-count').textContent=`(${CRM_REVIEW_QUEUE.length} pendente${CRM_REVIEW_QUEUE.length!==1?'s':''})`;
+  await crmRenderReviewQueue();
+  document.getElementById('ovl-crmreview').classList.add('open');
+}
+async function crmRenderReviewQueue(){
+  const cont=document.getElementById('crm-review-list');
+  if(!CRM_REVIEW_QUEUE.length){cont.innerHTML='<p class="hint">Nenhum caso pendente 🎉</p>';return;}
+  // busca o registro raw do tiny_id (nome/fantasia/documento), pra reconstituir candidatos
+  const tinyIds=CRM_REVIEW_QUEUE.map(r=>r.tiny_id);
+  const{data:tinyContacts}=await _supa.from('tiny_contacts_raw').select('tiny_id,nome,fantasia,documento,documento_normalizado,tipos_contato').in('tiny_id',tinyIds);
+  const tinyById={};(tinyContacts||[]).forEach(t=>tinyById[t.tiny_id]=t);
+
+  cont.innerHTML=CRM_REVIEW_QUEUE.map(r=>{
+    const tc=tinyById[r.tiny_id]||{};
+    const isTagConflict=(r.reason||'').includes('tag não-cliente');
+    const isDocAmbig=(r.reason||'').includes('documento já existe');
+    const isNameAmbig=(r.reason||'').includes('nome/fantasia bate');
+
+    let candidatos=[];
+    if(isDocAmbig&&tc.documento_normalizado){
+      candidatos=CRM_CUSTOMERS.filter(c=>c.document&&c.document.replace(/\D/g,'')===tc.documento_normalizado);
+    }else if(isNameAmbig){
+      const nn=crmNormalizeName(tc.nome),nf=crmNormalizeName(tc.fantasia);
+      candidatos=CRM_CUSTOMERS.filter(c=>{
+        const cn=crmNormalizeName(c.display_name),ct=crmNormalizeName(c.trade_name),cl=crmNormalizeName(c.legal_name);
+        return(nn&&(nn===cn||nn===ct||nn===cl))||(nf&&(nf===cn||nf===ct||nf===cl));
+      });
+    }
+
+    const candidatosHtml=candidatos.length?`<div style="display:flex;flex-direction:column;gap:.35rem;margin:.5rem 0">
+      ${candidatos.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem">
+        <div><b style="font-size:.74rem">${esc(c.trade_name||c.display_name)}</b><div style="font-size:.6rem;color:var(--ink4)">${esc(c.legal_name||'')} ${c.document?'· '+esc(c.document):''}</div></div>
+        <button class="btn btn-p" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmResolveReview('${r.id}','${r.tiny_id}','linked','${c.id}')">Vincular aqui</button>
+      </div>`).join('')}
+    </div>`:'';
+
+    const sugestaoTag=isTagConflict?`<div style="font-size:.62rem;color:var(--amber);margin:.3rem 0">💡 Sugestão: contato marcado só como Fornecedor/Transportador/Vendedor na Tiny — provavelmente não é cliente. Confirme ou vincule manualmente se souber que é.</div>`:'';
+
+    return`<div style="border:1px solid var(--bdr);border-radius:8px;padding:.6rem .75rem;margin-bottom:.6rem">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.4rem">
+        <b style="font-size:.76rem">${esc(r.nome||tc.nome||'(sem nome)')}</b>
+        <span style="font-size:.58rem;color:var(--ink4)">tiny_id ${esc(r.tiny_id)}</span>
+      </div>
+      <div style="font-size:.64rem;color:var(--ink3);margin:.15rem 0">${esc(r.reason)}</div>
+      ${tc.tipos_contato?`<div style="font-size:.6rem;color:var(--ink4)">tags: ${esc(tc.tipos_contato)}</div>`:''}
+      ${sugestaoTag}
+      ${candidatosHtml}
+      <div style="display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap">
+        <button class="btn btn-s" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReviewCreatePrompt('${r.id}','${r.tiny_id}')">＋ Criar cliente novo</button>
+        <button class="btn ${isTagConflict?'btn-p':'btn-s'}" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReview('${r.id}','${r.tiny_id}','non_client',null)">Manter raw / não-cliente</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function crmResolveReview(reviewId,tinyId,resolutionType,customerId){
+  if(resolutionType==='linked'||resolutionType==='created'){
+    const{data:tc}=await _supa.from('tiny_contacts_raw').select('nome').eq('tiny_id',tinyId).maybeSingle();
+    const{error}=await _supa.from('crm_customer_external_refs').insert({
+      customer_id:customerId,source:'tiny',external_id:tinyId,external_label:tc?.nome||null,confidence:'confirmed',linked_by:authUser.id,
+    });
+    if(error){toastSave('Erro ao vincular: '+error.message);return;}
+  }
+  const{error:errResolve}=await _supa.from('crm_tiny_match_review').update({
+    status:'resolved',resolved_at:new Date().toISOString(),resolved_by:authUser.id,
+    resolution_type:resolutionType,resolution_customer_id:customerId,
+  }).eq('id',reviewId);
+  if(errResolve){toastSave('Erro ao marcar revisão como resolvida: '+errResolve.message);return;}
+  toastSave('Caso resolvido ✓');
+  await crmLoadAll();
+  await crmOpenReviewQueue();
+}
+async function crmResolveReviewCreatePrompt(reviewId,tinyId){
+  const{data:tc}=await _supa.from('tiny_contacts_raw').select('*').eq('tiny_id',tinyId).maybeSingle();
+  if(!tc){toastSave('Não achei o contato Tiny bruto');return;}
+  if(!confirm(`Criar novo cliente CRM a partir de "${tc.nome}" (Tiny #${tinyId})?`))return;
+  const{data:novo,error}=await _supa.from('crm_customers').insert({
+    display_name:tc.nome||tc.fantasia||`Tiny #${tinyId}`,trade_name:tc.fantasia||null,
+    document:tc.documento||null,status:'active',
+  }).select().single();
+  if(error){toastSave('Erro ao criar cliente: '+error.message);return;}
+  await crmResolveReview(reviewId,tinyId,'created',novo.id);
 }
 
 /* ══════════════════════════════════════
