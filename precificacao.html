@@ -593,6 +593,32 @@ body.dark .rv-tabs{background:#0A0F1A}
         <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
       </div>
 
+      <div id="crm-cust-purchase-section" style="display:none">
+        <div class="fsep" style="margin-top:.9rem">Histórico de Compras (Tiny)</div>
+        <div id="crm-purchase-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.5rem 0">
+          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
+            <div style="font-size:.55rem;color:var(--ink4)">1ª compra</div>
+            <div id="crm-ph-first" style="font-size:.72rem;font-weight:700">—</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
+            <div style="font-size:.55rem;color:var(--ink4)">Última compra</div>
+            <div id="crm-ph-last" style="font-size:.72rem;font-weight:700">—</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
+            <div style="font-size:.55rem;color:var(--ink4)">Nº pedidos</div>
+            <div id="crm-ph-count" style="font-size:.72rem;font-weight:700">—</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
+            <div style="font-size:.55rem;color:var(--ink4)">Ticket médio</div>
+            <div id="crm-ph-avg" style="font-size:.72rem;font-weight:700">—</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:.6rem;color:var(--ink4);margin-bottom:.5rem">
+          Valor histórico bruto (sem desconto/frete): <b id="crm-ph-gross" style="color:var(--ink2)">—</b>
+        </div>
+        <div id="crm-purchase-orders"></div>
+      </div>
+
       <div id="crm-cust-timeline-section" style="display:none">
         <div class="fsep" style="margin-top:.9rem;display:flex;justify-content:space-between;align-items:center">
           <span>Timeline</span>
@@ -2474,6 +2500,9 @@ function crmOpenCustomerEdit(id){
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();
   document.getElementById('crm-cust-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-tl-periodo').value='30';crmRenderTimeline();}
+  const temVinculoTiny=id&&crmEditCtx.refs.some(r=>r.source==='tiny'&&!r.deleted);
+  document.getElementById('crm-cust-purchase-section').style.display=temVinculoTiny?'block':'none';
+  if(temVinculoTiny)crmLoadPurchaseHistory(id);
   document.getElementById('ovl-crmcustomer').classList.add('open');
 }
 function crmRenderCustTags(){
@@ -2586,6 +2615,75 @@ async function crmSaveCustomer(){
   toastSave('Cliente salvo ✓');
   await crmLoadAll();
 }
+/* ══════════════════════════════════════
+   CRM — HISTÓRICO DE COMPRAS (Tiny) — só leitura, 3 RPCs
+   crm_customer_purchase_summary / crm_customer_purchase_orders / crm_order_items.
+   Agrega automaticamente por TODOS os tiny_id ativos do cliente (caso real: um cliente
+   pode ter mais de 1 tiny_id — ex. MINAS GOIAS). Cancelado aparece na lista, mas fica
+   fora dos 4 números-resumo. Itens de pedido só carregam ao expandir a linha.
+══════════════════════════════════════ */
+function crmFmtBRL(v){
+  return(v==null?0:v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function crmFmtDateOnly(iso){ // "AAAA-MM-DD" -> "DD/MM/AAAA"
+  if(!iso)return'—';
+  const p=iso.split('-');
+  return`${p[2]}/${p[1]}/${p[0]}`;
+}
+async function crmLoadPurchaseHistory(customerId){
+  document.getElementById('crm-purchase-orders').innerHTML='<p class="hint">Carregando…</p>';
+  const[{data:summaryRows,error:errS},{data:orders,error:errO}]=await Promise.all([
+    _supa.rpc('crm_customer_purchase_summary',{p_customer_id:customerId}),
+    _supa.rpc('crm_customer_purchase_orders',{p_customer_id:customerId}),
+  ]);
+  if(errS||errO){
+    document.getElementById('crm-purchase-orders').innerHTML=`<p class="hint" style="color:var(--red)">Erro ao carregar histórico: ${esc((errS||errO).message)}</p>`;
+    return;
+  }
+  const s=summaryRows&&summaryRows[0]?summaryRows[0]:{order_count:0,first_purchase_date:null,last_purchase_date:null,total_gross_value:0,avg_ticket:0};
+  document.getElementById('crm-ph-first').textContent=crmFmtDateOnly(s.first_purchase_date);
+  document.getElementById('crm-ph-last').textContent=crmFmtDateOnly(s.last_purchase_date);
+  document.getElementById('crm-ph-count').textContent=s.order_count||0;
+  document.getElementById('crm-ph-avg').textContent=crmFmtBRL(s.avg_ticket);
+  document.getElementById('crm-ph-gross').textContent=crmFmtBRL(s.total_gross_value);
+  crmRenderPurchaseOrders(orders||[]);
+}
+function crmRenderPurchaseOrders(orders){
+  const cont=document.getElementById('crm-purchase-orders');
+  if(!orders.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado.</p>';return;}
+  cont.innerHTML=orders.map(o=>{
+    const cancelado=o.situacao==='Cancelado';
+    const rowId=`crm-ph-items-${o.tiny_order_id}`;
+    return`<div style="border:1px solid var(--bdr);border-radius:7px;margin-bottom:.35rem;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .6rem;cursor:pointer;${cancelado?'opacity:.6':''}" onclick="crmToggleOrderItems('${o.tiny_order_id}')">
+        <div>
+          <span style="font-size:.7rem;font-weight:700">${esc(o.numero_pedido||o.tiny_order_id)}</span>
+          <span style="font-size:.6rem;color:var(--ink4);margin-left:.4rem">${crmFmtDateOnly(o.data)}</span>
+          ${cancelado?'<span style="font-size:.56rem;color:#fff;background:var(--red);border-radius:4px;padding:.05rem .35rem;margin-left:.4rem">CANCELADO</span>':''}
+        </div>
+        <span style="font-size:.72rem;font-weight:700">${crmFmtBRL(o.order_value)}</span>
+      </div>
+      <div id="${rowId}" style="display:none;padding:.4rem .6rem;border-top:1px solid var(--bdr);background:var(--bg)"></div>
+    </div>`;
+  }).join('');
+}
+async function crmToggleOrderItems(tinyOrderId){
+  const el=document.getElementById(`crm-ph-items-${tinyOrderId}`);
+  if(!el)return;
+  if(el.style.display==='block'){el.style.display='none';return;}
+  el.style.display='block';
+  if(el.dataset.loaded){return;}
+  el.innerHTML='<p class="hint" style="font-size:.62rem">Carregando itens…</p>';
+  const{data:items,error}=await _supa.rpc('crm_order_items',{p_tiny_order_id:tinyOrderId});
+  if(error){el.innerHTML=`<p class="hint" style="font-size:.62rem;color:var(--red)">Erro: ${esc(error.message)}</p>`;return;}
+  if(!items||!items.length){el.innerHTML='<p class="hint" style="font-size:.62rem">Sem itens registrados pra esse pedido.</p>';el.dataset.loaded='1';return;}
+  el.innerHTML=items.map(it=>`<div style="display:flex;justify-content:space-between;gap:.4rem;font-size:.66rem;padding:.15rem 0;border-bottom:1px solid var(--bdr)">
+    <span>${esc(it.descricao||it.produto_cadastro||it.sku||it.tiny_product_id||'(sem descrição)')}</span>
+    <span style="color:var(--ink4);white-space:nowrap">${it.quantidade||0} × ${crmFmtBRL(it.valor_unitario)}</span>
+  </div>`).join('');
+  el.dataset.loaded='1';
+}
+
 async function crmLinkExists(table,match){
   const{data}=await _supa.from(table).select('*').match(match).maybeSingle();
   return!!data;
