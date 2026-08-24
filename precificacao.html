@@ -517,6 +517,10 @@ body.dark .rv-tabs{background:#0A0F1A}
             </div>
             <div id="crm-semana-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
           </div>
+          <div class="card" id="crm-signal-card" style="display:none;margin-top:.7rem">
+            <div class="sh" style="margin-bottom:.5rem">Vale sua atenção</div>
+            <div id="crm-signal-container"></div>
+          </div>
         </div>
 
         <div id="crmpane-clientes" class="rv-pane">
@@ -552,10 +556,9 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="modal" style="max-width:640px">
     <div class="modal-h"><span id="crm-cust-title">Cliente</span><button class="mcls" onclick="closeM('crmcustomer')">✕</button></div>
     <div class="modal-b">
-      <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.6rem">
-        <div class="ff"><label>Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
-        <div class="ff"><label>Razão social</label><input type="text" id="crm-cust-legal" placeholder="opcional"></div>
       </div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
         <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
@@ -568,6 +571,17 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
       <div class="ff" style="margin-top:.6rem"><label>Notas</label><textarea id="crm-cust-notes" rows="2" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
+
+      <div class="collap-h" id="crm-cust-moredetails-h" onclick="toggleCollap(this,'crm-cust-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
+      </div>
+      <div class="collap-body" id="crm-cust-moredetails-body">
+        <div class="ff" style="margin-top:.5rem">
+          <label>Razão Social (campo legado/secundário)</label>
+          <input type="text" id="crm-cust-legal" placeholder="opcional — só preencha se for diferente de Razão Social/Nome acima">
+          <p class="hint" style="font-size:.58rem;margin-top:.2rem">Campo antigo, mantido por compatibilidade — não é usado pra identificar o cliente. O campo "Razão Social / Nome" acima é o principal.</p>
+        </div>
+      </div>
 
       <div class="fsep" style="margin-top:.9rem">Tags</div>
       <div id="crm-cust-tags" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem"></div>
@@ -2408,6 +2422,7 @@ function crmShowSubTab(id,skipReclick){
     crmLoadAll();         // busca fresco e re-renderiza quando chegar
   }else if(id==='semana'){
     crmRenderMinhaSemana();
+    crmLoadSignalRecompra();
     crmLoadAll();
   }
 }
@@ -2445,7 +2460,7 @@ async function crmLoadAll(){
   CRM_EXTERNAL_REFS=refs;
   CRM_ACTIONS=actions;
   crmRenderCustomers();
-  if(document.getElementById('crmpane-semana')?.classList.contains('active'))crmRenderMinhaSemana();
+  if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
   crmLoadReviewQueue();
   crmLoadAuditQueue();
@@ -2491,6 +2506,9 @@ function crmOpenCustomerEdit(id){
   document.getElementById('crm-cust-name').value=c?.display_name||'';
   document.getElementById('crm-cust-trade').value=c?.trade_name||'';
   document.getElementById('crm-cust-legal').value=c?.legal_name||'';
+  const temLegalName=!!(c?.legal_name&&c.legal_name.trim());
+  document.getElementById('crm-cust-moredetails-h').classList.toggle('open',temLegalName);
+  document.getElementById('crm-cust-moredetails-body').classList.toggle('open',temLegalName);
   document.getElementById('crm-cust-doc').value=c?.document||'';
   document.getElementById('crm-cust-status').value=c?.status||'active';
   document.getElementById('crm-cust-notes').value=c?.notes||'';
@@ -3072,6 +3090,58 @@ function crmRenderMinhaSemana(){
 function crmFmtDate2(iso){ // "AAAA-MM-DD" -> "DD/MM/AAAA"
   const p=iso.split('-');
   return`${p[2]}/${p[1]}/${p[0]}`;
+}
+
+/* ══════════════════════════════════════
+   CRM — "VALE SUA ATENÇÃO" (sinal experimental v1, não é ação)
+   RPC de leitura (crm_signal_recompra) — nada de sinal gravado. Só "Agora não"
+   grava algo (crm_signal_dismissals, âncorada na ocorrência = last_purchase_date).
+   "Criar ação" é o ÚNICO caminho que grava em crm_actions — sinal em si nunca vira
+   ação sozinho. Regra fixa e simples nesta fase (90 dias sem comprar + 5 pedidos),
+   sem nenhum ajuste exposto na tela.
+══════════════════════════════════════ */
+function crmMesesAtras(dataISO){
+  if(!dataISO)return'';
+  const d=new Date(dataISO+'T00:00');
+  const dias=Math.floor((new Date()-d)/86400000);
+  const meses=Math.round(dias/30);
+  if(meses<=0)return'há poucos dias';
+  if(meses===1)return'há 1 mês';
+  return`há ${meses} meses`;
+}
+async function crmLoadSignalRecompra(){
+  const card=document.getElementById('crm-signal-card');
+  const cont=document.getElementById('crm-signal-container');
+  const{data,error}=await _supa.rpc('crm_signal_recompra',{});
+  if(error){console.error('crm_signal_recompra',error);card.style.display='none';return;}
+  if(!data||!data.length){card.style.display='none';return;}
+  card.style.display='block';
+  cont.innerHTML=data.map(s=>`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem" id="crm-signal-${s.customer_id}">
+    <div style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</div>
+    <div style="font-size:.68rem;color:var(--ink2);margin:.1rem 0">Vale retomar?</div>
+    <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.4rem">Última compra ${crmMesesAtras(s.last_purchase_date)} · ${s.order_count} pedidos</div>
+    <div style="display:flex;gap:.3rem">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
+    </div>
+  </div>`).join('');
+}
+async function crmDismissSignal(customerId,lastPurchaseDate){
+  const{error}=await _supa.from('crm_signal_dismissals').insert({
+    customer_id:customerId,signal_type:'recompra',signal_anchor_date:lastPurchaseDate,
+    // dismissed_by NÃO é enviado — a coluna já assume auth.uid() sozinha (default no banco),
+    // e a policy de insert rejeitaria qualquer valor diferente do usuário logado de verdade.
+  });
+  if(error&&error.code!=='23505'){ // 23505 = já dispensado antes (índice único) — trata como sucesso silencioso
+    toastSave('Erro: '+error.message);
+    return;
+  }
+  const el=document.getElementById(`crm-signal-${customerId}`);
+  if(el)el.remove();
+  if(!document.getElementById('crm-signal-container').children.length){
+    document.getElementById('crm-signal-card').style.display='none';
+  }
 }
 
 function rvSacachoLoad(){
