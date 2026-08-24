@@ -523,8 +523,9 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="card">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
               <div class="sh" style="margin:0">Clientes</div>
-              <div style="display:flex;gap:.4rem">
+              <div style="display:flex;gap:.4rem;align-items:center">
                 <button class="btn btn-s" id="crm-review-btn" style="font-size:.68rem;padding:.3rem .6rem;display:none" onclick="crmOpenReviewQueue()">🔍 Revisão Tiny <span id="crm-review-count" style="background:var(--amber);color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.6rem;margin-left:.2rem"></span></button>
+                <span id="crm-audit-link" style="display:none;font-size:.62rem;color:var(--ink4);text-decoration:underline;cursor:pointer" onclick="crmOpenAuditQueue()">Auditoria / Avisos (<span id="crm-audit-count">0</span>)</span>
                 <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
               </div>
             </div>
@@ -614,13 +615,24 @@ body.dark .rv-tabs{background:#0A0F1A}
   </div>
 </div>
 
-<!-- CRM — REVISÃO TINY (fila permanente de resolução humana) -->
+<!-- CRM — REVISÃO TINY (fila permanente de resolução humana — só bloqueante) -->
 <div class="ovl" id="ovl-crmreview" onclick="if(event.target===this)closeM('crmreview')">
   <div class="modal" style="max-width:640px">
     <div class="modal-h"><span>Revisão Tiny <span id="crm-review-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" onclick="closeM('crmreview')">✕</button></div>
     <div class="modal-b">
       <p class="hint" style="margin-bottom:.7rem">Casos que o matching automático não resolveu sozinho. Você decide — vincular a um cliente existente, criar um novo, ou manter só como registro bruto (não vira cliente CRM).</p>
       <div id="crm-review-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CRM — AUDITORIA / AVISOS (informativo, não bloqueante — não precisa de decisão) -->
+<div class="ovl" id="ovl-crmaudit" onclick="if(event.target===this)closeM('crmaudit')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-h"><span>Auditoria / Avisos <span id="crm-audit-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" onclick="closeM('crmaudit')">✕</button></div>
+    <div class="modal-b">
+      <p class="hint" style="margin-bottom:.7rem">Registros informativos — o cliente já foi criado/vinculado normalmente, isso é só um aviso (ex: nome parecido com CNPJ diferente, correção de vínculo antigo). Não exige nenhuma decisão, só "marcar como visto" se quiser limpar a lista.</p>
+      <div id="crm-audit-list"></div>
     </div>
   </div>
 </div>
@@ -2410,6 +2422,7 @@ async function crmLoadAll(){
   if(document.getElementById('crmpane-semana')?.classList.contains('active'))crmRenderMinhaSemana();
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
   crmLoadReviewQueue();
+  crmLoadAuditQueue();
 }
 function crmRenderCustomers(){
   const cont=document.getElementById('crm-customers-container');
@@ -2585,21 +2598,36 @@ async function crmLinkExists(table,match){
    matching em lote, não mexe nos 2.705 contatos já reconciliados — cada resolução aqui
    afeta só 1 tiny_id por vez.
 ══════════════════════════════════════ */
-let CRM_REVIEW_QUEUE=[];
+let CRM_REVIEW_QUEUE=[]; // só status='pending' AND blocking=true — precisa de decisão
+let CRM_AUDIT_QUEUE=[];  // status='pending' AND blocking=false — informativo, não acionável
 function crmNormalizeName(s){ // mesma lógica do normalize_name() do script Python
   return(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^A-Z0-9 ]/g,'').replace(/\s+/g,' ').trim();
 }
 async function crmLoadReviewQueue(){
-  CRM_REVIEW_QUEUE=await crmFetchAll('crm_tiny_match_review','*',{status:'pending'});
+  CRM_REVIEW_QUEUE=await crmFetchAll('crm_tiny_match_review','*',{status:'pending',blocking:true});
   crmRenderReviewBadge();
 }
+async function crmLoadAuditQueue(){
+  CRM_AUDIT_QUEUE=await crmFetchAll('crm_tiny_match_review','*',{status:'pending',blocking:false});
+  crmRenderAuditLink();
+}
 function crmRenderReviewBadge(){
+  // Badge acionável conta SÓ blocking=true — os informativos (blocking=false) nunca
+  // entram aqui, ficam só no link discreto de Auditoria/Avisos.
   const btn=document.getElementById('crm-review-btn');
   const cnt=document.getElementById('crm-review-count');
   if(!btn||!cnt)return;
   const n=CRM_REVIEW_QUEUE.length;
   btn.style.display=n>0?'inline-flex':'none';
+  cnt.textContent=n;
+}
+function crmRenderAuditLink(){
+  const link=document.getElementById('crm-audit-link');
+  const cnt=document.getElementById('crm-audit-count');
+  if(!link||!cnt)return;
+  const n=CRM_AUDIT_QUEUE.length;
+  link.style.display=n>0?'inline':'none';
   cnt.textContent=n;
 }
 async function crmOpenReviewQueue(){
@@ -2608,6 +2636,24 @@ async function crmOpenReviewQueue(){
   await crmRenderReviewQueue();
   document.getElementById('ovl-crmreview').classList.add('open');
 }
+async function crmOpenAuditQueue(){
+  await crmLoadAuditQueue();
+  document.getElementById('crm-audit-title-count').textContent=`(${CRM_AUDIT_QUEUE.length})`;
+  crmRenderAuditQueue();
+  document.getElementById('ovl-crmaudit').classList.add('open');
+}
+function crmRenderAuditQueue(){
+  const cont=document.getElementById('crm-audit-list');
+  if(!CRM_AUDIT_QUEUE.length){cont.innerHTML='<p class="hint">Nada por aqui.</p>';return;}
+  cont.innerHTML=CRM_AUDIT_QUEUE.map(r=>`<div style="border:1px solid var(--ltblue);border-radius:8px;padding:.55rem .7rem;margin-bottom:.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.4rem">
+      <b style="font-size:.74rem">${esc(r.nome||'(sem nome)')}</b>
+      <span style="font-size:.56rem;color:var(--ink4)">tiny_id ${esc(r.tiny_id)}</span>
+    </div>
+    <div style="font-size:.64rem;color:var(--ink3);margin:.15rem 0">${esc(r.reason)}</div>
+    <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .5rem;margin-top:.3rem" onclick="crmResolveReview('${r.id}',null,'acknowledged',null).then(crmOpenAuditQueue)">Marcar como visto</button>
+  </div>`).join('');
+}
 async function crmRenderReviewQueue(){
   const cont=document.getElementById('crm-review-list');
   if(!CRM_REVIEW_QUEUE.length){cont.innerHTML='<p class="hint">Nenhum caso pendente 🎉</p>';return;}
@@ -2615,6 +2661,16 @@ async function crmRenderReviewQueue(){
   const tinyIds=CRM_REVIEW_QUEUE.map(r=>r.tiny_id);
   const{data:tinyContacts}=await _supa.from('tiny_contacts_raw').select('tiny_id,nome,fantasia,documento,documento_normalizado,tipos_contato').in('tiny_id',tinyIds);
   const tinyById={};(tinyContacts||[]).forEach(t=>tinyById[t.tiny_id]=t);
+
+  // mesmo guard do script Python: trade_name de franquia/rede (ou compartilhado por
+  // mais de 1 cliente) nunca vira evidência de identidade — só display_name/legal_name.
+  const CRM_FRANCHISE_TRADE_NAME_BLOCKLIST=new Set(['KUMON']);
+  const tradeNameCount={};
+  CRM_CUSTOMERS.forEach(c=>{
+    const tv=crmNormalizeName(c.trade_name);
+    if(tv)(tradeNameCount[tv]=tradeNameCount[tv]||new Set()).add(c.id);
+  });
+  const tradeNameIsSafe=tv=>tv&&!CRM_FRANCHISE_TRADE_NAME_BLOCKLIST.has(tv)&&(tradeNameCount[tv]?.size||0)<=1;
 
   cont.innerHTML=CRM_REVIEW_QUEUE.map(r=>{
     const tc=tinyById[r.tiny_id]||{};
@@ -2628,8 +2684,10 @@ async function crmRenderReviewQueue(){
     }else if(isNameAmbig){
       const nn=crmNormalizeName(tc.nome),nf=crmNormalizeName(tc.fantasia);
       candidatos=CRM_CUSTOMERS.filter(c=>{
-        const cn=crmNormalizeName(c.display_name),ct=crmNormalizeName(c.trade_name),cl=crmNormalizeName(c.legal_name);
-        return(nn&&(nn===cn||nn===ct||nn===cl))||(nf&&(nf===cn||nf===ct||nf===cl));
+        const cn=crmNormalizeName(c.display_name),cl=crmNormalizeName(c.legal_name);
+        const ct=crmNormalizeName(c.trade_name);
+        const ctMatch=tradeNameIsSafe(ct)&&((nn&&nn===ct)||(nf&&nf===ct));
+        return(nn&&(nn===cn||nn===cl))||(nf&&(nf===cn||nf===cl))||ctMatch;
       });
     }
 
@@ -2640,9 +2698,16 @@ async function crmRenderReviewQueue(){
       </div>`).join('')}
     </div>`:'';
 
+    const badgeInfo=`<div style="font-size:.6rem;font-weight:700;color:var(--amber);margin-bottom:.3rem">⏳ PENDENTE — precisa de decisão</div>`;
     const sugestaoTag=isTagConflict?`<div style="font-size:.62rem;color:var(--amber);margin:.3rem 0">💡 Sugestão: contato marcado só como Fornecedor/Transportador/Vendedor na Tiny — provavelmente não é cliente. Confirme ou vincule manualmente se souber que é.</div>`:'';
 
+    const acoesHtml=`<div style="display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap">
+        <button class="btn btn-s" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReviewCreatePrompt('${r.id}','${r.tiny_id}')">＋ Criar cliente novo</button>
+        <button class="btn ${isTagConflict?'btn-p':'btn-s'}" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReview('${r.id}','${r.tiny_id}','non_client',null)">Manter raw / não-cliente</button>
+      </div>`;
+
     return`<div style="border:1px solid var(--bdr);border-radius:8px;padding:.6rem .75rem;margin-bottom:.6rem">
+      ${badgeInfo}
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:.4rem">
         <b style="font-size:.76rem">${esc(r.nome||tc.nome||'(sem nome)')}</b>
         <span style="font-size:.58rem;color:var(--ink4)">tiny_id ${esc(r.tiny_id)}</span>
@@ -2651,10 +2716,7 @@ async function crmRenderReviewQueue(){
       ${tc.tipos_contato?`<div style="font-size:.6rem;color:var(--ink4)">tags: ${esc(tc.tipos_contato)}</div>`:''}
       ${sugestaoTag}
       ${candidatosHtml}
-      <div style="display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap">
-        <button class="btn btn-s" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReviewCreatePrompt('${r.id}','${r.tiny_id}')">＋ Criar cliente novo</button>
-        <button class="btn ${isTagConflict?'btn-p':'btn-s'}" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmResolveReview('${r.id}','${r.tiny_id}','non_client',null)">Manter raw / não-cliente</button>
-      </div>
+      ${acoesHtml}
     </div>`;
   }).join('');
 }
@@ -2662,7 +2724,7 @@ async function crmResolveReview(reviewId,tinyId,resolutionType,customerId){
   if(resolutionType==='linked'||resolutionType==='created'){
     const{data:tc}=await _supa.from('tiny_contacts_raw').select('nome').eq('tiny_id',tinyId).maybeSingle();
     const{error}=await _supa.from('crm_customer_external_refs').insert({
-      customer_id:customerId,source:'tiny',external_id:tinyId,external_label:tc?.nome||null,confidence:'confirmed',linked_by:authUser.id,
+      customer_id:customerId,source:'tiny',external_id:tinyId,external_label:tc?.nome||null,confidence:'confirmed',linked_by:authUser.id,match_rule:'manual_review',
     });
     if(error){toastSave('Erro ao vincular: '+error.message);return;}
   }
