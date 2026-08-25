@@ -543,9 +543,67 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
 
         <div id="crmpane-projetos" class="rv-pane">
-          <div class="card" style="text-align:center;padding:2rem"><p class="hint">Projetos Estratégicos chega numa próxima fase.</p></div>
+          <div class="card">
+            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
+              <div class="sh" style="margin:0">Projetos</div>
+              <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenProjectEdit(null)">＋ Novo Projeto</button>
+            </div>
+            <div id="crm-projects-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
+          </div>
         </div>
       </div>
+
+<!-- CRM — CRIAR/EDITAR/ABRIR PROJETO (Fase 1+2 — sem Pessoas/Ações/Timeline ainda) -->
+<div class="ovl" id="ovl-crmproject" onclick="if(event.target===this)closeM('crmproject')">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-h"><span id="crm-proj-title">Projeto</span><button class="mcls" onclick="closeM('crmproject')">✕</button></div>
+    <div class="modal-b">
+      <div class="ff">
+        <label>Cliente</label>
+        <select id="crm-proj-customer" onchange="crmToggleProspectField()">
+          <option value="">— Prospect (sem cliente ainda) —</option>
+        </select>
+      </div>
+      <div class="ff" id="crm-proj-prospect-wrap" style="margin-top:.5rem;display:none">
+        <label>Nome do prospect</label>
+        <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente">
+      </div>
+      <div class="ff" style="margin-top:.6rem"><label>Projeto</label><input type="text" id="crm-proj-name" placeholder="ex: Embalagens descartáveis"></div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+        <div class="ff">
+          <label>Estágio</label>
+          <input type="text" id="crm-proj-stage" list="crm-proj-stage-list" placeholder="ex: Descoberta">
+          <datalist id="crm-proj-stage-list">
+            <option value="Ideia"><option value="Descoberta"><option value="Interesse">
+            <option value="Desenvolvimento"><option value="Amostra/Cotação">
+            <option value="Validação"><option value="Decisão">
+          </datalist>
+        </div>
+        <div class="ff">
+          <label>Status</label>
+          <select id="crm-proj-status">
+            <option value="active">Em andamento</option>
+            <option value="won">Ganho</option>
+            <option value="lost">Perdido</option>
+            <option value="paused">Pausado</option>
+          </select>
+        </div>
+      </div>
+      <div class="ff" style="margin-top:.6rem"><label>Próximo passo</label><input type="text" id="crm-proj-nextstep" placeholder="ex: consolidar envio da China"></div>
+      <div class="ff" style="margin-top:.5rem"><label>Data do próximo passo</label><input type="date" id="crm-proj-nextstep-date"></div>
+
+      <div class="collap-h" id="crm-proj-moredetails-h" onclick="toggleCollap(this,'crm-proj-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
+      </div>
+      <div class="collap-body" id="crm-proj-moredetails-body">
+        <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" id="crm-proj-value" placeholder="opcional, só contexto"></div>
+        <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
+      </div>
+
+      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveProject()">💾 Salvar projeto</button>
+    </div>
+  </div>
+</div>
     </div>
 
   </div>
@@ -2424,6 +2482,9 @@ function crmShowSubTab(id,skipReclick){
     crmRenderMinhaSemana();
     crmLoadSignalRecompra();
     crmLoadAll();
+  }else if(id==='projetos'){
+    crmRenderProjects();
+    crmLoadProjects();
   }
 }
 // Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
@@ -3167,6 +3228,113 @@ async function crmDismissSignal(customerId,lastPurchaseDate){
   if(!document.getElementById('crm-signal-container').children.length){
     document.getElementById('crm-signal-card').style.display='none';
   }
+}
+
+/* ══════════════════════════════════════
+   CRM — PROJETOS (Fase 1+2: schema + UI mínima, sem Pessoas/Ações/Timeline/sinal ainda)
+   Projeto ≠ Cliente. customer_id opcional — pode nascer só com prospect_name.
+   stage é texto livre (com sugestões), nunca enum travado. status é só
+   active/won/lost/paused, garantido por CHECK constraint no banco.
+══════════════════════════════════════ */
+let CRM_PROJECTS=[];
+let crmEditProjectId=null;
+const CRM_PROJECT_STATUS_LBL={active:'Em andamento',won:'Ganho',lost:'Perdido',paused:'Pausado'};
+const CRM_PROJECT_STATUS_COL={active:'var(--blue)',won:'var(--green)',lost:'var(--red)',paused:'var(--ink4)'};
+
+async function crmLoadProjects(){
+  CRM_PROJECTS=await crmFetchAll('crm_projects','*',{deleted:false});
+  crmRenderProjects();
+}
+function crmProjectClienteLabel(p){
+  if(p.customer_id){
+    const c=CRM_CUSTOMERS.find(x=>x.id===p.customer_id);
+    return c?(c.trade_name||c.display_name):'(cliente)';
+  }
+  return p.prospect_name||'(prospect)';
+}
+function crmRenderProjects(){
+  const cont=document.getElementById('crm-projects-container');
+  if(!cont)return;
+  if(!CRM_PROJECTS.length){cont.innerHTML='<p class="hint">Nenhum projeto ainda. Clique em "＋ Novo Projeto" pra criar o primeiro.</p>';return;}
+  const ativos=CRM_PROJECTS.filter(p=>p.status==='active');
+  const fechados=CRM_PROJECTS.filter(p=>p.status!=='active');
+  const cardHtml=p=>{
+    const cliente=crmProjectClienteLabel(p);
+    const statusCol=CRM_PROJECT_STATUS_COL[p.status]||'var(--ink4)';
+    return`<div class="card" style="padding:.7rem .85rem;cursor:pointer" onclick="crmOpenProjectEdit('${p.id}')">
+      <div style="font-weight:700;font-size:.78rem">${esc(cliente)} <span style="font-weight:400;color:var(--ink4)">·</span> ${esc(p.project_name)}</div>
+      <div style="display:flex;align-items:center;gap:.4rem;margin-top:.3rem">
+        <span style="font-size:.6rem;font-weight:700;color:${statusCol};background:${statusCol}18;padding:.1rem .4rem;border-radius:4px">${esc(p.stage||'—')}</span>
+        <span style="font-size:.58rem;color:var(--ink4)">${CRM_PROJECT_STATUS_LBL[p.status]||p.status}</span>
+      </div>
+      ${p.next_step?`<div style="font-size:.66rem;color:var(--ink2);margin-top:.35rem">Próximo: ${esc(p.next_step)}${p.next_step_date?' · '+crmFmtDateOnly(p.next_step_date):''}</div>`:''}
+    </div>`;
+  };
+  let html=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem">${ativos.map(cardHtml).join('')}</div>`;
+  if(fechados.length){
+    html+=`<div class="fsep" style="margin-top:1rem">Fechados/pausados (${fechados.length})</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem;margin-top:.5rem">${fechados.map(cardHtml).join('')}</div>`;
+  }
+  cont.innerHTML=html;
+}
+function crmPopulateProjectCustomerSelect(selectedId){
+  const sel=document.getElementById('crm-proj-customer');
+  const opts=['<option value="">— Prospect (sem cliente ainda) —</option>']
+    .concat(CRM_CUSTOMERS.slice().sort((a,b)=>(a.trade_name||a.display_name).localeCompare(b.trade_name||b.display_name))
+      .map(c=>`<option value="${c.id}"${c.id===selectedId?' selected':''}>${esc(c.trade_name||c.display_name)}</option>`));
+  sel.innerHTML=opts.join('');
+}
+function crmToggleProspectField(){
+  const temCliente=!!document.getElementById('crm-proj-customer').value;
+  document.getElementById('crm-proj-prospect-wrap').style.display=temCliente?'none':'block';
+}
+function crmOpenProjectEdit(id){
+  crmEditProjectId=id;
+  const p=id?CRM_PROJECTS.find(x=>x.id===id):null;
+  document.getElementById('crm-proj-title').textContent=id?'Editar Projeto':'Novo Projeto';
+  crmPopulateProjectCustomerSelect(p?.customer_id||'');
+  document.getElementById('crm-proj-prospect').value=p?.prospect_name||'';
+  crmToggleProspectField();
+  document.getElementById('crm-proj-name').value=p?.project_name||'';
+  document.getElementById('crm-proj-stage').value=p?.stage||'';
+  document.getElementById('crm-proj-status').value=p?.status||'active';
+  document.getElementById('crm-proj-nextstep').value=p?.next_step||'';
+  document.getElementById('crm-proj-nextstep-date').value=p?.next_step_date||'';
+  document.getElementById('crm-proj-value').value=p?.potential_value??'';
+  document.getElementById('crm-proj-notes').value=p?.notes||'';
+  const temValorOuNotas=!!(p?.potential_value||p?.notes);
+  document.getElementById('crm-proj-moredetails-h').classList.toggle('open',temValorOuNotas);
+  document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
+  document.getElementById('ovl-crmproject').classList.add('open');
+}
+async function crmSaveProject(){
+  const customerId=document.getElementById('crm-proj-customer').value||null;
+  const prospectName=document.getElementById('crm-proj-prospect').value.trim();
+  const projectName=document.getElementById('crm-proj-name').value.trim();
+  if(!customerId&&!prospectName){toastSave('Escolha um cliente ou preencha o nome do prospect');return;}
+  if(!projectName){toastSave('Preencha o nome do projeto');return;}
+  const payload={
+    customer_id:customerId,
+    prospect_name:customerId?null:prospectName,
+    project_name:projectName,
+    stage:document.getElementById('crm-proj-stage').value.trim()||'Ideia',
+    status:document.getElementById('crm-proj-status').value,
+    next_step:document.getElementById('crm-proj-nextstep').value.trim()||null,
+    next_step_date:document.getElementById('crm-proj-nextstep-date').value||null,
+    potential_value:document.getElementById('crm-proj-value').value?parseFloat(document.getElementById('crm-proj-value').value):null,
+    notes:document.getElementById('crm-proj-notes').value.trim()||null,
+    owner_user_id:authUser.id,
+  };
+  let error;
+  if(crmEditProjectId){
+    ({error}=await _supa.from('crm_projects').update(payload).eq('id',crmEditProjectId));
+  }else{
+    ({error}=await _supa.from('crm_projects').insert(payload));
+  }
+  if(error){toastSave('Erro ao salvar projeto: '+error.message);return;}
+  closeM('crmproject');
+  toastSave('Projeto salvo ✓');
+  await crmLoadProjects();
 }
 
 function rvSacachoLoad(){
