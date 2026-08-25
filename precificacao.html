@@ -3093,21 +3093,37 @@ function crmFmtDate2(iso){ // "AAAA-MM-DD" -> "DD/MM/AAAA"
 }
 
 /* ══════════════════════════════════════
-   CRM — "VALE SUA ATENÇÃO" (sinal experimental v1, não é ação)
+   CRM — "VALE SUA ATENÇÃO" (sinal experimental — Recompra V2, não é ação)
    RPC de leitura (crm_signal_recompra) — nada de sinal gravado. Só "Agora não"
    grava algo (crm_signal_dismissals, âncorada na ocorrência = last_purchase_date).
    "Criar ação" é o ÚNICO caminho que grava em crm_actions — sinal em si nunca vira
-   ação sozinho. Regra fixa e simples nesta fase (90 dias sem comprar + 5 pedidos),
-   sem nenhum ajuste exposto na tela.
+   ação sozinho.
+   V2: em vez de limiar fixo (90 dias + 5 pedidos), usa a cadência histórica de CADA
+   cliente — mediana de intervalos entre compras, guarda de regularidade (desvio ≤
+   mediana), teto de 24 meses de atividade (evita ressuscitar cliente morto — isso é
+   Reativação, uma inteligência separada, não Recompra), razão de atraso ≥1,3x SEM teto
+   superior (atraso alto não é motivo pra descartar, só o tempo absoluto parado é).
+   Mediana/desvio/razão nunca aparecem no card — só no title (tooltip), pra quem quiser
+   conferir sem precisar de uma tela de "Por quê" ainda.
 ══════════════════════════════════════ */
-function crmMesesAtras(dataISO){
-  if(!dataISO)return'';
-  const d=new Date(dataISO+'T00:00');
-  const dias=Math.floor((new Date()-d)/86400000);
-  const meses=Math.round(dias/30);
-  if(meses<=0)return'há poucos dias';
-  if(meses===1)return'há 1 mês';
-  return`há ${meses} meses`;
+function crmFmtCadenciaHumana(dias){ // 20→"~3 semanas" · 45→"~1,5 mês" · 90→"~3 meses" · 370→"~1 ano"
+  if(dias==null)return'';
+  if(dias<45){
+    const semanas=Math.max(1,Math.round(dias/7));
+    return`~${semanas} semana${semanas===1?'':'s'}`;
+  }
+  if(dias<330){
+    let meses=Math.round(dias/30*2)/2;
+    if(meses<1)meses=1;
+    const txt=Number.isInteger(meses)?String(meses):meses.toString().replace('.',',');
+    const singular=meses===1||!Number.isInteger(meses); // "1,5 mês" fica singular, "3 meses" plural
+    return`~${txt} ${singular?'mês':'meses'}`;
+  }
+  let anos=Math.round(dias/365*2)/2;
+  if(anos<1)anos=1;
+  const txt=Number.isInteger(anos)?String(anos):anos.toString().replace('.',',');
+  const singular=anos===1||!Number.isInteger(anos);
+  return`~${txt} ${singular?'ano':'anos'}`;
 }
 async function crmLoadSignalRecompra(){
   const card=document.getElementById('crm-signal-card');
@@ -3116,16 +3132,21 @@ async function crmLoadSignalRecompra(){
   if(error){console.error('crm_signal_recompra',error);card.style.display='none';return;}
   if(!data||!data.length){card.style.display='none';return;}
   card.style.display='block';
-  cont.innerHTML=data.map(s=>`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem" id="crm-signal-${s.customer_id}">
+  cont.innerHTML=data.map(s=>{
+    const diasParado=Math.floor((new Date()-new Date(s.last_purchase_date+'T00:00'))/86400000);
+    const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · última compra ${s.last_purchase_date}`;
+    return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
     <div style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</div>
-    <div style="font-size:.68rem;color:var(--ink2);margin:.1rem 0">Vale retomar?</div>
-    <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.4rem">Última compra ${crmMesesAtras(s.last_purchase_date)} · ${s.order_count} pedidos</div>
+    <div style="font-size:.68rem;color:var(--ink2);margin:.1rem 0">Recompra</div>
+    <div style="font-size:.62rem;color:var(--ink4)">Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}</div>
+    <div style="font-size:.6rem;color:var(--ink4);margin-bottom:.4rem">${s.order_count} pedidos no histórico</div>
     <div style="display:flex;gap:.3rem">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
     </div>
-  </div>`).join('');
+  </div>`;
+  }).join('');
 }
 async function crmDismissSignal(customerId,lastPurchaseDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
