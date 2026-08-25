@@ -3134,12 +3134,16 @@ async function crmLoadSignalRecompra(){
   card.style.display='block';
   cont.innerHTML=data.map(s=>{
     const diasParado=Math.floor((new Date()-new Date(s.last_purchase_date+'T00:00'))/86400000);
-    const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · última compra ${s.last_purchase_date}`;
+    const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · score=${s.ranking_score} · última compra ${s.last_purchase_date}`;
+    // ≥6 pedidos: base sólida o bastante pra afirmar "costuma comprar a cada X" como hábito.
+    // 4-5 pedidos: passa na elegibilidade, mas não é base suficiente pra afirmar cadência como hábito.
+    const linhaCadencia=s.order_count>=6
+      ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
+      :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
     return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
     <div style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</div>
     <div style="font-size:.68rem;color:var(--ink2);margin:.1rem 0">Recompra</div>
-    <div style="font-size:.62rem;color:var(--ink4)">Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}</div>
-    <div style="font-size:.6rem;color:var(--ink4);margin-bottom:.4rem">${s.order_count} pedidos no histórico</div>
+    <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.4rem">${linhaCadencia}</div>
     <div style="display:flex;gap:.3rem">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
