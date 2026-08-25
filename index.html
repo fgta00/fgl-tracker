@@ -352,7 +352,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <th class="L" style="min-width:150px">AV/FY · Cliente · Fornecedor · Coleção</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
-          <th style="min-width:400px">Situação</th>
+          <th style="min-width:320px">Situação</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Arte<br>Recebida</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Amostras<br>Em Mãos</th>
@@ -1029,7 +1029,6 @@ let DOC_EVENTS=[
   {key:'draft_pl',     label:'Cobrar Draft PL (conferência BL)',        short:'PL/BL',        fase:'prod', par:null, lado:null, baseIdx:6, offset:-2, cond:null},
   {key:'ci_pl_forn',   label:'Receber CI/PL Fornecedor',                short:'CI Forn',      fase:'entrega', par:'CI', lado:'forn', baseIdx:6, offset:5,  cond:null},
   {key:'ci_pl_cli',    label:'Emitir CI/PL Cliente',                    short:'CI Cli',       fase:'entrega', par:'CI', lado:'cli',  baseIdx:6, offset:7,  cond:null},
-  {key:'sinal_cli_sem',label:'Receber Sinal PI Cliente',                short:'Sinal Cli',    fase:'pre', par:'Sinal', lado:'cli',  baseIdx:0, offset:10, cond:'amostrasOff', finRef:'SINAL', finType:'receipt'},
   {key:'sinal_cli_com',label:'Receber Sinal PI Cliente',                short:'Sinal Cli',    fase:'pre', par:'Sinal', lado:'cli',  baseIdx:0, offset:25, cond:'amostrasOn',  finRef:'SINAL', finType:'receipt'},
   {key:'custo_amostras',label:'Receber Custo Amostras',                 short:'Amostra (receber)', fase:'pre', par:'Amostra', lado:'cli',  baseIdx:0, offset:10, cond:'amostrasOn',  finRef:'AMOSTRAS', finType:'receipt'},
   {key:'pagar_custo_amostras',label:'Pagar Custo Amostras',              short:'Amostra (pagar)',   fase:'pre', par:'Amostra', lado:'forn', baseIdx:0, offset:11, cond:'amostrasOn', finRef:'AMOSTRAS', finType:'payment'},
@@ -1865,8 +1864,8 @@ function renderInternal(){
               <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
             <div style="font-size:.62rem;color:var(--ink3);line-height:1.25">→ ${esc(a.suggestion)}</div>
-          </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;justify-content:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:''}</div>
-          <span style="flex-shrink:0">${(o.status==='FINALIZADO'||o.status==='SUSPENSO')?statusSel(o.num,o.status):daysCell(o.dates,o.status)}</span>
+          </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;justify-content:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:(o.status==='FINALIZADO'||o.status==='SUSPENSO')?`<div style="display:flex;justify-content:center">${statusSel(o.num,o.status)}</div>`:''}</div>
+          <span style="flex-shrink:0">${daysCell(o.dates,o.status)}</span>
         </div>`;
         inner+=docEventsChecklistHTML(o);
         inner+=`</div>`;
