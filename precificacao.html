@@ -629,6 +629,18 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff"><label>Data</label><input type="date" id="crm-proj-nextstep-date"></div>
       </div>
 
+      <div id="crm-proj-people-section" style="display:none">
+        <div class="crm-section">Relacionamento</div>
+        <div class="fsep">Pessoas</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+          <span id="crm-proj-people" style="display:contents"></span>
+          <select id="crm-proj-person-select" style="font-size:.7rem;padding:.28rem .4rem;border:1.5px solid var(--bdr2);border-radius:7px;max-width:200px">
+            <option value="">— selecione —</option>
+          </select>
+          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonToProject()">＋ Pessoa</button>
+        </div>
+      </div>
+
       <div id="crm-proj-timeline-section" style="display:none">
         <div class="crm-section">Atividade</div>
         <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
@@ -3412,6 +3424,8 @@ function crmOpenProjectEdit(id){
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-proj-tl-periodo').value='30';crmRenderProjectTimeline();}
+  document.getElementById('crm-proj-people-section').style.display=id?'block':'none';
+  if(id)crmLoadProjectPeople(id);
   document.getElementById('ovl-crmproject').classList.add('open');
 }
 function crmCreateActionForProject(){
@@ -3419,6 +3433,66 @@ function crmCreateActionForProject(){
   if(!p)return;
   crmOpenActionModal(p.customer_id||null,null,p.id);
 }
+
+/* ══════════════════════════════════════
+   CRM — PESSOAS DO PROJETO (Fase 4) — liga pessoa JÁ EXISTENTE via crm_project_people,
+   nunca cria pessoa nova (crm_people fica intocado, customer_id continua NOT NULL).
+   Gravação imediata (add/remove já persiste, não espera "Salvar projeto").
+   Limitação consciente da V1: projeto prospect (sem customer_id) só pode ligar pessoas
+   que já existem em algum cliente — não é possível cadastrar um contato novo direto
+   pelo Projeto. Fica registrado como ponto de revisão futura (identidade de Pessoas
+   independente de Cliente/prospecção), não implementado agora.
+══════════════════════════════════════ */
+let CRM_PROJECT_PEOPLE=[];
+async function crmLoadProjectPeople(projectId){
+  const{data,error}=await _supa.from('crm_project_people').select('*').eq('project_id',projectId);
+  if(error){console.error('crmLoadProjectPeople',error);CRM_PROJECT_PEOPLE=[];}
+  else CRM_PROJECT_PEOPLE=data||[];
+  crmRenderProjectPeopleChips();
+  crmPopulateProjectPersonSelect();
+}
+function crmProjectPersonLabel(pp){
+  const p=CRM_PEOPLE.find(x=>x.id===pp.person_id);
+  if(!p)return'(pessoa removida)';
+  const papel=pp.role_in_project||p.role||'';
+  return papel?`${p.name} · ${papel}`:p.name;
+}
+function crmRenderProjectPeopleChips(){
+  const cont=document.getElementById('crm-proj-people');
+  if(!cont)return;
+  cont.innerHTML=CRM_PROJECT_PEOPLE.length
+    ?CRM_PROJECT_PEOPLE.map(pp=>`<span class="crm-chip">${esc(crmProjectPersonLabel(pp))}<span class="x" onclick="crmRemovePersonFromProject('${pp.person_id}')">✕</span></span>`).join('')
+    :'<span class="crm-empty">—</span>';
+}
+function crmPopulateProjectPersonSelect(){
+  const sel=document.getElementById('crm-proj-person-select');
+  if(!sel)return;
+  const proj=CRM_PROJECTS.find(x=>x.id===crmEditProjectId);
+  const jaLigados=new Set(CRM_PROJECT_PEOPLE.map(pp=>pp.person_id));
+  const disponiveis=CRM_PEOPLE.filter(p=>!p.deleted&&!jaLigados.has(p.id));
+  const temCliente=proj&&proj.customer_id;
+  const deste=temCliente?disponiveis.filter(p=>p.customer_id===proj.customer_id):[];
+  const outros=temCliente?disponiveis.filter(p=>p.customer_id!==proj.customer_id):disponiveis;
+  const opt=p=>`<option value="${p.id}">${esc(p.name)}${p.role?' · '+esc(p.role):''}</option>`;
+  let html='<option value="">— selecione —</option>';
+  if(deste.length)html+=`<optgroup label="Deste cliente">${deste.map(opt).join('')}</optgroup>`;
+  if(outros.length)html+=`<optgroup label="${deste.length?'Outras pessoas':'Pessoas existentes'}">${outros.map(opt).join('')}</optgroup>`;
+  sel.innerHTML=html;
+}
+async function crmAddPersonToProject(){
+  const sel=document.getElementById('crm-proj-person-select');
+  const personId=sel.value;
+  if(!personId)return;
+  const{error}=await _supa.from('crm_project_people').insert({project_id:crmEditProjectId,person_id:personId});
+  if(error&&error.code!=='23505'){toastSave('Erro ao vincular pessoa: '+error.message);return;} // 23505 = já vinculado, trata como sucesso silencioso
+  await crmLoadProjectPeople(crmEditProjectId);
+}
+async function crmRemovePersonFromProject(personId){
+  const{error}=await _supa.from('crm_project_people').delete().eq('project_id',crmEditProjectId).eq('person_id',personId);
+  if(error){toastSave('Erro ao remover vínculo: '+error.message);return;}
+  await crmLoadProjectPeople(crmEditProjectId);
+}
+
 async function crmSaveProject(){
   const customerId=document.getElementById('crm-proj-customer').value||null;
   const prospectName=document.getElementById('crm-proj-prospect').value.trim();
