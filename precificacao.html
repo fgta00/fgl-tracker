@@ -555,9 +555,16 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- CRM — CRIAR/EDITAR/ABRIR PROJETO (Fase 1+2 — sem Pessoas/Ações/Timeline ainda) -->
 <div class="ovl" id="ovl-crmproject" onclick="if(event.target===this)closeM('crmproject')">
-  <div class="modal" style="max-width:560px">
-    <div class="modal-h"><span id="crm-proj-title">Projeto</span><button class="mcls" onclick="closeM('crmproject')">✕</button></div>
+  <div class="modal" style="max-width:640px">
+    <div class="modal-h">
+      <span id="crm-proj-title">Projeto</span>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveProject()">Salvar</button>
+        <button class="mcls" onclick="closeM('crmproject')">✕</button>
+      </div>
+    </div>
     <div class="modal-b">
+      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Projeto</div>
       <div class="ff">
         <label>Cliente</label>
         <select id="crm-proj-customer" onchange="crmToggleProspectField()">
@@ -592,16 +599,31 @@ body.dark .rv-tabs{background:#0A0F1A}
       <div class="ff" style="margin-top:.6rem"><label>Próximo passo</label><input type="text" id="crm-proj-nextstep" placeholder="ex: consolidar envio da China"></div>
       <div class="ff" style="margin-top:.5rem"><label>Data do próximo passo</label><input type="date" id="crm-proj-nextstep-date"></div>
 
-      <div class="collap-h" id="crm-proj-moredetails-h" onclick="toggleCollap(this,'crm-proj-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+      <div id="crm-proj-timeline-section" style="display:none">
+        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Atividade</div>
+        <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Timeline</span>
+          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmCreateActionForProject()">＋ Ação</button>
+        </div>
+        <div class="tb" style="padding:.3rem 0;gap:.4rem">
+          <span id="msf-crm-proj-acttype-wrap"></span>
+          <select id="crm-proj-tl-periodo" onchange="crmRenderProjectTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
+            <option value="7">últimos 7 dias</option>
+            <option value="30" selected>últimos 30 dias</option>
+            <option value="90">últimos 90 dias</option>
+            <option value="9999">tudo</option>
+          </select>
+        </div>
+        <div id="crm-proj-timeline"></div>
+      </div>
+
+      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Mais Detalhes</div>
+      <div class="collap-h" id="crm-proj-moredetails-h" onclick="toggleCollap(this,'crm-proj-moredetails-body')">
         <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
       </div>
       <div class="collap-body" id="crm-proj-moredetails-body">
         <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" id="crm-proj-value" placeholder="opcional, só contexto"></div>
         <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
-      </div>
-
-      <div id="crm-proj-actions-wrap" style="display:none;margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
-        <button class="btn btn-s" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
       </div>
 
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveProject()">💾 Salvar projeto</button>
@@ -641,28 +663,7 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
       <div class="ff" style="margin-top:.6rem"><label>Notas</label><textarea id="crm-cust-notes" rows="2" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
 
-      <div class="collap-h" id="crm-cust-moredetails-h" onclick="toggleCollap(this,'crm-cust-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
-        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
-      </div>
-      <div class="collap-body" id="crm-cust-moredetails-body">
-        <div class="ff" style="margin-top:.5rem">
-          <label>Razão Social (campo legado/secundário)</label>
-          <input type="text" id="crm-cust-legal" placeholder="opcional — só preencha se for diferente de Razão Social/Nome acima">
-          <p class="hint" style="font-size:.58rem;margin-top:.2rem">Campo antigo, mantido por compatibilidade — não é usado pra identificar o cliente. O campo "Razão Social / Nome" acima é o principal.</p>
-        </div>
-        <div class="fsep" style="margin-top:.8rem">Referências externas <span style="font-weight:400;color:var(--ink4);font-size:.6rem">(vínculo com outros cadastros — evita duplicar cliente)</span></div>
-        <div id="crm-cust-refs"></div>
-        <div style="display:flex;gap:.4rem;margin-top:.3rem">
-          <select id="crm-ref-source" style="width:140px">
-            <option value="rv_clientes2">Cliente PROD BR</option>
-            <option value="tiny">Tiny/Olist</option>
-            <option value="prod_asia">PROD ASIA</option>
-            <option value="wix">Wix</option>
-          </select>
-          <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
-          <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
-        </div>
-      </div>
+</div>
 
       <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Relacionamento</div>
       <div class="fsep" style="margin-top:.4rem">Tags</div>
@@ -720,6 +721,30 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
         <div id="crm-cust-timeline"></div>
       </div>
+
+      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Mais Detalhes</div>
+      <div class="collap-h" id="crm-cust-moredetails-h" onclick="toggleCollap(this,'crm-cust-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
+      </div>
+      <div class="collap-body" id="crm-cust-moredetails-body">
+        <div class="ff" style="margin-top:.5rem">
+          <label>Razão Social (campo legado/secundário)</label>
+          <input type="text" id="crm-cust-legal" placeholder="opcional — só preencha se for diferente de Razão Social/Nome acima">
+          <p class="hint" style="font-size:.58rem;margin-top:.2rem">Campo antigo, mantido por compatibilidade — não é usado pra identificar o cliente. O campo "Razão Social / Nome" acima é o principal.</p>
+        </div>
+        <div class="fsep" style="margin-top:.8rem">Referências externas <span style="font-weight:400;color:var(--ink4);font-size:.6rem">(vínculo com outros cadastros — evita duplicar cliente)</span></div>
+        <div id="crm-cust-refs"></div>
+        <div style="display:flex;gap:.4rem;margin-top:.3rem">
+          <select id="crm-ref-source" style="width:140px">
+            <option value="rv_clientes2">Cliente PROD BR</option>
+            <option value="tiny">Tiny/Olist</option>
+            <option value="prod_asia">PROD ASIA</option>
+            <option value="wix">Wix</option>
+          </select>
+          <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
+          <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
+        </div>
+      
 
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
     </div>
@@ -3097,18 +3122,9 @@ function crmFmtDate(iso){ // ISO -> DD/MM/AAAA HH:MM
   const pad=n=>String(n).padStart(2,'0');
   return`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-function crmRenderTimeline(){
-  const cont=document.getElementById('crm-cust-timeline');
-  if(!cont||!crmEditCtx.customerId)return;
-  const wrap=document.getElementById('msf-crm-acttype-wrap');
-  if(wrap&&!wrap.innerHTML)wrap.innerHTML=msfHtml('crm-acttype','Todos Tipos');
-  msfPopulate('crm-acttype',CRM_ACTION_TYPES.map(t=>t.lbl),'Todos Tipos',crmRenderTimeline);
-  const dias=parseInt(document.getElementById('crm-tl-periodo').value,10);
-  const limite=new Date();limite.setDate(limite.getDate()-dias);
-  const feitas=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='done'&&msfMatch('crm-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
-    .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
-  if(!feitas.length){cont.innerHTML='<p class="hint" style="margin-top:.4rem">Nenhuma ação registrada nesse período.</p>';return;}
-  cont.innerHTML=feitas.map(a=>{
+function crmActionListHtml(acoes){
+  if(!acoes.length)return'<p class="hint" style="margin-top:.4rem">Nenhuma ação registrada nesse período.</p>';
+  return acoes.map(a=>{
     const proxima=CRM_ACTIONS.find(x=>x.parent_action_id===a.id&&!x.deleted);
     return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-top:.4rem">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
@@ -3123,6 +3139,30 @@ function crmRenderTimeline(){
       <button onclick="crmDeleteAction('${a.id}')" title="Excluir" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.62rem;margin-top:.3rem;padding:0">excluir</button>
     </div>`;
   }).join('');
+}
+function crmRenderTimeline(){
+  const cont=document.getElementById('crm-cust-timeline');
+  if(!cont||!crmEditCtx.customerId)return;
+  const wrap=document.getElementById('msf-crm-acttype-wrap');
+  if(wrap&&!wrap.innerHTML)wrap.innerHTML=msfHtml('crm-acttype','Todos Tipos');
+  msfPopulate('crm-acttype',CRM_ACTION_TYPES.map(t=>t.lbl),'Todos Tipos',crmRenderTimeline);
+  const dias=parseInt(document.getElementById('crm-tl-periodo').value,10);
+  const limite=new Date();limite.setDate(limite.getDate()-dias);
+  const feitas=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='done'&&msfMatch('crm-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
+    .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
+  cont.innerHTML=crmActionListHtml(feitas);
+}
+function crmRenderProjectTimeline(){
+  const cont=document.getElementById('crm-proj-timeline');
+  if(!cont||!crmEditProjectId)return;
+  const wrap=document.getElementById('msf-crm-proj-acttype-wrap');
+  if(wrap&&!wrap.innerHTML)wrap.innerHTML=msfHtml('crm-proj-acttype','Todos Tipos');
+  msfPopulate('crm-proj-acttype',CRM_ACTION_TYPES.map(t=>t.lbl),'Todos Tipos',crmRenderProjectTimeline);
+  const dias=parseInt(document.getElementById('crm-proj-tl-periodo').value,10);
+  const limite=new Date();limite.setDate(limite.getDate()-dias);
+  const feitas=CRM_ACTIONS.filter(a=>a.project_id===crmEditProjectId&&a.status==='done'&&msfMatch('crm-proj-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
+    .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
+  cont.innerHTML=crmActionListHtml(feitas);
 }
 
 function crmToggleHorizonte30(){
@@ -3331,7 +3371,8 @@ function crmOpenProjectEdit(id){
   const temValorOuNotas=!!(p?.potential_value||p?.notes);
   document.getElementById('crm-proj-moredetails-h').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
-  document.getElementById('crm-proj-actions-wrap').style.display=id?'block':'none';
+  document.getElementById('crm-proj-timeline-section').style.display=id?'block':'none';
+  if(id){document.getElementById('crm-proj-tl-periodo').value='30';crmRenderProjectTimeline();}
   document.getElementById('ovl-crmproject').classList.add('open');
 }
 function crmCreateActionForProject(){
