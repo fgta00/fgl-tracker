@@ -3295,19 +3295,46 @@ function crmFmtCadenciaHumana(dias){ // 20→"~3 semanas" · 45→"~1,5 mês" ·
 async function crmLoadSignalRecompra(){
   const card=document.getElementById('crm-signal-card');
   const cont=document.getElementById('crm-signal-container');
-  const{data,error}=await _supa.rpc('crm_signal_recompra',{});
-  if(error){console.error('crm_signal_recompra',error);card.style.display='none';return;}
-  if(!data||!data.length){card.style.display='none';return;}
+  const[recompraRes,projetoRes]=await Promise.all([
+    _supa.rpc('crm_signal_recompra',{}),
+    _supa.rpc('crm_signal_projeto_parado',{}),
+  ]);
+  if(recompraRes.error)console.error('crm_signal_recompra',recompraRes.error);
+  if(projetoRes.error)console.error('crm_signal_projeto_parado',projetoRes.error);
+  const itens=[
+    ...(recompraRes.data||[]).map(s=>({kind:'recompra',...s})),
+    ...(projetoRes.data||[]).map(s=>({kind:'projeto_parado',...s})),
+  ];
+  if(!itens.length){card.style.display='none';return;}
   card.style.display='block';
-  cont.innerHTML=`<div>`+data.map((s,i)=>{
-    const diasParado=Math.floor((new Date()-new Date(s.last_purchase_date+'T00:00'))/86400000);
-    const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · score=${s.ranking_score} · última compra ${s.last_purchase_date}`;
-    // ≥6 pedidos: base sólida o bastante pra afirmar "costuma comprar a cada X" como hábito.
-    // 4-5 pedidos: passa na elegibilidade, mas não é base suficiente pra afirmar cadência como hábito.
-    const linhaCadencia=s.order_count>=6
-      ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
-      :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
-    return`<div style="padding:.45rem 0;${i<data.length-1?'border-bottom:1px solid var(--bdr)':''}" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
+  cont.innerHTML=`<div>`+itens.map((item,i)=>crmSignalCardHtml(item,i,itens.length)).join('')+`</div>`;
+}
+function crmSignalCardHtml(s,i,total){
+  const borda=i<total-1?'border-bottom:1px solid var(--bdr)':'';
+  if(s.kind==='projeto_parado'){
+    const nomeCliente=s.trade_name||s.display_name||s.prospect_name||'?';
+    const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
+    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-proj-${s.project_id}" title="next_step_date=${esc(s.next_step_date)} · dias vencido=${s.days_overdue}">
+    <div style="display:flex;align-items:baseline;gap:.4rem">
+      <span style="font-size:.72rem;font-weight:700">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
+      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Projeto</span>
+    </div>
+    <div style="font-size:.62rem;color:var(--ink4);margin:.15rem 0 .1rem">Próximo passo venceu há ${s.days_overdue} dia${s.days_overdue!==1?'s':''}</div>
+    ${s.next_step?`<div style="font-size:.62rem;color:var(--ink3);margin-bottom:.35rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px">${esc(s.next_step)}</div>`:''}
+    <div style="display:flex;gap:.3rem">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenProjectEdit('${s.project_id}')">Abrir projeto</button>
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.next_step_date}')">Agora não</button>
+    </div>
+  </div>`;
+  }
+  // s.kind==='recompra'
+  const diasParado=Math.floor((new Date()-new Date(s.last_purchase_date+'T00:00'))/86400000);
+  const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · score=${s.ranking_score} · última compra ${s.last_purchase_date}`;
+  const linhaCadencia=s.order_count>=6
+    ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
+    :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
+  return`<div style="padding:.45rem 0;${borda}" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
     <div style="display:flex;align-items:baseline;gap:.4rem">
       <span style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</span>
       <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Recompra</span>
@@ -3319,7 +3346,14 @@ async function crmLoadSignalRecompra(){
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
     </div>
   </div>`;
-  }).join('')+`</div>`;
+}
+function crmCheckEmptySignalContainer(){
+  // Correção de um bug latente: checar #crm-signal-container.children sempre dava 1
+  // (o <div> wrapper interno nunca some sozinho) — o certo é checar os filhos DO wrapper.
+  const wrapper=document.querySelector('#crm-signal-container > div');
+  if(!wrapper||!wrapper.children.length){
+    document.getElementById('crm-signal-card').style.display='none';
+  }
 }
 async function crmDismissSignal(customerId,lastPurchaseDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3333,9 +3367,19 @@ async function crmDismissSignal(customerId,lastPurchaseDate){
   }
   const el=document.getElementById(`crm-signal-${customerId}`);
   if(el)el.remove();
-  if(!document.getElementById('crm-signal-container').children.length){
-    document.getElementById('crm-signal-card').style.display='none';
+  crmCheckEmptySignalContainer();
+}
+async function crmDismissProjectSignal(projectId,nextStepDate){
+  const{error}=await _supa.from('crm_signal_dismissals').insert({
+    customer_id:null,project_id:projectId,signal_type:'projeto_parado',signal_anchor_date:nextStepDate,
+  });
+  if(error&&error.code!=='23505'){ // 23505 = já dispensado antes — sucesso silencioso, mesmo padrão de Recompra
+    toastSave('Erro: '+error.message);
+    return;
   }
+  const el=document.getElementById(`crm-signal-proj-${projectId}`);
+  if(el)el.remove();
+  crmCheckEmptySignalContainer();
 }
 
 /* ══════════════════════════════════════
