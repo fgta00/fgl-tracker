@@ -128,6 +128,30 @@ body.dark .modal-h{background:#1B2535}
 .modal-h h2{font-size:.92rem;font-weight:700}
 .mcls{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--ink3)}
 .modal-b{padding:1.1rem}
+
+/* ═══ CRM — classes escopadas, NUNCA alteram .modal/.fsep/.grid globais ═══ */
+.crm-modal{width:min(1200px,calc(100vw - 48px))}
+.crm-section{font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.5rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
+.crm-section:first-child{margin-top:0;padding-top:0;border-top:none}
+.crm-row-proj-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.6rem}
+.crm-row-proj-tipo{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:end}
+.crm-row-proj-next{display:grid;grid-template-columns:2.5fr 1fr;gap:.6rem}
+.crm-row-cli-main{display:grid;grid-template-columns:1.6fr 1.3fr 1fr;gap:.6rem}
+.crm-row-cli-doc{display:grid;grid-template-columns:1fr 2fr;gap:.6rem}
+@media(max-width:720px){.crm-row-proj-main,.crm-row-cli-main{grid-template-columns:1fr}.crm-row-proj-tipo,.crm-row-proj-next,.crm-row-cli-doc{grid-template-columns:1fr}}
+.crm-kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin:.6rem 0}
+.crm-kpi{background:var(--bg);border-radius:8px;padding:.5rem .6rem}
+.crm-kpi-lbl{font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em}
+.crm-kpi-val{font-size:.86rem;font-weight:700;color:var(--ink2);font-family:'IBM Plex Mono';margin-top:.1rem}
+.crm-empty{font-size:.68rem;color:var(--ink4)}
+.crm-chip{font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
+.crm-chip .x{cursor:pointer;color:var(--red)}
+.crm-timeline{display:flex;flex-wrap:wrap;gap:.5rem}
+.crm-tl-card{flex:1 1 260px;max-width:340px;min-width:220px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
+.crm-tl-card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem}
+.crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
+.crm-tl-card:hover .crm-tl-del{opacity:1}
+@media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
 .exp-row .formula{font-size:.55rem;color:var(--ink4);font-family:'IBM Plex Mono';display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap}
@@ -555,7 +579,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- CRM — CRIAR/EDITAR/ABRIR PROJETO (Fase 1+2 — sem Pessoas/Ações/Timeline ainda) -->
 <div class="ovl" id="ovl-crmproject" onclick="if(event.target===this)closeM('crmproject')">
-  <div class="modal" style="max-width:640px">
+  <div class="modal crm-modal">
     <div class="modal-h">
       <span id="crm-proj-title">Projeto</span>
       <div style="display:flex;align-items:center;gap:.5rem">
@@ -564,19 +588,9 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
-      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Projeto</div>
-      <div class="ff">
-        <label>Cliente</label>
-        <select id="crm-proj-customer" onchange="crmToggleProspectField()">
-          <option value="">— Prospect (sem cliente ainda) —</option>
-        </select>
-      </div>
-      <div class="ff" id="crm-proj-prospect-wrap" style="margin-top:.5rem;display:none">
-        <label>Nome do prospect</label>
-        <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente">
-      </div>
-      <div class="ff" style="margin-top:.6rem"><label>Projeto</label><input type="text" id="crm-proj-name" placeholder="ex: Embalagens descartáveis"></div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
+      <div class="crm-section">Projeto</div>
+      <div class="crm-row-proj-main">
+        <div class="ff"><label>Projeto</label><input type="text" id="crm-proj-name" placeholder="ex: Embalagens descartáveis"></div>
         <div class="ff">
           <label>Estágio</label>
           <input type="text" id="crm-proj-stage" list="crm-proj-stage-list" placeholder="ex: Descoberta">
@@ -596,11 +610,27 @@ body.dark .rv-tabs{background:#0A0F1A}
           </select>
         </div>
       </div>
-      <div class="ff" style="margin-top:.6rem"><label>Próximo passo</label><input type="text" id="crm-proj-nextstep" placeholder="ex: consolidar envio da China"></div>
-      <div class="ff" style="margin-top:.5rem"><label>Data do próximo passo</label><input type="date" id="crm-proj-nextstep-date"></div>
+      <div class="crm-row-proj-tipo" style="margin-top:.6rem">
+        <div class="ff">
+          <label>Tipo</label>
+          <div class="toggle-grp" id="crm-proj-tipo-toggle">
+            <button type="button" id="crm-proj-tipo-btn-cliente" class="active" onclick="crmOnToggleProjectTipo('cliente')">Cliente</button>
+            <button type="button" id="crm-proj-tipo-btn-prospect" onclick="crmOnToggleProjectTipo('prospect')">Prospect</button>
+          </div>
+        </div>
+        <div class="ff">
+          <label>Cliente / Prospect</label>
+          <select id="crm-proj-customer"></select>
+          <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente" style="display:none">
+        </div>
+      </div>
+      <div class="crm-row-proj-next" style="margin-top:.6rem">
+        <div class="ff"><label>Próximo passo</label><input type="text" id="crm-proj-nextstep" placeholder="ex: consolidar envio da China"></div>
+        <div class="ff"><label>Data</label><input type="date" id="crm-proj-nextstep-date"></div>
+      </div>
 
       <div id="crm-proj-timeline-section" style="display:none">
-        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Atividade</div>
+        <div class="crm-section">Atividade</div>
         <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
           <span>Timeline</span>
           <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmCreateActionForProject()">＋ Ação</button>
@@ -614,12 +644,11 @@ body.dark .rv-tabs{background:#0A0F1A}
             <option value="9999">tudo</option>
           </select>
         </div>
-        <div id="crm-proj-timeline"></div>
+        <div id="crm-proj-timeline" class="crm-timeline"></div>
       </div>
 
-      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Mais Detalhes</div>
-      <div class="collap-h" id="crm-proj-moredetails-h" onclick="toggleCollap(this,'crm-proj-moredetails-body')">
-        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
+      <div class="collap-h" id="crm-proj-moredetails-h" onclick="toggleCollap(this,'crm-proj-moredetails-body')" style="margin-top:1.1rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
+        <div class="crm-section" style="margin:0;padding:0;border:none">Mais Detalhes</div><span class="chev">▶</span>
       </div>
       <div class="collap-body" id="crm-proj-moredetails-body">
         <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" id="crm-proj-value" placeholder="opcional, só contexto"></div>
@@ -637,7 +666,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- CRM — EDITAR/CRIAR CLIENTE (Customer 360 mínimo) -->
 <div class="ovl" id="ovl-crmcustomer" onclick="if(event.target===this)closeM('crmcustomer')">
-  <div class="modal" style="max-width:640px">
+  <div class="modal crm-modal">
     <div class="modal-h">
       <span id="crm-cust-title">Cliente</span>
       <div style="display:flex;align-items:center;gap:.5rem">
@@ -646,13 +675,10 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
-      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Cliente</div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
+      <div class="crm-section">Cliente</div>
+      <div class="crm-row-cli-main">
         <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
-      </div>
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
-        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
         <div class="ff"><label>Status</label>
           <select id="crm-cust-status">
             <option value="active">Ativo</option>
@@ -661,47 +687,44 @@ body.dark .rv-tabs{background:#0A0F1A}
           </select>
         </div>
       </div>
-      <div class="ff" style="margin-top:.6rem"><label>Notas</label><textarea id="crm-cust-notes" rows="2" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
-
-</div>
-
-      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Relacionamento</div>
-      <div class="fsep" style="margin-top:.4rem">Tags</div>
-      <div id="crm-cust-tags" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem"></div>
-      <div style="display:flex;gap:.4rem">
-        <input type="text" id="crm-tag-new" placeholder="nova tag…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
-        <button class="btn btn-s" onclick="crmAddTagToCustomer()">＋</button>
+      <div class="crm-row-cli-doc" style="margin-top:.6rem">
+        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
+        <div class="ff"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
       </div>
 
-      <div class="fsep" style="margin-top:.9rem">Pessoas</div>
-      <div id="crm-cust-people"></div>
-      <button class="btn btn-s" style="font-size:.66rem;margin-top:.3rem" onclick="crmAddPersonRow()">＋ Adicionar pessoa</button>
+      <div class="crm-section">Relacionamento</div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem">
+        <div>
+          <div class="fsep">Tags</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+            <span id="crm-cust-tags" style="display:contents"></span>
+            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:100px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
+          </div>
+        </div>
+        <div>
+          <div class="fsep">Pessoas</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+            <span id="crm-cust-people" style="display:contents"></span>
+            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
+          </div>
+        </div>
+      </div>
 
       <div id="crm-cust-purchase-section" style="display:none">
-        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Compras</div>
-        <div class="fsep">Histórico de Compras (Tiny)</div>
-        <div id="crm-purchase-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.5rem 0">
-          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
-            <div style="font-size:.55rem;color:var(--ink4)">1ª compra</div>
-            <div id="crm-ph-first" style="font-size:.72rem;font-weight:700">—</div>
+        <div class="crm-section">Compras</div>
+        <div id="crm-ph-empty" class="crm-empty" style="display:none">Sem histórico de compras no Tiny</div>
+        <div id="crm-ph-content">
+          <div class="crm-kpi-strip">
+            <div class="crm-kpi"><div class="crm-kpi-lbl">1ª compra</div><div class="crm-kpi-val" id="crm-ph-first">—</div></div>
+            <div class="crm-kpi"><div class="crm-kpi-lbl">Última compra</div><div class="crm-kpi-val" id="crm-ph-last">—</div></div>
+            <div class="crm-kpi"><div class="crm-kpi-lbl">Pedidos</div><div class="crm-kpi-val" id="crm-ph-count">—</div></div>
+            <div class="crm-kpi"><div class="crm-kpi-lbl">Ticket médio</div><div class="crm-kpi-val" id="crm-ph-avg">—</div></div>
+            <div class="crm-kpi"><div class="crm-kpi-lbl">Valor histórico bruto</div><div class="crm-kpi-val" id="crm-ph-gross">—</div></div>
           </div>
-          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
-            <div style="font-size:.55rem;color:var(--ink4)">Última compra</div>
-            <div id="crm-ph-last" style="font-size:.72rem;font-weight:700">—</div>
-          </div>
-          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
-            <div style="font-size:.55rem;color:var(--ink4)">Nº pedidos</div>
-            <div id="crm-ph-count" style="font-size:.72rem;font-weight:700">—</div>
-          </div>
-          <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
-            <div style="font-size:.55rem;color:var(--ink4)">Ticket médio</div>
-            <div id="crm-ph-avg" style="font-size:.72rem;font-weight:700">—</div>
-          </div>
+          <div class="crm-empty" style="text-align:right;margin-top:-.3rem;margin-bottom:.4rem">sem desconto/frete</div>
+          <div id="crm-purchase-orders"></div>
         </div>
-        <div style="text-align:center;font-size:.6rem;color:var(--ink4);margin-bottom:.5rem">
-          Valor histórico bruto (sem desconto/frete): <b id="crm-ph-gross" style="color:var(--ink2)">—</b>
-        </div>
-        <div id="crm-purchase-orders"></div>
       </div>
 
       <div id="crm-cust-timeline-section" style="display:none">
@@ -719,12 +742,11 @@ body.dark .rv-tabs{background:#0A0F1A}
             <option value="9999">tudo</option>
           </select>
         </div>
-        <div id="crm-cust-timeline"></div>
+        <div id="crm-cust-timeline" class="crm-timeline"></div>
       </div>
 
-      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Mais Detalhes</div>
-      <div class="collap-h" id="crm-cust-moredetails-h" onclick="toggleCollap(this,'crm-cust-moredetails-body')" style="margin-top:.7rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
-        <div class="sh" style="margin:0;font-size:.62rem">Mais detalhes</div><span class="chev">▶</span>
+      <div class="collap-h" id="crm-cust-moredetails-h" onclick="toggleCollap(this,'crm-cust-moredetails-body')" style="margin-top:1.1rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
+        <div class="crm-section" style="margin:0;padding:0;border:none">Mais Detalhes</div><span class="chev">▶</span>
       </div>
       <div class="collap-body" id="crm-cust-moredetails-body">
         <div class="ff" style="margin-top:.5rem">
@@ -749,6 +771,7 @@ body.dark .rv-tabs{background:#0A0F1A}
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
     </div>
   </div>
+</div>
 </div>
 
 <!-- CRM — REVISÃO TINY (fila permanente de resolução humana — só bloqueante) -->
@@ -2624,7 +2647,8 @@ function crmOpenCustomerEdit(id){
   document.getElementById('ovl-crmcustomer').classList.add('open');
 }
 function crmRenderCustTags(){
-  document.getElementById('crm-cust-tags').innerHTML=crmEditCtx.tags.map(tn=>`<span style="font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem">${esc(tn)}<span onclick="crmEditCtx.tags=crmEditCtx.tags.filter(t=>t!=='${esc(tn).replace(/'/g,"\\'")}');crmRenderCustTags()" style="cursor:pointer;color:var(--red)">✕</span></span>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma tag ainda</span>';
+  const cont=document.getElementById('crm-cust-tags');
+  cont.innerHTML=crmEditCtx.tags.length?crmEditCtx.tags.map(tn=>`<span class="crm-chip">${esc(tn)}<span class="x" onclick="crmEditCtx.tags=crmEditCtx.tags.filter(t=>t!=='${esc(tn).replace(/'/g,"\\'")}');crmRenderCustTags()">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
 }
 function crmAddTagToCustomer(){
   const inp=document.getElementById('crm-tag-new');
@@ -2635,15 +2659,17 @@ function crmAddTagToCustomer(){
   crmRenderCustTags();
 }
 function crmRenderCustPeople(){
-  document.getElementById('crm-cust-people').innerHTML=crmEditCtx.people.map((p,i)=>`<div style="display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:.3rem;margin-bottom:.3rem;align-items:center">
-    <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .4rem;font-size:.7rem">
-    <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .4rem;font-size:.7rem">
-    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .3rem;font-size:.68rem">
+  const cont=document.getElementById('crm-cust-people');
+  cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>`<span class="crm-chip" style="gap:.25rem">
+    <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.66rem;width:64px;color:var(--blue);padding:0">
+    <span style="color:var(--ink4)">·</span>
+    <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.66rem;width:56px;color:var(--blue);padding:0">
+    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.6rem;color:var(--ink4);padding:0">
       <option value="">—</option>
       ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
     </select>
-    <button onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
-  </div>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma pessoa ainda</span>';
+    <span class="x" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
+  </span>`).join(''):'<span class="crm-empty">—</span>';
 }
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:''});crmRenderCustPeople();}
 function crmRenderCustRefs(){
@@ -2759,6 +2785,10 @@ async function crmLoadPurchaseHistory(customerId){
     return;
   }
   const s=summaryRows&&summaryRows[0]?summaryRows[0]:{order_count:0,first_purchase_date:null,last_purchase_date:null,total_gross_value:0,avg_ticket:0};
+  const semPedidos=!s.order_count;
+  document.getElementById('crm-ph-empty').style.display=semPedidos?'block':'none';
+  document.getElementById('crm-ph-content').style.display=semPedidos?'none':'block';
+  if(semPedidos)return;
   document.getElementById('crm-ph-first').textContent=crmFmtDateOnly(s.first_purchase_date);
   document.getElementById('crm-ph-last').textContent=crmFmtDateOnly(s.last_purchase_date);
   document.getElementById('crm-ph-count').textContent=s.order_count||0;
@@ -3126,8 +3156,8 @@ function crmActionListHtml(acoes){
   if(!acoes.length)return'<p class="hint" style="margin-top:.4rem">Nenhuma ação registrada nesse período.</p>';
   return acoes.map(a=>{
     const proxima=CRM_ACTIONS.find(x=>x.parent_action_id===a.id&&!x.deleted);
-    return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-top:.4rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
+    return`<div class="crm-tl-card">
+      <div class="crm-tl-card-h">
         <div style="font-size:.72rem"><b>${CRM_TYPE_ICON[a.type]||'•'} ${esc(CRM_TYPE_LBL[a.type]||a.type)}</b>${a.direction?` <span style="color:var(--ink4);font-size:.6rem">(${a.direction==='inbound'?'recebida':'enviada'})</span>`:''}</div>
         <span style="font-size:.6rem;color:var(--ink4);white-space:nowrap">${crmFmtDate(a.occurred_at)}</span>
       </div>
@@ -3136,7 +3166,7 @@ function crmActionListHtml(acoes){
       ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'}">
         ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
       </div>`:''}
-      <button onclick="crmDeleteAction('${a.id}')" title="Excluir" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.62rem;margin-top:.3rem;padding:0">excluir</button>
+      <button class="crm-tl-del" onclick="crmDeleteAction('${a.id}')" title="Excluir">excluir</button>
     </div>`;
   }).join('');
 }
@@ -3345,14 +3375,23 @@ function crmRenderProjects(){
 }
 function crmPopulateProjectCustomerSelect(selectedId){
   const sel=document.getElementById('crm-proj-customer');
-  const opts=['<option value="">— Prospect (sem cliente ainda) —</option>']
+  const opts=['<option value="">— selecione —</option>']
     .concat(CRM_CUSTOMERS.slice().sort((a,b)=>(a.trade_name||a.display_name).localeCompare(b.trade_name||b.display_name))
       .map(c=>`<option value="${c.id}"${c.id===selectedId?' selected':''}>${esc(c.trade_name||c.display_name)}</option>`));
   sel.innerHTML=opts.join('');
 }
-function crmToggleProspectField(){
-  const temCliente=!!document.getElementById('crm-proj-customer').value;
-  document.getElementById('crm-proj-prospect-wrap').style.display=temCliente?'none':'block';
+function crmSetProjectTipo(tipo){
+  document.getElementById('crm-proj-tipo-btn-cliente').classList.toggle('active',tipo==='cliente');
+  document.getElementById('crm-proj-tipo-btn-prospect').classList.toggle('active',tipo==='prospect');
+  document.getElementById('crm-proj-customer').style.display=tipo==='cliente'?'block':'none';
+  document.getElementById('crm-proj-prospect').style.display=tipo==='cliente'?'none':'block';
+}
+function crmOnToggleProjectTipo(tipo){
+  // troca MANUAL (clique do usuário) — limpa o campo que sai de cena, senão o valor antigo
+  // fica escondido no DOM e crmSaveProject() acabaria lendo um customer_id/prospect_name obsoleto.
+  if(tipo==='cliente')document.getElementById('crm-proj-prospect').value='';
+  else document.getElementById('crm-proj-customer').value='';
+  crmSetProjectTipo(tipo);
 }
 function crmOpenProjectEdit(id){
   crmEditProjectId=id;
@@ -3360,7 +3399,7 @@ function crmOpenProjectEdit(id){
   document.getElementById('crm-proj-title').textContent=id?'Editar Projeto':'Novo Projeto';
   crmPopulateProjectCustomerSelect(p?.customer_id||'');
   document.getElementById('crm-proj-prospect').value=p?.prospect_name||'';
-  crmToggleProspectField();
+  crmSetProjectTipo(p&&!p.customer_id?'prospect':'cliente');
   document.getElementById('crm-proj-name').value=p?.project_name||'';
   document.getElementById('crm-proj-stage').value=p?.stage||'';
   document.getElementById('crm-proj-status').value=p?.status||'active';
