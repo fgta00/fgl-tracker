@@ -134,7 +134,7 @@ body.dark .modal-h{background:#1B2535}
 .crm-section{font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.5rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
 .crm-section:first-child{margin-top:0;padding-top:0;border-top:none}
 .crm-row-proj-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.6rem}
-.crm-row-proj-tipo{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:end}
+.crm-row-proj-tipo{display:grid;grid-template-columns:auto 2fr 1.4fr;gap:.6rem;align-items:end}
 .crm-row-proj-next{display:grid;grid-template-columns:2.5fr 1fr;gap:.6rem}
 .crm-row-cli-main{display:grid;grid-template-columns:1.6fr 1.3fr 1fr;gap:.6rem}
 .crm-row-cli-doc{display:grid;grid-template-columns:1fr 2fr;gap:.6rem}
@@ -147,7 +147,7 @@ body.dark .modal-h{background:#1B2535}
 .crm-chip{font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
 .crm-chip .x{cursor:pointer;color:var(--red)}
 .crm-timeline{display:flex;flex-wrap:wrap;gap:.5rem}
-.crm-tl-card{flex:1 1 260px;max-width:340px;min-width:220px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
+.crm-tl-card{flex:1 1 380px;max-width:450px;min-width:360px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
 .crm-tl-card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
@@ -623,23 +623,23 @@ body.dark .rv-tabs{background:#0A0F1A}
           <select id="crm-proj-customer"></select>
           <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente" style="display:none">
         </div>
-      </div>
-      <div class="crm-row-proj-next" style="margin-top:.6rem">
-        <div class="ff"><label>Próximo passo</label><input type="text" id="crm-proj-nextstep" placeholder="ex: consolidar envio da China"></div>
-        <div class="ff"><label>Data</label><input type="date" id="crm-proj-nextstep-date"></div>
-      </div>
-
-      <div id="crm-proj-people-section" style="display:none">
-        <div class="crm-section">Relacionamento</div>
-        <div class="fsep">Pessoas</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-          <span id="crm-proj-people" style="display:contents"></span>
-          <select id="crm-proj-person-select" style="font-size:.7rem;padding:.28rem .4rem;border:1.5px solid var(--bdr2);border-radius:7px;max-width:200px">
-            <option value="">— selecione —</option>
-          </select>
-          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonToProject()">＋ Pessoa</button>
+        <div class="ff" id="crm-proj-people-section">
+          <label>Pessoas</label>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .4rem;min-height:2.1rem">
+            <span id="crm-proj-people" style="display:contents"></span>
+            <span id="crm-proj-people-addctrls" style="display:none">
+              <select id="crm-proj-person-select" style="font-size:.66rem;padding:.15rem .3rem;border:1px solid var(--bdr2);border-radius:5px;max-width:130px">
+                <option value="">— selecione —</option>
+              </select>
+              <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddPersonToProject()">＋</button>
+            </span>
+          </div>
         </div>
       </div>
+      <div class="ff" style="margin-top:.6rem"><label>Objetivo</label><textarea id="crm-proj-objective" rows="2" placeholder="ex: aprovar fornecimento da nova sacola de rede" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
+
+      <div class="crm-section">Próxima Ação</div>
+      <div id="crm-proj-next-action" style="max-width:62%"></div>
 
       <div id="crm-proj-timeline-section" style="display:none">
         <div class="crm-section">Atividade</div>
@@ -666,8 +666,6 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" id="crm-proj-value" placeholder="opcional, só contexto"></div>
         <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
       </div>
-
-      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveProject()">💾 Salvar projeto</button>
     </div>
   </div>
 </div>
@@ -2559,6 +2557,7 @@ function crmShowSubTab(id,skipReclick){
   }else if(id==='projetos'){
     crmRenderProjects();
     crmLoadProjects();
+    crmFetchAll('crm_actions','*',{deleted:false}).then(a=>{CRM_ACTIONS=a;crmRenderProjects();});
   }
 }
 // Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
@@ -2597,6 +2596,7 @@ async function crmLoadAll(){
   crmRenderCustomers();
   if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
+  if(document.getElementById('ovl-crmproject')?.classList.contains('open')&&crmEditProjectId){crmRenderProjectTimeline();crmRenderProjectNextAction();}
   crmLoadReviewQueue();
   crmLoadAuditQueue();
 }
@@ -3173,7 +3173,7 @@ function crmActionListHtml(acoes){
         <div style="font-size:.72rem"><b>${CRM_TYPE_ICON[a.type]||'•'} ${esc(CRM_TYPE_LBL[a.type]||a.type)}</b>${a.direction?` <span style="color:var(--ink4);font-size:.6rem">(${a.direction==='inbound'?'recebida':'enviada'})</span>`:''}</div>
         <span style="font-size:.6rem;color:var(--ink4);white-space:nowrap">${crmFmtDate(a.occurred_at)}</span>
       </div>
-      <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem">${esc(a.summary)}</div>
+      <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.summary)}</div>
       ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem">${esc(a.details)}</div>`:''}
       ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'}">
         ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
@@ -3295,16 +3295,12 @@ function crmFmtCadenciaHumana(dias){ // 20→"~3 semanas" · 45→"~1,5 mês" ·
 async function crmLoadSignalRecompra(){
   const card=document.getElementById('crm-signal-card');
   const cont=document.getElementById('crm-signal-container');
-  const[recompraRes,projetoRes]=await Promise.all([
-    _supa.rpc('crm_signal_recompra',{}),
-    _supa.rpc('crm_signal_projeto_parado',{}),
-  ]);
+  // "Projeto parado" (crm_signal_projeto_parado) temporariamente fora daqui — a inteligência de
+  // Projeto vai ser redesenhada em cima de crm_actions, não de next_step_date (que saiu da UI).
+  // RPC e migration de crm_signal_dismissals continuam intactas, só a CHAMADA foi removida.
+  const recompraRes=await _supa.rpc('crm_signal_recompra',{});
   if(recompraRes.error)console.error('crm_signal_recompra',recompraRes.error);
-  if(projetoRes.error)console.error('crm_signal_projeto_parado',projetoRes.error);
-  const itens=[
-    ...(recompraRes.data||[]).map(s=>({kind:'recompra',...s})),
-    ...(projetoRes.data||[]).map(s=>({kind:'projeto_parado',...s})),
-  ];
+  const itens=(recompraRes.data||[]).map(s=>({kind:'recompra',...s}));
   if(!itens.length){card.style.display='none';return;}
   card.style.display='block';
   cont.innerHTML=`<div>`+itens.map((item,i)=>crmSignalCardHtml(item,i,itens.length)).join('')+`</div>`;
@@ -3419,7 +3415,13 @@ function crmRenderProjects(){
         <span style="font-size:.6rem;font-weight:700;color:${statusCol};background:${statusCol}18;padding:.1rem .4rem;border-radius:4px">${esc(p.stage||'—')}</span>
         ${p.status!=='active'?`<span style="font-size:.58rem;color:var(--ink4)">${CRM_PROJECT_STATUS_LBL[p.status]||p.status}</span>`:''}
       </div>
-      ${p.next_step?`<div style="font-size:.66rem;color:var(--ink2);margin-top:.35rem">Próximo: ${esc(p.next_step)}${p.next_step_date?' · '+crmFmtDateOnly(p.next_step_date):''}</div>`:''}
+      ${(()=>{
+        const prox=CRM_ACTIONS.filter(a=>a.project_id===p.id&&a.status==='planned'&&!a.deleted)
+          .sort((a,b)=>new Date(a.due_date)-new Date(b.due_date))[0];
+        return prox
+          ?`<div style="font-size:.66rem;color:var(--ink2);margin-top:.35rem">Próxima: ${crmFmtDate2(prox.due_date)} · ${esc(prox.summary)}</div>`
+          :`<div style="font-size:.62rem;color:var(--ink4);margin-top:.35rem">Sem próxima ação</div>`;
+      })()}
     </div>`;
   };
   let html=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem">${ativos.map(cardHtml).join('')}</div>`;
@@ -3459,8 +3461,7 @@ function crmOpenProjectEdit(id){
   document.getElementById('crm-proj-name').value=p?.project_name||'';
   document.getElementById('crm-proj-stage').value=p?.stage||'';
   document.getElementById('crm-proj-status').value=p?.status||'active';
-  document.getElementById('crm-proj-nextstep').value=p?.next_step||'';
-  document.getElementById('crm-proj-nextstep-date').value=p?.next_step_date||'';
+  document.getElementById('crm-proj-objective').value=p?.objective||'';
   document.getElementById('crm-proj-value').value=p?.potential_value??'';
   document.getElementById('crm-proj-notes').value=p?.notes||'';
   const temValorOuNotas=!!(p?.potential_value||p?.notes);
@@ -3468,14 +3469,44 @@ function crmOpenProjectEdit(id){
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-proj-tl-periodo').value='30';crmRenderProjectTimeline();}
-  document.getElementById('crm-proj-people-section').style.display=id?'block':'none';
+  // Pessoas só pode vincular depois que o projeto existe (precisa de project_id de verdade pra
+  // gravar em crm_project_people) — a coluna em si continua sempre visível pro grid não quebrar,
+  // só os controles de adicionar somem/aparecem.
+  document.getElementById('crm-proj-people-addctrls').style.display=id?'contents':'none';
+  crmRenderProjectPeopleChips(); // limpa/mostra "—" mesmo sem id (CRM_PROJECT_PEOPLE só é populado por crmLoadProjectPeople)
   if(id)crmLoadProjectPeople(id);
+  else CRM_PROJECT_PEOPLE=[];
+  crmRenderProjectNextAction();
   document.getElementById('ovl-crmproject').classList.add('open');
 }
 function crmCreateActionForProject(){
   const p=CRM_PROJECTS.find(x=>x.id===crmEditProjectId);
   if(!p)return;
   crmOpenActionModal(p.customer_id||null,null,p.id);
+}
+function crmRenderProjectNextAction(){
+  const cont=document.getElementById('crm-proj-next-action');
+  if(!cont)return;
+  if(!crmEditProjectId){cont.innerHTML='';return;}
+  const proxima=CRM_ACTIONS.filter(a=>a.project_id===crmEditProjectId&&a.status==='planned'&&!a.deleted)
+    .sort((a,b)=>new Date(a.due_date)-new Date(b.due_date))[0];
+  if(!proxima){
+    cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .7rem">
+      <span class="crm-empty">Nenhuma ação planejada</span>
+      <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
+    </div>`;
+    return;
+  }
+  cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .75rem">
+    <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+      <span style="font-size:.72rem;font-weight:700">${crmFmtDate2(proxima.due_date)}</span>
+      <span style="font-size:.72rem;color:var(--ink2)"> · ${esc(proxima.summary)}</span>
+    </div>
+    <div style="display:flex;gap:.3rem;flex-shrink:0">
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModalById(null,'${proxima.id}')">Concluir</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmRescheduleAction('${proxima.id}')">Reagendar</button>
+    </div>
+  </div>`;
 }
 
 /* ══════════════════════════════════════
@@ -3549,8 +3580,7 @@ async function crmSaveProject(){
     project_name:projectName,
     stage:document.getElementById('crm-proj-stage').value.trim()||'Ideia',
     status:document.getElementById('crm-proj-status').value,
-    next_step:document.getElementById('crm-proj-nextstep').value.trim()||null,
-    next_step_date:document.getElementById('crm-proj-nextstep-date').value||null,
+    objective:document.getElementById('crm-proj-objective').value.trim()||null,
     potential_value:document.getElementById('crm-proj-value').value?parseFloat(document.getElementById('crm-proj-value').value):null,
     notes:document.getElementById('crm-proj-notes').value.trim()||null,
     owner_user_id:authUser.id,
