@@ -600,6 +600,10 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
       </div>
 
+      <div id="crm-proj-actions-wrap" style="display:none;margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
+        <button class="btn btn-s" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
+      </div>
+
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveProject()">💾 Salvar projeto</button>
     </div>
   </div>
@@ -2441,7 +2445,7 @@ const CRM_ACTION_TYPES=[
   {v:'meeting',lbl:'Reunião',hasDir:false},{v:'visit',lbl:'Visita',hasDir:false},{v:'proposal',lbl:'Proposta',hasDir:false},
   {v:'sample',lbl:'Amostra',hasDir:false},{v:'followup',lbl:'Follow-up',hasDir:false},{v:'other',lbl:'Outro',hasDir:false},
 ];
-let crmActCtx={customerId:null,actionId:null,type:'whatsapp',direction:'outbound',nextOpen:false,mode:'log'};
+let crmActCtx={customerId:null,actionId:null,projectId:null,type:'whatsapp',direction:'outbound',nextOpen:false,mode:'log'};
 let crmSemanaHorizonte=7;
 let crmEditCtx={customerId:null,tags:[],people:[],refs:[]}; // estado de trabalho do modal de edição
 
@@ -2490,6 +2494,7 @@ function crmShowSubTab(id,skipReclick){
   }else if(id==='semana'){
     crmRenderMinhaSemana();
     crmLoadSignalRecompra();
+    crmLoadProjects().then(crmRenderMinhaSemana);
     crmLoadAll();
   }else if(id==='projetos'){
     crmRenderProjects();
@@ -2971,14 +2976,15 @@ function crmSetActMode(mode){
   document.getElementById('crm-act-title').textContent=mode==='schedule'?'Agendar Ação Futura':'Registrar Ação';
 }
 function crmOpenActionModalById(customerId,actionId){
-  crmOpenActionModal(customerId,CRM_ACTIONS.find(a=>a.id===actionId)||null);
+  const action=CRM_ACTIONS.find(a=>a.id===actionId)||null;
+  crmOpenActionModal(action?action.customer_id:customerId,action);
 }
 // TODO (refinamentos de UI registrados, aprovados pra depois — não implementar agora):
 // 1) "+ Ação" deveria expor os 2 modos (Registrar/Agendar) direto, sem precisar abrir o modal primeiro pra só então escolher.
 // 2) Dentro do modal de ação, os dados do cliente deviam ficar recolhidos/minimizados — a ação em si é o foco, não o cadastro do cliente.
 // action=null → registrar ação nova (modo log ou schedule, à escolha). action=objeto → completar (se status='planned') ou editar (se já 'done').
-function crmOpenActionModal(customerId,action){
-  crmActCtx={customerId,actionId:action?.id||null,type:action?.type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false,mode:'log'};
+function crmOpenActionModal(customerId,action,projectId){
+  crmActCtx={customerId,actionId:action?.id||null,projectId:projectId||action?.project_id||null,type:action?.type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false,mode:'log'};
   const completando=action&&action.status==='planned';
   crmSetActMode('log'); // completar/editar sempre usa o modo "realizada" — agendar direto só faz sentido pra ação nova
   document.getElementById('crm-act-mode-toggle').style.display=action?'none':'flex'; // esconde o alternador ao completar/editar
@@ -3015,6 +3021,7 @@ async function crmSaveAction(){
       p_next_due_date:schedDate,
       p_action_id:null,
       p_mode:'schedule',
+      p_project_id:crmActCtx.projectId,
     });
     if(error){toastSave('Erro ao agendar: '+error.message);return;}
     closeM('crmaction');
@@ -3043,6 +3050,7 @@ async function crmSaveAction(){
     p_next_due_date:nextDate||null,
     p_action_id:crmActCtx.actionId,
     p_mode:'log',
+    p_project_id:crmActCtx.projectId,
   });
   if(error){toastSave('Erro ao salvar ação: '+error.message);return;}
   closeM('crmaction');
@@ -3137,10 +3145,17 @@ function crmRenderMinhaSemana(){
   });
   [atrasadas,hojeArr,proximas].forEach(arr=>arr.sort((a,b)=>a.due_date.localeCompare(b.due_date)));
   const rowHtml=a=>{
-    const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
+    let contexto;
+    if(a.project_id){
+      const proj=CRM_PROJECTS.find(x=>x.id===a.project_id);
+      contexto=proj?`${esc(crmProjectClienteLabel(proj))} · ${esc(proj.project_name)}`:'(projeto)';
+    }else{
+      const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
+      contexto=esc(c?.trade_name||c?.display_name||'?');
+    }
     return`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem">
       <div style="min-width:0">
-        <div style="font-size:.72rem"><b>${esc(c?.trade_name||c?.display_name||'?')}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
+        <div style="font-size:.72rem"><b>${contexto}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
         <div style="font-size:.7rem;color:var(--ink2)">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
       </div>
       <div style="display:flex;gap:.3rem;flex-shrink:0">
@@ -3316,7 +3331,13 @@ function crmOpenProjectEdit(id){
   const temValorOuNotas=!!(p?.potential_value||p?.notes);
   document.getElementById('crm-proj-moredetails-h').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
+  document.getElementById('crm-proj-actions-wrap').style.display=id?'block':'none';
   document.getElementById('ovl-crmproject').classList.add('open');
+}
+function crmCreateActionForProject(){
+  const p=CRM_PROJECTS.find(x=>x.id===crmEditProjectId);
+  if(!p)return;
+  crmOpenActionModal(p.customer_id||null,null,p.id);
 }
 async function crmSaveProject(){
   const customerId=document.getElementById('crm-proj-customer').value||null;
