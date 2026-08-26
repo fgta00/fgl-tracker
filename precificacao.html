@@ -147,8 +147,7 @@ body.dark .modal-h{background:#1B2535}
 .crm-chip{font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
 .crm-chip .x{cursor:pointer;color:var(--red)}
 .crm-timeline{display:flex;flex-wrap:wrap;gap:.5rem}
-.crm-tl-card{flex:1 1 380px;max-width:450px;min-width:360px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
-.crm-tl-card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem}
+.crm-tl-card{flex:1 1 215px;max-width:270px;min-width:200px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
@@ -636,10 +635,9 @@ body.dark .rv-tabs{background:#0A0F1A}
           </div>
         </div>
       </div>
-      <div class="ff" style="margin-top:.6rem"><label>Objetivo</label><textarea id="crm-proj-objective" rows="2" placeholder="ex: aprovar fornecimento da nova sacola de rede" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
 
       <div class="crm-section">Próxima Ação</div>
-      <div id="crm-proj-next-action" style="max-width:62%"></div>
+      <div id="crm-proj-next-action"></div>
 
       <div id="crm-proj-timeline-section" style="display:none">
         <div class="crm-section">Atividade</div>
@@ -3158,7 +3156,30 @@ async function crmDeleteAction(id){
 }
 
 const CRM_TYPE_LBL={whatsapp:'WhatsApp',phone:'Ligação',email:'E-mail',meeting:'Reunião',visit:'Visita',proposal:'Proposta',sample:'Amostra',followup:'Follow-up',other:'Outro'};
-const CRM_TYPE_ICON={whatsapp:'💬',phone:'📞',email:'✉️',meeting:'🤝',visit:'📍',proposal:'📄',sample:'📦',followup:'🔁',other:'•'};
+const CRM_TYPE_ICON={whatsapp:'💬',phone:'📞',email:'✉️',meeting:'🤝',visit:'📍',proposal:'📄',sample:'📦',followup:'🔁',other:'•'}; // não usado mais na Timeline (ver crmTypeIconBadge) — mantido só por retrocompat de outros pontos que possam referenciar
+// Ícones profissionais da Timeline: SVG inline estilo Feather (contorno, licença MIT, dado de path
+// amplamente conhecido/replicado) — NÃO é biblioteca nova, é só markup escrito à mão. Confirmado por
+// inspeção: o arquivo não carrega nenhum CDN de ícones nem tem SVG próprio hoje, só emoji.
+// Cores reaproveitam as variáveis semânticas já existentes (--green/--blue/--amber/--grey/--purple).
+const CRM_TYPE_COLOR={whatsapp:'green',phone:'blue',email:'grey',meeting:'purple',other:'amber',visit:'blue',proposal:'amber',sample:'green',followup:'purple'};
+const CRM_TYPE_SVGPATH={
+  whatsapp:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  email:'<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="2 7 12 14 22 7"/>',
+  meeting:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  other:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  visit:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  proposal:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+  sample:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  followup:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+};
+function crmTypeIconBadge(type,size){
+  size=size||26;
+  const cor=CRM_TYPE_COLOR[type]||'grey';
+  const path=CRM_TYPE_SVGPATH[type]||CRM_TYPE_SVGPATH.other;
+  const svgSize=Math.round(size*0.54);
+  return`<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:var(--${cor});flex-shrink:0"><svg width="${svgSize}" height="${svgSize}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>`;
+}
 function crmFmtDate(iso){ // ISO -> DD/MM/AAAA HH:MM
   const d=new Date(iso);
   const pad=n=>String(n).padStart(2,'0');
@@ -3168,13 +3189,18 @@ function crmActionListHtml(acoes){
   if(!acoes.length)return'<p class="hint" style="margin-top:.4rem">Nenhuma ação registrada nesse período.</p>';
   return acoes.map(a=>{
     const proxima=CRM_ACTIONS.find(x=>x.parent_action_id===a.id&&!x.deleted);
+    const cor=CRM_TYPE_COLOR[a.type]||'grey';
+    const statusTxt=a.direction?(a.direction==='inbound'?'Recebida':'Enviada'):(a.type==='other'?'Manual':'Realizada');
     return`<div class="crm-tl-card">
-      <div class="crm-tl-card-h">
-        <div style="font-size:.72rem"><b>${CRM_TYPE_ICON[a.type]||'•'} ${esc(CRM_TYPE_LBL[a.type]||a.type)}</b>${a.direction?` <span style="color:var(--ink4);font-size:.6rem">(${a.direction==='inbound'?'recebida':'enviada'})</span>`:''}</div>
-        <span style="font-size:.6rem;color:var(--ink4);white-space:nowrap">${crmFmtDate(a.occurred_at)}</span>
+      <div style="display:flex;gap:.5rem;align-items:flex-start">
+        ${crmTypeIconBadge(a.type)}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.7rem"><b style="color:var(--${cor})">${esc(CRM_TYPE_LBL[a.type]||a.type)}</b> <span style="color:var(--ink4)">· ${statusTxt}</span></div>
+          <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.summary)}</div>
+          ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem">${esc(a.details)}</div>`:''}
+          <div style="font-size:.6rem;color:var(--ink4);margin-top:.3rem">${crmFmtDate(a.occurred_at)}</div>
+        </div>
       </div>
-      <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.summary)}</div>
-      ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem">${esc(a.details)}</div>`:''}
       ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'}">
         ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
       </div>`:''}
@@ -3461,7 +3487,6 @@ function crmOpenProjectEdit(id){
   document.getElementById('crm-proj-name').value=p?.project_name||'';
   document.getElementById('crm-proj-stage').value=p?.stage||'';
   document.getElementById('crm-proj-status').value=p?.status||'active';
-  document.getElementById('crm-proj-objective').value=p?.objective||'';
   document.getElementById('crm-proj-value').value=p?.potential_value??'';
   document.getElementById('crm-proj-notes').value=p?.notes||'';
   const temValorOuNotas=!!(p?.potential_value||p?.notes);
@@ -3484,6 +3509,18 @@ function crmCreateActionForProject(){
   if(!p)return;
   crmOpenActionModal(p.customer_id||null,null,p.id);
 }
+function crmDiaSemanaAbrev(dataISO){
+  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  return dias[new Date(dataISO+'T00:00').getDay()];
+}
+function crmResolveResponsavel(userId){
+  // Não existe hoje, em nenhum lugar do app, uma tabela/array que resolva user_id -> nome.
+  // Único dado disponível é o e-mail do usuário JÁ LOGADO nesta sessão (authUser). Se o
+  // responsável da ação for outra pessoa, não dá pra mostrar nome nenhum com segurança —
+  // melhor omitir a linha do que inventar ou mostrar um UUID cru.
+  if(userId&&authUser&&userId===authUser.id)return authUser.email.split('@')[0];
+  return null;
+}
 function crmRenderProjectNextAction(){
   const cont=document.getElementById('crm-proj-next-action');
   if(!cont)return;
@@ -3497,14 +3534,22 @@ function crmRenderProjectNextAction(){
     </div>`;
     return;
   }
-  cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .75rem">
-    <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-      <span style="font-size:.72rem;font-weight:700">${crmFmtDate2(proxima.due_date)}</span>
-      <span style="font-size:.72rem;color:var(--ink2)"> · ${esc(proxima.summary)}</span>
+  const responsavel=crmResolveResponsavel(proxima.responsible_user_id);
+  cont.innerHTML=`<div style="display:flex;align-items:center;gap:.65rem;border:1px solid var(--bdr);border-radius:8px;padding:.6rem .75rem">
+    <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:var(--ltblue);flex-shrink:0">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.78rem;font-weight:700">${crmFmtDate2(proxima.due_date)}</div>
+      <div style="font-size:.62rem;color:var(--ink4)">${crmDiaSemanaAbrev(proxima.due_date)}</div>
     </div>
-    <div style="display:flex;gap:.3rem;flex-shrink:0">
-      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModalById(null,'${proxima.id}')">Concluir</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmRescheduleAction('${proxima.id}')">Reagendar</button>
+    <div style="flex:2;min-width:0">
+      <div style="font-size:.76rem;font-weight:700;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(proxima.summary)}</div>
+      ${responsavel?`<div style="font-size:.62rem;color:var(--ink4);margin-top:.1rem">Responsável: ${esc(responsavel)}</div>`:''}
+    </div>
+    <div style="display:flex;gap:.4rem;flex-shrink:0">
+      <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem;border-color:var(--green);color:var(--green)" onclick="crmOpenActionModalById(null,'${proxima.id}')">✓ Concluir</button>
+      <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem;border-color:var(--blue);color:var(--blue)" onclick="crmRescheduleAction('${proxima.id}')">Reagendar</button>
     </div>
   </div>`;
 }
@@ -3580,7 +3625,6 @@ async function crmSaveProject(){
     project_name:projectName,
     stage:document.getElementById('crm-proj-stage').value.trim()||'Ideia',
     status:document.getElementById('crm-proj-status').value,
-    objective:document.getElementById('crm-proj-objective').value.trim()||null,
     potential_value:document.getElementById('crm-proj-value').value?parseFloat(document.getElementById('crm-proj-value').value):null,
     notes:document.getElementById('crm-proj-notes').value.trim()||null,
     owner_user_id:authUser.id,
