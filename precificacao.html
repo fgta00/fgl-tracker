@@ -506,7 +506,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="rv-tabs no-print" style="display:flex;align-items:center;margin-bottom:.9rem;border-bottom:1px solid var(--bdr)">
           <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
           <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
-          <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos Estratégicos</button>
+          <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos</button>
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
@@ -527,11 +527,11 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="card">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
               <div class="sh" style="margin:0">Clientes</div>
-              <div style="display:flex;gap:.4rem;align-items:center">
-                <button class="btn btn-s" id="crm-review-btn" style="font-size:.68rem;padding:.3rem .6rem;display:none" onclick="crmOpenReviewQueue()">🔍 Revisão Tiny <span id="crm-review-count" style="background:var(--amber);color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.6rem;margin-left:.2rem"></span></button>
-                <span id="crm-audit-link" style="display:none;font-size:.62rem;color:var(--ink4);text-decoration:underline;cursor:pointer" onclick="crmOpenAuditQueue()">Auditoria / Avisos (<span id="crm-audit-count">0</span>)</span>
-                <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
-              </div>
+              <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+            </div>
+            <div style="display:flex;gap:.7rem;align-items:center;padding:.15rem .9rem 0;min-height:1.1rem">
+              <button class="btn btn-s" id="crm-review-btn" style="font-size:.6rem;padding:.15rem .5rem;display:none;opacity:.85" onclick="crmOpenReviewQueue()">🔍 Revisão Tiny <span id="crm-review-count" style="background:var(--amber);color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.56rem;margin-left:.2rem"></span></button>
+              <span id="crm-audit-link" style="display:none;font-size:.58rem;color:var(--ink4);text-decoration:underline;cursor:pointer" onclick="crmOpenAuditQueue()">Auditoria / Avisos (<span id="crm-audit-count">0</span>)</span>
             </div>
             <div class="tb" style="padding:0 .9rem .7rem">
               <input id="crm-cli-q" placeholder="🔍 Buscar cliente…" oninput="crmRenderCustomers()" style="flex:1">
@@ -612,8 +612,15 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CRM — EDITAR/CRIAR CLIENTE (Customer 360 mínimo) -->
 <div class="ovl" id="ovl-crmcustomer" onclick="if(event.target===this)closeM('crmcustomer')">
   <div class="modal" style="max-width:640px">
-    <div class="modal-h"><span id="crm-cust-title">Cliente</span><button class="mcls" onclick="closeM('crmcustomer')">✕</button></div>
+    <div class="modal-h">
+      <span id="crm-cust-title">Cliente</span>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
+        <button class="mcls" onclick="closeM('crmcustomer')">✕</button>
+      </div>
+    </div>
     <div class="modal-b">
+      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Cliente</div>
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
         <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
@@ -639,9 +646,22 @@ body.dark .rv-tabs{background:#0A0F1A}
           <input type="text" id="crm-cust-legal" placeholder="opcional — só preencha se for diferente de Razão Social/Nome acima">
           <p class="hint" style="font-size:.58rem;margin-top:.2rem">Campo antigo, mantido por compatibilidade — não é usado pra identificar o cliente. O campo "Razão Social / Nome" acima é o principal.</p>
         </div>
+        <div class="fsep" style="margin-top:.8rem">Referências externas <span style="font-weight:400;color:var(--ink4);font-size:.6rem">(vínculo com outros cadastros — evita duplicar cliente)</span></div>
+        <div id="crm-cust-refs"></div>
+        <div style="display:flex;gap:.4rem;margin-top:.3rem">
+          <select id="crm-ref-source" style="width:140px">
+            <option value="rv_clientes2">Cliente PROD BR</option>
+            <option value="tiny">Tiny/Olist</option>
+            <option value="prod_asia">PROD ASIA</option>
+            <option value="wix">Wix</option>
+          </select>
+          <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
+          <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
+        </div>
       </div>
 
-      <div class="fsep" style="margin-top:.9rem">Tags</div>
+      <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Relacionamento</div>
+      <div class="fsep" style="margin-top:.4rem">Tags</div>
       <div id="crm-cust-tags" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem"></div>
       <div style="display:flex;gap:.4rem">
         <input type="text" id="crm-tag-new" placeholder="nova tag…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
@@ -652,21 +672,9 @@ body.dark .rv-tabs{background:#0A0F1A}
       <div id="crm-cust-people"></div>
       <button class="btn btn-s" style="font-size:.66rem;margin-top:.3rem" onclick="crmAddPersonRow()">＋ Adicionar pessoa</button>
 
-      <div class="fsep" style="margin-top:.9rem">Referências externas <span style="font-weight:400;color:var(--ink4);font-size:.6rem">(vínculo com outros cadastros — evita duplicar cliente)</span></div>
-      <div id="crm-cust-refs"></div>
-      <div style="display:flex;gap:.4rem;margin-top:.3rem">
-        <select id="crm-ref-source" style="width:140px">
-          <option value="rv_clientes2">Cliente PROD BR</option>
-          <option value="tiny">Tiny/Olist</option>
-          <option value="prod_asia">PROD ASIA</option>
-          <option value="wix">Wix</option>
-        </select>
-        <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
-        <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
-      </div>
-
       <div id="crm-cust-purchase-section" style="display:none">
-        <div class="fsep" style="margin-top:.9rem">Histórico de Compras (Tiny)</div>
+        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Compras</div>
+        <div class="fsep">Histórico de Compras (Tiny)</div>
         <div id="crm-purchase-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.5rem 0">
           <div style="text-align:center;background:var(--bg);border-radius:7px;padding:.4rem .2rem">
             <div style="font-size:.55rem;color:var(--ink4)">1ª compra</div>
@@ -692,7 +700,8 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
 
       <div id="crm-cust-timeline-section" style="display:none">
-        <div class="fsep" style="margin-top:.9rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Atividade</div>
+        <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
           <span>Timeline</span>
           <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
         </div>
@@ -2550,13 +2559,13 @@ function crmRenderCustomers(){
     return`<div class="card" style="padding:.7rem .85rem;cursor:pointer" onclick="crmOpenCustomerEdit('${c.id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
         <div style="font-weight:700;font-size:.8rem">${esc(nomePrincipal)}</div>
-        <span style="font-size:.55rem;font-weight:700;color:${statusCol[c.status]||'var(--ink4)'};background:${statusCol[c.status]||'var(--ink4)'}18;padding:.1rem .4rem;border-radius:4px;white-space:nowrap">${statusLbl[c.status]||c.status}</span>
+        ${c.status!=='active'?`<span style="font-size:.55rem;font-weight:700;color:${statusCol[c.status]||'var(--ink4)'};background:${statusCol[c.status]||'var(--ink4)'}18;padding:.1rem .4rem;border-radius:4px;white-space:nowrap">${statusLbl[c.status]||c.status}</span>`:''}
       </div>
       ${c.legal_name?`<div style="font-size:.62rem;color:var(--ink4)">${esc(c.legal_name)}</div>`:''}
       <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem">
         ${tagNames.map(tn=>`<span style="font-size:.56rem;background:var(--ltblue);color:var(--blue);padding:.08rem .35rem;border-radius:4px">${esc(tn)}</span>`).join('')}
       </div>
-      <div style="font-size:.58rem;color:var(--ink4);margin-top:.4rem">${nPeople} pessoa${nPeople!==1?'s':''}</div>
+      ${nPeople>0?`<div style="font-size:.58rem;color:var(--ink4);margin-top:.4rem">${nPeople} pessoa${nPeople!==1?'s':''}</div>`:''}
     </div>`;
   }).join('')+`</div>`;
 }
@@ -3193,7 +3202,7 @@ async function crmLoadSignalRecompra(){
   if(error){console.error('crm_signal_recompra',error);card.style.display='none';return;}
   if(!data||!data.length){card.style.display='none';return;}
   card.style.display='block';
-  cont.innerHTML=data.map(s=>{
+  cont.innerHTML=`<div>`+data.map((s,i)=>{
     const diasParado=Math.floor((new Date()-new Date(s.last_purchase_date+'T00:00'))/86400000);
     const tooltip=`mediana=${s.median_interval_days}d · razão=${s.overdue_ratio}x · score=${s.ranking_score} · última compra ${s.last_purchase_date}`;
     // ≥6 pedidos: base sólida o bastante pra afirmar "costuma comprar a cada X" como hábito.
@@ -3201,17 +3210,19 @@ async function crmLoadSignalRecompra(){
     const linhaCadencia=s.order_count>=6
       ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
       :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
-    return`<div style="border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
-    <div style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</div>
-    <div style="font-size:.68rem;color:var(--ink2);margin:.1rem 0">Recompra</div>
-    <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.4rem">${linhaCadencia}</div>
+    return`<div style="padding:.45rem 0;${i<data.length-1?'border-bottom:1px solid var(--bdr)':''}" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
+    <div style="display:flex;align-items:baseline;gap:.4rem">
+      <span style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</span>
+      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Recompra</span>
+    </div>
+    <div style="font-size:.62rem;color:var(--ink4);margin:.15rem 0 .35rem">${linhaCadencia}</div>
     <div style="display:flex;gap:.3rem">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
     </div>
   </div>`;
-  }).join('');
+  }).join('')+`</div>`;
 }
 async function crmDismissSignal(customerId,lastPurchaseDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3265,7 +3276,7 @@ function crmRenderProjects(){
       <div style="font-weight:700;font-size:.78rem">${esc(cliente)} <span style="font-weight:400;color:var(--ink4)">·</span> ${esc(p.project_name)}</div>
       <div style="display:flex;align-items:center;gap:.4rem;margin-top:.3rem">
         <span style="font-size:.6rem;font-weight:700;color:${statusCol};background:${statusCol}18;padding:.1rem .4rem;border-radius:4px">${esc(p.stage||'—')}</span>
-        <span style="font-size:.58rem;color:var(--ink4)">${CRM_PROJECT_STATUS_LBL[p.status]||p.status}</span>
+        ${p.status!=='active'?`<span style="font-size:.58rem;color:var(--ink4)">${CRM_PROJECT_STATUS_LBL[p.status]||p.status}</span>`:''}
       </div>
       ${p.next_step?`<div style="font-size:.66rem;color:var(--ink2);margin-top:.35rem">Próximo: ${esc(p.next_step)}${p.next_step_date?' · '+crmFmtDateOnly(p.next_step_date):''}</div>`:''}
     </div>`;
