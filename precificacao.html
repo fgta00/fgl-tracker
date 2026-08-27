@@ -697,13 +697,38 @@ body.dark .rv-tabs{background:#0A0F1A}
 
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem">
+      <div class="grid" style="grid-template-columns:1.3fr 1.6fr 1.1fr 1.3fr;gap:1rem">
         <div>
-          <div class="fsep">Tags</div>
+          <div class="fsep">Segmento</div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-            <span id="crm-cust-tags" style="display:contents"></span>
-            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:100px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
-            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
+            <span id="crm-cust-segmento" style="display:contents"></span>
+            <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…" style="width:90px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <datalist id="crm-segmento-list">
+              <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
+              <option value="Franquia"><option value="Varejo"><option value="Indústria">
+              <option value="Agência/Brindes"><option value="Outros">
+            </datalist>
+            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddSegmento()">＋</button>
+          </div>
+        </div>
+        <div>
+          <div class="fsep">Perfil Comercial</div>
+          <div class="toggle-grp" id="crm-perfil-toggle" style="margin-top:.3rem;width:auto;flex-wrap:wrap;overflow:visible">
+            <button type="button" data-v="PE" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('PE')">PE</button>
+            <button type="button" data-v="SM BR" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('SM BR')">SM BR</button>
+            <button type="button" data-v="SM Asia" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('SM Asia')">SM Asia</button>
+            <button type="button" data-v="MIX" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('MIX')">MIX</button>
+            <button type="button" data-v="LOGO" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('LOGO')">LOGO</button>
+          </div>
+        </div>
+        <div>
+          <div class="fsep">Grupo / Rede</div>
+          <select id="crm-cust-group" style="width:100%;font-size:.72rem;padding:.3rem .4rem;border:1.5px solid var(--bdr2);border-radius:7px;margin-top:.3rem">
+            <option value="">— nenhum —</option>
+          </select>
+          <div style="display:flex;gap:.3rem;margin-top:.3rem">
+            <input type="text" id="crm-group-new" placeholder="ou criar novo…" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.66rem">
+            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmCreateAndSelectGroup()">＋</button>
           </div>
         </div>
         <div>
@@ -712,6 +737,15 @@ body.dark .rv-tabs{background:#0A0F1A}
             <span id="crm-cust-people" style="display:contents"></span>
             <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
           </div>
+        </div>
+      </div>
+
+      <div style="margin-top:.7rem">
+        <div class="fsep">Tags</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+          <span id="crm-cust-tags" style="display:contents"></span>
+          <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:100px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
         </div>
       </div>
 
@@ -2488,7 +2522,7 @@ let rvSacachoEditing=false;
    admin via SQL (sem auto-cadastro) — ver crmCheckAccess().
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
-let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[];
+let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[];
 const CRM_ACTION_TYPES=[
   {v:'whatsapp',lbl:'WhatsApp',hasDir:true},{v:'phone',lbl:'Ligação',hasDir:true},{v:'email',lbl:'E-mail',hasDir:true},
   {v:'meeting',lbl:'Reunião',hasDir:false},{v:'visit',lbl:'Visita',hasDir:false},{v:'proposal',lbl:'Proposta',hasDir:false},
@@ -2496,7 +2530,7 @@ const CRM_ACTION_TYPES=[
 ];
 let crmActCtx={customerId:null,actionId:null,projectId:null,type:'whatsapp',direction:'outbound',nextOpen:false,mode:'log'};
 let crmSemanaHorizonte=7;
-let crmEditCtx={customerId:null,tags:[],people:[],refs:[]}; // estado de trabalho do modal de edição
+let crmEditCtx={customerId:null,tags:[],people:[],refs:[],segmento:[],perfil:[]}; // estado de trabalho do modal de edição
 
 async function crmCheckAccess(){
   if(!authUser||!_supaOK){
@@ -2570,13 +2604,14 @@ async function crmFetchAll(table, selectStr, eqFilters){
   return all;
 }
 async function crmLoadAll(){
-  const[cust,tags,ctags,people,refs,actions]=await Promise.all([
+  const[cust,tags,ctags,people,refs,actions,groups]=await Promise.all([
     crmFetchAll('crm_customers','*',{deleted:false}),
     crmFetchAll('crm_tags','*'),
     crmFetchAll('crm_customer_tags','*'),
     crmFetchAll('crm_people','*',{deleted:false}),
     crmFetchAll('crm_customer_external_refs','*',{deleted:false}),
     crmFetchAll('crm_actions','*',{deleted:false}),
+    crmFetchAll('crm_groups','*',{deleted:false}),
   ]);
   CRM_CUSTOMERS=cust;
   CRM_TAGS=tags;
@@ -2584,6 +2619,7 @@ async function crmLoadAll(){
   CRM_PEOPLE=people;
   CRM_EXTERNAL_REFS=refs;
   CRM_ACTIONS=actions;
+  CRM_GROUPS=groups;
   crmRenderCustomers();
   if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
@@ -2626,7 +2662,7 @@ function crmRenderCustomers(){
   }).join('')+`</div>`;
 }
 function crmOpenCustomerEdit(id){
-  crmEditCtx={customerId:id,tags:[],people:[],refs:[]};
+  crmEditCtx={customerId:id,tags:[],people:[],refs:[],segmento:[],perfil:[]};
   document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
   document.getElementById('crm-cust-name').value=c?.display_name||'';
@@ -2641,7 +2677,10 @@ function crmOpenCustomerEdit(id){
   crmEditCtx.tags=id?CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)).filter(Boolean).map(t=>t.name):[];
   crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):[];
   crmEditCtx.refs=id?CRM_EXTERNAL_REFS.filter(r=>r.customer_id===id).map(r=>({...r})):[];
-  crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();
+  crmEditCtx.segmento=c?.segmento||[];
+  crmEditCtx.perfil=c?.perfil_comercial||[];
+  crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();crmRenderCustSegmento();crmRenderPerfilToggle();
+  crmPopulateGroupSelect(c?.group_id||'');
   document.getElementById('crm-cust-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-tl-periodo').value='30';crmRenderTimeline();}
   const temVinculoTiny=id&&crmEditCtx.refs.some(r=>r.source==='tiny'&&!r.deleted);
@@ -2652,6 +2691,48 @@ function crmOpenCustomerEdit(id){
 function crmRenderCustTags(){
   const cont=document.getElementById('crm-cust-tags');
   cont.innerHTML=crmEditCtx.tags.length?crmEditCtx.tags.map(tn=>`<span class="crm-chip">${esc(tn)}<span class="x" onclick="crmEditCtx.tags=crmEditCtx.tags.filter(t=>t!=='${esc(tn).replace(/'/g,"\\'")}');crmRenderCustTags()">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
+}
+function crmRenderCustSegmento(){
+  const cont=document.getElementById('crm-cust-segmento');
+  cont.innerHTML=crmEditCtx.segmento.length?crmEditCtx.segmento.map(s=>`<span class="crm-chip">${esc(s)}<span class="x" onclick="crmEditCtx.segmento=crmEditCtx.segmento.filter(x=>x!=='${esc(s).replace(/'/g,"\\'")}');crmRenderCustSegmento()">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
+}
+function crmAddSegmento(){
+  const inp=document.getElementById('crm-segmento-new');
+  const v=inp.value.trim();
+  if(!v)return;
+  if(!crmEditCtx.segmento.includes(v))crmEditCtx.segmento.push(v);
+  inp.value='';
+  crmRenderCustSegmento();
+}
+function crmRenderPerfilToggle(){
+  document.querySelectorAll('#crm-perfil-toggle button').forEach(b=>{
+    b.classList.toggle('active',crmEditCtx.perfil.includes(b.dataset.v));
+  });
+}
+function crmTogglePerfil(v){
+  if(crmEditCtx.perfil.includes(v))crmEditCtx.perfil=crmEditCtx.perfil.filter(x=>x!==v);
+  else crmEditCtx.perfil.push(v);
+  crmRenderPerfilToggle();
+}
+function crmPopulateGroupSelect(selectedId){
+  const sel=document.getElementById('crm-cust-group');
+  const opts=['<option value="">— nenhum —</option>']
+    .concat(CRM_GROUPS.slice().sort((a,b)=>a.name.localeCompare(b.name))
+      .map(g=>`<option value="${g.id}"${g.id===selectedId?' selected':''}>${esc(g.name)}</option>`));
+  sel.innerHTML=opts.join('');
+}
+async function crmCreateAndSelectGroup(){
+  const inp=document.getElementById('crm-group-new');
+  const name=inp.value.trim();
+  if(!name)return;
+  let group=CRM_GROUPS.find(g=>g.name.toLowerCase()===name.toLowerCase());
+  if(!group){
+    const{data,error}=await _supa.from('crm_groups').insert({name}).select().single();
+    if(error){toastSave('Erro ao criar grupo: '+error.message);return;}
+    group=data;CRM_GROUPS.push(group);
+  }
+  crmPopulateGroupSelect(group.id);
+  inp.value='';
 }
 function crmAddTagToCustomer(){
   const inp=document.getElementById('crm-tag-new');
@@ -2700,6 +2781,9 @@ async function crmSaveCustomer(){
     document:document.getElementById('crm-cust-doc').value.trim()||null,
     status:document.getElementById('crm-cust-status').value,
     notes:document.getElementById('crm-cust-notes').value.trim()||null,
+    segmento:crmEditCtx.segmento.length?crmEditCtx.segmento:null,
+    perfil_comercial:crmEditCtx.perfil.length?crmEditCtx.perfil:null,
+    group_id:document.getElementById('crm-cust-group').value||null,
     owner_user_id:authUser.id,
   };
   let customerId=crmEditCtx.customerId;
