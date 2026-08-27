@@ -147,7 +147,7 @@ body.dark .modal-h{background:#1B2535}
 .crm-chip{font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
 .crm-chip .x{cursor:pointer;color:var(--red)}
 .crm-timeline{display:flex;flex-wrap:wrap;gap:.5rem}
-.crm-tl-card{flex:1 1 215px;max-width:270px;min-width:200px;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem}
+.crm-tl-card{flex:1 1 190px;max-width:225px;min-width:170px;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .6rem;overflow-wrap:anywhere;word-break:break-word}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
@@ -587,7 +587,6 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
-      <div class="crm-section">Projeto</div>
       <div class="crm-row-proj-main">
         <div class="ff"><label>Projeto</label><input type="text" id="crm-proj-name" placeholder="ex: Embalagens descartáveis"></div>
         <div class="ff">
@@ -636,15 +635,12 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
 
-      <div class="crm-section">Próxima Ação</div>
-      <div id="crm-proj-next-action"></div>
+      <div id="crm-proj-next-action" style="margin-top:1.1rem"></div>
+
+      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
       <div id="crm-proj-timeline-section" style="display:none">
-        <div class="crm-section">Atividade</div>
-        <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Timeline</span>
-          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmCreateActionForProject()">＋ Ação</button>
-        </div>
+        <div class="fsep">Timeline</div>
         <div class="tb" style="padding:.3rem 0;gap:.4rem">
           <span id="msf-crm-proj-acttype-wrap"></span>
           <select id="crm-proj-tl-periodo" onchange="crmRenderProjectTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
@@ -683,7 +679,6 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
-      <div class="crm-section">Cliente</div>
       <div class="crm-row-cli-main">
         <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
@@ -700,7 +695,8 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
       </div>
 
-      <div class="crm-section">Relacionamento</div>
+      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
+
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem">
         <div>
           <div class="fsep">Tags</div>
@@ -719,8 +715,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
 
-      <div id="crm-cust-purchase-section" style="display:none">
-        <div class="crm-section">Compras</div>
+      <div id="crm-cust-purchase-section" style="display:none;margin-top:.9rem">
         <div id="crm-ph-empty" class="crm-empty" style="display:none">Sem histórico de compras no Tiny</div>
         <div id="crm-ph-content">
           <div class="crm-kpi-strip">
@@ -735,8 +730,9 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
 
+      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
+
       <div id="crm-cust-timeline-section" style="display:none">
-        <div style="font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.3rem;padding-top:.7rem;border-top:1px solid var(--bdr)">Atividade</div>
         <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
           <span>Timeline</span>
           <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
@@ -774,12 +770,9 @@ body.dark .rv-tabs{background:#0A0F1A}
           <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
           <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
         </div>
-      
-
-      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmSaveCustomer()">💾 Salvar cliente</button>
+      </div>
     </div>
   </div>
-</div>
 </div>
 
 <!-- CRM — REVISÃO TINY (fila permanente de resolução humana — só bloqueante) -->
@@ -3196,12 +3189,12 @@ function crmActionListHtml(acoes){
         ${crmTypeIconBadge(a.type)}
         <div style="flex:1;min-width:0">
           <div style="font-size:.7rem"><b style="color:var(--${cor})">${esc(CRM_TYPE_LBL[a.type]||a.type)}</b> <span style="color:var(--ink4)">· ${statusTxt}</span></div>
-          <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.summary)}</div>
-          ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem">${esc(a.details)}</div>`:''}
+          <div style="font-size:.72rem;color:var(--ink2);margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere">${esc(a.summary)}</div>
+          ${a.details?`<div style="font-size:.64rem;color:var(--ink4);margin-top:.1rem;overflow-wrap:anywhere">${esc(a.details)}</div>`:''}
           <div style="font-size:.6rem;color:var(--ink4);margin-top:.3rem">${crmFmtDate(a.occurred_at)}</div>
         </div>
       </div>
-      ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'}">
+      ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'};overflow-wrap:anywhere">
         ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
       </div>`:''}
       <button class="crm-tl-del" onclick="crmDeleteAction('${a.id}')" title="Excluir">excluir</button>
