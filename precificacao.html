@@ -136,9 +136,8 @@ body.dark .modal-h{background:#1B2535}
 .crm-row-proj-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.6rem}
 .crm-row-proj-tipo{display:grid;grid-template-columns:auto 2fr 1.4fr;gap:.6rem;align-items:end}
 .crm-row-proj-next{display:grid;grid-template-columns:2.5fr 1fr;gap:.6rem}
-.crm-row-cli-main{display:grid;grid-template-columns:1.6fr 1.3fr 1fr;gap:.6rem}
-.crm-row-cli-doc{display:grid;grid-template-columns:1fr 2fr;gap:.6rem}
-@media(max-width:720px){.crm-row-proj-main,.crm-row-cli-main{grid-template-columns:1fr}.crm-row-proj-tipo,.crm-row-proj-next,.crm-row-cli-doc{grid-template-columns:1fr}}
+.crm-row-cli-main{display:grid;grid-template-columns:1.5fr 1fr 1.1fr .8fr;gap:.6rem}
+@media(max-width:720px){.crm-row-proj-main,.crm-row-cli-main{grid-template-columns:1fr}.crm-row-proj-tipo,.crm-row-proj-next{grid-template-columns:1fr}}
 .crm-kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin:.6rem 0}
 .crm-kpi{background:var(--bg);border-radius:8px;padding:.5rem .6rem}
 .crm-kpi-lbl{font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em}
@@ -681,6 +680,7 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="modal-b">
       <div class="crm-row-cli-main">
         <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
+        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
         <div class="ff"><label>Status</label>
           <select id="crm-cust-status">
@@ -690,14 +690,19 @@ body.dark .rv-tabs{background:#0A0F1A}
           </select>
         </div>
       </div>
-      <div class="crm-row-cli-doc" style="margin-top:.6rem">
-        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
-        <div class="ff"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
-      </div>
+      <div class="ff" style="margin-top:.6rem"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
 
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
-      <div class="grid" style="grid-template-columns:1.1fr 1.3fr .9fr 1.1fr .9fr;gap:.9rem">
+      <div>
+        <div class="fsep">Pessoas</div>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;margin-top:.3rem">
+          <span id="crm-cust-people" style="display:contents"></span>
+          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1.2fr 1.4fr 1fr 1fr;gap:.9rem;margin-top:1.1rem">
         <div>
           <div class="fsep">Segmento</div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
@@ -735,13 +740,6 @@ body.dark .rv-tabs{background:#0A0F1A}
           </div>
         </div>
         <div>
-          <div class="fsep">Pessoas</div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-            <span id="crm-cust-people" style="display:contents"></span>
-            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
-          </div>
-        </div>
-        <div>
           <div class="fsep">Tags</div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
             <span id="crm-cust-tags" style="display:contents"></span>
@@ -774,18 +772,18 @@ body.dark .rv-tabs{background:#0A0F1A}
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
       <div id="crm-cust-timeline-section" style="display:none">
-        <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Timeline</span>
+        <div class="fsep">Timeline</div>
+        <div class="tb" style="padding:.3rem 0;gap:.4rem;justify-content:space-between">
+          <div class="tb" style="gap:.4rem">
+            <span id="msf-crm-acttype-wrap"></span>
+            <select id="crm-tl-periodo" onchange="crmRenderTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
+              <option value="7">últimos 7 dias</option>
+              <option value="30" selected>últimos 30 dias</option>
+              <option value="90">últimos 90 dias</option>
+              <option value="9999">tudo</option>
+            </select>
+          </div>
           <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
-        </div>
-        <div class="tb" style="padding:.3rem 0;gap:.4rem">
-          <span id="msf-crm-acttype-wrap"></span>
-          <select id="crm-tl-periodo" onchange="crmRenderTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
-            <option value="7">últimos 7 dias</option>
-            <option value="30" selected>últimos 30 dias</option>
-            <option value="90">últimos 90 dias</option>
-            <option value="9999">tudo</option>
-          </select>
         </div>
         <div id="crm-cust-timeline" class="crm-timeline"></div>
       </div>
