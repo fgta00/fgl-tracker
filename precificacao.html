@@ -144,58 +144,13 @@ body.dark .modal-h{background:#1B2535}
 .crm-kpi-lbl{font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em}
 .crm-kpi-val{font-size:.86rem;font-weight:700;color:var(--ink2);font-family:'IBM Plex Mono';margin-top:.1rem}
 .crm-empty{font-size:.68rem;color:var(--ink4)}
-.crm-chip{font-size:.66rem;background:var(--ltblue);color:var(--blue);padding:.15rem .5rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
+.crm-chip{font-size:.72rem;background:var(--ltblue);color:var(--blue);padding:.2rem .6rem;border-radius:5px;display:inline-flex;align-items:center;gap:.3rem}
 .crm-chip .x{cursor:pointer;color:var(--red)}
 .crm-timeline{display:flex;flex-wrap:wrap;gap:.5rem}
 .crm-tl-card{flex:1 1 190px;max-width:225px;min-width:170px;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .6rem;overflow-wrap:anywhere;word-break:break-word}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
-
-/* CRM Cliente — refinamento visual aprovado (escopado) */
-.crm-cust-classbox{margin-top:1rem;border:1px solid var(--bdr);border-radius:10px;padding:.8rem .9rem;background:var(--card)}
-.crm-cust-classgrid{display:grid;grid-template-columns:1.25fr 1.35fr 1.05fr 1.45fr;gap:0;align-items:start}
-.crm-cust-classcol{min-width:0;padding:0 .85rem;border-right:1px solid var(--bdr)}
-.crm-cust-classcol:first-child{padding-left:0}.crm-cust-classcol:last-child{border-right:none;padding-right:0}
-.crm-cust-classlbl{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.055em;color:var(--ink3);margin-bottom:.38rem}
-.crm-cust-classhelper{font-size:.56rem;color:var(--ink4);margin-top:.3rem;line-height:1.25}
-.crm-cust-addline{display:flex;align-items:center;gap:.28rem;margin-top:.38rem;min-width:0}
-.crm-cust-addline input,.crm-cust-addline select{height:28px;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .45rem;font-family:'IBM Plex Sans';font-size:.66rem;background:var(--card);color:var(--ink)}
-.crm-cust-addline input{flex:1}.crm-cust-addline select{width:100%}
-.crm-cust-addbtn{height:28px;min-width:28px;padding:0 .42rem!important;border-radius:6px!important}
-.crm-cust-tagsrow{border-top:1px solid var(--bdr);margin-top:.72rem;padding-top:.65rem}
-.crm-cust-tagshead{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.35rem}
-.crm-cust-tagshead .crm-cust-classhelper{margin:0}
-.crm-cust-purchases{margin-top:.85rem}
-.crm-cust-purchases .crm-kpi-strip{gap:.6rem;margin:.45rem 0 .55rem}
-.crm-cust-purchases .crm-kpi{background:var(--card);border:1px solid var(--bdr);padding:.52rem .65rem;box-shadow:0 1px 2px rgba(15,25,35,.03)}
-.crm-cust-purchases .crm-kpi-val{font-size:.84rem}
-.crm-cust-timeline-divider{border-top:1px solid var(--bdr);margin:1rem 0 .8rem}
-.crm-cust-classbox .crm-chip{background:var(--ltblue);border:1px solid rgba(21,101,192,.13);border-radius:7px;padding:.18rem .48rem}
-.crm-cust-classbox #crm-cust-people .crm-chip{background:var(--ltgry);color:var(--ink2);border-color:var(--bdr)}
-.crm-discover-summary{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;margin:.2rem .9rem .7rem}
-.crm-discover-stat{font-size:.66rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:7px;padding:.25rem .55rem}
-.crm-discover-stat b{color:var(--ink);font-family:'IBM Plex Mono'}
-.crm-discover-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:.65rem}
-.crm-wix-card{border:1px solid var(--bdr);border-radius:9px;padding:.65rem .7rem;background:var(--card);min-width:0}
-.crm-wix-card .crm-wix-title{font-size:.78rem;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
-.crm-wix-card .crm-wix-person{font-size:.68rem;color:var(--ink2);margin-top:.15rem;overflow-wrap:anywhere}
-.crm-wix-card .crm-wix-meta{font-size:.6rem;color:var(--ink4);margin-top:.25rem}
-.crm-wix-match{margin-top:.45rem;padding:.38rem .48rem;background:var(--ltgrn);border-radius:7px;font-size:.65rem;color:var(--green)}
-.crm-wix-none{margin-top:.45rem;font-size:.63rem;color:var(--ink4)}
-.crm-wix-actions{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.55rem}
-.crm-wix-search{display:none;margin-top:.45rem;border-top:1px solid var(--bdr);padding-top:.45rem}
-.crm-wix-search.open{display:block}
-.crm-wix-search-results{max-height:140px;overflow:auto;margin-top:.3rem}
-.crm-wix-search-row{padding:.28rem .35rem;border-bottom:1px solid var(--bdr);font-size:.64rem;cursor:pointer;border-radius:4px}
-.crm-wix-search-row:hover{background:var(--ltgry)}
-.crm-resolved-head{margin-top:.8rem;border-top:1px solid var(--bdr);padding-top:.55rem;font-size:.64rem;color:var(--ink3);cursor:pointer}
-.crm-wix-prefill{display:none;background:var(--ltblue);border:1px solid var(--bdr);border-radius:8px;padding:.45rem .55rem;margin-bottom:.65rem;font-size:.66rem;color:var(--ink2)}
-.crm-wix-prefill.show{display:block}
-.crm-cust-classbox #crm-cust-people input{color:var(--ink2)!important}
-.crm-cust-classbox #crm-cust-people select{color:var(--ink3)!important}
-@media(max-width:900px){.crm-cust-classgrid{grid-template-columns:1fr 1fr;row-gap:.8rem}.crm-cust-classcol:nth-child(2){border-right:none}.crm-cust-classcol:nth-child(3){padding-left:0}.crm-cust-classcol{padding-right:.75rem}}
-@media(max-width:620px){.crm-cust-classgrid{grid-template-columns:1fr}.crm-cust-classcol{padding:.55rem 0;border-right:none;border-bottom:1px solid var(--bdr)}.crm-cust-classcol:last-child{border-bottom:none}.crm-cust-classcol:nth-child(3){padding-left:0}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
 .exp-row .formula{font-size:.55rem;color:var(--ink4);font-family:'IBM Plex Mono';display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap}
@@ -575,7 +530,6 @@ body.dark .rv-tabs{background:#0A0F1A}
           <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
           <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
           <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos</button>
-          <button class="rv-tab" id="crmtab-descobrir" onclick="crmShowSubTab('descobrir')">Descobrir</button>
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
@@ -618,24 +572,6 @@ body.dark .rv-tabs{background:#0A0F1A}
               <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenProjectEdit(null)">＋ Novo Projeto</button>
             </div>
             <div id="crm-projects-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
-          </div>
-        </div>
-
-        <div id="crmpane-descobrir" class="rv-pane">
-          <div class="card">
-            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
-              <div class="sh" style="margin:0">Descobrir</div>
-              <div style="font-size:.6rem;color:var(--ink4)">Triagem de leads Wix</div>
-            </div>
-            <div class="crm-discover-summary">
-              <span class="crm-discover-stat"><b id="crm-wix-count-relevant">—</b> novos relevantes</span>
-              <span class="crm-discover-stat"><b id="crm-wix-count-suggested">—</b> possíveis clientes</span>
-              <span id="msf-crm-wix-view-wrap"></span>
-              <span id="msf-crm-wix-year-wrap"></span>
-              <input id="crm-wix-q" placeholder="Buscar empresa, pessoa, e-mail…" oninput="crmRenderWixLeads()" style="flex:1;min-width:190px">
-            </div>
-            <div id="crm-wix-container" style="padding:.15rem .9rem .9rem"><p class="hint">Abra esta aba para carregar os leads.</p></div>
-            <div id="crm-wix-resolved-wrap" style="padding:0 .9rem .9rem"></div>
           </div>
         </div>
       </div>
@@ -743,7 +679,6 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
-      <div id="crm-wix-prefill" class="crm-wix-prefill"></div>
       <div class="crm-row-cli-main">
         <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
         <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
@@ -760,74 +695,63 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
       </div>
 
-      <div style="border-top:1px solid var(--bdr);margin:1rem 0 0"></div>
+      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
-      <div class="crm-cust-classbox">
-        <div class="crm-cust-classgrid">
-          <div class="crm-cust-classcol">
-            <div class="crm-cust-classlbl">Segmento</div>
-            <div id="crm-cust-segmento" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
-            <div class="crm-cust-addline">
-              <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…">
-              <datalist id="crm-segmento-list">
-                <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
-                <option value="Franquia"><option value="Varejo"><option value="Indústria">
-                <option value="Moda"><option value="Alimentação"><option value="Educação">
-                <option value="Agência/Brindes"><option value="Outros">
-              </datalist>
-              <button class="btn btn-s crm-cust-addbtn" onclick="crmAddSegmento()">＋</button>
-            </div>
-            <div class="crm-cust-classhelper">Quem é / em que setor atua</div>
-          </div>
-
-          <div class="crm-cust-classcol">
-            <div class="crm-cust-classlbl">Perfil Comercial</div>
-            <div id="crm-perfil-selected" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
-            <div class="crm-cust-addline">
-              <select id="crm-perfil-add">
-                <option value="">＋ adicionar…</option>
-                <option value="PE">PE</option><option value="SM BR">SM BR</option><option value="SM Asia">SM Asia</option>
-                <option value="MIX">MIX</option><option value="LOGO">LOGO</option>
-              </select>
-              <button class="btn btn-s crm-cust-addbtn" onclick="crmAddPerfil()">＋</button>
-            </div>
-            <div class="crm-cust-classhelper">Como fornecemos / vendemos</div>
-          </div>
-
-          <div class="crm-cust-classcol">
-            <div class="crm-cust-classlbl">Grupo / Rede</div>
-            <div class="crm-cust-addline" style="margin-top:0"><select id="crm-cust-group"><option value="">— nenhum —</option></select></div>
-            <div class="crm-cust-addline">
-              <input type="text" id="crm-group-new" placeholder="ou criar novo grupo/rede…">
-              <button class="btn btn-s crm-cust-addbtn" onclick="crmCreateAndSelectGroup()">＋</button>
-            </div>
-            <div class="crm-cust-classhelper">Vínculo opcional com rede / franquia</div>
-          </div>
-
-          <div class="crm-cust-classcol">
-            <div class="crm-cust-classlbl">Pessoas</div>
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem">
-              <span id="crm-cust-people" style="display:contents"></span>
-            </div>
-            <button class="btn btn-s" style="font-size:.62rem;padding:.18rem .48rem;margin-top:.38rem" onclick="crmAddPersonRow()">＋ adicionar pessoa</button>
-            <div class="crm-cust-classhelper">Contatos e papéis no relacionamento</div>
+      <div class="grid" style="grid-template-columns:1.1fr 1.3fr .9fr 1.1fr .9fr;gap:.9rem">
+        <div>
+          <div class="fsep">Segmento</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+            <span id="crm-cust-segmento" style="display:contents"></span>
+            <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…" style="width:90px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <datalist id="crm-segmento-list">
+              <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
+              <option value="Franquia"><option value="Varejo"><option value="Indústria">
+              <option value="Agência/Brindes"><option value="Outros">
+            </datalist>
+            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddSegmento()">＋</button>
           </div>
         </div>
-
-        <div class="crm-cust-tagsrow">
-          <div class="crm-cust-tagshead">
-            <div class="crm-cust-classlbl" style="margin:0">Tags</div>
-            <div class="crm-cust-classhelper">Marcadores livres / classificações ad hoc</div>
+        <div>
+          <div class="fsep">Perfil Comercial</div>
+          <div class="toggle-grp" id="crm-perfil-toggle" style="margin-top:.3rem;width:auto;flex-wrap:wrap;overflow:visible">
+            <button type="button" data-v="PE" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('PE')">PE</button>
+            <button type="button" data-v="SM BR" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('SM BR')">SM BR</button>
+            <button type="button" data-v="SM Asia" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('SM Asia')">SM Asia</button>
+            <button type="button" data-v="MIX" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('MIX')">MIX</button>
+            <button type="button" data-v="LOGO" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('LOGO')">LOGO</button>
           </div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem">
+        </div>
+        <div>
+          <div class="fsep">Grupo / Rede</div>
+          <div style="display:flex;gap:.3rem;margin-top:.3rem">
+            <select id="crm-cust-group" style="flex:1;min-width:0;font-size:.72rem;padding:.3rem .4rem;border:1.5px solid var(--bdr2);border-radius:7px">
+              <option value="">— nenhum —</option>
+            </select>
+            <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .5rem;flex-shrink:0" onclick="crmToggleGroupCreate()">＋</button>
+          </div>
+          <div id="crm-group-create-wrap" style="display:none;gap:.3rem;margin-top:.3rem">
+            <input type="text" id="crm-group-new" placeholder="nome do novo grupo…" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem;flex-shrink:0" onclick="crmCreateAndSelectGroup()">Criar</button>
+          </div>
+        </div>
+        <div>
+          <div class="fsep">Pessoas</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
+            <span id="crm-cust-people" style="display:contents"></span>
+            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
+          </div>
+        </div>
+        <div>
+          <div class="fsep">Tags</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
             <span id="crm-cust-tags" style="display:contents"></span>
-            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:110px;height:28px;border:1.5px dashed var(--bdr2);border-radius:6px;padding:.25rem .5rem;font-size:.66rem;background:var(--card);color:var(--ink)">
-            <button class="btn btn-s crm-cust-addbtn" onclick="crmAddTagToCustomer()">＋</button>
+            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:80px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
           </div>
         </div>
       </div>
 
-      <div id="crm-cust-purchase-section" class="crm-cust-purchases" style="display:none">
+      <div id="crm-cust-purchase-section" style="display:none;margin-top:.9rem">
         <div id="crm-ph-empty" class="crm-empty" style="display:none">Sem histórico de compras no Tiny</div>
         <div id="crm-ph-content">
           <div class="crm-kpi-strip">
@@ -838,11 +762,16 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div class="crm-kpi"><div class="crm-kpi-lbl">Valor histórico bruto</div><div class="crm-kpi-val" id="crm-ph-gross">—</div></div>
           </div>
           <div class="crm-empty" style="text-align:right;margin-top:-.3rem;margin-bottom:.4rem">sem desconto/frete</div>
-          <div id="crm-purchase-orders"></div>
+          <div class="collap-h" id="crm-ph-orders-h" onclick="toggleCollap(this,'crm-ph-orders-body')">
+            <span class="sh" style="margin:0;font-size:.62rem" id="crm-ph-orders-label">Histórico de compras</span><span class="chev">▶</span>
+          </div>
+          <div class="collap-body" id="crm-ph-orders-body">
+            <div id="crm-purchase-orders" style="margin-top:.4rem"></div>
+          </div>
         </div>
       </div>
 
-      <div class="crm-cust-timeline-divider"></div>
+      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
       <div id="crm-cust-timeline-section" style="display:none">
         <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
@@ -2601,9 +2530,6 @@ let rvSacachoEditing=false;
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
 let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[];
-let CRM_WIX_LEADS=[];
-let crmPendingWixLeadId=null;
-let crmWixResolvedOpen=false;
 const CRM_ACTION_TYPES=[
   {v:'whatsapp',lbl:'WhatsApp',hasDir:true},{v:'phone',lbl:'Ligação',hasDir:true},{v:'email',lbl:'E-mail',hasDir:true},
   {v:'meeting',lbl:'Reunião',hasDir:false},{v:'visit',lbl:'Visita',hasDir:false},{v:'proposal',lbl:'Proposta',hasDir:false},
@@ -2664,8 +2590,6 @@ function crmShowSubTab(id,skipReclick){
     crmRenderProjects();
     crmLoadProjects();
     crmFetchAll('crm_actions','*',{deleted:false}).then(a=>{CRM_ACTIONS=a;crmRenderProjects();});
-  }else if(id==='descobrir'){
-    crmLoadWixLeads();
   }
 }
 // Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
@@ -2744,36 +2668,27 @@ function crmRenderCustomers(){
     </div>`;
   }).join('')+`</div>`;
 }
-function crmOpenCustomerEdit(id,prefill){
-  if(!prefill)crmPendingWixLeadId=null;
+function crmOpenCustomerEdit(id){
   crmEditCtx={customerId:id,tags:[],people:[],refs:[],segmento:[],perfil:[]};
   document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
-  const pf=(!id&&prefill)?prefill:null;
-  document.getElementById('crm-cust-name').value=c?.display_name||pf?.display_name||'';
+  document.getElementById('crm-cust-name').value=c?.display_name||'';
   document.getElementById('crm-cust-trade').value=c?.trade_name||'';
   document.getElementById('crm-cust-legal').value=c?.legal_name||'';
   const temLegalName=!!(c?.legal_name&&c.legal_name.trim());
   document.getElementById('crm-cust-moredetails-h').classList.toggle('open',temLegalName);
   document.getElementById('crm-cust-moredetails-body').classList.toggle('open',temLegalName);
   document.getElementById('crm-cust-doc').value=c?.document||'';
-  document.getElementById('crm-cust-status').value=c?.status||pf?.status||'active';
+  document.getElementById('crm-cust-status').value=c?.status||'active';
   document.getElementById('crm-cust-notes').value=c?.notes||'';
   crmEditCtx.tags=id?CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)).filter(Boolean).map(t=>t.name):[];
-  crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):(pf?.person?[{name:pf.person.name||'',role:'',relationship_type:'',email:pf.person.email||null,phone:pf.person.phone||null}]:[]);
+  crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):[];
   crmEditCtx.refs=id?CRM_EXTERNAL_REFS.filter(r=>r.customer_id===id).map(r=>({...r})):[];
   crmEditCtx.segmento=c?.segmento||[];
   crmEditCtx.perfil=c?.perfil_comercial||[];
-  const pfBox=document.getElementById('crm-wix-prefill');
-  if(pfBox){
-    if(pf){
-      const contato=[pf.person?.name,pf.person?.email,pf.person?.phone].filter(Boolean).join(' · ');
-      pfBox.classList.add('show');
-      pfBox.innerHTML=`<b>Origem Wix</b>${contato?` · ${esc(contato)}`:''}<span style="color:var(--ink4)"> — revise os dados e classifique antes de salvar.</span>`;
-    }else{pfBox.classList.remove('show');pfBox.innerHTML='';}
-  }
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();crmRenderCustSegmento();crmRenderPerfilToggle();
   crmPopulateGroupSelect(c?.group_id||'');
+  document.getElementById('crm-group-create-wrap').style.display='none';
   document.getElementById('crm-cust-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-tl-periodo').value='30';crmRenderTimeline();}
   const temVinculoTiny=id&&crmEditCtx.refs.some(r=>r.source==='tiny'&&!r.deleted);
@@ -2798,21 +2713,13 @@ function crmAddSegmento(){
   crmRenderCustSegmento();
 }
 function crmRenderPerfilToggle(){
-  const cont=document.getElementById('crm-perfil-selected');
-  if(!cont)return;
-  cont.innerHTML=crmEditCtx.perfil.length?crmEditCtx.perfil.map(v=>`<span class="crm-chip">${esc(v)}<span class="x" onclick="crmTogglePerfil('${v}')">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
+  document.querySelectorAll('#crm-perfil-toggle button').forEach(b=>{
+    b.classList.toggle('active',crmEditCtx.perfil.includes(b.dataset.v));
+  });
 }
 function crmTogglePerfil(v){
   if(crmEditCtx.perfil.includes(v))crmEditCtx.perfil=crmEditCtx.perfil.filter(x=>x!==v);
   else crmEditCtx.perfil.push(v);
-  crmRenderPerfilToggle();
-}
-function crmAddPerfil(){
-  const sel=document.getElementById('crm-perfil-add');
-  const v=sel?.value||'';
-  if(!v)return;
-  if(!crmEditCtx.perfil.includes(v))crmEditCtx.perfil.push(v);
-  sel.value='';
   crmRenderPerfilToggle();
 }
 function crmPopulateGroupSelect(selectedId){
@@ -2822,24 +2729,25 @@ function crmPopulateGroupSelect(selectedId){
       .map(g=>`<option value="${g.id}"${g.id===selectedId?' selected':''}>${esc(g.name)}</option>`));
   sel.innerHTML=opts.join('');
 }
+function crmToggleGroupCreate(){
+  const wrap=document.getElementById('crm-group-create-wrap');
+  const mostrar=wrap.style.display==='none'||!wrap.style.display;
+  wrap.style.display=mostrar?'flex':'none';
+  if(mostrar)document.getElementById('crm-group-new').focus();
+}
 async function crmCreateAndSelectGroup(){
   const inp=document.getElementById('crm-group-new');
   const name=inp.value.trim();
   if(!name)return;
-  const norm=v=>v.trim().toLocaleLowerCase('pt-BR');
-  let group=CRM_GROUPS.find(g=>norm(g.name)===norm(name));
+  let group=CRM_GROUPS.find(g=>g.name.toLowerCase()===name.toLowerCase());
   if(!group){
     const{data,error}=await _supa.from('crm_groups').insert({name}).select().single();
-    if(error){
-      if(error.code==='23505'){
-        await crmLoadAll();
-        group=CRM_GROUPS.find(g=>norm(g.name)===norm(name));
-        if(!group){toastSave('Grupo já existe, mas não consegui recarregá-lo.');return;}
-      }else{toastSave('Erro ao criar grupo: '+error.message);return;}
-    }else{group=data;CRM_GROUPS.push(group);}
+    if(error){toastSave('Erro ao criar grupo: '+error.message);return;}
+    group=data;CRM_GROUPS.push(group);
   }
   crmPopulateGroupSelect(group.id);
   inp.value='';
+  document.getElementById('crm-group-create-wrap').style.display='none';
 }
 function crmAddTagToCustomer(){
   const inp=document.getElementById('crm-tag-new');
@@ -2851,16 +2759,22 @@ function crmAddTagToCustomer(){
 }
 function crmRenderCustPeople(){
   const cont=document.getElementById('crm-cust-people');
-  cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>`<span class="crm-chip" style="gap:.25rem">
-    <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.66rem;width:64px;color:var(--blue);padding:0">
-    <span style="color:var(--ink4)">·</span>
-    <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.66rem;width:56px;color:var(--blue);padding:0">
-    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.6rem;color:var(--ink4);padding:0">
-      <option value="">—</option>
-      ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
-    </select>
-    <span class="x" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
-  </span>`).join(''):'<span class="crm-empty">—</span>';
+  cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>{
+    const contato=[p.email,p.phone].filter(Boolean).join(' · ');
+    return`<span class="crm-chip" style="gap:.25rem;flex-direction:column;align-items:flex-start;padding:.25rem .55rem">
+    <span style="display:flex;align-items:center;gap:.25rem">
+      <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.7rem;width:64px;color:var(--blue);padding:0">
+      <span style="color:var(--ink4)">·</span>
+      <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.7rem;width:56px;color:var(--blue);padding:0">
+      <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.62rem;color:var(--ink4);padding:0">
+        <option value="">—</option>
+        ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
+      </select>
+      <span class="x" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
+    </span>
+    ${contato?`<span style="font-size:.58rem;color:var(--ink4)">${esc(contato)}</span>`:''}
+  </span>`;
+  }).join(''):'<span class="crm-empty">—</span>';
 }
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:''});crmRenderCustPeople();}
 function crmRenderCustRefs(){
@@ -2925,10 +2839,10 @@ async function crmSaveCustomer(){
   for(const p of crmEditCtx.people){
     if(!p.name)continue;
     if(p.id){
-      await _supa.from('crm_people').update({name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null}).eq('id',p.id);
+      await _supa.from('crm_people').update({name:p.name,role:p.role||null,relationship_type:p.relationship_type||null}).eq('id',p.id);
       idsPessoasMantidas.push(p.id);
     }else{
-      const{data}=await _supa.from('crm_people').insert({customer_id:customerId,name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null}).select().single();
+      const{data}=await _supa.from('crm_people').insert({customer_id:customerId,name:p.name,role:p.role||null,relationship_type:p.relationship_type||null}).select().single();
       if(data)idsPessoasMantidas.push(data.id);
     }
   }
@@ -2949,16 +2863,9 @@ async function crmSaveCustomer(){
   for(const r of refsOriginais){
     if(!idsRefsMantidas.includes(r.id))await _supa.from('crm_customer_external_refs').update({deleted:true}).eq('id',r.id);
   }
-  if(crmPendingWixLeadId){
-    const wixId=crmPendingWixLeadId;
-    const{error:wixErr}=await _supa.from('crm_wix_leads').update({status:'converted',matched_customer_id:customerId,reviewed_at:new Date().toISOString(),reviewed_by:authUser.id}).eq('id',wixId);
-    if(wixErr){toastSave('Cliente salvo, mas lead Wix não foi atualizado: '+wixErr.message);}
-    crmPendingWixLeadId=null;
-  }
   closeM('crmcustomer');
   toastSave('Cliente salvo ✓');
   await crmLoadAll();
-  if(document.getElementById('crmpane-descobrir')?.classList.contains('active'))await crmLoadWixLeads();
 }
 /* ══════════════════════════════════════
    CRM — HISTÓRICO DE COMPRAS (Tiny) — só leitura, 3 RPCs
@@ -2995,6 +2902,9 @@ async function crmLoadPurchaseHistory(customerId){
   document.getElementById('crm-ph-count').textContent=s.order_count||0;
   document.getElementById('crm-ph-avg').textContent=crmFmtBRL(s.avg_ticket);
   document.getElementById('crm-ph-gross').textContent=crmFmtBRL(s.total_gross_value);
+  document.getElementById('crm-ph-orders-label').textContent=`Histórico de compras (${s.order_count} pedido${s.order_count!==1?'s':''})`;
+  document.getElementById('crm-ph-orders-h').classList.remove('open');
+  document.getElementById('crm-ph-orders-body').classList.remove('open');
   crmRenderPurchaseOrders(orders||[]);
 }
 function crmRenderPurchaseOrders(orders){
@@ -3593,115 +3503,6 @@ async function crmDismissProjectSignal(projectId,nextStepDate){
   const el=document.getElementById(`crm-signal-proj-${projectId}`);
   if(el)el.remove();
   crmCheckEmptySignalContainer();
-}
-
-
-/* ══════════════════════════════════════
-   CRM — DESCOBRIR / WIX V1
-   Staging separado: nada vira Cliente/Pessoa sem decisão humana.
-══════════════════════════════════════ */
-function crmWixHasLabel(w,label){return Array.isArray(w.labels)&&w.labels.includes(label);}
-function crmWixIsRelevant(w){return crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3')||crmWixHasLabel(w,'SM Fred');}
-function crmWixYear(w){const d=w.wix_created_at?new Date(w.wix_created_at):null;return d&&!isNaN(d)?String(d.getFullYear()):'—';}
-function crmWixDisplay(w){return (w.company||[w.first_name,w.last_name].filter(Boolean).join(' ')||w.email||'Lead Wix').trim();}
-function crmWixPerson(w){return [w.first_name,w.last_name].filter(Boolean).join(' ').trim();}
-function crmWixSuggestedCustomer(w){return w.suggested_customer_id?CRM_CUSTOMERS.find(c=>c.id===w.suggested_customer_id):null;}
-async function crmLoadWixLeads(){
-  const cont=document.getElementById('crm-wix-container');if(cont)cont.innerHTML='<p class="hint">Carregando…</p>';
-  CRM_WIX_LEADS=await crmFetchAll('crm_wix_leads','*',{deleted:false});
-  crmInitWixFilters();crmRenderWixLeads();
-}
-function crmInitWixFilters(){
-  const vw=document.getElementById('msf-crm-wix-view-wrap');
-  if(vw&&!vw.innerHTML){vw.innerHTML=msfHtml('crm-wix-view','Novos relevantes');msfPopulate('crm-wix-view',['Novos relevantes','Possível cliente existente','Orçamento','SM Fred'],'Novos relevantes',crmRenderWixLeads);}
-  const yr=document.getElementById('msf-crm-wix-year-wrap');
-  if(yr&&!yr.innerHTML){
-    const years=[...new Set(CRM_WIX_LEADS.map(crmWixYear).filter(y=>y!=='—'))].sort().reverse();
-    yr.innerHTML=msfHtml('crm-wix-year','Todos anos');msfPopulate('crm-wix-year',years,'Todos anos',crmRenderWixLeads);
-  }
-}
-function crmWixSelected(id){const st=MSF[id];return(!st||st.selected===null)?[]:[...st.selected];}
-function crmWixFilterMatch(w){
-  const q=norm(document.getElementById('crm-wix-q')?.value||'');
-  if(q&&!norm([crmWixDisplay(w),crmWixPerson(w),w.email,w.phone].filter(Boolean).join(' ')).includes(q))return false;
-  const views=crmWixSelected('crm-wix-view');
-  if(views.length){
-    const ok=views.some(v=>v==='Novos relevantes'?(w.status==='new'&&crmWixIsRelevant(w)):v==='Possível cliente existente'?(w.status==='new'&&!!w.suggested_customer_id):v==='Orçamento'?(w.status==='new'&&(crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3'))):v==='SM Fred'?(w.status==='new'&&crmWixHasLabel(w,'SM Fred')):false);
-    if(!ok)return false;
-  }else if(!(w.status==='new'&&crmWixIsRelevant(w)))return false;
-  const years=crmWixSelected('crm-wix-year');if(years.length&&!years.includes(crmWixYear(w)))return false;
-  return true;
-}
-function crmWixPriority(w){
-  const year=Number(crmWixYear(w))||0, recent=year>=2024?30:year>=2022?15:0;
-  const complete=(w.company?8:0)+(w.phone?5:0)+(w.email?3:0)+(crmWixPerson(w)?3:0);
-  const budget=(crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3'))?40:0;
-  const sm=crmWixHasLabel(w,'SM Fred')?20:0;
-  return (w.suggested_customer_id?50:0)+budget+sm+recent+complete;
-}
-function crmWixCardHtml(w){
-  const sugg=crmWixSuggestedCustomer(w),person=crmWixPerson(w),labels=(w.labels||[]).filter(l=>l==='Pedir um orçamento 2'||l==='Pedir um orçamento 3'||l==='SM Fred');
-  const contact=[person,w.email,w.phone].filter(Boolean).map(esc).join(' · ');
-  return `<div class="crm-wix-card" id="crm-wix-card-${w.id}">
-    <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start"><div class="crm-wix-title">${esc(crmWixDisplay(w))}</div><div style="font-size:.58rem;color:var(--ink4);white-space:nowrap">${esc(crmWixYear(w))}</div></div>
-    ${contact?`<div class="crm-wix-person">${contact}</div>`:''}
-    <div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.35rem">${labels.map(l=>`<span class="crm-chip">${esc(l)}</span>`).join('')}</div>
-    ${sugg?`<div class="crm-wix-match"><div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.04em;opacity:.75">Possível cliente existente · ${esc(w.match_type||'sugestão')}</div><b>${esc(sugg.display_name)}</b>${sugg.trade_name?` · ${esc(sugg.trade_name)}`:''}</div>`:`<div class="crm-wix-none">Nenhum cliente correspondente confirmado.</div>`}
-    <div class="crm-wix-actions">
-      ${sugg?`<button class="btn btn-p" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmConfirmWixLink('${w.id}','${sugg.id}')">Confirmar vínculo</button><button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmOpenCustomerEdit('${sugg.id}')">Abrir cliente</button>`:`<button class="btn btn-p" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmCreateProspectFromWix('${w.id}')">Criar Prospect</button><button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmToggleWixSearch('${w.id}')">Procurar cliente</button>`}
-      <button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem;color:var(--ink4)" onclick="crmDismissWixLead('${w.id}')">Descartar</button>
-    </div>
-    <div class="crm-wix-search" id="crm-wix-search-${w.id}"><input placeholder="Buscar cliente…" oninput="crmRenderWixCustomerSearch('${w.id}',this.value)" style="width:100%"><div class="crm-wix-search-results" id="crm-wix-search-results-${w.id}"></div></div>
-  </div>`;
-}
-function crmRenderWixLeads(){
-  const cont=document.getElementById('crm-wix-container');if(!cont)return;
-  const relevant=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='new'&&crmWixIsRelevant(w));
-  const suggested=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='new'&&w.suggested_customer_id);
-  document.getElementById('crm-wix-count-relevant').textContent=relevant.length;
-  document.getElementById('crm-wix-count-suggested').textContent=suggested.length;
-  const arr=CRM_WIX_LEADS.filter(w=>!w.deleted&&crmWixFilterMatch(w)).sort((a,b)=>crmWixPriority(b)-crmWixPriority(a)||(b.wix_created_at||'').localeCompare(a.wix_created_at||''));
-  cont.innerHTML=arr.length?`<div class="crm-discover-grid">${arr.map(crmWixCardHtml).join('')}</div>`:'<div class="crm-empty">Nenhum lead nesta seleção.</div>';
-  const resolved=CRM_WIX_LEADS.filter(w=>!w.deleted&&(w.status==='linked'||w.status==='converted'));
-  const dismissed=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='dismissed');
-  const rw=document.getElementById('crm-wix-resolved-wrap');
-  rw.innerHTML=`<div class="crm-resolved-head" onclick="crmWixResolvedOpen=!crmWixResolvedOpen;crmRenderWixResolved()">${crmWixResolvedOpen?'▾':'▸'} Resolvidos ${resolved.length} · Descartados ${dismissed.length}</div><div id="crm-wix-resolved-list"></div>`;
-  crmRenderWixResolved();
-}
-function crmRenderWixResolved(){
-  const el=document.getElementById('crm-wix-resolved-list');if(!el)return;if(!crmWixResolvedOpen){el.innerHTML='';return;}
-  const arr=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status!=='new').sort((a,b)=>(b.reviewed_at||b.dismissed_at||'').localeCompare(a.reviewed_at||a.dismissed_at||''));
-  el.innerHTML=arr.length?`<div style="margin-top:.45rem">${arr.slice(0,100).map(w=>`<div style="display:flex;justify-content:space-between;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--bdr);font-size:.64rem"><span>${esc(crmWixDisplay(w))}</span><span style="color:var(--ink4)">${esc(w.status)}</span></div>`).join('')}</div>`:'<div class="crm-empty" style="margin-top:.4rem">—</div>';
-}
-async function crmConfirmWixLink(wixId,customerId){
-  const{error}=await _supa.from('crm_wix_leads').update({status:'linked',matched_customer_id:customerId,reviewed_at:new Date().toISOString(),reviewed_by:authUser.id}).eq('id',wixId);
-  if(error){toastSave('Erro ao vincular: '+error.message);return;}
-  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(w){w.status='linked';w.matched_customer_id=customerId;w.reviewed_at=new Date().toISOString();}
-  crmRenderWixLeads();toastSave('Lead Wix vinculado ✓');
-  if(w&&crmWixPerson(w)&&confirm('Adicionar '+crmWixPerson(w)+' às Pessoas deste cliente?'))await crmAddWixPerson(w,customerId);
-}
-async function crmAddWixPerson(w,customerId){
-  const name=crmWixPerson(w);if(!name)return;
-  const existing=CRM_PEOPLE.some(p=>p.customer_id===customerId&&!p.deleted&&((w.email&&p.email&&p.email.toLowerCase()===w.email.toLowerCase())||(w.phone&&p.phone&&normPhoneSimple(p.phone)===normPhoneSimple(w.phone))));
-  if(existing){toastSave('Contato já existe em Pessoas.');return;}
-  const{data,error}=await _supa.from('crm_people').insert({customer_id:customerId,name,email:w.email||null,phone:w.phone||null}).select().single();
-  if(error){toastSave('Erro ao adicionar Pessoa: '+error.message);return;}if(data)CRM_PEOPLE.push(data);toastSave('Pessoa adicionada ✓');
-}
-function normPhoneSimple(v){return String(v||'').replace(/\D/g,'');}
-function crmCreateProspectFromWix(wixId){
-  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(!w)return;crmPendingWixLeadId=wixId;
-  crmOpenCustomerEdit(null,{display_name:(w.company||crmWixPerson(w)||w.email||'').trim(),status:'prospect',person:{name:crmWixPerson(w),email:w.email||'',phone:w.phone||''}});
-}
-function crmToggleWixSearch(wixId){document.getElementById('crm-wix-search-'+wixId)?.classList.toggle('open');}
-function crmRenderWixCustomerSearch(wixId,q){
-  const el=document.getElementById('crm-wix-search-results-'+wixId);if(!el)return;const nq=norm(q);if(!nq){el.innerHTML='';return;}
-  const arr=CRM_CUSTOMERS.filter(c=>!c.deleted&&norm([c.display_name,c.trade_name,c.legal_name,c.document].filter(Boolean).join(' ')).includes(nq)).slice(0,12);
-  el.innerHTML=arr.length?arr.map(c=>`<div class="crm-wix-search-row" onclick="crmConfirmWixLink('${wixId}','${c.id}')"><b>${esc(c.display_name)}</b>${c.trade_name?` · ${esc(c.trade_name)}`:''}${c.document?`<div style="color:var(--ink4)">${esc(c.document)}</div>`:''}</div>`).join(''):'<div class="crm-empty">Nenhum cliente encontrado.</div>';
-}
-async function crmDismissWixLead(wixId){
-  const{error}=await _supa.from('crm_wix_leads').update({status:'dismissed',dismissed_at:new Date().toISOString(),dismissed_by:authUser.id,reviewed_at:new Date().toISOString(),reviewed_by:authUser.id}).eq('id',wixId);
-  if(error){toastSave('Erro ao descartar: '+error.message);return;}
-  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(w){w.status='dismissed';w.dismissed_at=new Date().toISOString();}crmRenderWixLeads();
 }
 
 /* ══════════════════════════════════════
