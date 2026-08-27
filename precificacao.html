@@ -151,6 +151,32 @@ body.dark .modal-h{background:#1B2535}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
+
+/* CRM Cliente — refinamento visual aprovado (escopado) */
+.crm-cust-classbox{margin-top:1rem;border:1px solid var(--bdr);border-radius:10px;padding:.8rem .9rem;background:var(--card)}
+.crm-cust-classgrid{display:grid;grid-template-columns:1.25fr 1.35fr 1.05fr 1.45fr;gap:0;align-items:start}
+.crm-cust-classcol{min-width:0;padding:0 .85rem;border-right:1px solid var(--bdr)}
+.crm-cust-classcol:first-child{padding-left:0}.crm-cust-classcol:last-child{border-right:none;padding-right:0}
+.crm-cust-classlbl{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.055em;color:var(--ink3);margin-bottom:.38rem}
+.crm-cust-classhelper{font-size:.56rem;color:var(--ink4);margin-top:.3rem;line-height:1.25}
+.crm-cust-addline{display:flex;align-items:center;gap:.28rem;margin-top:.38rem;min-width:0}
+.crm-cust-addline input,.crm-cust-addline select{height:28px;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.25rem .45rem;font-family:'IBM Plex Sans';font-size:.66rem;background:var(--card);color:var(--ink)}
+.crm-cust-addline input{flex:1}.crm-cust-addline select{width:100%}
+.crm-cust-addbtn{height:28px;min-width:28px;padding:0 .42rem!important;border-radius:6px!important}
+.crm-cust-tagsrow{border-top:1px solid var(--bdr);margin-top:.72rem;padding-top:.65rem}
+.crm-cust-tagshead{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.35rem}
+.crm-cust-tagshead .crm-cust-classhelper{margin:0}
+.crm-cust-purchases{margin-top:.85rem}
+.crm-cust-purchases .crm-kpi-strip{gap:.6rem;margin:.45rem 0 .55rem}
+.crm-cust-purchases .crm-kpi{background:var(--card);border:1px solid var(--bdr);padding:.52rem .65rem;box-shadow:0 1px 2px rgba(15,25,35,.03)}
+.crm-cust-purchases .crm-kpi-val{font-size:.84rem}
+.crm-cust-timeline-divider{border-top:1px solid var(--bdr);margin:1rem 0 .8rem}
+.crm-cust-classbox .crm-chip{background:var(--ltblue);border:1px solid rgba(21,101,192,.13);border-radius:7px;padding:.18rem .48rem}
+.crm-cust-classbox #crm-cust-people .crm-chip{background:var(--ltgry);color:var(--ink2);border-color:var(--bdr)}
+.crm-cust-classbox #crm-cust-people input{color:var(--ink2)!important}
+.crm-cust-classbox #crm-cust-people select{color:var(--ink3)!important}
+@media(max-width:900px){.crm-cust-classgrid{grid-template-columns:1fr 1fr;row-gap:.8rem}.crm-cust-classcol:nth-child(2){border-right:none}.crm-cust-classcol:nth-child(3){padding-left:0}.crm-cust-classcol{padding-right:.75rem}}
+@media(max-width:620px){.crm-cust-classgrid{grid-template-columns:1fr}.crm-cust-classcol{padding:.55rem 0;border-right:none;border-bottom:1px solid var(--bdr)}.crm-cust-classcol:last-child{border-bottom:none}.crm-cust-classcol:nth-child(3){padding-left:0}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
 .exp-row .formula{font-size:.55rem;color:var(--ink4);font-family:'IBM Plex Mono';display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap}
@@ -695,61 +721,74 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="ff"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
       </div>
 
-      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
+      <div style="border-top:1px solid var(--bdr);margin:1rem 0 0"></div>
 
-      <div class="grid" style="grid-template-columns:1.3fr 1.6fr 1.1fr 1.3fr;gap:1rem">
-        <div>
-          <div class="fsep">Segmento</div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-            <span id="crm-cust-segmento" style="display:contents"></span>
-            <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…" style="width:90px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
-            <datalist id="crm-segmento-list">
-              <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
-              <option value="Franquia"><option value="Varejo"><option value="Indústria">
-              <option value="Agência/Brindes"><option value="Outros">
-            </datalist>
-            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddSegmento()">＋</button>
+      <div class="crm-cust-classbox">
+        <div class="crm-cust-classgrid">
+          <div class="crm-cust-classcol">
+            <div class="crm-cust-classlbl">Segmento</div>
+            <div id="crm-cust-segmento" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
+            <div class="crm-cust-addline">
+              <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…">
+              <datalist id="crm-segmento-list">
+                <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
+                <option value="Franquia"><option value="Varejo"><option value="Indústria">
+                <option value="Moda"><option value="Alimentação"><option value="Educação">
+                <option value="Agência/Brindes"><option value="Outros">
+              </datalist>
+              <button class="btn btn-s crm-cust-addbtn" onclick="crmAddSegmento()">＋</button>
+            </div>
+            <div class="crm-cust-classhelper">Quem é / em que setor atua</div>
+          </div>
+
+          <div class="crm-cust-classcol">
+            <div class="crm-cust-classlbl">Perfil Comercial</div>
+            <div id="crm-perfil-selected" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
+            <div class="crm-cust-addline">
+              <select id="crm-perfil-add">
+                <option value="">＋ adicionar…</option>
+                <option value="PE">PE</option><option value="SM BR">SM BR</option><option value="SM Asia">SM Asia</option>
+                <option value="MIX">MIX</option><option value="LOGO">LOGO</option>
+              </select>
+              <button class="btn btn-s crm-cust-addbtn" onclick="crmAddPerfil()">＋</button>
+            </div>
+            <div class="crm-cust-classhelper">Como fornecemos / vendemos</div>
+          </div>
+
+          <div class="crm-cust-classcol">
+            <div class="crm-cust-classlbl">Grupo / Rede</div>
+            <div class="crm-cust-addline" style="margin-top:0"><select id="crm-cust-group"><option value="">— nenhum —</option></select></div>
+            <div class="crm-cust-addline">
+              <input type="text" id="crm-group-new" placeholder="ou criar novo grupo/rede…">
+              <button class="btn btn-s crm-cust-addbtn" onclick="crmCreateAndSelectGroup()">＋</button>
+            </div>
+            <div class="crm-cust-classhelper">Vínculo opcional com rede / franquia</div>
+          </div>
+
+          <div class="crm-cust-classcol">
+            <div class="crm-cust-classlbl">Pessoas</div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem">
+              <span id="crm-cust-people" style="display:contents"></span>
+            </div>
+            <button class="btn btn-s" style="font-size:.62rem;padding:.18rem .48rem;margin-top:.38rem" onclick="crmAddPersonRow()">＋ adicionar pessoa</button>
+            <div class="crm-cust-classhelper">Contatos e papéis no relacionamento</div>
           </div>
         </div>
-        <div>
-          <div class="fsep">Perfil Comercial</div>
-          <div class="toggle-grp" id="crm-perfil-toggle" style="margin-top:.3rem;width:auto;flex-wrap:wrap;overflow:visible">
-            <button type="button" data-v="PE" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('PE')">PE</button>
-            <button type="button" data-v="SM BR" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('SM BR')">SM BR</button>
-            <button type="button" data-v="SM Asia" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('SM Asia')">SM Asia</button>
-            <button type="button" data-v="MIX" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('MIX')">MIX</button>
-            <button type="button" data-v="LOGO" style="padding:.25rem .5rem;font-size:.62rem" onclick="crmTogglePerfil('LOGO')">LOGO</button>
+
+        <div class="crm-cust-tagsrow">
+          <div class="crm-cust-tagshead">
+            <div class="crm-cust-classlbl" style="margin:0">Tags</div>
+            <div class="crm-cust-classhelper">Marcadores livres / classificações ad hoc</div>
           </div>
-        </div>
-        <div>
-          <div class="fsep">Grupo / Rede</div>
-          <select id="crm-cust-group" style="width:100%;font-size:.72rem;padding:.3rem .4rem;border:1.5px solid var(--bdr2);border-radius:7px;margin-top:.3rem">
-            <option value="">— nenhum —</option>
-          </select>
-          <div style="display:flex;gap:.3rem;margin-top:.3rem">
-            <input type="text" id="crm-group-new" placeholder="ou criar novo…" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.66rem">
-            <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmCreateAndSelectGroup()">＋</button>
-          </div>
-        </div>
-        <div>
-          <div class="fsep">Pessoas</div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-            <span id="crm-cust-people" style="display:contents"></span>
-            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem">
+            <span id="crm-cust-tags" style="display:contents"></span>
+            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:110px;height:28px;border:1.5px dashed var(--bdr2);border-radius:6px;padding:.25rem .5rem;font-size:.66rem;background:var(--card);color:var(--ink)">
+            <button class="btn btn-s crm-cust-addbtn" onclick="crmAddTagToCustomer()">＋</button>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:.7rem">
-        <div class="fsep">Tags</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-          <span id="crm-cust-tags" style="display:contents"></span>
-          <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:100px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
-          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
-        </div>
-      </div>
-
-      <div id="crm-cust-purchase-section" style="display:none;margin-top:.9rem">
+      <div id="crm-cust-purchase-section" class="crm-cust-purchases" style="display:none">
         <div id="crm-ph-empty" class="crm-empty" style="display:none">Sem histórico de compras no Tiny</div>
         <div id="crm-ph-content">
           <div class="crm-kpi-strip">
@@ -764,7 +803,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
 
-      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
+      <div class="crm-cust-timeline-divider"></div>
 
       <div id="crm-cust-timeline-section" style="display:none">
         <div class="fsep" style="display:flex;justify-content:space-between;align-items:center">
@@ -2705,13 +2744,21 @@ function crmAddSegmento(){
   crmRenderCustSegmento();
 }
 function crmRenderPerfilToggle(){
-  document.querySelectorAll('#crm-perfil-toggle button').forEach(b=>{
-    b.classList.toggle('active',crmEditCtx.perfil.includes(b.dataset.v));
-  });
+  const cont=document.getElementById('crm-perfil-selected');
+  if(!cont)return;
+  cont.innerHTML=crmEditCtx.perfil.length?crmEditCtx.perfil.map(v=>`<span class="crm-chip">${esc(v)}<span class="x" onclick="crmTogglePerfil('${v}')">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
 }
 function crmTogglePerfil(v){
   if(crmEditCtx.perfil.includes(v))crmEditCtx.perfil=crmEditCtx.perfil.filter(x=>x!==v);
   else crmEditCtx.perfil.push(v);
+  crmRenderPerfilToggle();
+}
+function crmAddPerfil(){
+  const sel=document.getElementById('crm-perfil-add');
+  const v=sel?.value||'';
+  if(!v)return;
+  if(!crmEditCtx.perfil.includes(v))crmEditCtx.perfil.push(v);
+  sel.value='';
   crmRenderPerfilToggle();
 }
 function crmPopulateGroupSelect(selectedId){
@@ -2725,11 +2772,17 @@ async function crmCreateAndSelectGroup(){
   const inp=document.getElementById('crm-group-new');
   const name=inp.value.trim();
   if(!name)return;
-  let group=CRM_GROUPS.find(g=>g.name.toLowerCase()===name.toLowerCase());
+  const norm=v=>v.trim().toLocaleLowerCase('pt-BR');
+  let group=CRM_GROUPS.find(g=>norm(g.name)===norm(name));
   if(!group){
     const{data,error}=await _supa.from('crm_groups').insert({name}).select().single();
-    if(error){toastSave('Erro ao criar grupo: '+error.message);return;}
-    group=data;CRM_GROUPS.push(group);
+    if(error){
+      if(error.code==='23505'){
+        await crmLoadAll();
+        group=CRM_GROUPS.find(g=>norm(g.name)===norm(name));
+        if(!group){toastSave('Grupo já existe, mas não consegui recarregá-lo.');return;}
+      }else{toastSave('Erro ao criar grupo: '+error.message);return;}
+    }else{group=data;CRM_GROUPS.push(group);}
   }
   crmPopulateGroupSelect(group.id);
   inp.value='';
