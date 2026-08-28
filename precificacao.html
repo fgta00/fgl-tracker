@@ -54,7 +54,7 @@ header .spacer{flex:1}
 .msf-opt:hover{background:var(--ltgry)}
 .msf-opt input{width:auto;margin:0}
 .msf-selectall{border-bottom:1px solid var(--bdr);margin:0 .3rem .2rem;padding-bottom:.4rem;font-weight:600}
-.rv2-prodrow{display:grid;grid-template-columns:2.1fr .8fr .9fr .9fr auto;gap:.35rem;align-items:end;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.35rem .5rem;margin-bottom:.3rem}
+.rv2-prodrow{display:grid;grid-template-columns:1.7fr .7fr .8fr .8fr 1fr auto;gap:.35rem;align-items:end;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.35rem .5rem;margin-bottom:.3rem}
 body.dark .rv2-prodrow{background:#16202E}
 .rv2-prodrow .plbl{font-size:.55rem;color:var(--ink4);font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.1rem}
 .rv2-prodrow input{width:100%}
@@ -406,7 +406,6 @@ body.dark .rv-tabs{background:#0A0F1A}
               <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
             </div>
             <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
-              <div class="ff"><label>Fornecedor</label><select id="rv2-fornecedor" onchange="rv2Calc()"><option value="">— selecione —</option></select></div>
               <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores">＋</button>
             </div>
           </div>
@@ -958,10 +957,7 @@ body.dark .rv-tabs{background:#0A0F1A}
   <div class="modal" style="max-width:600px">
     <div class="modal-h"><span id="rvedit-title">Editar</span><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
     <div class="modal-b">
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem">
-        <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
-        <div class="ff"><label>Fornecedor</label><select id="rvedit-fornecedor"></select></div>
-      </div>
+      <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
       <div class="grid" style="grid-template-columns:1fr auto auto;gap:.6rem;margin-top:.6rem;align-items:end">
         <div class="ff"><label>Mercadoria</label>
           <div class="toggle-grp" id="rvedit-tipo-toggle">
@@ -999,10 +995,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
         <div class="collap-body" id="rvedit-cp-body">
           <div style="margin-top:.6rem">
-            <div class="fsep" style="font-size:.62rem">🏭 Pagar ao Fornecedor — <span id="rvedit-cp-forn-nome"></span> — Total <b id="rvedit-cp-forn-total"></b></div>
-            <div id="rvedit-cp-forn-rows"></div>
-            <button class="btn btn-s" style="font-size:.62rem;margin-top:.3rem" onclick="rvCPAddParcela('fornecedor')">＋ parcela</button>
-            <div style="font-size:.62rem;margin-top:.2rem" id="rvedit-cp-forn-sum"></div>
+            <div id="rvedit-cp-forn-container"></div>
 
             <div id="rvedit-cp-benef-wrap" style="display:none">
               <div class="fsep" style="margin-top:.9rem;font-size:.62rem">🎨 Pagar ao Beneficiador (logo) — Total <b id="rvedit-cp-benef-total"></b></div>
@@ -1031,10 +1024,7 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="modal-b">
       <p style="font-size:.68rem;color:var(--ink3);margin-bottom:.8rem">Defina em quantos dias após o pedido cada parcela vence, e o % (ou valor) dela — até somar 100% do total de cada parte. A Ref padronizada (SINAL/SALDO/AMOSTRAS) ajuda a organizar os lançamentos depois.</p>
 
-      <div class="fsep">🏭 Pagar ao Fornecedor — <span id="cp-forn-nome"></span> — Total <b id="cp-forn-total"></b></div>
-      <div id="cp-forn-rows"></div>
-      <button class="btn btn-s" style="font-size:.65rem;margin-top:.3rem" onclick="rvCPAddParcela('fornecedor')">＋ parcela</button>
-      <div style="font-size:.65rem;margin-top:.2rem" id="cp-forn-sum"></div>
+      <div id="cp-forn-container"></div>
 
       <div id="cp-benef-wrap" style="display:none">
         <div class="fsep" style="margin-top:1.1rem">🎨 Pagar ao Beneficiador (logo) — Total <b id="cp-benef-total"></b></div>
@@ -2470,17 +2460,19 @@ function rv2LoadLocalCad(){
 }
 
 function rv2PopulateSelects(){
-  const selCli=rvEl('rv2-cliente'),selForn=rvEl('rv2-fornecedor');
-  const curCli=selCli.value,curForn=selForn.value;
+  const selCli=rvEl('rv2-cliente');
+  const curCli=selCli.value;
   selCli.innerHTML='<option value="">— selecione —</option>'+RV_CLIENTES2.map(c=>`<option value="${esc(c.nome)}">${esc(c.nome)} (${c.estado})</option>`).join('');
-  selForn.innerHTML='<option value="">— selecione —</option>'+RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)} (${f.estado} · ${f.regime})</option>`).join('');
   if(RV_CLIENTES2.some(c=>c.nome===curCli))selCli.value=curCli;
-  if(RV_FORNECEDORES2.some(f=>f.nome===curForn))selForn.value=curForn;
   const estSel=rvEl('rvcad-estado');
   if(estSel)estSel.innerHTML=ESTADOS.map(([uf,nome])=>`<option value="${uf}">${uf} — ${esc(nome)}</option>`).join('');
+  // Refresca as opções de fornecedor de cada linha de produto já criada (ex: fornecedor novo cadastrado agora)
+  document.querySelectorAll('.rv2-prod-forn').forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}"${f.nome===cur?' selected':''}>${esc(f.nome)}</option>`).join('');
+  });
 }
 function rv2GetCliente(){return RV_CLIENTES2.find(c=>c.nome===rvEl('rv2-cliente').value);}
-function rv2GetFornecedor(){return RV_FORNECEDORES2.find(f=>f.nome===rvEl('rv2-fornecedor').value);}
 function rv2SetTipo(t){
   rv2Tipo=t;
   document.querySelectorAll('#rv2-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
@@ -3816,8 +3808,11 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome)
   const row=document.createElement('div');
   row.className='rv2-prodrow';
   const onCalc=containerId==='rvedit-prod-rows'?'rv2EditPreview()':'rv2Calc()';
-  const selTopoId=containerId==='rvedit-prod-rows'?'rvedit-fornecedor':'rv2-fornecedor';
-  const fornAtual=fornecedorNome||(rvEl(selTopoId)?rvEl(selTopoId).value:'')||'';
+  let fornAtual=fornecedorNome;
+  if(!fornAtual){
+    const rowsExistentes=cont.querySelectorAll('.rv2-prod-forn');
+    fornAtual=rowsExistentes.length?rowsExistentes[rowsExistentes.length-1].value:(RV_FORNECEDORES2[0]?RV_FORNECEDORES2[0].nome:'');
+  }
   const opcoesForn=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}"${f.nome===fornAtual?' selected':''}>${esc(f.nome)}</option>`).join('');
   row.innerHTML=`<div><span class="plbl">Descrição</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" oninput="${onCalc}"></div>
     <div><span class="plbl">Qtd</span><input type="number" class="mono" placeholder="1000" value="${qtd}" min="0" step="1" oninput="${onCalc}"></div>
@@ -3882,6 +3877,12 @@ function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cli
     // nomes antigos mantidos como alias — cotações/pedidos já salvos e o histórico continuam lendo a "margem final" (bottom line real)
     vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
     lucroTotal:margemLiquida,margem:pctMargemLiquida,saldoICMS:debICMS-credICMS};
+}
+function rvSafeId(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]/g,'_');}
+function rvBuildFornecedoresArray(r){
+  // Constrói o array fornecedores[] pronto pra salvar no registro, a partir do resultado consolidado
+  if(!r.fornecedores)return[];
+  return r.fornecedores.map(f=>({key:rvSafeId(f.fornecedor.nome),nome:f.fornecedor.nome,custoCompra:f.custoCompra,freteTotal:f.freteTotal,cliche:f.cliche}));
 }
 function rv2CalcMultiFornecedor(cliente,tipo,produtos,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
   if(!cliente||!produtos||!produtos.length)return null;
@@ -4090,7 +4091,10 @@ function rv2SaveCad(){
   }else{
     if(RV_FORNECEDORES2.some(f=>f.nome.toLowerCase()===nome.toLowerCase())){toastSave('Fornecedor já cadastrado');return;}
     RV_FORNECEDORES2.push({nome,estado,regime:rv2CadRegime,produtor:rvEl('rvcad-produtor').checked,updatedAt:Date.now()});
-    rv2PopulateSelects();rvEl('rv2-fornecedor').value=nome;rv2Calc();
+    rv2PopulateSelects();
+    const rowsForn=document.querySelectorAll('#rv2-prod-rows .rv2-prod-forn');
+    if(rowsForn.length)rowsForn[rowsForn.length-1].value=nome;
+    rv2Calc();
   }
   rv2SaveLocalCad();
   rvSyncPush();
@@ -4166,7 +4170,7 @@ function rv2SalvarCotacao(){
   const r=rv2Calc();
   if(!r){toastSave('Preencha os dados antes de salvar');return;}
   const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem};
@@ -4180,7 +4184,7 @@ function rv2CriarPedido(){
   if(!r){toastSave('Preencha os dados antes de criar o pedido');return;}
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
   const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem,status,obs:''};
@@ -4219,10 +4223,9 @@ function rv2OpenEdit(kind,id){
   const detH=document.getElementById('rvedit-detalhe-body')?.previousElementSibling;
   if(detH)detH.classList.remove('open');
   document.getElementById('rvedit-detalhe-body')?.classList.remove('open');
-  const selCli=rvEl('rvedit-cliente'),selForn=rvEl('rvedit-fornecedor');
+  const selCli=rvEl('rvedit-cliente');
   selCli.innerHTML=RV_CLIENTES2.map(c=>`<option value="${esc(c.nome)}">${esc(c.nome)} (${c.estado})</option>`).join('');
-  selForn.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)} (${f.estado} · ${f.regime})</option>`).join('');
-  selCli.value=rec.cliente;selForn.value=rec.fornecedor;
+  selCli.value=rec.cliente;
   rvEl('rvedit-prod-rows').innerHTML='';
   if(rec.produtos&&rec.produtos.length){
     rec.produtos.forEach(p=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor));
@@ -4270,27 +4273,39 @@ function rv2SaveEdit(){
   if(!r){toastSave('Preencha os dados corretamente antes de salvar');return;}
   const{kind,id}=rvEditCtx;
   // Se for pedido, valida as condições de pagamento também antes de salvar qualquer coisa
+  let fornKeysEdit=[];
   if(kind==='pedido'){
     const pCheck=rvLoadPedidos().find(x=>x.id===id);
-    const partes=['fornecedor','cliente'];
+    fornKeysEdit=rvCPFornKeys(pCheck||{fornecedor:r.fornecedorLegado});
+    const partes=[...fornKeysEdit.map(fk=>fk.key),'cliente'];
     if(pCheck&&pCheck.comLogo)partes.push('beneficiador');
     for(const tipo of partes){
-      const soma=rvCPParcelas[tipo].reduce((a,x)=>a+(x.pct||0),0);
-      if(Math.abs(soma-100)>=0.05){toastSave(`As parcelas de ${tipo} (pagamento/recebimento) precisam somar 100% (está em ${soma.toFixed(1)}%)`);return;}
+      const soma=(rvCPParcelas[tipo]||[]).reduce((a,x)=>a+(x.pct||0),0);
+      if(Math.abs(soma-100)>=0.05){
+        const fk=fornKeysEdit.find(x=>x.key===tipo);
+        const label=fk?fk.nome:tipo;
+        toastSave(`As parcelas de ${label} (pagamento/recebimento) precisam somar 100% (está em ${soma.toFixed(1)}%)`);
+        return;
+      }
     }
   }
   const lista=kind==='cotacao'?rvLoadCotacoes():rvLoadPedidos();
   const rec=lista.find(x=>x.id===id);
   if(!rec){toastSave('Registro não encontrado');return;}
   Object.assign(rec,{
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
     custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
   });
   if(kind==='pedido'){
+    // Recalcula fornKeys já com o fornecedores[] recém-atualizado no rec (pode ter mudado nesta edição)
+    const fornKeysFinal=rvCPFornKeys(rec);
+    const fornecedoresPlano={};
+    fornKeysFinal.forEach(fk=>{fornecedoresPlano[fk.key]=rvCPParcelas[fk.key]||[{dias:0,pct:100,ref:'SINAL'}];});
     rec.planoPagamento={
-      fornecedor:rvCPParcelas.fornecedor,
+      fornecedores:fornecedoresPlano,
+      fornecedor:fornKeysFinal.length===1?rvCPParcelas[fornKeysFinal[0].key]:undefined,
       beneficiador:rec.comLogo?rvCPParcelas.beneficiador:[],
       beneficiadorNome:rec.comLogo?(rvEl(rvCPIds('beneficiador').select)?.value||''):'',
       cliente:rvCPParcelas.cliente
@@ -4303,7 +4318,7 @@ function rv2SaveEdit(){
   closeM('rvedit');
   toastSave('Alterações salvas ✓');
 }
-['rvedit-comissao','rvedit-frete','rvedit-cliche','rvedit-cliente','rvedit-fornecedor'].forEach(id=>{
+['rvedit-comissao','rvedit-frete','rvedit-cliche','rvedit-cliente'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener(el.tagName==='SELECT'?'change':'input',rv2EditPreview);
 });
@@ -4407,18 +4422,29 @@ function rvConverterEmPedido(cotId){
 ══════════════════════════════════════ */
 const RV_FIN_REF_TAGS=['SINAL','SALDO','AMOSTRAS'];
 let rvCPPedidoId=null;
-let rvCPParcelas={fornecedor:[],beneficiador:[],cliente:[]};
+let rvCPParcelas={};
+function rvCPFornKeys(p){
+  if(p.fornecedores&&p.fornecedores.length)return p.fornecedores.map(f=>({key:'forn_'+(f.key||rvSafeId(f.nome)),nome:f.nome}));
+  return[{key:'fornecedor',nome:p.fornecedor||'Fornecedor'}]; // pedido antigo — chave idêntica à usada historicamente no ledger
+}
 function rvCPTotais(p){
-  return{
-    fornecedor:(p.custoTotal||0)-(p.cliche||0)-(p.freteTotal||0), // custoCompra "puro" (sem clichê/frete)
-    beneficiador:p.cliche||0,
-    cliente:p.vendaTotal||0
-  };
+  const map={};
+  const fornKeys=rvCPFornKeys(p);
+  if(p.fornecedores&&p.fornecedores.length){
+    p.fornecedores.forEach((f,i)=>{map[fornKeys[i].key]=f.custoCompra||0;});
+  }else{
+    map.fornecedor=(p.custoTotal||0)-(p.cliche||0)-(p.freteTotal||0);
+  }
+  map.beneficiador=p.cliche||0;
+  map.cliente=p.vendaTotal||0;
+  return map;
 }
 let rvCPPrefix='cp'; // 'cp' = modal separado (Financeiro) | 'rvedit-cp' = seção dentro da edição do pedido
 function rvCPIds(tipo){
-  const suf=tipo==='fornecedor'?'forn':tipo==='beneficiador'?'benef':'cli';
-  return{nome:`${rvCPPrefix}-${suf}-nome`,total:`${rvCPPrefix}-${suf}-total`,rows:`${rvCPPrefix}-${suf}-rows`,sum:`${rvCPPrefix}-${suf}-sum`,wrap:`${rvCPPrefix}-benef-wrap`,select:`${rvCPPrefix}-benef-select`};
+  if(tipo==='beneficiador')return{nome:`${rvCPPrefix}-benef-nome`,total:`${rvCPPrefix}-benef-total`,rows:`${rvCPPrefix}-benef-rows`,sum:`${rvCPPrefix}-benef-sum`,wrap:`${rvCPPrefix}-benef-wrap`,select:`${rvCPPrefix}-benef-select`};
+  if(tipo==='cliente')return{nome:`${rvCPPrefix}-cli-nome`,total:`${rvCPPrefix}-cli-total`,rows:`${rvCPPrefix}-cli-rows`,sum:`${rvCPPrefix}-cli-sum`};
+  // qualquer outra chave é fornecedor — legado ('fornecedor') ou novo ('forn_X'), sempre bloco dinâmico
+  return{nome:`${rvCPPrefix}-${tipo}-nome`,total:`${rvCPPrefix}-${tipo}-total`,rows:`${rvCPPrefix}-${tipo}-rows`,sum:`${rvCPPrefix}-${tipo}-sum`};
 }
 function rvOpenCondPagto(pedidoId,prefix){
   rvCPPrefix=prefix||'cp';
@@ -4426,8 +4452,22 @@ function rvOpenCondPagto(pedidoId,prefix){
   if(!p){toastSave('Pedido não encontrado');return;}
   rvCPPedidoId=pedidoId;
   const tot=rvCPTotais(p);
-  rvEl(rvCPIds('fornecedor').nome).textContent=p.fornecedor;
-  rvEl(rvCPIds('fornecedor').total).textContent=rvBrl(tot.fornecedor);
+  const fornKeys=rvCPFornKeys(p);
+
+  const fornContainer=rvEl(`${rvCPPrefix}-forn-container`);
+  if(fornContainer){
+    fornContainer.innerHTML=fornKeys.map(fk=>{
+      const ids=rvCPIds(fk.key);
+      return`<div style="margin-top:.8rem">
+        <div class="fsep" style="font-size:.62rem">🏭 Pagar a <span id="${ids.nome}">${esc(fk.nome)}</span> — Total <b id="${ids.total}"></b></div>
+        <div id="${ids.rows}"></div>
+        <button class="btn btn-s" style="font-size:.62rem;margin-top:.3rem" onclick="rvCPAddParcela('${fk.key}')">＋ parcela</button>
+        <div style="font-size:.62rem;margin-top:.2rem" id="${ids.sum}"></div>
+      </div>`;
+    }).join('');
+  }
+  fornKeys.forEach(fk=>{rvEl(rvCPIds(fk.key).total).textContent=rvBrl(tot[fk.key]);});
+
   rvEl(rvCPIds('cliente').nome).textContent=p.cliente;
   rvEl(rvCPIds('cliente').total).textContent=rvBrl(tot.cliente);
   const showBenef=!!p.comLogo;
@@ -4438,14 +4478,21 @@ function rvOpenCondPagto(pedidoId,prefix){
     sel.innerHTML=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)}</option>`).join('');
     if(p.planoPagamento&&p.planoPagamento.beneficiadorNome)sel.value=p.planoPagamento.beneficiadorNome;
   }
-  // Carrega plano existente, ou começa com 1 parcela de 100% em dia 0 pra cada parte
-  const existing=p.planoPagamento;
-  rvCPParcelas={
-    fornecedor:(existing&&existing.fornecedor&&existing.fornecedor.length)?JSON.parse(JSON.stringify(existing.fornecedor)):[{dias:0,pct:100,ref:'SINAL'}],
-    beneficiador:(existing&&existing.beneficiador&&existing.beneficiador.length)?JSON.parse(JSON.stringify(existing.beneficiador)):[{dias:0,pct:100,ref:'SINAL'}],
-    cliente:(existing&&existing.cliente&&existing.cliente.length)?JSON.parse(JSON.stringify(existing.cliente)):[{dias:0,pct:100,ref:'SINAL'}],
-  };
-  ['fornecedor','beneficiador','cliente'].forEach(rvCPRenderRows);
+
+  // Carrega plano existente por chave, com retrocompat pro formato antigo (plano.fornecedor singular),
+  // ou começa com 1 parcela de 100% em dia 0 pra cada parte
+  const existing=p.planoPagamento||{};
+  rvCPParcelas={};
+  fornKeys.forEach(fk=>{
+    const salvoNovo=existing.fornecedores&&existing.fornecedores[fk.key];
+    const salvoLegado=fk.key==='fornecedor'?existing.fornecedor:null;
+    const salvo=(salvoNovo&&salvoNovo.length)?salvoNovo:(salvoLegado&&salvoLegado.length?salvoLegado:null);
+    rvCPParcelas[fk.key]=salvo?JSON.parse(JSON.stringify(salvo)):[{dias:0,pct:100,ref:'SINAL'}];
+  });
+  rvCPParcelas.beneficiador=(existing.beneficiador&&existing.beneficiador.length)?JSON.parse(JSON.stringify(existing.beneficiador)):[{dias:0,pct:100,ref:'SINAL'}];
+  rvCPParcelas.cliente=(existing.cliente&&existing.cliente.length)?JSON.parse(JSON.stringify(existing.cliente)):[{dias:0,pct:100,ref:'SINAL'}];
+
+  [...fornKeys.map(fk=>fk.key),'beneficiador','cliente'].forEach(rvCPRenderRows);
   if(rvCPPrefix==='cp')document.getElementById('ovl-condpagto').classList.add('open');
 }
 function rvCPAddParcela(tipo){
@@ -4507,18 +4554,28 @@ function rvCPRenderSum(tipo){
     </span>`;
 }
 function rvCPSave(){
-  const partes=['fornecedor','cliente'];
   const p=rvLoadPedidos().find(x=>x.id===rvCPPedidoId);
-  if(p&&p.comLogo)partes.push('beneficiador');
+  if(!p){toastSave('Pedido não encontrado');return;}
+  const fornKeys=rvCPFornKeys(p);
+  const partes=[...fornKeys.map(fk=>fk.key),'cliente'];
+  if(p.comLogo)partes.push('beneficiador');
   for(const tipo of partes){
-    const soma=rvCPParcelas[tipo].reduce((a,r)=>a+(r.pct||0),0);
-    if(Math.abs(soma-100)>=0.05){toastSave(`As parcelas de ${tipo} precisam somar 100% (está em ${soma.toFixed(1)}%)`);return;}
+    const soma=(rvCPParcelas[tipo]||[]).reduce((a,r)=>a+(r.pct||0),0);
+    if(Math.abs(soma-100)>=0.05){
+      const fk=fornKeys.find(x=>x.key===tipo);
+      const label=fk?fk.nome:tipo;
+      toastSave(`As parcelas de ${label} precisam somar 100% (está em ${soma.toFixed(1)}%)`);
+      return;
+    }
   }
   const lista=rvLoadPedidos();
   const rec=lista.find(x=>x.id===rvCPPedidoId);
   if(!rec){toastSave('Pedido não encontrado');return;}
+  const fornecedoresPlano={};
+  fornKeys.forEach(fk=>{fornecedoresPlano[fk.key]=rvCPParcelas[fk.key];});
   rec.planoPagamento={
-    fornecedor:rvCPParcelas.fornecedor,
+    fornecedores:fornecedoresPlano, // novo formato — sempre presente, 1 ou mais fornecedores
+    fornecedor:fornKeys.length===1?rvCPParcelas[fornKeys[0].key]:undefined, // retrocompat de leitura pra código antigo
     beneficiador:rec.comLogo?rvCPParcelas.beneficiador:[],
     beneficiadorNome:rec.comLogo?rvEl(rvCPIds('beneficiador').select).value:'',
     cliente:rvCPParcelas.cliente
@@ -4716,8 +4773,15 @@ function rvParseDataBR(dataStr){ // "DD/MM/AAAA" -> Date
   if(p.length!==3)return null;
   return new Date(parseInt(p[2],10),parseInt(p[1],10)-1,parseInt(p[0],10));
 }
-function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'beneficiador'|'cliente' -> {status,valor,dias}|null
-  const plano=p.planoPagamento?p.planoPagamento[tipo]:null;
+function rvPlanoDoTipo(p,tipo){
+  if(tipo==='cliente'||tipo==='beneficiador')return(p.planoPagamento&&p.planoPagamento[tipo])||[];
+  const novo=p.planoPagamento&&p.planoPagamento.fornecedores&&p.planoPagamento.fornecedores[tipo];
+  if(novo&&novo.length)return novo;
+  if(tipo==='fornecedor'&&p.planoPagamento&&p.planoPagamento.fornecedor&&p.planoPagamento.fornecedor.length)return p.planoPagamento.fornecedor;
+  return[];
+}
+function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'forn_X'|'beneficiador'|'cliente' -> {status,valor,dias}|null
+  const plano=rvPlanoDoTipo(p,tipo);
   if(!plano||!plano.length)return null;
   const tot=rvCPTotais(p)[tipo];
   if(tot<=0)return null;
@@ -4742,7 +4806,7 @@ function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'beneficiador'|'cliente'
 }
 // Retorna a notificação mais urgente entre fornecedor/beneficiador/cliente de um pedido, ou null
 function rvParcelaStatusPedido(p){
-  const tipos=['fornecedor','cliente'];
+  const tipos=[...rvCPFornKeys(p).map(fk=>fk.key),'cliente'];
   if(p.comLogo)tipos.push('beneficiador');
   let pior=null;
   tipos.forEach(tipo=>{
@@ -4756,7 +4820,8 @@ function rvParcelaStatusPedido(p){
 function rvParcelaStatusBadge(p){
   const st=rvParcelaStatusPedido(p);
   if(!st)return'';
-  const lbl={fornecedor:'Pagar fornecedor',beneficiador:'Pagar beneficiador',cliente:'Receber cliente'}[st.tipo];
+  const fk=rvCPFornKeys(p).find(x=>x.key===st.tipo);
+  const lbl=fk?`Pagar ${fk.nome}`:(st.tipo==='beneficiador'?'Pagar beneficiador':'Receber cliente');
   const col=st.status==='atrasado'?'var(--red)':'var(--amber)';
   const txt=st.status==='atrasado'?`${lbl} atrasado — falta ${rvBrl(st.valor)}`:`${lbl} vence em ${st.dias}d — ${rvBrl(st.valor)}`;
   return`<div style="font-size:.62rem;font-weight:700;color:#fff;background:${col};border-radius:5px;padding:.22rem .5rem;margin-bottom:.4rem">⏰ ${esc(txt)}</div>`;
@@ -4772,10 +4837,12 @@ function rvRenderFin(){
   let totCompra=0,totVenda=0,totPagar=0,totReceber=0,totPago=0,totRecebido=0;
   lista.forEach(p=>{
     const tot=rvCPTotais(p);
-    const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
-    totCompra+=tot.fornecedor+(p.comLogo?tot.beneficiador:0);
+    const fornKeys=rvCPFornKeys(p);
+    const totForn=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
+    const pagoForn=fornKeys.reduce((a,fk)=>a+rvPartyPago(p.id,fk.key),0),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
+    totCompra+=totForn+(p.comLogo?tot.beneficiador:0);
     totVenda+=tot.cliente;
-    totPagar+=Math.max(0,tot.fornecedor-pagoForn)+(p.comLogo?Math.max(0,tot.beneficiador-pagoBenef):0);
+    totPagar+=Math.max(0,totForn-pagoForn)+(p.comLogo?Math.max(0,tot.beneficiador-pagoBenef):0);
     totReceber+=Math.max(0,tot.cliente-recCli);
     totPago+=pagoForn+pagoBenef;
     totRecebido+=recCli;
@@ -4813,7 +4880,9 @@ function rvRenderFin(){
   if(!listaFiltrada.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado com esses filtros.</p>';rvUpdateFinBadge();return;}
   cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+listaFiltrada.map(p=>{
     const tot=rvCPTotais(p);
-    const pagoForn=rvPartyPago(p.id,'fornecedor'),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
+    const fornKeys=rvCPFornKeys(p);
+    const totForn=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
+    const pagoForn=fornKeys.reduce((a,fk)=>a+rvPartyPago(p.id,fk.key),0),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
     const bar=(label,pago,total,color)=>{
       const pct=total>0?Math.min(100,Math.round(pago/total*100)):0;
       return `<div style="margin-bottom:.35rem">
@@ -4825,7 +4894,7 @@ function rvRenderFin(){
       <div style="font-weight:700;font-size:.78rem;margin-bottom:.1rem">${esc(p.cliente)}</div>
       <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.5rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
       ${rvParcelaStatusBadge(p)}
-      ${bar('Pagar Fornecedor',pagoForn,tot.fornecedor,'var(--red)')}
+      ${bar('Pagar Fornecedor',pagoForn,totForn,'var(--red)')}
       ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'#B85C00'):''}
       ${bar('Receber Cliente',recCli,tot.cliente,'var(--green)')}
     </div>`;
@@ -4917,21 +4986,23 @@ function rvOpenFinPopupR(pedidoId){
   if(!p){toastSave('Pedido não encontrado');return;}
   rvFinCurPedidoId=pedidoId;
   const tot=rvCPTotais(p);
+  const fornKeys=rvCPFornKeys(p);
   rvEl('finr-title').textContent=`Financeiro — ${p.cliente} (${p.data})`;
 
-  const custoTotal=tot.fornecedor+(p.comLogo?tot.beneficiador:0);
+  const custoFornSum=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
+  const custoTotal=custoFornSum+(p.comLogo?tot.beneficiador:0);
   const vendaTotal=tot.cliente;
   const margem=vendaTotal-custoTotal;
   const margemPct=vendaTotal?Math.round(margem/vendaTotal*100):0;
-  const pagoFornSum=rvPartyPago(pedidoId,'fornecedor')+(p.comLogo?rvPartyPago(pedidoId,'beneficiador'):0);
+  const pagoFornSum=fornKeys.reduce((a,fk)=>a+rvPartyPago(pedidoId,fk.key),0)+(p.comLogo?rvPartyPago(pedidoId,'beneficiador'):0);
   const recebidoSum=rvPartyRecebido(pedidoId);
 
   const partyBlock=(party,total,isReceipt,showHeader,label,icon)=>{
     const paid=isReceipt?rvPartyRecebido(pedidoId):rvPartyPago(pedidoId,party);
-    const planParcelas=isReceipt?p.planoPagamento.cliente:p.planoPagamento[party];
-    const planTxt=(planParcelas||[]).map(pc=>`${pc.dias}d: ${pc.pct}% (${rvBrl(total*pc.pct/100)}) · ${pc.ref}`).join(' · ');
+    const planParcelas=isReceipt?rvPlanoDoTipo(p,'cliente'):rvPlanoDoTipo(p,party);
+    const planTxt=planParcelas.map(pc=>`${pc.dias}d: ${pc.pct}% (${rvBrl(total*pc.pct/100)}) · ${pc.ref}`).join(' · ');
     return`<div style="margin-top:.5rem">
-      ${showHeader?`<div style="font-size:.66rem;font-weight:700;color:var(--ink2);margin-bottom:.15rem">${icon} ${label} — ${rvBrl(paid)} / ${rvBrl(total)}</div>`:''}
+      ${showHeader?`<div style="font-size:.66rem;font-weight:700;color:var(--ink2);margin-bottom:.15rem">${icon} ${esc(label)} — ${rvBrl(paid)} / ${rvBrl(total)}</div>`:''}
       <div style="font-size:.58rem;color:var(--ink4);margin-bottom:.3rem">Plano: ${esc(planTxt)}</div>
       ${rvFinPartyRows(pedidoId,party,total,isReceipt)}
       <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem">
@@ -4954,6 +5025,8 @@ function rvOpenFinPopupR(pedidoId){
     return`<div style="height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${pct}%;background:${cor}"></div></div>`;
   };
 
+  const fornecedoresHtml=fornKeys.map(fk=>partyBlock(fk.key,tot[fk.key],false,fornKeys.length>1,fk.nome,'🏭')).join('');
+
   let html=`<div style="display:flex;gap:.7rem;margin-bottom:1rem">
     ${kpiBox('Custo Total (Forn.)',rvBrl(custoTotal),'var(--red)')}
     ${kpiBox('Venda (Cli.)',rvBrl(vendaTotal),'var(--green)')}
@@ -4962,7 +5035,7 @@ function rvOpenFinPopupR(pedidoId){
   <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.3rem">
     <div>
       <div style="font-size:.7rem;font-weight:700;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:.3rem">🏭 Pago ao Fornecedor</div>
-      ${partyBlock('fornecedor',tot.fornecedor,false,false)}
+      ${fornecedoresHtml}
       ${p.comLogo?partyBlock('beneficiador',tot.beneficiador,false,true,'Beneficiador (logo)','🎨'):''}
       <div style="font-size:.66rem;margin-top:.6rem">Total pago: <b style="color:var(--red)">${rvBrl(pagoFornSum)}</b> de ${rvBrl(custoTotal)} · falta ${rvBrl(Math.max(0,custoTotal-pagoFornSum))}</div>
       ${barra(pagoFornSum,custoTotal,'var(--red)')}
