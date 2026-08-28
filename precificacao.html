@@ -54,10 +54,13 @@ header .spacer{flex:1}
 .msf-opt:hover{background:var(--ltgry)}
 .msf-opt input{width:auto;margin:0}
 .msf-selectall{border-bottom:1px solid var(--bdr);margin:0 .3rem .2rem;padding-bottom:.4rem;font-weight:600}
-.rv2-prodrow{display:grid;grid-template-columns:1.7fr .7fr .8fr .8fr 1fr auto;gap:.35rem;align-items:end;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.35rem .5rem;margin-bottom:.3rem}
+.rv2-prodrow{display:grid;grid-template-columns:1.3fr .45fr .55fr .55fr .55fr .85fr auto auto auto;gap:.3rem;align-items:end;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.35rem .5rem;margin-bottom:.3rem}
 body.dark .rv2-prodrow{background:#16202E}
 .rv2-prodrow .plbl{font-size:.55rem;color:var(--ink4);font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.1rem}
 .rv2-prodrow input{width:100%}
+.rv2-prod-logo-btn{width:100%;font-size:.68rem;padding:.32rem .3rem;border:1.5px solid var(--bdr2);border-radius:5px;background:var(--card);cursor:pointer;color:var(--ink3)}
+.rv2-prod-logo-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.rv2-prod-tipo-btn{width:100%;font-size:.6rem;padding:.32rem .15rem;border:1.5px solid var(--bdr2);border-radius:5px;background:var(--card);cursor:pointer;color:var(--ink2);white-space:nowrap}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ff input.mono{font-family:'IBM Plex Mono'}
 .ff input:focus,.ff select:focus{border-color:var(--blue)}
@@ -395,30 +398,18 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
       </div>
 
-      <div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+      <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:1rem;align-items:start">
         <!-- CARD ESQUERDO: DADOS DA VENDA -->
         <div class="card no-print">
           <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
-          <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;align-items:end">
-            <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
-              <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
-              <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
-            </div>
-            <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
-              <button class="btn btn-s" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores">＋</button>
-            </div>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
+            <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
+            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
           </div>
 
-          <div class="grid" style="grid-template-columns:1fr auto auto;gap:.6rem;margin-top:.6rem;align-items:end">
-            <div class="ff"><label>Mercadoria</label>
-              <div class="toggle-grp" id="rv2-tipo-toggle">
-                <button class="active" onclick="rv2SetTipo('Nacional')">Nacional</button>
-                <button onclick="rv2SetTipo('Importada')">Importada</button>
-              </div>
-            </div>
+          <div style="margin-top:.6rem">
             <button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">+ Frete</button>
-            <button type="button" class="pill-toggle-sm" id="rv2-com-logo-btn" onclick="rv2ToggleComLogo()" title="Marca que o pedido leva logo — lembra de preencher o clichê/molde nos encargos opcionais">Com<br>logo</button>
           </div>
 
           <div class="fsep" style="margin-top:.9rem">Produtos</div>
@@ -958,15 +949,8 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="modal-h"><span id="rvedit-title">Editar</span><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
-      <div class="grid" style="grid-template-columns:1fr auto auto;gap:.6rem;margin-top:.6rem;align-items:end">
-        <div class="ff"><label>Mercadoria</label>
-          <div class="toggle-grp" id="rvedit-tipo-toggle">
-            <button class="active" type="button" onclick="rvEditSetTipo('Nacional')">Nacional</button>
-            <button type="button" onclick="rvEditSetTipo('Importada')">Importada</button>
-          </div>
-        </div>
+      <div style="margin-top:.6rem">
         <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">+ Frete</button>
-        <button type="button" class="pill-toggle-sm" id="rvedit-com-logo-btn" onclick="rvEditToggleComLogo()">Com<br>logo</button>
       </div>
       <div class="fsep" style="margin-top:.8rem">Produtos</div>
       <div id="rvedit-prod-rows"></div>
@@ -2447,7 +2431,6 @@ function rvShowTab(id){
 
 let RV_CLIENTES2=[];      // {nome,estado}
 let RV_FORNECEDORES2=[];  // {nome,estado,regime:'LP'|'SN'}
-let rv2Tipo='Nacional';
 let rv2DetalheOpen=false;
 
 function rv2SaveLocalCad(){
@@ -2473,11 +2456,6 @@ function rv2PopulateSelects(){
   });
 }
 function rv2GetCliente(){return RV_CLIENTES2.find(c=>c.nome===rvEl('rv2-cliente').value);}
-function rv2SetTipo(t){
-  rv2Tipo=t;
-  document.querySelectorAll('#rv2-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
-  rv2Calc();
-}
 function rv2OnClienteChange(){rv2Calc();rv2RenderHist();}
 
 /* ── CÁLCULO ── */
@@ -3802,36 +3780,52 @@ function rvSacachoRender(){
   }
 }
 
-function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome){
+function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,tipoProduto,comLogoProduto){
   containerId=containerId||'rv2-prod-rows';
   const cont=rvEl(containerId);
   const row=document.createElement('div');
   row.className='rv2-prodrow';
   const onCalc=containerId==='rvedit-prod-rows'?'rv2EditPreview()':'rv2Calc()';
   let fornAtual=fornecedorNome;
-  if(!fornAtual){
-    const rowsExistentes=cont.querySelectorAll('.rv2-prod-forn');
-    fornAtual=rowsExistentes.length?rowsExistentes[rowsExistentes.length-1].value:(RV_FORNECEDORES2[0]?RV_FORNECEDORES2[0].nome:'');
+  let tipoAtual=tipoProduto;
+  if(!fornAtual||!tipoAtual){
+    const rowsExistentes=cont.querySelectorAll('.rv2-prodrow');
+    const ultima=rowsExistentes.length?rowsExistentes[rowsExistentes.length-1]:null;
+    if(!fornAtual)fornAtual=ultima?ultima.querySelector('.rv2-prod-forn').value:(RV_FORNECEDORES2[0]?RV_FORNECEDORES2[0].nome:'');
+    if(!tipoAtual)tipoAtual=ultima?ultima.querySelector('.rv2-prod-tipo-btn').dataset.v:'Nacional';
   }
+  const logoAtual=!!comLogoProduto;
   const opcoesForn=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}"${f.nome===fornAtual?' selected':''}>${esc(f.nome)}</option>`).join('');
   row.innerHTML=`<div><span class="plbl">Descrição</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" oninput="${onCalc}"></div>
     <div><span class="plbl">Qtd</span><input type="number" class="mono" placeholder="1000" value="${qtd}" min="0" step="1" oninput="${onCalc}"></div>
     <div><span class="plbl">Compra R$</span><input type="number" class="mono" placeholder="4.25" value="${preco}" min="0" step="0.01" oninput="${onCalc}"></div>
     <div><span class="plbl">Venda R$</span><input type="number" class="mono" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}"></div>
-    <div><span class="plbl">Fornecedor</span><select class="rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select></div>
+    <div><span class="plbl">Tipo</span><button type="button" class="rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique pra alternar" onclick="rv2ToggleProdTipo(this);${onCalc}">${tipoAtual==='Nacional'?'Nac':'Imp'}</button></div>
+    <div><span class="plbl">Fornecedor</span><div style="display:flex;gap:.15rem"><select class="rv2-prod-forn" onchange="${onCalc}" style="flex:1;min-width:0">${opcoesForn}</select></div></div>
+    <button type="button" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores" style="border:1.5px solid var(--bdr2);border-radius:5px;background:var(--card);cursor:pointer;padding:.32rem .4rem;font-size:.68rem">＋</button>
+    <div><span class="plbl">Logo</span><button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="this.classList.toggle('active');if(this.classList.contains('active'))rv2ProdLogoReminder('${containerId}');${onCalc}" title="Este produto leva logo/beneficiamento">🎨</button></div>
     <button onclick="this.parentElement.remove();${onCalc}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding-bottom:.4rem">✕</button>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
+}
+function rv2ToggleProdTipo(btn){
+  const novo=btn.dataset.v==='Nacional'?'Importada':'Nacional';
+  btn.dataset.v=novo;
+  btn.textContent=novo==='Nacional'?'Nac':'Imp';
+  btn.title=novo+' — clique pra alternar';
 }
 function rv2ReadProdRows(containerId){
   containerId=containerId||'rv2-prod-rows';
   return[...document.querySelectorAll('#'+containerId+' .rv2-prodrow')].map(row=>{
     const inp=row.querySelectorAll('input');
     const selForn=row.querySelector('.rv2-prod-forn');
-    return{desc:inp[0].value.trim(),qtd:parseFloat(inp[1].value)||0,preco:parseFloat(inp[2].value)||0,pv:parseFloat(inp[3].value)||0,fornecedor:selForn?selForn.value:''};
+    const tipoBtn=row.querySelector('.rv2-prod-tipo-btn');
+    const logoBtn=row.querySelector('.rv2-prod-logo-btn');
+    return{desc:inp[0].value.trim(),qtd:parseFloat(inp[1].value)||0,preco:parseFloat(inp[2].value)||0,pv:parseFloat(inp[3].value)||0,
+      fornecedor:selForn?selForn.value:'',tipo:tipoBtn?tipoBtn.dataset.v:'Nacional',comLogo:logoBtn?logoBtn.classList.contains('active'):false};
   });
 }
-function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome);}
+function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto);}
 function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
   if(!cliente||!fornecedor||!produtos||!produtos.length)return null;
   const qtd=produtos.reduce((a,p)=>a+(p.qtd||0),0);
@@ -3880,39 +3874,58 @@ function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cli
 }
 function rvSafeId(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]/g,'_');}
 function rvBuildFornecedoresArray(r){
-  // Constrói o array fornecedores[] pronto pra salvar no registro, a partir do resultado consolidado
+  // Constrói o array fornecedores[] pronto pra salvar no registro, agregando por FORNECEDOR REAL
+  // (pagamento é por fornecedor — mesmo que ele tenha produtos em sub-grupos de cálculo diferentes,
+  // por causa de tipo/logo variando dentro do mesmo fornecedor)
   if(!r.fornecedores)return[];
-  return r.fornecedores.map(f=>({key:rvSafeId(f.fornecedor.nome),nome:f.fornecedor.nome,custoCompra:f.custoCompra,freteTotal:f.freteTotal,cliche:f.cliche}));
+  const porFornecedor={};
+  r.fornecedores.forEach(f=>{
+    const nome=f.fornecedor.nome;
+    if(!porFornecedor[nome])porFornecedor[nome]={key:rvSafeId(nome),nome,custoCompra:0,freteTotal:0,cliche:0};
+    porFornecedor[nome].custoCompra+=f.custoCompra;
+    porFornecedor[nome].freteTotal+=f.freteTotal;
+    porFornecedor[nome].cliche+=f.cliche;
+  });
+  return Object.values(porFornecedor);
 }
-function rv2CalcMultiFornecedor(cliente,tipo,produtos,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
+function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,freteIncluso){
   if(!cliente||!produtos||!produtos.length)return null;
   const gruposMap={};
   produtos.forEach(p=>{
     const fn=p.fornecedor||'';
     if(!fn)return;
-    if(!gruposMap[fn])gruposMap[fn]=[];
-    gruposMap[fn].push(p);
+    const tp=p.tipo||'Nacional';
+    const logo=!!p.comLogo;
+    const key=fn+'||'+tp+'||'+(logo?'1':'0');
+    if(!gruposMap[key])gruposMap[key]={fornecedorNome:fn,tipo:tp,comLogo:logo,produtos:[]};
+    gruposMap[key].produtos.push(p);
   });
-  const nomesFornecedores=Object.keys(gruposMap);
-  if(!nomesFornecedores.length)return null;
+  const chaves=Object.keys(gruposMap);
+  if(!chaves.length)return null;
   const custoCompraGeral=produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
   if(custoCompraGeral<=0)return null;
 
+  // Clichê só é rateado entre grupos com logo=true. Se ninguém marcou logo mas há valor de
+  // clichê digitado, cai de volta pra ratear entre todos (evita perder um valor preenchido por engano).
+  const gruposComLogo=chaves.filter(k=>gruposMap[k].comLogo);
+  const baseClicheChaves=gruposComLogo.length?gruposComLogo:chaves;
+  const custoBaseCliche=baseClicheChaves.reduce((a,k)=>a+gruposMap[k].produtos.reduce((b,p)=>b+(p.qtd||0)*(p.preco||0),0),0);
+
   const subResultados=[];
-  for(const nome of nomesFornecedores){
-    const fornecedorObj=RV_FORNECEDORES2.find(f=>f.nome===nome);
+  for(const key of chaves){
+    const g=gruposMap[key];
+    const fornecedorObj=RV_FORNECEDORES2.find(f=>f.nome===g.fornecedorNome);
     if(!fornecedorObj)continue; // fornecedor da linha não está mais cadastrado — ignora esse grupo defensivamente
-    const gp=gruposMap[nome];
-    const custoGrupo=gp.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
-    const proporcao=custoCompraGeral>0?custoGrupo/custoCompraGeral:0;
-    const freteGrupo=freteTotal*proporcao;   // rateio proporcional — soma dos grupos = freteTotal exato
-    const clicheGrupo=cliche*proporcao;
-    const r=rv2CalcCore(cliente,fornecedorObj,tipo,gp,comissaoPct,freteGrupo,clicheGrupo,freteIncluso,comLogo);
+    const custoGrupo=g.produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
+    const proporcaoFrete=custoCompraGeral>0?custoGrupo/custoCompraGeral:0;
+    const freteGrupo=freteTotal*proporcaoFrete;   // frete é sempre rateado entre TODOS — é 1 entrega só, independente de fornecedor/tipo/logo
+    const clicheGrupo=(baseClicheChaves.includes(key)&&custoBaseCliche>0)?cliche*(custoGrupo/custoBaseCliche):0;
+    const r=rv2CalcCore(cliente,fornecedorObj,g.tipo,g.produtos,comissaoPct,freteGrupo,clicheGrupo,freteIncluso,g.comLogo);
     if(r)subResultados.push(r);
   }
   if(!subResultados.length)return null;
 
-  // Caso trivial (1 fornecedor só): consolidado = o próprio sub-resultado, comportamento idêntico ao motor de hoje
+  // Caso trivial (1 grupo só): consolidado = o próprio sub-resultado, comportamento idêntico ao motor de hoje
   const soma=campo=>subResultados.reduce((a,r)=>a+(r[campo]||0),0);
   const receita=soma('receita'),custoCompra=soma('custoCompra'),CMV=soma('CMV'),
     lucroBruto=soma('lucroBruto'),comissao=soma('comissao'),fed=soma('fed'),
@@ -3931,21 +3944,24 @@ function rv2CalcMultiFornecedor(cliente,tipo,produtos,comissaoPct,freteTotal,cli
   const icmsDebPctEfetivo=receita>0?debICMS/receita*100:0;
   const freteUnit=qtdSum>0?freteTotalSum/qtdSum:0;
   const freteDespesa=freteIncluso?0:freteTotalSum;
-  const fornecedorNomes=nomesFornecedores.filter(n=>subResultados.some(r=>r.fornecedor&&r.fornecedor.nome===n));
+  const fornecedorNomes=[...new Set(subResultados.map(r=>r.fornecedor.nome))];
   const fornecedorLegado=fornecedorNomes.join(' + '); // string única pra telas que ainda esperam "1 fornecedor"
+  const tiposUsados=[...new Set(subResultados.map(r=>r.tipo))];
+  const tipoLegado=tiposUsados.length===1?tiposUsados[0]:tiposUsados.join(' + '); // idem, pra telas que esperam "1 tipo"
+  const comLogoAny=subResultados.some(r=>r.comLogo);
   const regCli=subResultados[0].regCli; // igual em todos os grupos — é sempre o mesmo cliente
   const regFor=subResultados[0].regFor; // representativo do 1º grupo — resumo consolidado não tem "1 região" de verdade quando há vários fornecedores; o detalhe por fornecedor (r.fornecedores) tem a região correta de cada um
 
   return{
     multiFornecedor:subResultados.length>1,
-    fornecedores:subResultados, // sub-DRE completo por fornecedor, pra telas que precisam do detalhe
-    fornecedorNomes,fornecedorLegado,
-    cliente,tipo,produtos,qtd:qtdSum,preco:precoMedio,pv:pvMedio,
+    fornecedores:subResultados, // sub-DRE completo por grupo (fornecedor+tipo+logo), pra telas que precisam do detalhe
+    fornecedorNomes,fornecedorLegado,tiposUsados,tipo:tipoLegado,comLogo:comLogoAny,
+    cliente,produtos,qtd:qtdSum,preco:precoMedio,pv:pvMedio,
     icmsCredPct:icmsCredPctEfetivo,icmsDebPct:icmsDebPctEfetivo,fedPct:RV_EMPRESA.fedPct,comissaoPct,
     freteUnit,freteDespesa,regFor,regCli,
     receita,custoCompra,CMV,lucroBruto,comissao,fed,despesasVenda,margemLiquida,pctMargemLiquida,
     credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
-    freteTotal:freteTotalSum,cliche:clicheSum,freteIncluso:!!freteIncluso,comLogo:!!comLogo,
+    freteTotal:freteTotalSum,cliche:clicheSum,freteIncluso:!!freteIncluso,
     // mesmos nomes/aliases que rv2CalcCore já usa — telas existentes (rvCPTotais, Financeiro, listagem)
     // continuam lendo o resultado consolidado sem precisar saber que agora pode vir de vários fornecedores
     vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotalSum,
@@ -3959,7 +3975,7 @@ function rv2Calc(){
   const comissaoPct=parseFloat(rvEl('rv2-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rv2-frete').value)||0;
   const cliche=parseFloat(rvEl('rv2-cliche').value)||0;
-  const r=rv2CalcMultiFornecedor(cliente,rv2Tipo,produtos,comissaoPct,freteTotal,cliche,rv2FreteIncluso,rv2ComLogo);
+  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,rv2FreteIncluso);
   if(!r){
     rvEl('rv2-resumo').innerHTML='<p class="hint">Selecione cliente e fornecedor, adicione ao menos 1 produto com qtd e preços preenchidos.</p>';
     rvEl('rv2-detalhe').innerHTML='';
@@ -3968,25 +3984,22 @@ function rv2Calc(){
   rv2Render(r);
   return r;
 }
-let rv2FreteIncluso=false,rv2ComLogo=false;
+let rv2FreteIncluso=false;
 function rv2ToggleFreteIncluso(){
   rv2FreteIncluso=!rv2FreteIncluso;
   rvEl('rv2-frete-incluso-btn').classList.toggle('active',rv2FreteIncluso);
   rv2Calc();
 }
-function rv2ToggleComLogo(){
-  rv2ComLogo=!rv2ComLogo;
-  rvEl('rv2-com-logo-btn').classList.toggle('active',rv2ComLogo);
-  if(rv2ComLogo){
-    // lembra de preencher o clichê/molde/logo — abre os encargos opcionais se estiverem fechados
-    const body=document.getElementById('rv2-opt-body');
-    if(body&&!body.classList.contains('open')){
-      const h=body.previousElementSibling;
-      if(h)toggleCollap(h,'rv2-opt-body');
-    }
-    setTimeout(()=>rvEl('rv2-cliche')?.focus(),150);
+function rv2ProdLogoReminder(containerId){
+  // lembra de preencher o clichê/molde/logo — abre os encargos opcionais se estiverem fechados
+  const bodyId=containerId==='rvedit-prod-rows'?'rvedit-opt-body':'rv2-opt-body';
+  const clicheId=containerId==='rvedit-prod-rows'?'rvedit-cliche':'rv2-cliche';
+  const body=document.getElementById(bodyId);
+  if(body&&!body.classList.contains('open')){
+    const h=body.previousElementSibling;
+    if(h)toggleCollap(h,bodyId);
   }
-  rv2Calc();
+  setTimeout(()=>rvEl(clicheId)?.focus(),150);
 }
 function rv2Render(r){
   rvEl('rv2-resumo').innerHTML=`
@@ -4198,20 +4211,10 @@ function rv2CriarPedido(){
 
 /* ── EDITAR COTAÇÃO/PEDIDO JÁ SALVOS ── */
 let rvEditCtx=null; // {kind:'cotacao'|'pedido', id}
-let rvEditTipo='Nacional',rvEditFreteIncluso=false,rvEditComLogo=false;
-function rvEditSetTipo(t){
-  rvEditTipo=t;
-  document.querySelectorAll('#rvedit-tipo-toggle button').forEach(b=>b.classList.toggle('active',b.textContent===t));
-  rv2EditPreview();
-}
+let rvEditFreteIncluso=false;
 function rvEditToggleFreteIncluso(){
   rvEditFreteIncluso=!rvEditFreteIncluso;
   rvEl('rvedit-frete-incluso-btn').classList.toggle('active',rvEditFreteIncluso);
-  rv2EditPreview();
-}
-function rvEditToggleComLogo(){
-  rvEditComLogo=!rvEditComLogo;
-  rvEl('rvedit-com-logo-btn').classList.toggle('active',rvEditComLogo);
   rv2EditPreview();
 }
 function rv2OpenEdit(kind,id){
@@ -4228,18 +4231,15 @@ function rv2OpenEdit(kind,id){
   selCli.value=rec.cliente;
   rvEl('rvedit-prod-rows').innerHTML='';
   if(rec.produtos&&rec.produtos.length){
-    rec.produtos.forEach(p=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor));
+    rec.produtos.forEach(p=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor,p.tipo||rec.tipo||'Nacional',p.comLogo!==undefined?p.comLogo:!!rec.comLogo));
   }else{
-    rv2AddProdRowEdit('',rec.qtd,rec.preco,rec.pv,rec.fornecedor); // registro salvo antes de existir múltiplos produtos
+    rv2AddProdRowEdit('',rec.qtd,rec.preco,rec.pv,rec.fornecedor,rec.tipo||'Nacional',!!rec.comLogo); // registro salvo antes de existir múltiplos produtos
   }
   rvEl('rvedit-comissao').value=rec.comissaoPct||0;
   rvEl('rvedit-frete').value=rec.freteTotal||0;
   rvEl('rvedit-cliche').value=rec.cliche||0;
   rvEditFreteIncluso=!!rec.freteIncluso;
   rvEl('rvedit-frete-incluso-btn').classList.toggle('active',rvEditFreteIncluso);
-  rvEditComLogo=!!rec.comLogo;
-  rvEl('rvedit-com-logo-btn').classList.toggle('active',rvEditComLogo);
-  rvEditSetTipo(rec.tipo||'Nacional');
   const cpSection=document.getElementById('rvedit-cp-section');
   if(kind==='pedido'){
     cpSection.style.display='block';
@@ -4258,7 +4258,7 @@ function rv2EditPreview(){
   const comissaoPct=parseFloat(rvEl('rvedit-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rvedit-frete').value)||0;
   const cliche=parseFloat(rvEl('rvedit-cliche').value)||0;
-  const r=rv2CalcMultiFornecedor(cliente,rvEditTipo,produtos,comissaoPct,freteTotal,cliche,rvEditFreteIncluso,rvEditComLogo);
+  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,rvEditFreteIncluso);
   const prev=rvEl('rvedit-preview');
   if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e adicione ao menos 1 produto com qtd e preços.</p>';rvEl('rvedit-detalhe').innerHTML='';return null;}
   prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
