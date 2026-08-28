@@ -2757,23 +2757,25 @@ function crmAddTagToCustomer(){
 function crmRenderCustPeople(){
   const cont=document.getElementById('crm-cust-people');
   cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>{
-    return`<span class="crm-chip" style="gap:.25rem;flex-direction:column;align-items:flex-start;padding:.25rem .55rem">
-    <span style="display:flex;align-items:center;gap:.25rem">
-      <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.7rem;width:64px;color:var(--blue);padding:0">
-      <span style="color:var(--ink4)">·</span>
-      <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.7rem;width:56px;color:var(--blue);padding:0">
-      <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.62rem;color:var(--ink4);padding:0">
-        <option value="">—</option>
-        ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
-      </select>
-      <span class="x" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
-    </span>
-    <span style="display:flex;align-items:center;gap:.25rem">
-      <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="border:none;background:none;font-size:.6rem;width:78px;color:var(--ink3);padding:0">
-      <span style="color:var(--ink4)">·</span>
-      <input type="text" value="${esc(p.phone||'')}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="border:none;background:none;font-size:.6rem;width:72px;color:var(--ink3);padding:0">
-    </span>
-  </span>`;
+    return`<div style="display:flex;flex-direction:column;gap:.35rem;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .7rem;min-width:230px">
+    <div style="display:flex;align-items:center;gap:.4rem">
+      <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.78rem;font-weight:600;width:110px;color:var(--ink);padding:0">
+      <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink3);padding:0">
+      <span class="x" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
+    </div>
+    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.64rem;color:var(--ink4);padding:0;width:fit-content">
+      <option value="">papel —</option>
+      ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
+    </select>
+    <div style="display:flex;align-items:center;gap:.35rem;border-top:1px solid var(--bdr);padding-top:.35rem;margin-top:.05rem">
+      <span style="font-size:.64rem;color:var(--ink4);flex-shrink:0">✉</span>
+      <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink2);padding:0">
+    </div>
+    <div style="display:flex;align-items:center;gap:.35rem">
+      <span style="font-size:.64rem;color:var(--ink4);flex-shrink:0">☎</span>
+      <input type="text" value="${esc(p.phone||'')}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink2);padding:0">
+    </div>
+  </div>`;
   }).join(''):'<span class="crm-empty">—</span>';
 }
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
