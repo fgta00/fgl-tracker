@@ -1056,7 +1056,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
 <div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
-  <div class="modal" style="max-width:920px">
+  <div class="modal" style="max-width:min(1150px, calc(100vw - 48px))">
     <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" onclick="closeM('finr')">✕</button></div>
     <div class="modal-b" id="finr-body"></div>
   </div>
