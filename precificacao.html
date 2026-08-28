@@ -1056,7 +1056,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
 <div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" style="max-width:920px">
     <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" onclick="closeM('finr')">✕</button></div>
     <div class="modal-b" id="finr-body"></div>
   </div>
@@ -4838,26 +4838,66 @@ function rvOpenFinPopupR(pedidoId){
   rvFinCurPedidoId=pedidoId;
   const tot=rvCPTotais(p);
   rvEl('finr-title').textContent=`Financeiro — ${p.cliente} (${p.data})`;
-  const partySection=(label,party,total,isReceipt)=>{
+
+  const custoTotal=tot.fornecedor+(p.comLogo?tot.beneficiador:0);
+  const vendaTotal=tot.cliente;
+  const margem=vendaTotal-custoTotal;
+  const margemPct=vendaTotal?Math.round(margem/vendaTotal*100):0;
+  const pagoFornSum=rvPartyPago(pedidoId,'fornecedor')+(p.comLogo?rvPartyPago(pedidoId,'beneficiador'):0);
+  const recebidoSum=rvPartyRecebido(pedidoId);
+
+  const partyBlock=(party,total,isReceipt,showHeader,label,icon)=>{
     const paid=isReceipt?rvPartyRecebido(pedidoId):rvPartyPago(pedidoId,party);
     const planParcelas=isReceipt?p.planoPagamento.cliente:p.planoPagamento[party];
     const planTxt=(planParcelas||[]).map(pc=>`${pc.dias}d: ${pc.pct}% (${rvBrl(total*pc.pct/100)}) · ${pc.ref}`).join(' · ');
-    return `<div style="margin-top:1rem">
-      <div class="fsep">${label} — ${rvBrl(paid)} / ${rvBrl(total)}</div>
-      <div style="font-size:.6rem;color:var(--ink4);margin-bottom:.3rem">Plano: ${esc(planTxt)}</div>
+    return`<div style="margin-top:.5rem">
+      ${showHeader?`<div style="font-size:.66rem;font-weight:700;color:var(--ink2);margin-bottom:.15rem">${icon} ${label} — ${rvBrl(paid)} / ${rvBrl(total)}</div>`:''}
+      <div style="font-size:.58rem;color:var(--ink4);margin-bottom:.3rem">Plano: ${esc(planTxt)}</div>
       ${rvFinPartyRows(pedidoId,party,total,isReceipt)}
-      <div style="display:flex;gap:.4rem;margin-top:.4rem">
-        <input type="date" id="finr-${party}-date" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
-        <input type="number" id="finr-${party}-valor" placeholder="Valor" style="width:90px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
-        <select id="finr-${party}-ref" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">${RV_FIN_REF_TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
-        <input type="text" id="finr-${party}-notas" placeholder="notas…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.7rem">
-        <button class="btn btn-p" style="font-size:.65rem;padding:.3rem .6rem" onclick="${isReceipt?`rvAddReceiptR(${pedidoId})`:`rvAddLedgerR(${pedidoId},'${party}')`}">＋</button>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem">
+        <input type="date" id="finr-${party}-date" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
+        <input type="number" id="finr-${party}-valor" placeholder="Valor" style="width:80px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
+        <select id="finr-${party}-ref" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">${RV_FIN_REF_TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+        <input type="text" id="finr-${party}-notas" placeholder="notas…" style="flex:1;min-width:70px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
       </div>
+      <button style="width:100%;margin-top:.35rem;font-size:.68rem;padding:.45rem;background:${isReceipt?'var(--green)':'var(--red)'};color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="${isReceipt?`rvAddReceiptR(${pedidoId})`:`rvAddLedgerR(${pedidoId},'${party}')`}">＋ Lançar ${isReceipt?'recebimento':'pagamento'}</button>
     </div>`;
   };
-  let html=partySection('🏭 Pagar Fornecedor','fornecedor',tot.fornecedor,false);
-  if(p.comLogo)html+=partySection('🎨 Pagar Beneficiador','beneficiador',tot.beneficiador,false);
-  html+=partySection('👤 Receber Cliente','cliente',tot.cliente,true);
+
+  const kpiBox=(label,val,cor,extra)=>`<div style="flex:1;background:var(--bg);border-radius:8px;padding:.6rem .8rem">
+    <div style="font-size:.58rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em">${label}</div>
+    <div style="font-size:1rem;font-weight:700;color:${cor};font-family:'IBM Plex Mono'">${val}${extra?` <span style="font-size:.7rem;font-weight:600">${extra}</span>`:''}</div>
+  </div>`;
+
+  const barra=(pago,total,cor)=>{
+    const pct=total?Math.min(100,Math.round(pago/total*100)):0;
+    return`<div style="height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${pct}%;background:${cor}"></div></div>`;
+  };
+
+  let html=`<div style="display:flex;gap:.7rem;margin-bottom:1rem">
+    ${kpiBox('Custo Total (Forn.)',rvBrl(custoTotal),'var(--red)')}
+    ${kpiBox('Venda (Cli.)',rvBrl(vendaTotal),'var(--green)')}
+    ${kpiBox('Margem',rvBrl(margem),'var(--green)',`(${margemPct}%)`)}
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.3rem">
+    <div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:.3rem">🏭 Pago ao Fornecedor</div>
+      ${partyBlock('fornecedor',tot.fornecedor,false,false)}
+      ${p.comLogo?partyBlock('beneficiador',tot.beneficiador,false,true,'Beneficiador (logo)','🎨'):''}
+      <div style="font-size:.66rem;margin-top:.6rem">Total pago: <b style="color:var(--red)">${rvBrl(pagoFornSum)}</b> de ${rvBrl(custoTotal)} · falta ${rvBrl(Math.max(0,custoTotal-pagoFornSum))}</div>
+      ${barra(pagoFornSum,custoTotal,'var(--red)')}
+    </div>
+    <div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:.3rem">👤 Recebido do Cliente</div>
+      ${partyBlock('cliente',tot.cliente,true,false)}
+      <div style="font-size:.66rem;margin-top:.6rem">Total recebido: <b style="color:var(--green)">${rvBrl(recebidoSum)}</b> de ${rvBrl(vendaTotal)} · falta ${rvBrl(Math.max(0,vendaTotal-recebidoSum))}</div>
+      ${barra(recebidoSum,vendaTotal,'var(--green)')}
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--bdr);margin-top:1rem;padding-top:.7rem;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:.72rem;font-weight:700">Saldo líquido (a receber − a pagar)</span>
+    <span style="font-size:.9rem;font-weight:700;font-family:'IBM Plex Mono';color:${(recebidoSum-pagoFornSum)>=0?'var(--green)':'var(--red)'}">${rvBrl(recebidoSum-pagoFornSum)}</span>
+  </div>`;
   rvEl('finr-body').innerHTML=html;
   document.getElementById('ovl-finr').classList.add('open');
 }
