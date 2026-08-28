@@ -1039,7 +1039,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- SEGURANÇA — trocar senha da conta e dos cofres -->
 <!-- CALENDÁRIO — pagamentos/recebimentos agendados e feitos -->
 <div class="ovl" id="ovl-rvcal" onclick="if(event.target===this)closeM('rvcal')">
-  <div class="modal" style="max-width:720px">
+  <div class="modal" style="max-width:min(920px, calc(100vw - 48px))">
     <div class="modal-h"><span>Calendário — Pagamentos e Recebimentos</span><button class="mcls" onclick="closeM('rvcal')">✕</button></div>
     <div class="modal-b">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
@@ -4947,23 +4947,24 @@ function rvRenderCalendar(){
   let h='';
   dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
   const startOff=(firstDay===0?6:firstDay-1);
-  for(let i=0;i<startOff;i++)h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
+  for(let i=0;i<startOff;i++)h+=`<div style="background:${bgOther};min-width:0;height:82px"></div>`;
   const today=new Date();
   for(let d=1;d<=daysInMonth;d++){
     const isToday=d===today.getDate()&&_rvCalMonth===today.getMonth()&&_rvCalYear===today.getFullYear();
     const evts=events[d]||[];
-    h+=`<div style="background:${bgCell};padding:3px 4px;min-height:60px;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
-    h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px">${d}</div>`;
+    h+=`<div style="background:${bgCell};min-width:0;height:82px;padding:3px 4px;display:flex;flex-direction:column;overflow:hidden;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
+    h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px;flex-shrink:0">${d}</div>`;
+    h+=`<div style="overflow-y:auto;min-height:0">`;
     evts.forEach(e=>{
       const col=e.tipo==='pagar'?'var(--red)':'var(--green)';
       const nome=e.tipo==='pagar'?e.fornecedor:e.cliente;
       h+=`<div onclick="closeM('rvcal');${e.pedidoId?`rvOpenFinPopupR(${e.pedidoId})`:''}" style="font-size:.62rem;padding:2px 4px;margin-bottom:2px;border-radius:3px;background:${col}${e.futuro?'':'18'};color:${e.futuro?'#fff':col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" title="${e.futuro?'Agendado':'Feito'} — ${esc(nome)} — ${rvBrl(e.valor)}${e.ref?' — '+esc(e.ref):''}"><b>${rvBrl(e.valor)}</b> ${esc(nome)}</div>`;
     });
-    h+='</div>';
+    h+='</div></div>';
   }
   const totalCells=startOff+daysInMonth;
   const rem=totalCells%7===0?0:7-totalCells%7;
-  for(let i=0;i<rem;i++)h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
+  for(let i=0;i<rem;i++)h+=`<div style="background:${bgOther};min-width:0;height:82px"></div>`;
   document.getElementById('rvcal-grid').innerHTML=h;
 }
 
