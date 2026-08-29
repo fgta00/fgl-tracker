@@ -1149,19 +1149,19 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="modal-b" style="text-align:center;padding-top:1.6rem">
       <div style="font-size:2rem;margin-bottom:.4rem">👤</div>
       <div class="sh" style="justify-content:center;margin-bottom:.3rem">Entrar</div>
-      <p style="font-size:.74rem;color:var(--ink3);margin-bottom:.9rem">Acesso restrito. Preencha os 3 campos — a senha do cofre libera automaticamente o que você tiver permissão de ver.</p>
+      <p id="auth-help" style="font-size:.74rem;color:var(--ink3);margin-bottom:.9rem">Acesso restrito. A senha do cofre é opcional e serve apenas para liberar os módulos protegidos.</p>
       <input class="mono" id="auth-email" type="email" placeholder="seu@email.com" autocomplete="email"
         style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink);margin-bottom:.5rem">
       <input class="mono" id="auth-pw" type="password" placeholder="Senha da conta" autocomplete="current-password"
         style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink);margin-bottom:.5rem">
-      <input class="mono" id="auth-vault-pw" type="password" placeholder="Senha do cofre" autocomplete="off"
+      <input class="mono" id="auth-vault-pw" type="password" placeholder="Senha do cofre (opcional)" autocomplete="off"
         style="width:100%;padding:.6rem;border-radius:8px;border:1.5px solid var(--bdr2);text-align:center;font-size:.88rem;background:var(--card);color:var(--ink)">
       <div id="auth-err" style="color:var(--red);font-size:.7rem;margin-top:.4rem;min-height:1.2em"></div>
       <div style="display:flex;gap:.5rem;margin-top:.6rem">
         <button class="btn btn-p" style="flex:1" onclick="authSignIn()">Entrar</button>
-        <button class="btn btn-s" style="flex:1" onclick="authSignUp()">Criar conta</button>
+        <button class="btn btn-s" id="auth-signup-btn" style="flex:1" onclick="authSignUp()">Criar conta</button>
       </div>
-      <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Primeira vez? Use "Criar conta". Sua gerente faz o mesmo com o e-mail dela — depois você a adiciona no vault compartilhado.</p>
+      <p id="auth-signup-help" style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Primeira vez? Use "Criar conta". Sua gerente faz o mesmo com o e-mail dela — depois você a adiciona no vault compartilhado.</p>
     </div>
   </div>
 </div>
@@ -1730,6 +1730,10 @@ function setLocalTs(key){localStorage.setItem(key+'_ts',new Date().toISOString()
 
 /* ── CONTA (Supabase Auth — e-mail + senha, controla QUEM pode ler/escrever) ── */
 const FRED_EMAIL='fred@animaverde.com.br'; // único e-mail com acesso à Importação e ao Tracker
+const META_REVIEWER_UID='522a36fb-5716-4292-8b90-a455dfa6341b';
+const META_REVIEWER_EMAIL='meta.reviewer@animaverde.com.br';
+function isMetaReviewer(){return !!(authUser&&authUser.id===META_REVIEWER_UID);}
+function isMetaReviewerEmail(v){return (v||'').trim().toLowerCase()===META_REVIEWER_EMAIL;}
 let authUser=null;      // {id,email} quando logado
 let _pendingTab=null;   // pra retomar o fluxo (Importação/Revenda) depois do login
 function updateAuthUI(){
@@ -1739,12 +1743,42 @@ function updateAuthUI(){
 }
 function updateHeaderVisibility(){
   const isFred=!!(authUser&&authUser.email&&authUser.email.toLowerCase()===FRED_EMAIL);
+  const reviewer=isMetaReviewer();
   const tabImport=document.getElementById('tab-import');
   const tabTracker=document.getElementById('tab-tracker');
   const btnSecurity=document.getElementById('btn-security');
-  if(tabImport)tabImport.style.display=isFred?'':'none';
-  if(tabTracker)tabTracker.style.display=isFred?'':'none';
-  if(btnSecurity)btnSecurity.style.display=isFred?'':'none';
+  if(tabImport)tabImport.style.display=(!reviewer&&isFred)?'':'none';
+  if(tabTracker)tabTracker.style.display=(!reviewer&&isFred)?'':'none';
+  if(btnSecurity)btnSecurity.style.display=(!reviewer&&isFred)?'':'none';
+  applyMetaReviewerMode();
+}
+function applyMetaReviewerMode(){
+  if(!isMetaReviewer())return;
+  // Reviewer vê somente CRM > Clientes. RLS continua sendo a barreira de segurança dos dados.
+  ['rvtab-calc','rvtab-cotacoes','rvtab-pedidos','rvtab-fin'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  ['rvpane-calc','rvpane-cotacoes','rvpane-pedidos','rvpane-fin'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active');});
+  ['crmtab-semana','crmtab-projetos'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  ['crmpane-semana','crmpane-projetos'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active');});
+  // Controles de vault/arquivo não fazem parte do fluxo de App Review.
+  ['rv-sync-status'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  document.querySelectorAll('header .hbtn').forEach(e=>{if(e.id!=='auth-status')e.style.display='none';});
+  _rvCurTab='crm';
+  const crmPane=document.getElementById('rvpane-crm'),crmTab=document.getElementById('rvtab-crm');
+  if(crmPane)crmPane.classList.add('active');
+  if(crmTab){crmTab.classList.add('active');crmTab.style.display='';}
+  setTimeout(()=>{crmCheckAccess();crmShowSubTab('clientes');},0);
+}
+function updateAuthModalForEmail(){
+  const email=document.getElementById('auth-email');
+  const reviewer=isMetaReviewerEmail(email&&email.value);
+  const vault=document.getElementById('auth-vault-pw');
+  const help=document.getElementById('auth-help');
+  const signup=document.getElementById('auth-signup-btn');
+  const signupHelp=document.getElementById('auth-signup-help');
+  if(vault)vault.style.display=reviewer?'none':'';
+  if(help)help.textContent=reviewer?'Acesso de revisão. Entre com e-mail e senha.':'Acesso restrito. A senha do cofre é opcional e serve apenas para liberar os módulos protegidos.';
+  if(signup)signup.style.display=reviewer?'none':'';
+  if(signupHelp)signupHelp.style.display=reviewer?'none':'';
 }
 async function initAuth(){
   if(!_supaOK)return;
@@ -1759,7 +1793,7 @@ async function initAuth(){
 function openAuthModal(){
   document.getElementById('auth-err').textContent='';
   document.getElementById('ovl-auth').classList.add('open');
-  setTimeout(()=>{const el=document.getElementById('auth-email');if(el)el.focus();},50);
+  setTimeout(()=>{const el=document.getElementById('auth-email');if(el){el.focus();el.addEventListener('input',updateAuthModalForEmail,{once:false});updateAuthModalForEmail();}},50);
 }
 function onAuthButtonClick(){authUser?authSignOut():openAuthModal();}
 
@@ -1812,7 +1846,7 @@ async function attemptAutoUnlock(vaultPass){
 async function authSignIn(){
   const email=document.getElementById('auth-email').value.trim();
   const pw=document.getElementById('auth-pw').value;
-  const vaultPw=document.getElementById('auth-vault-pw').value;
+  const vaultPw=isMetaReviewerEmail(email)?'':document.getElementById('auth-vault-pw').value;
   if(!email||!pw){document.getElementById('auth-err').textContent='Preencha e-mail e senha.';return;}
   document.getElementById('auth-err').style.color='';
   document.getElementById('auth-err').textContent='Entrando…';
@@ -1822,9 +1856,9 @@ async function authSignIn(){
   updateAuthUI();
   document.getElementById('ovl-auth').classList.remove('open');
   toastSave('Conectado ✓');
-  await attemptAutoUnlock(vaultPw);
+  if(!isMetaReviewer())await attemptAutoUnlock(vaultPw);
   document.getElementById('auth-vault-pw').value='';
-  _resumePending();
+  if(isMetaReviewer())applyMetaReviewerMode();else _resumePending();
 }
 async function authSignUp(){
   const email=document.getElementById('auth-email').value.trim();
@@ -2411,6 +2445,7 @@ function rvSaveReceiptsR(d,forceReplace){
 /* ── SUB-ABAS DA REVENDA ── */
 let _rvCurTab='calc';
 function rvShowTab(id){
+  if(isMetaReviewer()&&id!=='crm')id='crm';
   _rvCurTab=id;
   document.querySelectorAll('.rv-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
@@ -2521,7 +2556,9 @@ async function crmCheckAccess(){
     document.getElementById('crm-content').style.display='none';
     return;
   }
-  if(CRM_ROLE===null){
+  if(isMetaReviewer()){
+    CRM_ROLE='meta_reviewer';
+  }else if(CRM_ROLE===null){
     const{data,error}=await _supa.from('crm_user_roles').select('role').eq('user_id',authUser.id).maybeSingle();
     CRM_ROLE=(!error&&data)?data.role:false;
   }
@@ -2532,7 +2569,7 @@ async function crmCheckAccess(){
   }
   document.getElementById('crm-noaccess').style.display='none';
   document.getElementById('crm-content').style.display='block';
-  crmShowSubTab('semana',true);
+  crmShowSubTab(isMetaReviewer()?'clientes':'semana',true);
   crmLoadAll();
   crmStartAutoRefresh();
 }
@@ -2548,6 +2585,7 @@ function crmStartAutoRefresh(){
   },30000);
 }
 function crmShowSubTab(id,skipReclick){
+  if(isMetaReviewer()&&id!=='clientes')id='clientes';
   if(!skipReclick){
     document.querySelectorAll('#crm-content .rv-pane').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('#crm-content > .rv-tabs .rv-tab').forEach(b=>b.classList.remove('active'));
