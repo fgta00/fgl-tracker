@@ -54,24 +54,31 @@ header .spacer{flex:1}
 .msf-opt:hover{background:var(--ltgry)}
 .msf-opt input{width:auto;margin:0}
 .msf-selectall{border-bottom:1px solid var(--bdr);margin:0 .3rem .2rem;padding-bottom:.4rem;font-weight:600}
-.rv2-prodcard{background:#F4F8FC;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .65rem;margin-bottom:.4rem}
+.rv2-order-head{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(105px,.7fr) minmax(82px,.48fr);gap:.55rem;align-items:end}
+.rv2-client-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.3rem;align-items:end}
+.rv2-frete-wrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.28rem;align-items:center}
+.rv2-frete-wrap .pill-toggle-sm{height:32px;white-space:nowrap}
+.rv2-products-head{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;margin-bottom:.45rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
+.rv2-products-head .fsep{margin:0;padding:0;border:0}
+.rv2-prodcard{background:#F4F8FC;border:1px solid var(--bdr);border-radius:9px;padding:.55rem .65rem;margin-bottom:.45rem}
 body.dark .rv2-prodcard{background:#16202E}
-.rv2-prodcard-l1{display:flex;align-items:baseline;gap:.5rem}
-.rv2-prod-desc{flex:1;min-width:0;border:none;background:none;font-size:.8rem;font-weight:600;color:var(--ink);padding:0}
-.rv2-prod-qtypreco{font-size:.64rem;color:var(--ink4);white-space:nowrap;display:flex;align-items:baseline;gap:.2rem}
-.rv2-prod-qtypreco input{border:none;background:none;font-size:.64rem;color:var(--ink4);padding:0;text-align:right}
-.rv2-prod-qty{width:34px}
-.rv2-prod-preco{width:44px}
-.rv2-prod-pv{width:52px;border:none;background:none;font-size:.8rem;font-weight:700;color:var(--ink);padding:0;text-align:right}
-.rv2-prod-remove{background:none;border:none;color:var(--red);cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:center}
-.rv2-prodcard-l2{display:flex;align-items:center;gap:.3rem;margin-top:.4rem;flex-wrap:wrap}
-.rv2-chip-select{font-size:.66rem;padding:.18rem .45rem;border:1px solid var(--bdr2);border-radius:999px;background:var(--ltblue);color:var(--blue);cursor:pointer;font-weight:600}
-.rv2-chip-addbtn{border:1px dashed var(--bdr2);border-radius:999px;background:none;color:var(--ink4);cursor:pointer;padding:.18rem .4rem;font-size:.64rem;display:flex;align-items:center}
-.rv2-prod-tipo-btn{font-size:.64rem;padding:.18rem .5rem;border:1px solid var(--bdr2);border-radius:999px;background:var(--card);cursor:pointer;color:var(--ink3);font-weight:600}
-.rv2-prod-logo-btn{font-size:.64rem;padding:.18rem .5rem;border:1px solid var(--bdr2);border-radius:999px;background:var(--card);cursor:pointer;color:var(--ink3);display:flex;align-items:center;gap:.25rem}
+.rv2-prodcard-l1,.rv2-prodcard-l2{display:grid;gap:.45rem;align-items:end}
+.rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(150px,1.5fr) minmax(92px,.65fr) auto}
+.rv2-prodcard-l2{grid-template-columns:minmax(68px,.65fr) minmax(78px,.75fr) minmax(78px,.75fr) minmax(82px,.75fr) minmax(70px,.65fr);margin-top:.5rem}
+.rv2-field{min-width:0}
+.rv2-field-label{display:block;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.045em;color:var(--ink4);margin:0 0 .18rem .05rem;white-space:nowrap}
+.rv2-field input,.rv2-field select{width:100%;height:31px;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink);padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;box-sizing:border-box}
+.rv2-field input.mono{font-family:'IBM Plex Mono'}
+.rv2-field input:focus,.rv2-field select:focus{border-color:var(--blue)}
+.rv2-forn-control{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.22rem}
+.rv2-chip-select{font-size:.7rem!important;padding:.25rem .4rem!important;border:1px solid var(--bdr2)!important;border-radius:6px!important;background:var(--card)!important;color:var(--ink)!important;font-weight:600!important;height:31px}
+.rv2-chip-addbtn{height:31px;width:28px;justify-content:center;border:1px dashed var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink4);cursor:pointer;padding:0;display:flex;align-items:center}
+.rv2-prod-desc{font-weight:600!important}
+.rv2-prod-tipo-btn,.rv2-prod-logo-btn{width:100%;height:31px;font-size:.66rem;padding:.2rem .35rem;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);cursor:pointer;color:var(--ink3);font-weight:600;display:flex;align-items:center;justify-content:center;gap:.2rem;box-sizing:border-box}
 .rv2-prod-logo-btn.active{background:var(--ltpur,#EDE9FE);color:var(--purple,#5B21B6);border-color:var(--purple,#5B21B6)}
-.rv2-prodcard-l3{display:flex;align-items:center;gap:.4rem;margin-top:.35rem;padding-top:.35rem;border-top:1px dashed var(--bdr)}
-.rv2-prodcard-l3 input{width:75px;border:1px solid var(--bdr2);border-radius:5px;padding:.15rem .35rem;font-size:.68rem}
+.rv2-prod-remove{background:none;border:none;color:var(--red);cursor:pointer;padding:0 0 8px;align-self:end;display:flex;align-items:center}
+body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+@media(max-width:900px){.rv2-order-head{grid-template-columns:1fr 1fr}.rv2-order-head>.rv2-client-field{grid-column:1/-1}.rv2-prodcard-l1{grid-template-columns:1fr 1.4fr}.rv2-prodcard-l1>.rv2-cliche-field{grid-column:1/2}.rv2-prod-remove{grid-column:2;grid-row:2;justify-self:end}.rv2-prodcard-l2{grid-template-columns:repeat(3,1fr)}}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ff input.mono{font-family:'IBM Plex Mono'}
 .ff input:focus,.ff select:focus{border-color:var(--blue)}
@@ -414,28 +421,14 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="card no-print">
           <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
-          <div class="grid" style="grid-template-columns:1fr auto;gap:.3rem;align-items:end">
-            <div class="ff"><label>Cliente</label><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select></div>
-            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
+          <div class="rv2-order-head">
+            <div class="ff rv2-client-field"><label>Cliente</label><div class="rv2-client-wrap"><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select><button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button></div></div>
+            <div class="ff"><label>Frete R$</label><div class="rv2-frete-wrap"><button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">+ Frete</button><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"></div></div>
+            <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
           </div>
 
-          <div style="margin-top:.6rem">
-            <button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">+ Frete</button>
-          </div>
-
-          <div class="fsep" style="margin-top:.9rem">Produtos</div>
+          <div class="rv2-products-head"><div class="fsep">Produtos</div><button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem" onclick="rv2AddProdRow()">＋ Adicionar</button></div>
           <div id="rv2-prod-rows"></div>
-          <button class="btn btn-s" style="font-size:.68rem;margin-top:.3rem" onclick="rv2AddProdRow()">＋ Adicionar produto</button>
-
-          <div class="collap-h" onclick="toggleCollap(this,'rv2-opt-body')" style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
-            <div class="sh" style="margin:0;font-size:.62rem">+ Encargos opcionais</div><span class="chev">▶</span>
-          </div>
-          <div class="collap-body" id="rv2-opt-body">
-            <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
-              <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
-              <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo — já embutido no preço de venda</span></div>
-            </div>
-          </div>
 
           <div class="no-print" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.1rem">
             <button class="btn" style="background:var(--blue);color:#fff;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem" onclick="rv2SalvarCotacao()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Salvar Cotação</button>
@@ -3978,26 +3971,25 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
   const logoAtual=!!comLogoProduto;
   const opcoesForn=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}"${f.nome===fornAtual?' selected':''}>${esc(f.nome)}</option>`).join('');
   row.innerHTML=`<div class="rv2-prodcard-l1">
-      <input type="text" class="rv2-prod-desc" placeholder="Descrição do produto" value="${esc(desc)}" oninput="${onCalc}">
-      <span class="rv2-prod-qtypreco"><input type="number" class="mono rv2-prod-qty" placeholder="1000" value="${qtd}" min="0" step="1" oninput="${onCalc}"> x R$ <input type="number" class="mono rv2-prod-preco" placeholder="4.25" value="${preco}" min="0" step="0.01" oninput="${onCalc}"></span>
-      <input type="number" class="mono rv2-prod-pv" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}">
+      <div class="rv2-field"><span class="rv2-field-label">Fornecedor</span><div class="rv2-forn-control"><select class="rv2-chip-select rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select><button type="button" class="rv2-chip-addbtn" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      <div class="rv2-field"><span class="rv2-field-label">Produto / descrição</span><input type="text" class="rv2-prod-desc" placeholder="Descrição do produto" value="${esc(desc)}" oninput="${onCalc}"></div>
+      <div class="rv2-field rv2-cliche-field"><span class="rv2-field-label">Clichê / molde / logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span><input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}"></div>
       <button type="button" class="rv2-prod-remove" title="Remover produto" onclick="this.closest('.rv2-prodcard').remove();${onCalc}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="rv2-prodcard-l2">
-      <select class="rv2-chip-select rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select>
-      <button type="button" class="rv2-chip-addbtn" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-      <button type="button" class="rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique pra alternar" onclick="rv2ToggleProdTipo(this);${onCalc}">${tipoAtual==='Nacional'?'Nacional':'Importada'}</button>
-      <button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Este produto leva logo/beneficiamento"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>Logo</button>
-    </div>
-    <div class="rv2-prodcard-l3">
-      <span style="font-size:.6rem;color:var(--ink4)">Clichê/molde/logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span>
-      <input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}">
+      <div class="rv2-field"><span class="rv2-field-label">Qtd.</span><input type="number" class="mono rv2-prod-qty" placeholder="1000" value="${qtd}" min="0" step="1" oninput="${onCalc}"></div>
+      <div class="rv2-field"><span class="rv2-field-label">Custo unit. R$</span><input type="number" class="mono rv2-prod-preco" placeholder="4.25" value="${preco}" min="0" step="0.01" oninput="${onCalc}"></div>
+      <div class="rv2-field"><span class="rv2-field-label">PV unit. R$</span><input type="number" class="mono rv2-prod-pv" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}"></div>
+      <div class="rv2-field"><span class="rv2-field-label">Origem</span><button type="button" class="rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique pra alternar" onclick="rv2ToggleProdTipo(this);${onCalc}">${tipoAtual==='Nacional'?'Nacional':'Importada'}</button></div>
+      <div class="rv2-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Este produto leva logo/beneficiamento"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>${logoAtual?'Com':'Sem'}</button></div>
     </div>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
 }
 function rv2ToggleProdLogo(btn){
   btn.classList.toggle('active');
+  const svg=btn.querySelector('svg')?.outerHTML||'';
+  btn.innerHTML=svg+(btn.classList.contains('active')?'Com':'Sem');
 }
 function rv2ToggleProdTipo(btn){
   const novo=btn.dataset.v==='Nacional'?'Importada':'Nacional';
