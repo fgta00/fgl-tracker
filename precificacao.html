@@ -2717,7 +2717,9 @@ function crmOpenCustomerEdit(id){
   document.getElementById('ovl-crmcustomer').classList.add('open');
 }
 function crmRenderCustTags(){
+  // Tags are intentionally hidden from the V1 customer UI, but the data model is preserved.
   const cont=document.getElementById('crm-cust-tags');
+  if(!cont)return;
   cont.innerHTML=crmEditCtx.tags.length?crmEditCtx.tags.map(tn=>`<span class="crm-chip">${esc(tn)}<span class="x" onclick="crmEditCtx.tags=crmEditCtx.tags.filter(t=>t!=='${esc(tn).replace(/'/g,"\\'")}');crmRenderCustTags()">✕</span></span>`).join(''):'<span class="crm-empty">—</span>';
 }
 function crmRenderCustSegmento(){
