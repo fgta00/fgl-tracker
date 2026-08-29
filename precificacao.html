@@ -420,10 +420,9 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div class="sh" style="margin:0;font-size:.62rem">+ Encargos opcionais</div><span class="chev">▶</span>
           </div>
           <div class="collap-body" id="rv2-opt-body">
-            <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-top:.6rem">
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
               <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
               <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo — já embutido no preço de venda</span></div>
-              <div class="ff"><label>Clichê / molde / logo total R$</label><input type="number" class="mono" id="rv2-cliche" value="0" step="0.01" min="0" oninput="rv2Calc()"><span class="formula">custo puro, sem ICMS</span></div>
             </div>
           </div>
 
@@ -960,10 +959,9 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div class="sh" style="margin:0;font-size:.62rem">+ Encargos opcionais</div><span class="chev">▶</span>
       </div>
       <div class="collap-body" id="rvedit-opt-body">
-        <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-top:.6rem">
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
           <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rvedit-comissao" step="0.1" min="0"></div>
           <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rvedit-frete" step="0.01" min="0"></div>
-          <div class="ff"><label>Clichê / molde / logo total R$</label><input type="number" class="mono" id="rvedit-cliche" step="0.01" min="0"></div>
         </div>
       </div>
       <div id="rvedit-preview" style="margin-top:.8rem"></div>
@@ -3780,7 +3778,7 @@ function rvSacachoRender(){
   }
 }
 
-function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,tipoProduto,comLogoProduto){
+function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,tipoProduto,comLogoProduto,clicheProduto){
   containerId=containerId||'rv2-prod-rows';
   const cont=rvEl(containerId);
   const row=document.createElement('div');
@@ -3803,10 +3801,17 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
     <div><span class="plbl">Tipo</span><button type="button" class="rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique pra alternar" onclick="rv2ToggleProdTipo(this);${onCalc}">${tipoAtual==='Nacional'?'Nac':'Imp'}</button></div>
     <div><span class="plbl">Fornecedor</span><div style="display:flex;gap:.15rem"><select class="rv2-prod-forn" onchange="${onCalc}" style="flex:1;min-width:0">${opcoesForn}</select></div></div>
     <button type="button" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores" style="border:1.5px solid var(--bdr2);border-radius:5px;background:var(--card);cursor:pointer;padding:.32rem .4rem;font-size:.68rem">＋</button>
-    <div><span class="plbl">Logo</span><button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="this.classList.toggle('active');if(this.classList.contains('active'))rv2ProdLogoReminder('${containerId}');${onCalc}" title="Este produto leva logo/beneficiamento">🎨</button></div>
-    <button onclick="this.parentElement.remove();${onCalc}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding-bottom:.4rem">✕</button>`;
+    <div><span class="plbl">Logo</span><button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Este produto leva logo/beneficiamento">🎨</button></div>
+    <button onclick="this.parentElement.remove();${onCalc}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding-bottom:.4rem">✕</button>
+    <div class="rv2-prod-cliche-wrap" style="grid-column:1/-1;display:flex;align-items:center;gap:.4rem;margin-top:.25rem">
+      <span class="plbl" style="margin:0">Clichê/molde/logo R$ <span style="text-transform:none;font-weight:400">— vai pro fornecedor, ou pro beneficiador se Logo estiver marcado</span></span>
+      <input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" style="width:90px" oninput="${onCalc}">
+    </div>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
+}
+function rv2ToggleProdLogo(btn){
+  btn.classList.toggle('active');
 }
 function rv2ToggleProdTipo(btn){
   const novo=btn.dataset.v==='Nacional'?'Importada':'Nacional';
@@ -3821,11 +3826,14 @@ function rv2ReadProdRows(containerId){
     const selForn=row.querySelector('.rv2-prod-forn');
     const tipoBtn=row.querySelector('.rv2-prod-tipo-btn');
     const logoBtn=row.querySelector('.rv2-prod-logo-btn');
+    const clicheInp=row.querySelector('.rv2-prod-cliche');
+    const comLogo=logoBtn?logoBtn.classList.contains('active'):false;
     return{desc:inp[0].value.trim(),qtd:parseFloat(inp[1].value)||0,preco:parseFloat(inp[2].value)||0,pv:parseFloat(inp[3].value)||0,
-      fornecedor:selForn?selForn.value:'',tipo:tipoBtn?tipoBtn.dataset.v:'Nacional',comLogo:logoBtn?logoBtn.classList.contains('active'):false};
+      fornecedor:selForn?selForn.value:'',tipo:tipoBtn?tipoBtn.dataset.v:'Nacional',comLogo,
+      cliche:clicheInp?(parseFloat(clicheInp.value)||0):0};
   });
 }
-function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto);}
+function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto);}
 function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
   if(!cliente||!fornecedor||!produtos||!produtos.length)return null;
   const qtd=produtos.reduce((a,p)=>a+(p.qtd||0),0);
@@ -3888,7 +3896,7 @@ function rvBuildFornecedoresArray(r){
   });
   return Object.values(porFornecedor);
 }
-function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,freteIncluso){
+function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteIncluso){
   if(!cliente||!produtos||!produtos.length)return null;
   const gruposMap={};
   produtos.forEach(p=>{
@@ -3905,12 +3913,6 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,f
   const custoCompraGeral=produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
   if(custoCompraGeral<=0)return null;
 
-  // Clichê só é rateado entre grupos com logo=true. Se ninguém marcou logo mas há valor de
-  // clichê digitado, cai de volta pra ratear entre todos (evita perder um valor preenchido por engano).
-  const gruposComLogo=chaves.filter(k=>gruposMap[k].comLogo);
-  const baseClicheChaves=gruposComLogo.length?gruposComLogo:chaves;
-  const custoBaseCliche=baseClicheChaves.reduce((a,k)=>a+gruposMap[k].produtos.reduce((b,p)=>b+(p.qtd||0)*(p.preco||0),0),0);
-
   const subResultados=[];
   for(const key of chaves){
     const g=gruposMap[key];
@@ -3919,7 +3921,7 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,f
     const custoGrupo=g.produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
     const proporcaoFrete=custoCompraGeral>0?custoGrupo/custoCompraGeral:0;
     const freteGrupo=freteTotal*proporcaoFrete;   // frete é sempre rateado entre TODOS — é 1 entrega só, independente de fornecedor/tipo/logo
-    const clicheGrupo=(baseClicheChaves.includes(key)&&custoBaseCliche>0)?cliche*(custoGrupo/custoBaseCliche):0;
+    const clicheGrupo=g.produtos.reduce((a,p)=>a+(p.cliche||0),0); // clichê já é por produto — soma direta, sem rateio
     const r=rv2CalcCore(cliente,fornecedorObj,g.tipo,g.produtos,comissaoPct,freteGrupo,clicheGrupo,freteIncluso,g.comLogo);
     if(r)subResultados.push(r);
   }
@@ -3974,8 +3976,7 @@ function rv2Calc(){
   const produtos=rv2ReadProdRows();
   const comissaoPct=parseFloat(rvEl('rv2-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rv2-frete').value)||0;
-  const cliche=parseFloat(rvEl('rv2-cliche').value)||0;
-  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,rv2FreteIncluso);
+  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,rv2FreteIncluso);
   if(!r){
     rvEl('rv2-resumo').innerHTML='<p class="hint">Selecione cliente e fornecedor, adicione ao menos 1 produto com qtd e preços preenchidos.</p>';
     rvEl('rv2-detalhe').innerHTML='';
@@ -3990,17 +3991,7 @@ function rv2ToggleFreteIncluso(){
   rvEl('rv2-frete-incluso-btn').classList.toggle('active',rv2FreteIncluso);
   rv2Calc();
 }
-function rv2ProdLogoReminder(containerId){
-  // lembra de preencher o clichê/molde/logo — abre os encargos opcionais se estiverem fechados
-  const bodyId=containerId==='rvedit-prod-rows'?'rvedit-opt-body':'rv2-opt-body';
-  const clicheId=containerId==='rvedit-prod-rows'?'rvedit-cliche':'rv2-cliche';
-  const body=document.getElementById(bodyId);
-  if(body&&!body.classList.contains('open')){
-    const h=body.previousElementSibling;
-    if(h)toggleCollap(h,bodyId);
-  }
-  setTimeout(()=>rvEl(clicheId)?.focus(),150);
-}
+
 function rv2Render(r){
   rvEl('rv2-resumo').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
@@ -4231,13 +4222,20 @@ function rv2OpenEdit(kind,id){
   selCli.value=rec.cliente;
   rvEl('rvedit-prod-rows').innerHTML='';
   if(rec.produtos&&rec.produtos.length){
-    rec.produtos.forEach(p=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor,p.tipo||rec.tipo||'Nacional',p.comLogo!==undefined?p.comLogo:!!rec.comLogo));
+    const temClicheProprio=rec.produtos.some(p=>(p.cliche||0)>0);
+    const clicheDistribuido=new Array(rec.produtos.length).fill(0);
+    if(!temClicheProprio&&(rec.cliche||0)>0){
+      const idxComLogo=rec.produtos.map((p,i)=>i).filter(i=>rec.produtos[i].comLogo!==undefined?rec.produtos[i].comLogo:!!rec.comLogo);
+      const idxBase=idxComLogo.length?idxComLogo:rec.produtos.map((p,i)=>i);
+      const custoBase=idxBase.reduce((a,i)=>a+(rec.produtos[i].qtd||0)*(rec.produtos[i].preco||0),0);
+      if(custoBase>0)idxBase.forEach(i=>{clicheDistribuido[i]=rec.cliche*((rec.produtos[i].qtd*rec.produtos[i].preco)/custoBase);});
+    }
+    rec.produtos.forEach((p,i)=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor,p.tipo||rec.tipo||'Nacional',p.comLogo!==undefined?p.comLogo:!!rec.comLogo,p.cliche!==undefined?p.cliche:clicheDistribuido[i]));
   }else{
-    rv2AddProdRowEdit('',rec.qtd,rec.preco,rec.pv,rec.fornecedor,rec.tipo||'Nacional',!!rec.comLogo); // registro salvo antes de existir múltiplos produtos
+    rv2AddProdRowEdit('',rec.qtd,rec.preco,rec.pv,rec.fornecedor,rec.tipo||'Nacional',!!rec.comLogo,rec.cliche||0); // registro salvo antes de existir múltiplos produtos
   }
   rvEl('rvedit-comissao').value=rec.comissaoPct||0;
   rvEl('rvedit-frete').value=rec.freteTotal||0;
-  rvEl('rvedit-cliche').value=rec.cliche||0;
   rvEditFreteIncluso=!!rec.freteIncluso;
   rvEl('rvedit-frete-incluso-btn').classList.toggle('active',rvEditFreteIncluso);
   const cpSection=document.getElementById('rvedit-cp-section');
@@ -4257,8 +4255,7 @@ function rv2EditPreview(){
   const produtos=rv2ReadProdRows('rvedit-prod-rows');
   const comissaoPct=parseFloat(rvEl('rvedit-comissao').value)||0;
   const freteTotal=parseFloat(rvEl('rvedit-frete').value)||0;
-  const cliche=parseFloat(rvEl('rvedit-cliche').value)||0;
-  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,cliche,rvEditFreteIncluso);
+  const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,rvEditFreteIncluso);
   const prev=rvEl('rvedit-preview');
   if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e adicione ao menos 1 produto com qtd e preços.</p>';rvEl('rvedit-detalhe').innerHTML='';return null;}
   prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
@@ -4318,7 +4315,7 @@ function rv2SaveEdit(){
   closeM('rvedit');
   toastSave('Alterações salvas ✓');
 }
-['rvedit-comissao','rvedit-frete','rvedit-cliche','rvedit-cliente'].forEach(id=>{
+['rvedit-comissao','rvedit-frete','rvedit-cliente'].forEach(id=>{
   const el=document.getElementById(id);
   if(el)el.addEventListener(el.tagName==='SELECT'?'change':'input',rv2EditPreview);
 });
@@ -4430,12 +4427,23 @@ function rvCPFornKeys(p){
 function rvCPTotais(p){
   const map={};
   const fornKeys=rvCPFornKeys(p);
+  const temProdutos=!!(p.produtos&&p.produtos.length);
   if(p.fornecedores&&p.fornecedores.length){
-    p.fornecedores.forEach((f,i)=>{map[fornKeys[i].key]=f.custoCompra||0;});
+    p.fornecedores.forEach((f,i)=>{
+      let total=f.custoCompra||0;
+      if(temProdutos){
+        // Clichê/molde/logo vai pro fornecedor por padrão — só não, se o produto tiver Logo marcado
+        // (aí vai pro beneficiador, ver abaixo). Nunca altera o DRE/ICMS, só o total a pagar aqui.
+        total+=p.produtos.filter(pr=>pr.fornecedor===f.nome&&!pr.comLogo).reduce((a,pr)=>a+(pr.cliche||0),0);
+      }
+      map[fornKeys[i].key]=total;
+    });
   }else{
     map.fornecedor=(p.custoTotal||0)-(p.cliche||0)-(p.freteTotal||0);
   }
-  map.beneficiador=p.cliche||0;
+  map.beneficiador=temProdutos
+    ?p.produtos.filter(pr=>pr.comLogo).reduce((a,pr)=>a+(pr.cliche||0),0)
+    :(p.cliche||0); // retrocompat: registro antigo sem produtos detalhados — mantém o comportamento anterior
   map.cliente=p.vendaTotal||0;
   return map;
 }
