@@ -301,6 +301,19 @@ body.dark .rv-tabs{background:#0A0F1A}
 .s-pendente{background:var(--ltgry);color:var(--ink3)}
 @media print{.no-print{display:none!important}}
 </style>
+
+<style>
+@media(max-width:900px){
+  #crm-cust-people > div{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:640px){
+  #crm-cust-people > div{grid-template-columns:1fr!important}
+  .crm-cust-class-grid{grid-template-columns:1fr!important}
+}
+#crm-perfil-details > summary::-webkit-details-marker{display:none}
+#crm-perfil-details > summary::after{content:"▾";float:right;color:var(--ink4);margin-left:.5rem}
+</style>
+
 </head>
 <body>
 <header>
@@ -666,40 +679,33 @@ body.dark .rv-tabs{background:#0A0F1A}
     <div class="modal-h">
       <span id="crm-cust-title">Cliente</span>
       <div style="display:flex;align-items:center;gap:.5rem">
+        <select id="crm-cust-status" title="Status do cliente" style="width:auto;min-width:82px;border:1px solid var(--bdr2);border-radius:999px;background:var(--bg);padding:.18rem .55rem;font-size:.62rem;font-weight:600;color:var(--ink3)">
+          <option value="active">Ativo</option>
+          <option value="prospect">Prospect</option>
+          <option value="inactive">Inativo</option>
+        </select>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
         <button class="mcls" onclick="closeM('crmcustomer')">✕</button>
       </div>
     </div>
     <div class="modal-b">
-      <div class="crm-row-cli-main">
-        <div class="ff"><label>Razão Social / Nome</label><input type="text" id="crm-cust-name" placeholder="Nome do cliente"></div>
-        <div class="ff"><label>Nome Fantasia</label><input type="text" id="crm-cust-trade" placeholder="opcional"></div>
-        <div class="ff"><label>CNPJ/CPF</label><input type="text" id="crm-cust-doc" placeholder="opcional"></div>
-        <div class="ff"><label>Status</label>
-          <select id="crm-cust-status">
-            <option value="active">Ativo</option>
-            <option value="prospect">Prospect</option>
-            <option value="inactive">Inativo</option>
-          </select>
+      <div style="margin-bottom:.7rem">
+        <div class="ff">
+          <label>Razão Social / Nome</label>
+          <input type="text" id="crm-cust-name" placeholder="Nome do cliente" style="font-size:1rem;font-weight:600;padding:.42rem .65rem">
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,.7fr);gap:.8rem;margin-top:.3rem">
+          <input type="text" id="crm-cust-trade" placeholder="Nome fantasia (opcional)" aria-label="Nome Fantasia" style="border:none;border-bottom:1px solid var(--bdr);border-radius:0;background:transparent;padding:.2rem .05rem;font-size:.7rem;color:var(--ink3)">
+          <input type="text" id="crm-cust-doc" placeholder="CNPJ/CPF (opcional)" aria-label="CNPJ/CPF" style="border:none;border-bottom:1px solid var(--bdr);border-radius:0;background:transparent;padding:.2rem .05rem;font-size:.7rem;color:var(--ink3)">
         </div>
       </div>
 
-      <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
-
-      <div>
-        <div class="fsep">Pessoas</div>
-        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;margin-top:.22rem;min-height:30px">
-          <span id="crm-cust-people" style="display:contents"></span>
-          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
-        </div>
-      </div>
-
-      <div class="grid crm-cust-class-grid" style="grid-template-columns:1.2fr 1.4fr 1.5fr .9fr;gap:.8rem;margin-top:.72rem">
+      <div class="grid crm-cust-class-grid" style="grid-template-columns:1fr 1fr 1.25fr;gap:.9rem;margin-top:.55rem">
         <div>
           <div class="fsep">Segmento</div>
           <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
             <span id="crm-cust-segmento" style="display:contents"></span>
-            <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…" style="width:90px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
+            <input type="text" id="crm-segmento-new" list="crm-segmento-list" placeholder="adicionar…" style="width:100px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
             <datalist id="crm-segmento-list">
               <option value="Supermercado"><option value="Atacarejo"><option value="Distribuidor">
               <option value="Franquia"><option value="Varejo"><option value="Indústria">
@@ -708,16 +714,21 @@ body.dark .rv-tabs{background:#0A0F1A}
             <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddSegmento()">＋</button>
           </div>
         </div>
+
         <div>
           <div class="fsep">Perfil Comercial</div>
-          <div class="toggle-grp" id="crm-perfil-toggle" style="margin-top:.3rem;width:auto;flex-wrap:wrap;overflow:visible">
-            <button type="button" data-v="PE" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('PE')">PE</button>
-            <button type="button" data-v="SM BR" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('SM BR')">SM BR</button>
-            <button type="button" data-v="SM Asia" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('SM Asia')">SM Asia</button>
-            <button type="button" data-v="MIX" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('MIX')">MIX</button>
-            <button type="button" data-v="LOGO" style="padding:.3rem .6rem;font-size:.68rem" onclick="crmTogglePerfil('LOGO')">LOGO</button>
-          </div>
+          <details id="crm-perfil-details" style="position:relative;margin-top:.3rem">
+            <summary id="crm-perfil-summary" style="list-style:none;cursor:pointer;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .55rem;font-size:.7rem;color:var(--ink2);background:var(--bg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">— nenhum —</summary>
+            <div id="crm-perfil-toggle" style="position:absolute;z-index:30;left:0;top:calc(100% + 4px);min-width:180px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 8px 22px rgba(0,0,0,.12);padding:.35rem">
+              <button type="button" data-v="PE" onclick="crmTogglePerfil('PE')" style="display:block;width:100%;text-align:left;border:none;background:none;padding:.32rem .45rem;font-size:.7rem;border-radius:5px">PE</button>
+              <button type="button" data-v="SM BR" onclick="crmTogglePerfil('SM BR')" style="display:block;width:100%;text-align:left;border:none;background:none;padding:.32rem .45rem;font-size:.7rem;border-radius:5px">SM BR</button>
+              <button type="button" data-v="SM Asia" onclick="crmTogglePerfil('SM Asia')" style="display:block;width:100%;text-align:left;border:none;background:none;padding:.32rem .45rem;font-size:.7rem;border-radius:5px">SM Asia</button>
+              <button type="button" data-v="MIX" onclick="crmTogglePerfil('MIX')" style="display:block;width:100%;text-align:left;border:none;background:none;padding:.32rem .45rem;font-size:.7rem;border-radius:5px">MIX</button>
+              <button type="button" data-v="LOGO" onclick="crmTogglePerfil('LOGO')" style="display:block;width:100%;text-align:left;border:none;background:none;padding:.32rem .45rem;font-size:.7rem;border-radius:5px">LOGO</button>
+            </div>
+          </details>
         </div>
+
         <div>
           <div class="fsep">Grupo / Rede</div>
           <div style="display:flex;gap:.3rem;margin-top:.3rem">
@@ -731,17 +742,19 @@ body.dark .rv-tabs{background:#0A0F1A}
             <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem;flex-shrink:0" onclick="crmCreateAndSelectGroup()">Criar</button>
           </div>
         </div>
-        <div>
-          <div class="fsep">Tags</div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">
-            <span id="crm-cust-tags" style="display:contents"></span>
-            <input type="text" id="crm-tag-new" placeholder="nova tag…" style="width:80px;border:1.5px solid var(--bdr2);border-radius:7px;padding:.25rem .5rem;font-size:.7rem">
-            <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddTagToCustomer()">＋</button>
-          </div>
-        </div>
       </div>
 
-      <div class="ff" style="margin-top:.9rem"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
+      <div style="border-top:1px solid var(--bdr);margin:.85rem 0 .65rem"></div>
+
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem">
+          <div class="fsep" style="margin:0">Pessoas</div>
+          <button class="btn btn-s" style="font-size:.66rem;padding:.2rem .5rem" onclick="crmAddPersonRow()">＋ Pessoa</button>
+        </div>
+        <div id="crm-cust-people" style="display:flex;flex-direction:column;gap:.35rem;margin-top:.35rem"></div>
+      </div>
+
+      <div class="ff" style="margin-top:.75rem"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
 
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
@@ -2721,8 +2734,15 @@ function crmAddSegmento(){
 }
 function crmRenderPerfilToggle(){
   document.querySelectorAll('#crm-perfil-toggle button').forEach(b=>{
-    b.classList.toggle('active',crmEditCtx.perfil.includes(b.dataset.v));
+    const on=crmEditCtx.perfil.includes(b.dataset.v);
+    b.classList.toggle('active',on);
+    b.style.fontWeight=on?'700':'400';
+    b.style.background=on?'var(--ltblue)':'none';
+    b.style.color=on?'var(--blue)':'var(--ink2)';
+    b.textContent=(on?'✓  ':'')+b.dataset.v;
   });
+  const summary=document.getElementById('crm-perfil-summary');
+  if(summary)summary.textContent=crmEditCtx.perfil.length?crmEditCtx.perfil.join(' · '):'— nenhum —';
 }
 function crmTogglePerfil(v){
   if(crmEditCtx.perfil.includes(v))crmEditCtx.perfil=crmEditCtx.perfil.filter(x=>x!==v);
@@ -2767,27 +2787,19 @@ function crmAddTagToCustomer(){
 function crmRenderCustPeople(){
   const cont=document.getElementById('crm-cust-people');
   cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>{
-    return`<div style="display:flex;flex-direction:column;gap:.35rem;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .7rem;min-width:230px">
-    <div style="display:flex;align-items:center;gap:.4rem">
-      <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="border:none;background:none;font-size:.78rem;font-weight:600;width:110px;color:var(--ink);padding:0">
-      <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink3);padding:0">
+    return`<div style="display:grid;grid-template-columns:minmax(180px,1.05fr) minmax(190px,1.1fr) minmax(165px,.9fr) auto;align-items:center;gap:.8rem;border-bottom:1px solid var(--bdr);padding:.38rem .05rem">
+      <div style="min-width:0">
+        <input type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="display:block;width:100%;border:none;background:none;font-size:.84rem;font-weight:600;color:var(--ink);padding:0">
+        <input type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="display:block;width:100%;border:none;background:none;font-size:.64rem;color:var(--ink4);padding:.08rem 0 0">
+      </div>
+      <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.72rem;color:var(--ink2);padding:0;min-width:0">
+      <div style="display:flex;align-items:center;gap:.35rem;min-width:0">
+        <input type="text" value="${esc(p.phone||'')}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.72rem;color:var(--ink2);padding:0;min-width:0">
+        ${p.id&&p.phone?`<button type="button" class="btn btn-s" onclick="crmOpenWhatsApp(${i})" style="font-size:.58rem;padding:.16rem .4rem;white-space:nowrap;color:var(--green);border-color:var(--green)" title="Enviar pelo WhatsApp Business Platform">WhatsApp</button>`:''}
+      </div>
       <span class="x" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
-    </div>
-    <select onchange="crmEditCtx.people[${i}].relationship_type=this.value" style="border:none;background:none;font-size:.64rem;color:var(--ink4);padding:0;width:fit-content">
-      <option value="">papel —</option>
-      ${['champion','decisor','influenciador','aprovador'].map(v=>`<option value="${v}"${p.relationship_type===v?' selected':''}>${v}</option>`).join('')}
-    </select>
-    <div style="display:flex;align-items:center;gap:.35rem;border-top:1px solid var(--bdr);padding-top:.35rem;margin-top:.05rem">
-      <span style="font-size:.64rem;color:var(--ink4);flex-shrink:0">✉</span>
-      <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink2);padding:0">
-    </div>
-    <div style="display:flex;align-items:center;gap:.35rem">
-      <span style="font-size:.64rem;color:var(--ink4);flex-shrink:0">☎</span>
-      <input type="text" value="${esc(p.phone||'')}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="border:none;background:none;font-size:.72rem;flex:1;min-width:0;color:var(--ink2);padding:0">
-      ${p.id&&p.phone?`<button type="button" class="btn btn-s" onclick="crmOpenWhatsApp(${i})" style="font-size:.6rem;padding:.18rem .45rem;white-space:nowrap;color:var(--green);border-color:var(--green)" title="Enviar pelo WhatsApp Business Platform">WhatsApp</button>`:''}
-    </div>
-  </div>`;
-  }).join(''):'<span class="crm-empty" style="font-size:.66rem">Nenhum contato cadastrado</span>';
+    </div>`;
+  }).join(''):'<span class="crm-empty" style="font-size:.68rem;padding:.2rem 0">Nenhum contato cadastrado</span>';
 }
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
 
