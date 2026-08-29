@@ -63,8 +63,8 @@ header .spacer{flex:1}
 .rv2-prodcard{background:#F4F8FC;border:1px solid var(--bdr);border-radius:9px;padding:.55rem .65rem;margin-bottom:.45rem}
 body.dark .rv2-prodcard{background:#16202E}
 .rv2-prodcard-l1,.rv2-prodcard-l2{display:grid;gap:.45rem;align-items:end}
-.rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(150px,1.5fr) minmax(92px,.65fr) auto}
-.rv2-prodcard-l2{grid-template-columns:minmax(68px,.65fr) minmax(78px,.75fr) minmax(78px,.75fr) minmax(82px,.75fr) minmax(70px,.65fr);margin-top:.5rem}
+.rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(150px,1.45fr) minmax(150px,1fr) auto}
+.rv2-prodcard-l2{grid-template-columns:minmax(62px,.55fr) minmax(78px,.72fr) minmax(78px,.72fr) minmax(128px,1.05fr) minmax(145px,1.15fr);margin-top:.5rem}
 .rv2-field{min-width:0}
 .rv2-field-label{display:block;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.045em;color:var(--ink4);margin:0 0 .18rem .05rem;white-space:nowrap}
 .rv2-field input,.rv2-field select{width:100%;height:31px;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink);padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;box-sizing:border-box}
@@ -74,10 +74,13 @@ body.dark .rv2-prodcard{background:#16202E}
 .rv2-chip-select{font-size:.7rem!important;padding:.25rem .4rem!important;border:1px solid var(--bdr2)!important;border-radius:6px!important;background:var(--card)!important;color:var(--ink)!important;font-weight:600!important;height:31px}
 .rv2-chip-addbtn{height:31px;width:28px;justify-content:center;border:1px dashed var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink4);cursor:pointer;padding:0;display:flex;align-items:center}
 .rv2-prod-desc{font-weight:600!important}
-.rv2-prod-tipo-btn,.rv2-prod-logo-btn{width:100%;height:31px;font-size:.66rem;padding:.2rem .35rem;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);cursor:pointer;color:var(--ink3);font-weight:600;display:flex;align-items:center;justify-content:center;gap:.2rem;box-sizing:border-box}
-.rv2-prod-logo-btn.active{background:var(--ltpur,#EDE9FE);color:var(--purple,#5B21B6);border-color:var(--purple,#5B21B6)}
+.rv2-seg-toggle{width:100%;height:31px;padding:2px;border:1px solid var(--bdr2);border-radius:8px;background:var(--card);cursor:pointer;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;overflow:hidden;box-sizing:border-box}
+.rv2-seg-toggle span{display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:.61rem;font-weight:600;color:var(--ink3);white-space:nowrap;padding:0 .2rem}
+.rv2-seg-toggle span.active{background:var(--green);color:#fff}
+.rv2-prod-logo-btn.active{background:var(--card);color:inherit;border-color:var(--bdr2)}
 .rv2-prod-remove{background:none;border:none;color:var(--red);cursor:pointer;padding:0 0 8px;align-self:end;display:flex;align-items:center}
 body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .rv2-seg-toggle span.active{background:var(--green);color:#fff}
 @media(max-width:900px){.rv2-order-head{grid-template-columns:1fr 1fr}.rv2-order-head>.rv2-client-field{grid-column:1/-1}.rv2-prodcard-l1{grid-template-columns:1fr 1.4fr}.rv2-prodcard-l1>.rv2-cliche-field{grid-column:1/2}.rv2-prod-remove{grid-column:2;grid-row:2;justify-self:end}.rv2-prodcard-l2{grid-template-columns:repeat(3,1fr)}}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ff input.mono{font-family:'IBM Plex Mono'}
@@ -4062,29 +4065,29 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
   row.innerHTML=`<div class="rv2-prodcard-l1">
       <div class="rv2-field"><span class="rv2-field-label">Fornecedor</span><div class="rv2-forn-control"><select class="rv2-chip-select rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select><button type="button" class="rv2-chip-addbtn" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
       <div class="rv2-field"><span class="rv2-field-label">Produto / descrição</span><input type="text" class="rv2-prod-desc" placeholder="Descrição do produto" value="${esc(desc)}" oninput="${onCalc}"></div>
-      <div class="rv2-field rv2-cliche-field"><span class="rv2-field-label">Clichê / molde / logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span><input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}"></div>
+      <div class="rv2-field rv2-origem-field"><span class="rv2-field-label">Origem</span><button type="button" class="rv2-seg-toggle rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique para alternar" onclick="rv2ToggleProdTipo(this);${onCalc}"><span data-value="Nacional" class="${tipoAtual==='Nacional'?'active':''}">Nacional</span><span data-value="Importada" class="${tipoAtual==='Importada'?'active':''}">Importado</span></button></div>
       <button type="button" class="rv2-prod-remove" title="Remover produto" onclick="this.closest('.rv2-prodcard').remove();${onCalc}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="rv2-prodcard-l2">
       <div class="rv2-field"><span class="rv2-field-label">Qtd.</span><input type="number" class="mono rv2-prod-qty" placeholder="1000" value="${qtd}" min="0" step="1" oninput="${onCalc}"></div>
       <div class="rv2-field"><span class="rv2-field-label">Custo unit. R$</span><input type="number" class="mono rv2-prod-preco" placeholder="4.25" value="${preco}" min="0" step="0.01" oninput="${onCalc}"></div>
       <div class="rv2-field"><span class="rv2-field-label">PV unit. R$</span><input type="number" class="mono rv2-prod-pv" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}"></div>
-      <div class="rv2-field"><span class="rv2-field-label">Origem</span><button type="button" class="rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique pra alternar" onclick="rv2ToggleProdTipo(this);${onCalc}">${tipoAtual==='Nacional'?'Nacional':'Importada'}</button></div>
-      <div class="rv2-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Este produto leva logo/beneficiamento"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>${logoAtual?'Com':'Sem'}</button></div>
+      <div class="rv2-field rv2-cliche-field"><span class="rv2-field-label">Clichê / molde / logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span><input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}"></div>
+      <div class="rv2-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-seg-toggle rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Clique para alternar"><span data-value="false" class="${!logoAtual?'active':''}">Sem logo</span><span data-value="true" class="${logoAtual?'active':''}">Com logo</span></button></div>
     </div>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
 }
 function rv2ToggleProdLogo(btn){
   btn.classList.toggle('active');
-  const svg=btn.querySelector('svg')?.outerHTML||'';
-  btn.innerHTML=svg+(btn.classList.contains('active')?'Com':'Sem');
+  const comLogo=btn.classList.contains('active');
+  btn.querySelectorAll('span').forEach(s=>s.classList.toggle('active',(s.dataset.value==='true')===comLogo));
 }
 function rv2ToggleProdTipo(btn){
   const novo=btn.dataset.v==='Nacional'?'Importada':'Nacional';
   btn.dataset.v=novo;
-  btn.textContent=novo==='Nacional'?'Nac':'Imp';
-  btn.title=novo+' — clique pra alternar';
+  btn.querySelectorAll('span').forEach(s=>s.classList.toggle('active',s.dataset.value===novo));
+  btn.title=novo+' — clique para alternar';
 }
 function rv2ReadProdRows(containerId){
   containerId=containerId||'rv2-prod-rows';
