@@ -4789,15 +4789,21 @@ function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'forn_X'|'beneficiador'|
   const dataPedido=rvParseDataBR(p.data);
   if(!dataPedido)return null;
   const hoje=new Date();hoje.setHours(0,0,0,0);
-  let pctVencidoAteHoje=0,proxima=null;
+  let pctVencidoAteHoje=0,proxima=null,maisAntigaVencida=null;
   plano.forEach(parc=>{
     const venc=new Date(dataPedido);venc.setDate(venc.getDate()+(parc.dias||0));
-    if(venc<=hoje)pctVencidoAteHoje+=(parc.pct||0);
+    if(venc<=hoje){
+      pctVencidoAteHoje+=(parc.pct||0);
+      if(!maisAntigaVencida||venc<maisAntigaVencida)maisAntigaVencida=venc;
+    }
     else if(!proxima||venc<proxima.venc)proxima={venc,pct:parc.pct};
   });
   const deveriaTerPago=tot*pctVencidoAteHoje/100;
   const faltante=deveriaTerPago-pago;
-  if(faltante>0.5)return{status:'atrasado',valor:faltante};
+  if(faltante>0.5){
+    const diasAtraso=maisAntigaVencida?Math.floor((hoje-maisAntigaVencida)/86400000):0;
+    return{status:'atrasado',valor:faltante,dias:diasAtraso};
+  }
   if(proxima){
     const dias=Math.ceil((proxima.venc-hoje)/86400000);
     if(dias<=5)return{status:'em_breve',valor:tot*proxima.pct/100,dias};
@@ -4823,7 +4829,7 @@ function rvParcelaStatusBadge(p){
   const fk=rvCPFornKeys(p).find(x=>x.key===st.tipo);
   const lbl=fk?`Pagar ${fk.nome}`:(st.tipo==='beneficiador'?'Pagar beneficiador':'Receber cliente');
   const col=st.status==='atrasado'?'var(--red)':'var(--amber)';
-  const txt=st.status==='atrasado'?`${lbl} atrasado — falta ${rvBrl(st.valor)}`:`${lbl} vence em ${st.dias}d — ${rvBrl(st.valor)}`;
+  const txt=st.status==='atrasado'?`${lbl} atrasado há ${st.dias}d — falta ${rvBrl(st.valor)}`:`${lbl} vence em ${st.dias}d — ${rvBrl(st.valor)}`;
   return`<div style="font-size:.62rem;font-weight:700;color:#fff;background:${col};border-radius:5px;padding:.22rem .5rem;margin-bottom:.4rem">⏰ ${esc(txt)}</div>`;
 }
 function rvCountVencimentos(){
