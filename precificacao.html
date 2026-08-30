@@ -4560,9 +4560,38 @@ function rv2EditPreview(){
   const r=rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,rvEditFreteIncluso);
   const prev=rvEl('rvedit-preview');
   if(!r){prev.innerHTML='<p class="hint">Selecione cliente e fornecedor, e adicione ao menos 1 produto com qtd e preços.</p>';rvEl('rvedit-detalhe').innerHTML='';return null;}
-  prev.innerHTML=`<div class="card" style="background:var(--ltgrn);padding:.6rem .8rem;border:none">
-    <div style="font-size:.6rem;color:var(--green);font-weight:700;text-transform:uppercase">Margem líquida recalculada</div>
-    <div style="font-size:1.1rem;font-weight:700;color:var(--green)">${rvBrl(r.margemLiquida)} <span style="font-size:.7rem">(${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</span></div>
+  prev.innerHTML=`<div class="card" style="padding:.75rem .8rem">
+    <div class="sh" style="margin-bottom:.6rem">Resultado</div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.7rem">
+      <div style="flex:1;background:var(--bg);border-radius:8px;padding:.55rem .65rem">
+        <div style="font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Custo total</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--red);font-family:'IBM Plex Mono'">${rvBrl(r.custoTotal)}</div>
+      </div>
+      <div style="flex:1;background:var(--bg);border-radius:8px;padding:.55rem .65rem">
+        <div style="font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Venda</div>
+        <div style="font-size:.92rem;font-weight:700;color:var(--blue);font-family:'IBM Plex Mono'">${rvBrl(r.receita)}</div>
+      </div>
+      <div style="flex:1;background:var(--bg);border-radius:8px;padding:.55rem .65rem">
+        <div style="font-size:.56rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Margem</div>
+        <div style="font-size:.92rem;font-weight:700;color:${r.margemFinal>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${rvBrl(r.margemFinal)} <span style="font-size:.68rem">(${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</span></div>
+      </div>
+    </div>
+    <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · ${rvBrl(r.pv)}/un${r.freteTotal>0?' + frete':''}</div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+      <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
+      <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--ink3);margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--bdr)">
+      <span>Margem Líquida <span style="color:var(--ink4)">(antes da apuração de ICMS)</span></span>
+      <b style="font-family:'IBM Plex Mono';color:${r.margemLiquida>=0?'var(--green)':'var(--red)'}">${rvBrl(r.margemLiquida)} (${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</b>
+    </div>
+    ${r.multiFornecedor?`<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
+      <div style="font-size:.6rem;color:var(--ink4);font-weight:700;text-transform:uppercase;margin-bottom:.3rem">Margem por fornecedor</div>
+      ${r.fornecedores.map(f=>`<div style="display:flex;justify-content:space-between;font-size:.68rem;padding:.15rem 0">
+        <span>${esc(f.fornecedor.nome)} <span style="color:var(--ink4)">(${rvBrl(f.custoCompra)})</span></span>
+        <b style="font-family:'IBM Plex Mono';color:${f.margemFinal>=0?'var(--green)':'var(--red)'}">${rvBrl(f.margemFinal)} (${(f.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</b>
+      </div>`).join('')}
+    </div>`:''}
   </div>`;
   rv2RenderDetalhe(r,'rvedit-detalhe');
   return r;
@@ -5165,16 +5194,16 @@ function rvRenderFin(){
   });
   const margem=totVenda-totCompra;
   const saldo=totReceber-totPagar;
-  const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.62rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.4rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
-  const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.25rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.65rem;color:var(--ink3)">${lbl}</span><span style="font-size:.7rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
+  const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.62rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
+  const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.36rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.74rem;color:var(--ink3)">${lbl}</span><span style="font-size:.80rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
   rvEl('rv-fin-summary').innerHTML=`
     <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch">
-      <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1rem 1.2rem">
+      <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1.2rem 1.2rem">
         ${big('A Pagar',rvBrl(totPagar),'var(--red)')}
         ${big('A Receber',rvBrl(totReceber),'var(--green)')}
         ${big('Saldo Líquido',rvBrl(saldo),saldo>=0?'var(--green)':'var(--red)')}
       </div>
-      <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.7rem 1rem">
+      <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1rem">
         ${small('Total Compra',rvBrl(totCompra),'var(--ink2)')}
         ${small('Total Venda',rvBrl(totVenda),'var(--teal)')}
         ${small('Margem Bruta',rvBrl(margem)+(totVenda>0?' ('+Math.round(margem/totVenda*100)+'%)':''),margem>=0?'var(--green)':'var(--red)')}
@@ -5201,14 +5230,14 @@ function rvRenderFin(){
     const pagoForn=fornKeys.reduce((a,fk)=>a+rvPartyPago(p.id,fk.key),0),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
     const bar=(label,pago,total,color)=>{
       const pct=total>0?Math.min(100,Math.round(pago/total*100)):0;
-      return `<div style="margin-bottom:.35rem">
-        <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--ink3)"><span>${label} ${pct}%</span><span>${rvBrl(pago)} / ${rvBrl(total)}</span></div>
+      return `<div style="margin-bottom:.48rem">
+        <div style="display:flex;justify-content:space-between;font-size:.70rem;color:var(--ink3)"><span>${label} ${pct}%</span><span>${rvBrl(pago)} / ${rvBrl(total)}</span></div>
         <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color}"></div></div>
       </div>`;
     };
-    return `<div class="card" style="padding:.8rem .9rem;cursor:pointer" onclick="rvOpenFinPopupR(${p.id})">
-      <div style="font-weight:700;font-size:.78rem;margin-bottom:.1rem">${esc(p.cliente)}</div>
-      <div style="font-size:.62rem;color:var(--ink4);margin-bottom:.5rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
+    return `<div class="card" style="padding:1rem .9rem;cursor:pointer" onclick="rvOpenFinPopupR(${p.id})">
+      <div style="font-weight:700;font-size:.92rem;margin-bottom:.14rem">${esc(p.cliente)}</div>
+      <div style="font-size:.72rem;color:var(--ink4);margin-bottom:.65rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
       ${rvParcelaStatusBadge(p)}
       ${bar('Pagar Fornecedor',pagoForn,totForn,'var(--red)')}
       ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'#B85C00'):''}
