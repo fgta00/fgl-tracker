@@ -1047,7 +1047,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- EDITAR COTAÇÃO/PEDIDO SALVO -->
 <div class="ovl" id="ovl-rvedit" onclick="if(event.target===this)closeM('rvedit')">
   <div class="modal" style="max-width:820px;width:min(820px,calc(100vw - 32px))">
-    <div class="modal-h"><span id="rvedit-title">Editar</span><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
+    <div class="modal-h"><span id="rvedit-title">Editar</span><button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="rv2SaveEdit()">Salvar</button><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
     <div class="modal-b">
       <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
@@ -1113,7 +1113,6 @@ body.dark .rv-tabs{background:#0A0F1A}
           </div>
         </div>
       </div>
-      <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveEdit()">💾 Salvar alterações</button>
     </div>
   </div>
 </div>
