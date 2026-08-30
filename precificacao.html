@@ -382,6 +382,16 @@ body.dark .rv-tabs{background:#0A0F1A}
 }
 </style>
 
+
+<style>
+#ovl-rvedit .modal-b{padding-top:.9rem}
+#ovl-rvedit .rv2-prodcard{width:100%}
+#ovl-rvedit #rvedit-preview{margin-top:.85rem}
+@media(max-width:860px){
+  #ovl-rvedit .modal{width:min(800px,calc(100vw - 20px))!important}
+}
+</style>
+
 </head>
 <body>
 <header>
@@ -1036,26 +1046,43 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <!-- EDITAR COTAÇÃO/PEDIDO SALVO -->
 <div class="ovl" id="ovl-rvedit" onclick="if(event.target===this)closeM('rvedit')">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" style="max-width:820px;width:min(820px,calc(100vw - 32px))">
     <div class="modal-h"><span id="rvedit-title">Editar</span><button class="mcls" onclick="closeM('rvedit')">✕</button></div>
     <div class="modal-b">
-      <div class="ff"><label>Cliente</label><select id="rvedit-cliente"></select></div>
-      <div style="margin-top:.6rem">
-        <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">+ Frete</button>
-      </div>
-      <div class="fsep" style="margin-top:.8rem">Produtos</div>
-      <div id="rvedit-prod-rows"></div>
-      <button class="btn btn-s" style="font-size:.68rem;margin-top:.3rem" onclick="rv2AddProdRowEdit()">＋ Adicionar produto</button>
+      <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
-      <div class="collap-h" onclick="toggleCollap(this,'rvedit-opt-body')" style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bdr)">
-        <div class="sh" style="margin:0;font-size:.62rem">+ Encargos opcionais</div><span class="chev">▶</span>
-      </div>
-      <div class="collap-body" id="rvedit-opt-body">
-        <div class="grid" style="grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem">
-          <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rvedit-comissao" step="0.1" min="0"></div>
-          <div class="ff"><label>Frete entrega total R$</label><input type="number" class="mono" id="rvedit-frete" step="0.01" min="0"></div>
+      <div class="rv2-order-head">
+        <div class="ff rv2-client-field">
+          <label>Cliente</label>
+          <div class="rv2-client-wrap">
+            <select id="rvedit-cliente"></select>
+            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
+          </div>
+        </div>
+
+        <div class="ff">
+          <label style="visibility:hidden">Frete</label>
+          <div class="rv2-frete-wrap" style="align-items:flex-start">
+            <button type="button" class="pill-toggle-sm" id="rvedit-frete-incluso-btn" onclick="rvEditToggleFreteIncluso()">+ Frete</button>
+            <div style="flex:1;min-width:0;position:relative">
+              <label style="position:absolute;bottom:calc(100% + .28rem);left:0;margin:0">Frete R$</label>
+              <input type="number" class="mono" id="rvedit-frete" step="0.01" min="0" oninput="rv2EditPreview()" style="width:100%">
+            </div>
+          </div>
+        </div>
+
+        <div class="ff">
+          <label>Comissão %</label>
+          <input type="number" class="mono" id="rvedit-comissao" step="0.1" min="0" oninput="rv2EditPreview()">
         </div>
       </div>
+
+      <div class="rv2-products-head">
+        <div class="sh" style="margin:0">Produtos</div>
+        <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem" onclick="rv2AddProdRowEdit()">＋ Adicionar</button>
+      </div>
+      <div id="rvedit-prod-rows"></div>
+
       <div id="rvedit-preview" style="margin-top:.8rem"></div>
       <div class="collap-h" onclick="toggleCollap(this,'rvedit-detalhe-body')" style="margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--bdr)">
         <div class="sh" style="margin:0;font-size:.62rem">+ Ver detalhamento</div><span class="chev">▶</span>
