@@ -3697,6 +3697,13 @@ async function crmLoadSignalRecompra(){
   if(recompraRes.error)console.error('crm_signal_recompra',recompraRes.error);
   if(projetoRes.error)console.error('crm_signal_projeto_parado',projetoRes.error);
   if(reativacaoRes.error)console.error('crm_signal_reativacao',reativacaoRes.error);
+  // ===== DIAGNÓSTICO TEMPORÁRIO — remover depois =====
+  console.log('[DIAG] reativacaoRes.error =', reativacaoRes.error);
+  console.log('[DIAG] reativacaoRes.data =', reativacaoRes.data);
+  console.log('[DIAG] reativacaoRes.data.length =', (reativacaoRes.data||[]).length);
+  console.log('[DIAG] recompraRes.data.length =', (recompraRes.data||[]).length);
+  console.log('[DIAG] projetoRes.data.length =', (projetoRes.data||[]).length);
+  // ===== FIM DIAGNÓSTICO TEMPORÁRIO =====
   const itens=[
     ...(recompraRes.data||[]).map(s=>({kind:'recompra',...s})),
     ...(projetoRes.data||[]).map(s=>({kind:'projeto_parado',...s})),
