@@ -3689,15 +3689,18 @@ function crmFmtCadenciaHumana(dias){ // 20→"~3 semanas" · 45→"~1,5 mês" ·
 async function crmLoadSignalRecompra(){
   const card=document.getElementById('crm-signal-card');
   const cont=document.getElementById('crm-signal-container');
-  const[recompraRes,projetoRes]=await Promise.all([
+  const[recompraRes,projetoRes,reativacaoRes]=await Promise.all([
     _supa.rpc('crm_signal_recompra',{}),
     _supa.rpc('crm_signal_projeto_parado',{}),
+    _supa.rpc('crm_signal_reativacao',{}),
   ]);
   if(recompraRes.error)console.error('crm_signal_recompra',recompraRes.error);
   if(projetoRes.error)console.error('crm_signal_projeto_parado',projetoRes.error);
+  if(reativacaoRes.error)console.error('crm_signal_reativacao',reativacaoRes.error);
   const itens=[
     ...(recompraRes.data||[]).map(s=>({kind:'recompra',...s})),
     ...(projetoRes.data||[]).map(s=>({kind:'projeto_parado',...s})),
+    ...(reativacaoRes.data||[]).map(s=>({kind:'reativacao',...s})),
   ];
   if(!itens.length){card.style.display='none';return;}
   card.style.display='block';
@@ -3705,6 +3708,22 @@ async function crmLoadSignalRecompra(){
 }
 function crmSignalCardHtml(s,i,total){
   const borda=i<total-1?'border-bottom:1px solid var(--bdr)':'';
+  if(s.kind==='reativacao'){
+    const tagline={relacao_consolidada:'Relação recorrente anteriormente ativa.',grande_relacao:'Conta historicamente relevante.',relacao_relevante:'Relação relevante no passado.'}[s.signal_variant]||'';
+    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-react-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
+    <div style="display:flex;align-items:baseline;gap:.4rem">
+      <span style="font-size:.72rem;font-weight:700">${esc(s.cliente)}</span>
+      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Reativação</span>
+    </div>
+    <div style="font-size:.62rem;color:var(--ink3);margin:.15rem 0 .1rem;max-width:380px">${esc(s.reason)}</div>
+    ${s.comportamento_observado?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.1rem">${esc(s.comportamento_observado)}</div>`:''}
+    ${tagline?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem;font-style:italic">${esc(tagline)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
+    <div style="display:flex;gap:.3rem">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissReativacaoSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
+    </div>
+  </div>`;
+  }
   if(s.kind==='projeto_parado'){
     const nomeCliente=s.trade_name||s.display_name||s.prospect_name||'?';
     const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
@@ -3759,6 +3778,18 @@ async function crmDismissSignal(customerId,lastPurchaseDate){
     return;
   }
   const el=document.getElementById(`crm-signal-${customerId}`);
+  if(el)el.remove();
+  crmCheckEmptySignalContainer();
+}
+async function crmDismissReativacaoSignal(customerId,signalVariant,anchorDate){
+  const{error}=await _supa.from('crm_signal_dismissals').insert({
+    customer_id:customerId,project_id:null,signal_type:'reativacao',signal_variant:signalVariant,signal_anchor_date:anchorDate,
+  });
+  if(error&&error.code!=='23505'){ // 23505 = já dispensado antes — sucesso silencioso, mesmo padrão dos outros detectores
+    toastSave('Erro: '+error.message);
+    return;
+  }
+  const el=document.getElementById(`crm-signal-react-${customerId}`);
   if(el)el.remove();
   crmCheckEmptySignalContainer();
 }
