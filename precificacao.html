@@ -3708,7 +3708,7 @@ function crmSignalCardHtml(s,i,total){
   if(s.kind==='projeto_parado'){
     const nomeCliente=s.trade_name||s.display_name||s.prospect_name||'?';
     const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
-    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-proj-${s.project_id}" title="signal_type=${esc(s.signal_type)} · anchor=${esc(s.anchor_date)}">
+    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-proj-${s.project_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
     <div style="display:flex;align-items:baseline;gap:.4rem">
       <span style="font-size:.72rem;font-weight:700">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
       <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Projeto</span>
@@ -3717,7 +3717,7 @@ function crmSignalCardHtml(s,i,total){
     <div style="display:flex;gap:.3rem">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenProjectEdit('${s.project_id}')">Abrir projeto</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.signal_type}','${s.anchor_date}')">Agora não</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
     </div>
   </div>`;
   }
@@ -3762,9 +3762,9 @@ async function crmDismissSignal(customerId,lastPurchaseDate){
   if(el)el.remove();
   crmCheckEmptySignalContainer();
 }
-async function crmDismissProjectSignal(projectId,signalType,anchorDate){
+async function crmDismissProjectSignal(projectId,signalVariant,anchorDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
-    customer_id:null,project_id:projectId,signal_type:signalType,signal_anchor_date:anchorDate,
+    customer_id:null,project_id:projectId,signal_type:'projeto_parado',signal_variant:signalVariant,signal_anchor_date:anchorDate,
   });
   if(error&&error.code!=='23505'){ // 23505 = já dispensado antes — sucesso silencioso, mesmo padrão de Recompra
     toastSave('Erro: '+error.message);
