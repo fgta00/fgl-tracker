@@ -845,10 +845,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
       <div id="crm-cust-purchase-section" style="display:none;margin-top:.9rem">
         <div id="crm-ph-empty" class="crm-empty" style="display:none">Sem histórico de compras no Tiny</div>
-        <div class="collap-h" id="crm-ph-h" onclick="toggleCollap(this,'crm-ph-content')" style="display:none">
-          <span class="sh" style="margin:0;font-size:.62rem" id="crm-ph-summary-label">Compras</span><span class="chev">▶</span>
-        </div>
-        <div class="collap-body" id="crm-ph-content">
+        <div id="crm-ph-kpis" style="display:none">
           <div class="crm-kpi-strip">
             <div class="crm-kpi"><div class="crm-kpi-lbl">1ª compra</div><div class="crm-kpi-val" id="crm-ph-first">—</div></div>
             <div class="crm-kpi"><div class="crm-kpi-lbl">Última compra</div><div class="crm-kpi-val" id="crm-ph-last">—</div></div>
@@ -857,6 +854,11 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div class="crm-kpi"><div class="crm-kpi-lbl">Valor histórico bruto</div><div class="crm-kpi-val" id="crm-ph-gross">—</div></div>
           </div>
           <div class="crm-empty" style="text-align:right;margin-top:-.3rem;margin-bottom:.4rem">sem desconto/frete</div>
+        </div>
+        <div class="collap-h" id="crm-ph-h" onclick="toggleCollap(this,'crm-ph-content')" style="display:none">
+          <span class="sh" style="margin:0;font-size:.62rem" id="crm-ph-summary-label">Compras</span><span class="chev">▶</span>
+        </div>
+        <div class="collap-body" id="crm-ph-content">
           <div id="crm-purchase-orders" style="margin-top:.4rem"></div>
         </div>
       </div>
@@ -3159,6 +3161,7 @@ async function crmLoadPurchaseHistory(customerId){
   const s=summaryRows&&summaryRows[0]?summaryRows[0]:{order_count:0,first_purchase_date:null,last_purchase_date:null,total_gross_value:0,avg_ticket:0};
   const semPedidos=!s.order_count;
   document.getElementById('crm-ph-empty').style.display=semPedidos?'block':'none';
+  document.getElementById('crm-ph-kpis').style.display=semPedidos?'none':'block';
   document.getElementById('crm-ph-h').style.display=semPedidos?'none':'flex';
   if(semPedidos){document.getElementById('crm-ph-content').classList.remove('open');return;}
   document.getElementById('crm-ph-first').textContent=crmFmtDateOnly(s.first_purchase_date);
