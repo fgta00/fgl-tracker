@@ -469,6 +469,34 @@ body.dark .rv-tabs{background:#0A0F1A}
 }
 </style>
 
+
+<style id="crm-descobrir-v1">
+.crm-discover-summary{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin:.65rem 0 .7rem}
+.crm-discover-stat{font-size:.61rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:999px;padding:.24rem .52rem}
+.crm-discover-stat b{color:var(--ink);font-family:'IBM Plex Mono'}
+.crm-discover-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:.55rem}
+.crm-wix-card{border:1px solid var(--bdr);border-radius:9px;padding:.65rem .7rem;background:var(--card);min-width:0}
+.crm-wix-card:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.crm-wix-card .crm-wix-title{font-size:.72rem;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.crm-wix-card .crm-wix-person{font-size:.62rem;color:var(--ink2);margin-top:.15rem;overflow-wrap:anywhere}
+.crm-wix-card .crm-wix-meta{font-size:.57rem;color:var(--ink4);margin-top:.25rem}
+.crm-wix-match{margin-top:.45rem;padding:.38rem .48rem;background:var(--ltgrn);border-radius:7px;font-size:.61rem;color:var(--green)}
+.crm-wix-none{margin-top:.45rem;font-size:.59rem;color:var(--ink4)}
+.crm-wix-actions{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.5rem}
+.crm-wix-actions .btn{font-size:.56rem!important;padding:.19rem .42rem!important}
+.crm-wix-search{display:none;margin-top:.45rem;border-top:1px solid var(--bdr);padding-top:.45rem}
+.crm-wix-search.open{display:block}
+.crm-wix-search input{width:100%;height:32px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);padding:.3rem .48rem;font-size:.64rem;outline:none}
+.crm-wix-search input:focus{border-color:var(--blue)}
+.crm-wix-search-results{max-height:160px;overflow:auto;margin-top:.3rem}
+.crm-wix-search-row{padding:.3rem .36rem;border-bottom:1px solid var(--bdr);font-size:.61rem;cursor:pointer;border-radius:4px}
+.crm-wix-search-row:hover{background:var(--ltgry)}
+.crm-resolved-head{margin-top:.8rem;border-top:1px solid var(--bdr);padding-top:.55rem;font-size:.61rem;color:var(--ink3);cursor:pointer}
+.crm-wix-prefill{display:none;background:var(--ltblue);border:1px solid var(--bdr);border-radius:8px;padding:.45rem .55rem;margin-bottom:.65rem;font-size:.63rem;color:var(--ink2)}
+.crm-wix-prefill.show{display:block}
+@media(max-width:680px){.crm-discover-grid{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <header>
@@ -690,6 +718,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
           <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
           <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos</button>
+          <button class="rv-tab" id="crmtab-descobrir" onclick="crmShowSubTab('descobrir')">Descobrir</button>
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
@@ -757,6 +786,28 @@ body.dark .rv-tabs{background:#0A0F1A}
             <div id="crm-projects-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
           </div>
         </div>
+
+        <div id="crmpane-descobrir" class="rv-pane">
+          <div class="card" style="padding:.85rem 1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem">
+              <div>
+                <div class="sh" style="margin:0">Descobrir</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Leads e sinais externos em triagem — nada entra no CRM sem sua decisão</div>
+              </div>
+              <div style="font-size:.58rem;color:var(--ink4)">Wix · staging</div>
+            </div>
+            <div class="crm-discover-summary">
+              <span class="crm-discover-stat"><b id="crm-wix-count-relevant">—</b> relevantes</span>
+              <span class="crm-discover-stat"><b id="crm-wix-count-suggested">—</b> possíveis clientes</span>
+              <span id="msf-crm-wix-view-wrap"></span>
+              <span id="msf-crm-wix-year-wrap"></span>
+              <input id="crm-wix-q" placeholder="🔎 Buscar empresa, pessoa, e-mail ou telefone…" oninput="crmRenderWixLeads()" style="flex:1;min-width:220px;height:32px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);padding:.3rem .5rem;font-size:.64rem;outline:none">
+            </div>
+            <div id="crm-wix-container"><p class="hint">Abra esta aba para carregar os leads.</p></div>
+            <div id="crm-wix-resolved-wrap"></div>
+          </div>
+        </div>
+
       </div>
 
 <!-- CRM — CRIAR/EDITAR/ABRIR PROJETO (Fase 1+2 — sem Pessoas/Ações/Timeline ainda) -->
@@ -867,6 +918,7 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
     </div>
     <div class="modal-b">
+      <div id="crm-wix-prefill" class="crm-wix-prefill"></div>
       <div class="crm-cust-identity">
         <div class="ff">
           <label>Razão Social / Nome</label>
@@ -2750,6 +2802,9 @@ let rvSacachoEditing=false;
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
 let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[];
+let CRM_WIX_LEADS=[];
+let crmPendingWixLeadId=null;
+let crmWixResolvedOpen=false;
 const CRM_ACTION_TYPES=[
   {v:'whatsapp',lbl:'WhatsApp',hasDir:true},{v:'phone',lbl:'Ligação',hasDir:true},{v:'email',lbl:'E-mail',hasDir:true},
   {v:'meeting',lbl:'Reunião',hasDir:false},{v:'visit',lbl:'Visita',hasDir:false},{v:'proposal',lbl:'Proposta',hasDir:false},
@@ -2813,6 +2868,9 @@ function crmShowSubTab(id,skipReclick){
     crmRenderProjects();
     crmLoadProjects();
     crmFetchAll('crm_actions','*',{deleted:false}).then(a=>{CRM_ACTIONS=a;crmRenderProjects();});
+  }else if(id==='descobrir'){
+    crmLoadAll();
+    crmLoadWixLeads();
   }
 }
 // Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
@@ -2931,24 +2989,34 @@ function crmRenderCustomers(){
     }).join('')}
   </div>`;
 }
-function crmOpenCustomerEdit(id){
+function crmOpenCustomerEdit(id,prefill){
+  if(!prefill)crmPendingWixLeadId=null;
   crmEditCtx={customerId:id,tags:[],people:[],refs:[],segmento:[],perfil:[]};
   document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
-  document.getElementById('crm-cust-name').value=c?.display_name||'';
+  const pf=(!id&&prefill)?prefill:null;
+  document.getElementById('crm-cust-name').value=c?.display_name||pf?.display_name||'';
   document.getElementById('crm-cust-trade').value=c?.trade_name||'';
   document.getElementById('crm-cust-legal').value=c?.legal_name||'';
   const temLegalName=!!(c?.legal_name&&c.legal_name.trim());
   document.getElementById('crm-cust-moredetails-h').classList.toggle('open',temLegalName);
   document.getElementById('crm-cust-moredetails-body').classList.toggle('open',temLegalName);
   document.getElementById('crm-cust-doc').value=c?.document||'';
-  document.getElementById('crm-cust-status').value=c?.status||'active';
+  document.getElementById('crm-cust-status').value=c?.status||pf?.status||'active';
   document.getElementById('crm-cust-notes').value=c?.notes||'';
   crmEditCtx.tags=id?CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)).filter(Boolean).map(t=>t.name):[];
-  crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):[];
+  crmEditCtx.people=id?CRM_PEOPLE.filter(p=>p.customer_id===id).map(p=>({...p})):(pf?.person?[{name:pf.person.name||'',role:'',relationship_type:'',email:pf.person.email||null,phone:pf.person.phone||null}]:[]);
   crmEditCtx.refs=id?CRM_EXTERNAL_REFS.filter(r=>r.customer_id===id).map(r=>({...r})):[];
   crmEditCtx.segmento=c?.segmento||[];
   crmEditCtx.perfil=c?.perfil_comercial||[];
+  const pfBox=document.getElementById('crm-wix-prefill');
+  if(pfBox){
+    if(pf){
+      const contato=[pf.person?.name,pf.person?.email,pf.person?.phone].filter(Boolean).join(' · ');
+      pfBox.classList.add('show');
+      pfBox.innerHTML=`<b>Origem Wix</b>${contato?` · ${esc(contato)}`:''}<span style="color:var(--ink4)"> — revise os dados e classifique antes de salvar.</span>`;
+    }else{pfBox.classList.remove('show');pfBox.innerHTML='';}
+  }
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();crmRenderCustSegmento();crmRenderPerfilToggle();
   crmPopulateGroupSelect(c?.group_id||'');
   document.getElementById('crm-group-create-wrap').style.display='none';
@@ -3269,9 +3337,19 @@ async function crmSaveCustomer(){
   for(const r of refsOriginais){
     if(!idsRefsMantidas.includes(r.id))await _supa.from('crm_customer_external_refs').update({deleted:true}).eq('id',r.id);
   }
+  if(crmPendingWixLeadId){
+    const wixId=crmPendingWixLeadId;
+    const{error:wixErr}=await _supa.from('crm_wix_leads').update({
+      status:'converted',matched_customer_id:customerId,
+      reviewed_at:new Date().toISOString(),reviewed_by:authUser.id
+    }).eq('id',wixId);
+    if(wixErr){toastSave('Cliente salvo, mas lead Wix não foi atualizado: '+wixErr.message);}
+    crmPendingWixLeadId=null;
+  }
   closeM('crmcustomer');
   toastSave('Cliente salvo ✓');
   await crmLoadAll();
+  if(document.getElementById('crmpane-descobrir')?.classList.contains('active'))await crmLoadWixLeads();
 }
 /* ══════════════════════════════════════
    CRM — HISTÓRICO DE COMPRAS (Tiny) — só leitura, 3 RPCs
@@ -4049,6 +4127,114 @@ async function crmDismissProjectSignal(projectId,signalVariant,anchorDate){
     return;
   }
   crmRemoveSignalFromUi('projeto_parado',projectId);
+}
+
+/* ══════════════════════════════════════
+   CRM — DESCOBRIR / WIX V1
+   Staging separado: nada vira Cliente/Pessoa sem decisão humana.
+══════════════════════════════════════ */
+function crmWixHasLabel(w,label){return Array.isArray(w.labels)&&w.labels.includes(label);}
+function crmWixIsRelevant(w){return crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3')||crmWixHasLabel(w,'SM Fred');}
+function crmWixYear(w){const d=w.wix_created_at?new Date(w.wix_created_at):null;return d&&!isNaN(d)?String(d.getFullYear()):'—';}
+function crmWixDisplay(w){return (w.company||[w.first_name,w.last_name].filter(Boolean).join(' ')||w.email||'Lead Wix').trim();}
+function crmWixPerson(w){return [w.first_name,w.last_name].filter(Boolean).join(' ').trim();}
+function crmWixSuggestedCustomer(w){return w.suggested_customer_id?CRM_CUSTOMERS.find(c=>c.id===w.suggested_customer_id):null;}
+async function crmLoadWixLeads(){
+  const cont=document.getElementById('crm-wix-container');if(cont)cont.innerHTML='<p class="hint">Carregando…</p>';
+  CRM_WIX_LEADS=await crmFetchAll('crm_wix_leads','*',{deleted:false});
+  crmInitWixFilters();crmRenderWixLeads();
+}
+function crmInitWixFilters(){
+  const vw=document.getElementById('msf-crm-wix-view-wrap');
+  if(vw&&!vw.innerHTML){vw.innerHTML=msfHtml('crm-wix-view','Novos relevantes');msfPopulate('crm-wix-view',['Novos relevantes','Possível cliente existente','Orçamento','SM Fred'],'Novos relevantes',crmRenderWixLeads);}
+  const yr=document.getElementById('msf-crm-wix-year-wrap');
+  if(yr&&!yr.innerHTML){
+    const years=[...new Set(CRM_WIX_LEADS.map(crmWixYear).filter(y=>y!=='—'))].sort().reverse();
+    yr.innerHTML=msfHtml('crm-wix-year','Todos anos');msfPopulate('crm-wix-year',years,'Todos anos',crmRenderWixLeads);
+  }
+}
+function crmWixSelected(id){const st=MSF[id];return(!st||st.selected===null)?[]:[...st.selected];}
+function crmWixFilterMatch(w){
+  const q=norm(document.getElementById('crm-wix-q')?.value||'');
+  if(q&&!norm([crmWixDisplay(w),crmWixPerson(w),w.email,w.phone].filter(Boolean).join(' ')).includes(q))return false;
+  const views=crmWixSelected('crm-wix-view');
+  if(views.length){
+    const ok=views.some(v=>v==='Novos relevantes'?(w.status==='new'&&crmWixIsRelevant(w)):v==='Possível cliente existente'?(w.status==='new'&&!!w.suggested_customer_id):v==='Orçamento'?(w.status==='new'&&(crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3'))):v==='SM Fred'?(w.status==='new'&&crmWixHasLabel(w,'SM Fred')):false);
+    if(!ok)return false;
+  }else if(!(w.status==='new'&&crmWixIsRelevant(w)))return false;
+  const years=crmWixSelected('crm-wix-year');if(years.length&&!years.includes(crmWixYear(w)))return false;
+  return true;
+}
+function crmWixPriority(w){
+  const year=Number(crmWixYear(w))||0, recent=year>=2024?30:year>=2022?15:0;
+  const complete=(w.company?8:0)+(w.phone?5:0)+(w.email?3:0)+(crmWixPerson(w)?3:0);
+  const budget=(crmWixHasLabel(w,'Pedir um orçamento 2')||crmWixHasLabel(w,'Pedir um orçamento 3'))?40:0;
+  const sm=crmWixHasLabel(w,'SM Fred')?20:0;
+  return (w.suggested_customer_id?50:0)+budget+sm+recent+complete;
+}
+function crmWixCardHtml(w){
+  const sugg=crmWixSuggestedCustomer(w),person=crmWixPerson(w),labels=(w.labels||[]).filter(l=>l==='Pedir um orçamento 2'||l==='Pedir um orçamento 3'||l==='SM Fred');
+  const contact=[person,w.email,w.phone].filter(Boolean).map(esc).join(' · ');
+  return `<div class="crm-wix-card" id="crm-wix-card-${w.id}">
+    <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start"><div class="crm-wix-title">${esc(crmWixDisplay(w))}</div><div style="font-size:.58rem;color:var(--ink4);white-space:nowrap">${esc(crmWixYear(w))}</div></div>
+    ${contact?`<div class="crm-wix-person">${contact}</div>`:''}
+    <div style="display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.35rem">${labels.map(l=>`<span class="crm-chip">${esc(l)}</span>`).join('')}</div>
+    ${sugg?`<div class="crm-wix-match"><div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.04em;opacity:.75">Possível cliente existente · ${esc(w.match_type||'sugestão')}</div><b>${esc(sugg.display_name)}</b>${sugg.trade_name?` · ${esc(sugg.trade_name)}`:''}</div>`:`<div class="crm-wix-none">Nenhum cliente correspondente confirmado.</div>`}
+    <div class="crm-wix-actions">
+      ${sugg?`<button class="btn btn-p" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmConfirmWixLink('${w.id}','${sugg.id}')">Confirmar vínculo</button><button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmOpenCustomerEdit('${sugg.id}')">Abrir cliente</button>`:`<button class="btn btn-p" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmCreateProspectFromWix('${w.id}')">Criar Prospect</button><button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem" onclick="crmToggleWixSearch('${w.id}')">Procurar cliente</button>`}
+      <button class="btn btn-s" style="font-size:.6rem;padding:.25rem .5rem;color:var(--ink4)" onclick="crmDismissWixLead('${w.id}')">Descartar</button>
+    </div>
+    <div class="crm-wix-search" id="crm-wix-search-${w.id}"><input placeholder="Buscar cliente…" oninput="crmRenderWixCustomerSearch('${w.id}',this.value)" style="width:100%"><div class="crm-wix-search-results" id="crm-wix-search-results-${w.id}"></div></div>
+  </div>`;
+}
+function crmRenderWixLeads(){
+  const cont=document.getElementById('crm-wix-container');if(!cont)return;
+  const relevant=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='new'&&crmWixIsRelevant(w));
+  const suggested=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='new'&&w.suggested_customer_id);
+  document.getElementById('crm-wix-count-relevant').textContent=relevant.length;
+  document.getElementById('crm-wix-count-suggested').textContent=suggested.length;
+  const arr=CRM_WIX_LEADS.filter(w=>!w.deleted&&crmWixFilterMatch(w)).sort((a,b)=>crmWixPriority(b)-crmWixPriority(a)||(b.wix_created_at||'').localeCompare(a.wix_created_at||''));
+  cont.innerHTML=arr.length?`<div class="crm-discover-grid">${arr.map(crmWixCardHtml).join('')}</div>`:'<div class="crm-empty">Nenhum lead nesta seleção.</div>';
+  const resolved=CRM_WIX_LEADS.filter(w=>!w.deleted&&(w.status==='linked'||w.status==='converted'));
+  const dismissed=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status==='dismissed');
+  const rw=document.getElementById('crm-wix-resolved-wrap');
+  rw.innerHTML=`<div class="crm-resolved-head" onclick="crmWixResolvedOpen=!crmWixResolvedOpen;crmRenderWixResolved()">${crmWixResolvedOpen?'▾':'▸'} Resolvidos ${resolved.length} · Descartados ${dismissed.length}</div><div id="crm-wix-resolved-list"></div>`;
+  crmRenderWixResolved();
+}
+function crmRenderWixResolved(){
+  const el=document.getElementById('crm-wix-resolved-list');if(!el)return;if(!crmWixResolvedOpen){el.innerHTML='';return;}
+  const arr=CRM_WIX_LEADS.filter(w=>!w.deleted&&w.status!=='new').sort((a,b)=>(b.reviewed_at||b.dismissed_at||'').localeCompare(a.reviewed_at||a.dismissed_at||''));
+  el.innerHTML=arr.length?`<div style="margin-top:.45rem">${arr.slice(0,100).map(w=>`<div style="display:flex;justify-content:space-between;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--bdr);font-size:.64rem"><span>${esc(crmWixDisplay(w))}</span><span style="color:var(--ink4)">${esc(w.status)}</span></div>`).join('')}</div>`:'<div class="crm-empty" style="margin-top:.4rem">—</div>';
+}
+async function crmConfirmWixLink(wixId,customerId){
+  const{error}=await _supa.from('crm_wix_leads').update({status:'linked',matched_customer_id:customerId,reviewed_at:new Date().toISOString(),reviewed_by:authUser.id}).eq('id',wixId);
+  if(error){toastSave('Erro ao vincular: '+error.message);return;}
+  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(w){w.status='linked';w.matched_customer_id=customerId;w.reviewed_at=new Date().toISOString();}
+  crmRenderWixLeads();toastSave('Lead Wix vinculado ✓');
+  if(w&&crmWixPerson(w)&&confirm('Adicionar '+crmWixPerson(w)+' às Pessoas deste cliente?'))await crmAddWixPerson(w,customerId);
+}
+async function crmAddWixPerson(w,customerId){
+  const name=crmWixPerson(w);if(!name)return;
+  const existing=CRM_PEOPLE.some(p=>p.customer_id===customerId&&!p.deleted&&((w.email&&p.email&&p.email.toLowerCase()===w.email.toLowerCase())||(w.phone&&p.phone&&normPhoneSimple(p.phone)===normPhoneSimple(w.phone))));
+  if(existing){toastSave('Contato já existe em Pessoas.');return;}
+  const{data,error}=await _supa.from('crm_people').insert({customer_id:customerId,name,email:w.email||null,phone:w.phone||null}).select().single();
+  if(error){toastSave('Erro ao adicionar Pessoa: '+error.message);return;}if(data)CRM_PEOPLE.push(data);toastSave('Pessoa adicionada ✓');
+}
+function normPhoneSimple(v){return String(v||'').replace(/\D/g,'');}
+function crmCreateProspectFromWix(wixId){
+  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(!w)return;crmPendingWixLeadId=wixId;
+  crmOpenCustomerEdit(null,{display_name:(w.company||crmWixPerson(w)||w.email||'').trim(),status:'prospect',person:{name:crmWixPerson(w),email:w.email||'',phone:w.phone||''}});
+}
+function crmToggleWixSearch(wixId){document.getElementById('crm-wix-search-'+wixId)?.classList.toggle('open');}
+function crmRenderWixCustomerSearch(wixId,q){
+  const el=document.getElementById('crm-wix-search-results-'+wixId);if(!el)return;const nq=norm(q);if(!nq){el.innerHTML='';return;}
+  const arr=CRM_CUSTOMERS.filter(c=>!c.deleted&&norm([c.display_name,c.trade_name,c.legal_name,c.document].filter(Boolean).join(' ')).includes(nq)).slice(0,12);
+  el.innerHTML=arr.length?arr.map(c=>`<div class="crm-wix-search-row" onclick="crmConfirmWixLink('${wixId}','${c.id}')"><b>${esc(c.display_name)}</b>${c.trade_name?` · ${esc(c.trade_name)}`:''}${c.document?`<div style="color:var(--ink4)">${esc(c.document)}</div>`:''}</div>`).join(''):'<div class="crm-empty">Nenhum cliente encontrado.</div>';
+}
+async function crmDismissWixLead(wixId){
+  const{error}=await _supa.from('crm_wix_leads').update({status:'dismissed',dismissed_at:new Date().toISOString(),dismissed_by:authUser.id,reviewed_at:new Date().toISOString(),reviewed_by:authUser.id}).eq('id',wixId);
+  if(error){toastSave('Erro ao descartar: '+error.message);return;}
+  const w=CRM_WIX_LEADS.find(x=>x.id===wixId);if(w){w.status='dismissed';w.dismissed_at=new Date().toISOString();}crmRenderWixLeads();
 }
 
 /* ══════════════════════════════════════
