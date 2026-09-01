@@ -2686,6 +2686,11 @@ if(localStorage.getItem('calc_dark')==='1'){document.body.classList.add('dark');
    ═══════════════════════════════════════════════════════════════ */
 const rvEl=id=>document.getElementById(id);
 const rvBrl=n=>(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const rvPct=(v,maxDec=2)=>{
+  const n=Number(v);
+  if(!Number.isFinite(n))return'0';
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:maxDec});
+};
 
 /* ═══════════════════════════════════════════════════════════════
    REVENDA — versão simplificada
@@ -4713,16 +4718,17 @@ function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cli
   const icmsDebPct=TAB_DEBITO[tipo][regCli];
 
   // ── DRE ──
-  // Frete incluso: o valor do frete passa a fazer parte da Receita de Venda
-  // (e por consequência entra na base de ICMS débito, comissão e federais) —
-  // em vez de ser descontado como Despesa de Venda.
-  const receita=vendaProduto+(freteIncluso?freteTotal:0);   // Receita de Venda (soma de todos os produtos)
+  // +Frete significa: cobrar o frete do cliente na NF.
+  // O frete continua sendo custo/despesa da empresa SEMPRE.
+  // Com +Frete: entra uma vez em Receita e uma vez em Despesa.
+  // Sem +Frete: entra somente em Despesa.
+  const receita=vendaProduto+(freteIncluso?freteTotal:0);
   const CMV=custoCompra+cliche;                      // CMV = despesa de compra (soma) + clichê/molde/logo
   const lucroBruto=receita-CMV;
 
   const comissao=receita*(comissaoPct/100);
   const fed=receita*(fedPct/100);
-  const freteDespesa=freteIncluso?0:freteTotal;
+  const freteDespesa=freteTotal;
   const despesasVenda=comissao+freteDespesa+fed;      // comissão + frete (se não incluso) + PIS/COFINS/IRPJ/CSLL
   const margemLiquida=lucroBruto-despesasVenda;        // ← RESULTADO (resumo)
   const pctMargemLiquida=receita>0?margemLiquida/receita:0;
@@ -4815,7 +4821,7 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
   const icmsCredPctEfetivo=custoCompra>0?credICMS/custoCompra*100:0;
   const icmsDebPctEfetivo=receita>0?debICMS/receita*100:0;
   const freteUnit=qtdSum>0?freteTotalSum/qtdSum:0;
-  const freteDespesa=freteIncluso?0:freteTotalSum;
+  const freteDespesa=freteTotalSum;
   const fornecedorNomes=[...new Set(subResultados.map(r=>r.fornecedor.nome))];
   const fornecedorLegado=fornecedorNomes.join(' + '); // string única pra telas que ainda esperam "1 fornecedor"
   const tiposUsados=[...new Set(subResultados.map(r=>r.tipo))];
@@ -4880,8 +4886,8 @@ function rv2Render(r){
     </div>
     <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(r.pv)}/un${r.freteTotal>0?` · frete ${rvBrl(r.freteTotal)}${r.freteIncluso?' cobrado à parte':' como despesa'}`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
-      <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
-      <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
+      <span>ICMS crédito: <b style="color:var(--ink)">${rvPct(r.icmsCredPct)}%</b> (${REGIAO_LBL[r.regFor]})</span>
+      <span>ICMS débito: <b style="color:var(--ink)">${rvPct(r.icmsDebPct)}%</b> (${REGIAO_LBL[r.regCli]})</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--ink3);margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--bdr)">
       <span>Margem Líquida <span style="color:var(--ink4)">(antes da apuração de ICMS)</span></span>
@@ -4923,8 +4929,8 @@ function rv2RenderDetalhe(r,targetId){
         <tr class="rv-tot"><td>= MARGEM LÍQUIDA</td><td class="num">${rvBrl(r.margemLiquida)} (${(r.pctMargemLiquida*100).toFixed(1).replace('.',',')}%)</td></tr>
 
         <tr class="rv-sec"><td colspan="2">Apuração de ICMS <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">(acerto de imposto, não é despesa)</span></td></tr>
-        <tr><td>(+) Crédito da compra (${r.icmsCredPct}%)</td><td class="num">${rvBrl(r.credICMS)}</td></tr>
-        <tr><td>(−) Débito da venda (${r.icmsDebPct}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
+        <tr><td>(+) Crédito da compra (${rvPct(r.icmsCredPct)}%)</td><td class="num">${rvBrl(r.credICMS)}</td></tr>
+        <tr><td>(−) Débito da venda (${rvPct(r.icmsDebPct)}%)</td><td class="num negv">−${rvBrl(r.debICMS)}</td></tr>
         <tr class="rv-sub"><td>= Saldo ICMS (${r.apuracaoICMS>=0?'a recuperar':'a recolher'})</td><td class="num">${rvBrl(r.apuracaoICMS)}</td></tr>
 
         <tr class="rv-tot"><td>= MARGEM FINAL</td><td class="num">${rvBrl(r.margemFinal)} (${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</td></tr>
@@ -5047,7 +5053,7 @@ function rv2SalvarCotacao(){
   const r=rv2Calc();
   if(!r){toastSave('Preencha os dados antes de salvar');return;}
   const cotacao={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),produtores:rvProdutoresDoResultado(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem};
@@ -5056,12 +5062,22 @@ function rv2SalvarCotacao(){
   rv2RenderHist();
   toastSave('Cotação salva ✓');
 }
+function rvProdutoresDoResultado(r){
+  const nomes=new Set();
+  (r?.produtos||[]).forEach(pr=>{if(pr?.fornecedor&&rvIsProdutor(pr.fornecedor))nomes.add(pr.fornecedor);});
+  (rvBuildFornecedoresArray(r)||[]).forEach(f=>{if(f?.produtor||rvIsProdutor(f?.nome))nomes.add(f.nome);});
+  return[...nomes];
+}
 function rv2CriarPedido(){
   const r=rv2Calc();
   if(!r){toastSave('Preencha os dados antes de criar o pedido');return;}
   const status={};RV_STATUS_STEPS.forEach(s=>status[s.key]=false);status.confirmado=true;
+  const fornecedoresSnap=rvBuildFornecedoresArray(r);
+  const produtores=rvProdutoresDoResultado(r);
   const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:fornecedoresSnap,produtores,
+    ciDates:produtores.length?RV_CI_LABELS.map(()=>rvMkD(null,true)):undefined,
+    tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
     lucroTotal:r.lucroTotal,margem:r.margem,status,obs:''};
@@ -5149,8 +5165,8 @@ function rv2EditPreview(){
     </div>
     <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(r.pv)}/un${r.freteTotal>0?` · frete ${rvBrl(r.freteTotal)}${r.freteIncluso?' cobrado à parte':' como despesa'}`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
-      <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
-      <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
+      <span>ICMS crédito: <b style="color:var(--ink)">${rvPct(r.icmsCredPct)}%</b> (${REGIAO_LBL[r.regFor]})</span>
+      <span>ICMS débito: <b style="color:var(--ink)">${rvPct(r.icmsDebPct)}%</b> (${REGIAO_LBL[r.regCli]})</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--ink3);margin-top:.4rem;padding-top:.4rem;border-top:1px dashed var(--bdr)">
       <span>Margem Líquida <span style="color:var(--ink4)">(antes da apuração de ICMS)</span></span>
@@ -5192,7 +5208,7 @@ function rv2SaveEdit(){
   const rec=lista.find(x=>x.id===id);
   if(!rec){toastSave('Registro não encontrado');return;}
   Object.assign(rec,{
-    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
+    cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),produtores:rvProdutoresDoResultado(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
     custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
@@ -5594,16 +5610,19 @@ function rvIsProdutor(nomeFornecedor){
 function rvPedidoProdutores(p){
   if(!p)return[];
   const nomes=new Set();
-  // Novo formato: fornecedores[] é a fonte mais confiável e pode trazer snapshot do flag produtor.
+  // Snapshot explícito salvo na criação/edição do pedido.
+  (p.produtores||[]).forEach(n=>{if(n)nomes.add(n);});
+  // Novo formato: fornecedores[] também pode carregar snapshot do flag produtor.
   (p.fornecedores||[]).forEach(f=>{
     if(f?.produtor||rvIsProdutor(f?.nome))nomes.add(f.nome);
   });
-  // Defesa para registros em que fornecedores[] ainda não existia ou ficou incompleto.
+  // Defesa para registros antigos/incompletos.
   (p.produtos||[]).forEach(pr=>{
     if(pr?.fornecedor&&rvIsProdutor(pr.fornecedor))nomes.add(pr.fornecedor);
   });
-  // Legado: pedido antigo com um único fornecedor.
   if(!nomes.size&&p.fornecedor&&rvIsProdutor(p.fornecedor))nomes.add(p.fornecedor);
+  // Se o pedido já tem ciDates, ele pertence ao fluxo de produção.
+  if(!nomes.size&&Array.isArray(p.ciDates))nomes.add(p.fornecedor||'Produção');
   return[...nomes];
 }
 function rvPedidoTemProducao(p){return rvPedidoProdutores(p).length>0;}
