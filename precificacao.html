@@ -4740,8 +4740,9 @@ function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cli
     comissaoPct,freteTotal,freteUnit,freteIncluso:!!freteIncluso,freteDespesa,comLogo:!!comLogo,cliche,
     receita,custoCompra,CMV,lucroBruto,comissao,fed,despesasVenda,margemLiquida,pctMargemLiquida,
     credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
-    // nomes antigos mantidos como alias — cotações/pedidos já salvos e o histórico continuam lendo a "margem final" (bottom line real)
-    vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
+    // vendaProduto = SOMENTE mercadoria. Frete cobrado do cliente fica separado e entra apenas em receita/vendaTotal.
+    // Isso impede o frete de contaminar o PV unitário e depois ser somado novamente no detalhamento.
+    vendaTotal:receita,vendaProduto,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
     lucroTotal:margemLiquida,margem:pctMargemLiquida,saldoICMS:debICMS-credICMS};
 }
 function rvSafeId(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]/g,'_');}
@@ -4753,7 +4754,10 @@ function rvBuildFornecedoresArray(r){
   const porFornecedor={};
   r.fornecedores.forEach(f=>{
     const nome=f.fornecedor.nome;
-    if(!porFornecedor[nome])porFornecedor[nome]={key:rvSafeId(nome),nome,custoCompra:0,freteTotal:0,cliche:0};
+    if(!porFornecedor[nome]){
+      const cad=RV_FORNECEDORES2.find(x=>(x.nome||'').toLowerCase().trim()===String(nome||'').toLowerCase().trim());
+      porFornecedor[nome]={key:rvSafeId(nome),nome,custoCompra:0,freteTotal:0,cliche:0,produtor:!!cad?.produtor};
+    }
     porFornecedor[nome].custoCompra+=f.custoCompra;
     porFornecedor[nome].freteTotal+=f.freteTotal;
     porFornecedor[nome].cliche+=f.cliche;
@@ -4793,7 +4797,7 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
 
   // Caso trivial (1 grupo só): consolidado = o próprio sub-resultado, comportamento idêntico ao motor de hoje
   const soma=campo=>subResultados.reduce((a,r)=>a+(r[campo]||0),0);
-  const receita=soma('receita'),custoCompra=soma('custoCompra'),CMV=soma('CMV'),
+  const receita=soma('receita'),vendaProdutoTotal=soma('vendaProduto'),custoCompra=soma('custoCompra'),CMV=soma('CMV'),
     lucroBruto=soma('lucroBruto'),comissao=soma('comissao'),fed=soma('fed'),
     despesasVenda=soma('despesasVenda'),margemLiquida=soma('margemLiquida'),
     credICMS=soma('credICMS'),debICMS=soma('debICMS'),apuracaoICMS=soma('apuracaoICMS'),
@@ -4805,7 +4809,9 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
   // campos legados que rv2CalcCore devolvia como valor único — aqui viram derivados/ponderados,
   // só pra telas que ainda leem "1 número só" (preço médio, % efetiva de crédito/débito etc.)
   const precoMedio=qtdSum>0?custoCompra/qtdSum:0;
-  const pvMedio=qtdSum>0?receita/qtdSum:0;
+  // PV médio = somente venda dos produtos ÷ quantidade.
+  // Receita pode incluir frete cobrado à parte, mas esse frete NÃO altera o PV.
+  const pvMedio=qtdSum>0?vendaProdutoTotal/qtdSum:0;
   const icmsCredPctEfetivo=custoCompra>0?credICMS/custoCompra*100:0;
   const icmsDebPctEfetivo=receita>0?debICMS/receita*100:0;
   const freteUnit=qtdSum>0?freteTotalSum/qtdSum:0;
@@ -4830,7 +4836,7 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
     freteTotal:freteTotalSum,cliche:clicheSum,freteIncluso:!!freteIncluso,
     // mesmos nomes/aliases que rv2CalcCore já usa — telas existentes (rvCPTotais, Financeiro, listagem)
     // continuam lendo o resultado consolidado sem precisar saber que agora pode vir de vários fornecedores
-    vendaTotal:receita,vendaProduto:receita,custoTotal:CMV+freteTotalSum,
+    vendaTotal:receita,vendaProduto:vendaProdutoTotal,custoTotal:CMV+freteTotalSum,
     custoLiquido:CMV+freteTotalSum-credICMS,lucroTotal:margemLiquida,margem:pctMargemLiquida,
     saldoICMS:debICMS-credICMS,
   };
@@ -4872,7 +4878,7 @@ function rv2Render(r){
         <div style="font-size:.92rem;font-weight:700;color:${r.margemFinal>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${rvBrl(r.margemFinal)} <span style="font-size:.68rem">(${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</span></div>
       </div>
     </div>
-    <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · ${rvBrl(r.pv)}/un${r.freteTotal>0?' + frete':''}</div>
+    <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(r.pv)}/un${r.freteTotal>0?` · frete ${rvBrl(r.freteTotal)}${r.freteIncluso?' cobrado à parte':' como despesa'}`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
       <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
       <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
@@ -4894,7 +4900,7 @@ function rv2RenderDetalhe(r,targetId){
   const cmvClicheLinha=r.cliche>0?`<tr><td>(+) Clichê / molde / logo</td><td class="num">${rvBrl(r.cliche)}</td></tr>`:'';
   const freteLinha=r.freteDespesa>0?`<tr><td>Frete entrega <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteDespesa)}</td></tr>`:'';
   const comissaoLinha=r.comissaoPct>0?`<tr><td>Comissão (${r.comissaoPct}% s/ receita)</td><td class="num">${rvBrl(r.comissao)}</td></tr>`:'';
-  const vendaProdutoBruta=r.pv*r.qtd;
+  const vendaProdutoBruta=r.vendaProduto!=null?r.vendaProduto:(r.pv*r.qtd);
   const freteReceitaLinha=r.freteIncluso&&r.freteTotal>0?`
         <tr style="background:var(--ltgrn)"><td>Frete entrega cobrado à parte <span style="color:var(--ink4)">(${rvBrl(r.freteUnit)}/un)</span></td><td class="num">${rvBrl(r.freteTotal)}</td></tr>
         <tr class="rv-sub"><td>= Receita total</td><td class="num">${rvBrl(r.receita)}</td></tr>`:'';
@@ -5141,7 +5147,7 @@ function rv2EditPreview(){
         <div style="font-size:.92rem;font-weight:700;color:${r.margemFinal>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${rvBrl(r.margemFinal)} <span style="font-size:.68rem">(${(r.pctMargemFinal*100).toFixed(1).replace('.',',')}%)</span></div>
       </div>
     </div>
-    <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · ${rvBrl(r.pv)}/un${r.freteTotal>0?' + frete':''}</div>
+    <div style="font-size:.66rem;color:var(--ink4)">${r.qtd.toLocaleString('pt-BR')} un · PV ${rvBrl(r.pv)}/un${r.freteTotal>0?` · frete ${rvBrl(r.freteTotal)}${r.freteIncluso?' cobrado à parte':' como despesa'}`:''}</div>
     <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink3);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--bdr)">
       <span>ICMS crédito: <b style="color:var(--ink)">${r.icmsCredPct}%</b> (${REGIAO_LBL[r.regFor]})</span>
       <span>ICMS débito: <b style="color:var(--ink)">${r.icmsDebPct}%</b> (${REGIAO_LBL[r.regCli]})</span>
@@ -5499,7 +5505,7 @@ function rvRenderPedidos(){
   const todos=rvLoadPedidosActive();
   const cont=rvEl('rv-pedidos-container');
   function statusLabel(p){
-    if(rvIsProdutor(p.fornecedor)){
+    if(rvPedidoTemProducao(p)){
       const dates=p.ciDates;
       if(dates){
         for(let i=dates.length-1;i>=0;i--){
@@ -5543,7 +5549,7 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td>${rvIsProdutor(p.fornecedor)?rvMilestoneDotsHTML(p):'<span style="color:var(--ink4);font-size:.65rem">—</span>'}</td>
+      <td>${rvPedidoTemProducao(p)?rvMilestoneDotsHTML(p):'<span style="color:var(--ink4);font-size:.65rem">—</span>'}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
@@ -5585,7 +5591,23 @@ function rvIsProdutor(nomeFornecedor){
   const f=RV_FORNECEDORES2.find(x=>(x.nome||'').toLowerCase().trim()===alvo);
   return!!(f&&f.produtor);
 }
-function rvGetCIPedidos(){return rvLoadPedidosActive().filter(p=>rvIsProdutor(p.fornecedor));}
+function rvPedidoProdutores(p){
+  if(!p)return[];
+  const nomes=new Set();
+  // Novo formato: fornecedores[] é a fonte mais confiável e pode trazer snapshot do flag produtor.
+  (p.fornecedores||[]).forEach(f=>{
+    if(f?.produtor||rvIsProdutor(f?.nome))nomes.add(f.nome);
+  });
+  // Defesa para registros em que fornecedores[] ainda não existia ou ficou incompleto.
+  (p.produtos||[]).forEach(pr=>{
+    if(pr?.fornecedor&&rvIsProdutor(pr.fornecedor))nomes.add(pr.fornecedor);
+  });
+  // Legado: pedido antigo com um único fornecedor.
+  if(!nomes.size&&p.fornecedor&&rvIsProdutor(p.fornecedor))nomes.add(p.fornecedor);
+  return[...nomes];
+}
+function rvPedidoTemProducao(p){return rvPedidoProdutores(p).length>0;}
+function rvGetCIPedidos(){return rvLoadPedidosActive().filter(rvPedidoTemProducao);}
 function rvCIIsLate(d){
   if(!d||!d.v||!d.est)return false;
   const iso=rvDispToISO(d.v);if(!iso)return false;
@@ -5602,7 +5624,8 @@ function rvMilestoneDotsHTML(p){
     const dateColor=cls==='late'?'var(--red)':cls==='done'?'var(--green)':cls==='est'?'#B85C00':'var(--ink4)';
     return`${connector}<div class="mst"><div class="mc ${cls}" style="width:20px;height:20px;font-size:.6rem" onclick="event.stopPropagation();rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl" style="font-size:.48rem">${RV_CI_SHORT[i]}</span><span class="mlbl" style="color:${dateColor};font-weight:700;font-size:.48rem">${d.v?esc(d.v):'—'}</span></div>`;
   }).join('');
-  return `<div class="ms-row" style="justify-content:center" onclick="event.stopPropagation()">${dots}</div>`;
+  const produtores=rvPedidoProdutores(p);
+  return `<div class="ms-row" style="justify-content:center" onclick="event.stopPropagation()" title="${esc(produtores.length?('Produção: '+produtores.join(' + ')):'Marcos de produção')}">${dots}</div>`;
 }
 let rvCICtx=null; // {pedidoId, idx}
 function rvCIOpenMarco(pedidoId,idx){
