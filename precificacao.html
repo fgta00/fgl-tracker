@@ -392,6 +392,83 @@ body.dark .rv-tabs{background:#0A0F1A}
 }
 </style>
 
+
+<style id="crm-ui-v2">
+/* ═══ CRM UI V2 — densidade, hierarquia e navegação operacional ═══ */
+.crm-week-kpis{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:.55rem;margin:.15rem 0 .85rem}
+.crm-week-kpi{border:1px solid var(--bdr);border-radius:10px;padding:.6rem .75rem;background:var(--bg)}
+.crm-week-kpi .n{font-family:'IBM Plex Mono';font-size:1.05rem;font-weight:700;line-height:1}
+.crm-week-kpi .l{font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4);margin-top:.22rem}
+.crm-week-kpi.late .n{color:var(--red)} .crm-week-kpi.today .n{color:var(--blue)} .crm-week-kpi.next .n{color:var(--green)}
+.crm-week-section{margin-top:.75rem}
+.crm-week-head{display:flex;align-items:center;gap:.42rem;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:.2rem 0 .35rem}
+.crm-week-head .count{font-family:'IBM Plex Mono';font-size:.55rem;background:var(--ltgry);border-radius:999px;padding:.07rem .35rem;color:var(--ink3)}
+.crm-week-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.6rem;align-items:center;border-top:1px solid var(--bdr);padding:.52rem .1rem}
+.crm-week-row:first-of-type{border-top:none}
+.crm-week-main{min-width:0}
+.crm-week-title{display:flex;align-items:baseline;gap:.4rem;min-width:0}
+.crm-week-client{font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-week-date{font-family:'IBM Plex Mono';font-size:.58rem;color:var(--ink4);white-space:nowrap}
+.crm-week-summary{font-size:.65rem;color:var(--ink3);margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-week-actions{display:flex;gap:.25rem;align-items:center}
+.crm-week-actions .btn{font-size:.58rem;padding:.18rem .42rem}
+.crm-week-empty{padding:.9rem;text-align:center;color:var(--ink4);font-size:.68rem}
+
+.crm-signal-toolbar{display:flex;gap:.35rem;flex-wrap:wrap;margin:-.05rem 0 .65rem}
+.crm-signal-chip{border:1px solid var(--bdr);background:var(--card);color:var(--ink3);font:600 .61rem 'IBM Plex Sans';padding:.27rem .55rem;border-radius:999px;cursor:pointer}
+.crm-signal-chip:hover{border-color:var(--blue);color:var(--blue)}
+.crm-signal-chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.crm-signal-chip .n{font-family:'IBM Plex Mono';opacity:.72;margin-left:.18rem}
+.crm-signal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:.5rem}
+.crm-signal-item{border:1px solid var(--bdr);border-radius:9px;padding:.6rem .7rem;min-width:0;background:var(--card)}
+.crm-signal-item:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.crm-signal-item .sig-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.crm-signal-item .sig-name{font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-signal-item .sig-kind{font-size:.51rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink4);white-space:nowrap}
+.crm-signal-item .sig-reason{font-size:.61rem;color:var(--ink3);line-height:1.35;margin:.25rem 0 .42rem;min-height:1.65em}
+.crm-signal-item .sig-actions{display:flex;gap:.25rem;flex-wrap:wrap}
+.crm-signal-item .sig-actions .btn{font-size:.56rem;padding:.18rem .4rem}
+
+.crm-client-tools{display:grid;grid-template-columns:minmax(220px,1.8fr) repeat(4,minmax(125px,.7fr));gap:.45rem;align-items:center;margin:.65rem 0 .45rem}
+.crm-client-tools input,.crm-client-tools select{height:34px;border:1px solid var(--bdr2);border-radius:8px;background:var(--card);color:var(--ink);padding:.32rem .55rem;font-family:'IBM Plex Sans';font-size:.68rem;outline:none;min-width:0}
+.crm-client-tools input:focus,.crm-client-tools select:focus{border-color:var(--blue)}
+.crm-client-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:.25rem 0 .4rem;color:var(--ink4);font-size:.62rem}
+.crm-client-admin{display:flex;gap:.4rem;align-items:center}
+.crm-client-admin .btn{font-size:.56rem;padding:.16rem .4rem;opacity:.78}
+.crm-client-list{border:1px solid var(--bdr);border-radius:10px;overflow:hidden}
+.crm-client-head,.crm-client-row{display:grid;grid-template-columns:minmax(230px,2.2fr) minmax(150px,1.15fr) minmax(130px,1fr) minmax(150px,1.2fr);gap:.6rem;align-items:center;padding:.48rem .7rem}
+.crm-client-head{background:var(--bg);font-size:.53rem;font-weight:700;text-transform:uppercase;letter-spacing:.055em;color:var(--ink4)}
+.crm-client-row{border-top:1px solid var(--bdr);cursor:pointer;background:var(--card);min-height:52px}
+.crm-client-row:hover{background:var(--ltgry)}
+.crm-client-primary{min-width:0}
+.crm-client-name{font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-client-sub{font-size:.57rem;color:var(--ink4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.08rem}
+.crm-client-pills{display:flex;gap:.22rem;flex-wrap:wrap}
+.crm-mini-pill{font-size:.52rem;font-weight:600;border-radius:999px;padding:.08rem .32rem;background:var(--ltblue);color:var(--blue);white-space:nowrap}
+.crm-mini-pill.seg{background:var(--ltgry);color:var(--ink3)}
+.crm-client-group{font-size:.64rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-client-contact{font-size:.61rem;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-client-status{display:inline-block;font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:.3rem}
+
+@media(max-width:980px){
+  .crm-client-tools{grid-template-columns:1fr 1fr 1fr}
+  .crm-client-tools input{grid-column:1/-1}
+  .crm-client-head,.crm-client-row{grid-template-columns:minmax(200px,2fr) minmax(130px,1fr) minmax(130px,1fr)}
+  .crm-client-head>div:nth-child(4),.crm-client-row>div:nth-child(4){display:none}
+}
+@media(max-width:680px){
+  .crm-week-kpis{grid-template-columns:repeat(3,1fr)}
+  .crm-week-row{grid-template-columns:1fr}
+  .crm-week-actions{justify-content:flex-start}
+  .crm-signal-grid{grid-template-columns:1fr}
+  .crm-client-tools{grid-template-columns:1fr 1fr}
+  .crm-client-tools input{grid-column:1/-1}
+  .crm-client-head{display:none}
+  .crm-client-row{grid-template-columns:1fr;gap:.28rem}
+  .crm-client-row>div:nth-child(3),.crm-client-row>div:nth-child(4){display:none}
+}
+</style>
+
 </head>
 <body>
 <header>
@@ -616,35 +693,58 @@ body.dark .rv-tabs{background:#0A0F1A}
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
-          <div class="card">
+          <div class="card" style="padding:.85rem 1rem">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
-              <div class="sh" style="margin:0">Minha Semana</div>
-              <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
+              <div>
+                <div class="sh" style="margin:0">Minha Semana</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Ações comprometidas — o que precisa acontecer agora</div>
+              </div>
+              <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.61rem;padding:.24rem .52rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
             </div>
-            <div id="crm-semana-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
+            <div id="crm-semana-container" style="padding:.65rem 0 0"><p class="hint">Carregando…</p></div>
           </div>
-          <div class="card" id="crm-signal-card" style="display:none;margin-top:.7rem">
-            <div class="sh" style="margin-bottom:.5rem">Vale sua atenção</div>
+          <div class="card" id="crm-signal-card" style="display:none;margin-top:.65rem;padding:.85rem 1rem">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;margin-bottom:.5rem">
+              <div>
+                <div class="sh" style="margin:0">Vale sua atenção</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Oportunidades e exceções — só viram ação quando você decidir</div>
+              </div>
+            </div>
+            <div id="crm-signal-filters"></div>
             <div id="crm-signal-container"></div>
           </div>
         </div>
 
         <div id="crmpane-clientes" class="rv-pane">
-          <div class="card">
-            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
-              <div class="sh" style="margin:0">Clientes</div>
-              <button class="btn btn-p" style="font-size:.68rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+          <div class="card" style="padding:.85rem 1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem">
+              <div>
+                <div class="sh" style="margin:0">Clientes</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Base comercial — encontre rápido, abra só o que precisa</div>
+              </div>
+              <button class="btn btn-p" style="font-size:.64rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
             </div>
-            <div style="display:flex;gap:.7rem;align-items:center;padding:.15rem .9rem 0;min-height:1.1rem">
-              <button class="btn btn-s" id="crm-review-btn" style="font-size:.6rem;padding:.15rem .5rem;display:none;opacity:.85" onclick="crmOpenReviewQueue()">🔍 Revisão Tiny <span id="crm-review-count" style="background:var(--amber);color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.56rem;margin-left:.2rem"></span></button>
-              <span id="crm-audit-link" style="display:none;font-size:.58rem;color:var(--ink4);text-decoration:underline;cursor:pointer" onclick="crmOpenAuditQueue()">Auditoria / Avisos (<span id="crm-audit-count">0</span>)</span>
+
+            <div class="crm-client-tools">
+              <input id="crm-cli-q" placeholder="🔎 Buscar nome, fantasia, razão social ou CNPJ…" oninput="crmRenderCustomers()">
+              <select id="crm-cli-perfil" onchange="crmRenderCustomers()"><option value="">Todos perfis</option></select>
+              <select id="crm-cli-segmento" onchange="crmRenderCustomers()"><option value="">Todos segmentos</option></select>
+              <select id="crm-cli-grupo" onchange="crmRenderCustomers()"><option value="">Todas redes/grupos</option></select>
+              <select id="crm-cli-status" onchange="crmRenderCustomers()">
+                <option value="">Todos status</option><option value="active">Ativos</option><option value="prospect">Prospects</option><option value="inactive">Inativos</option>
+              </select>
             </div>
-            <div class="tb" style="padding:0 .9rem .7rem">
-              <input id="crm-cli-q" placeholder="🔍 Buscar cliente…" oninput="crmRenderCustomers()" style="flex:1">
-              <span id="msf-crm-tag-wrap"></span>
+
+            <div class="crm-client-meta">
+              <span id="crm-cli-cnt"></span>
+              <div class="crm-client-admin">
+                <span id="msf-crm-tag-wrap"></span>
+                <button class="btn btn-s" id="crm-review-btn" style="display:none" onclick="crmOpenReviewQueue()">Revisão Tiny <span id="crm-review-count"></span></button>
+                <button class="btn btn-s" id="crm-audit-link" style="display:none" onclick="crmOpenAuditQueue()">Auditoria <span id="crm-audit-count"></span></button>
+              </div>
             </div>
-            <div id="crm-cli-cnt" style="padding:0 .9rem .4rem;font-size:.7rem;color:var(--ink4)"></div>
-            <div id="crm-customers-container" style="padding:.9rem"><p class="hint">Carregando…</p></div>
+
+            <div id="crm-customers-container"><p class="hint">Carregando…</p></div>
           </div>
         </div>
 
@@ -2757,39 +2857,79 @@ async function crmLoadAll(){
   crmLoadReviewQueue();
   crmLoadAuditQueue();
 }
+function crmPopulateCustomerFilters(){
+  const defs=[
+    ['crm-cli-perfil',[...new Set(CRM_CUSTOMERS.flatMap(c=>c.perfil_comercial||[]).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),'Todos perfis'],
+    ['crm-cli-segmento',[...new Set(CRM_CUSTOMERS.flatMap(c=>c.segmento||[]).filter(Boolean))].sort((a,b)=>a.localeCompare(b)),'Todos segmentos'],
+    ['crm-cli-grupo',CRM_GROUPS.map(g=>g.name).filter(Boolean).sort((a,b)=>a.localeCompare(b)),'Todas redes/grupos'],
+  ];
+  defs.forEach(([id,vals,label])=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.value;
+    el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    if(vals.includes(cur))el.value=cur;
+  });
+}
 function crmRenderCustomers(){
   const cont=document.getElementById('crm-customers-container');
   if(!cont)return;
+  crmPopulateCustomerFilters();
   const wrapTag=document.getElementById('msf-crm-tag-wrap');
-  if(wrapTag&&!wrapTag.innerHTML)wrapTag.innerHTML=msfHtml('crm-tag','Todas Tags');
-  msfPopulate('crm-tag',CRM_TAGS.map(t=>t.name).sort(),'Todas Tags',crmRenderCustomers);
+  if(wrapTag&&!wrapTag.innerHTML)wrapTag.innerHTML=msfHtml('crm-tag','Tags');
+  msfPopulate('crm-tag',CRM_TAGS.map(t=>t.name).sort(),'Tags',crmRenderCustomers);
+
   const q=norm(document.getElementById('crm-cli-q')?.value);
+  const perfil=document.getElementById('crm-cli-perfil')?.value||'';
+  const segmento=document.getElementById('crm-cli-segmento')?.value||'';
+  const grupo=document.getElementById('crm-cli-grupo')?.value||'';
+  const status=document.getElementById('crm-cli-status')?.value||'';
   const tagsByCustomer=id=>CRM_CUSTOMER_TAGS.filter(ct=>ct.customer_id===id).map(ct=>CRM_TAGS.find(t=>t.id===ct.tag_id)?.name).filter(Boolean);
+  const groupName=c=>CRM_GROUPS.find(g=>g.id===c.group_id)?.name||'';
+
   const lista=CRM_CUSTOMERS.filter(c=>{
     const t=norm(`${c.display_name} ${c.trade_name||''} ${c.legal_name||''} ${c.document||''}`);
     const tagNames=tagsByCustomer(c.id);
-    return(!q||t.includes(q))&&tagNames.every(tn=>msfMatch('crm-tag',tn))&&(tagNames.length?tagNames.some(tn=>msfMatch('crm-tag',tn)):true);
+    return(!q||t.includes(q))
+      &&(!perfil||(c.perfil_comercial||[]).includes(perfil))
+      &&(!segmento||(c.segmento||[]).includes(segmento))
+      &&(!grupo||groupName(c)===grupo)
+      &&(!status||c.status===status)
+      &&tagNames.every(tn=>msfMatch('crm-tag',tn))
+      &&(tagNames.length?tagNames.some(tn=>msfMatch('crm-tag',tn)):true);
   }).sort((a,b)=>(a.trade_name||a.display_name).localeCompare(b.trade_name||b.display_name));
-  document.getElementById('crm-cli-cnt').textContent=`${lista.length} cliente${lista.length!==1?'s':''}`;
-  if(!lista.length){cont.innerHTML='<p class="hint">Nenhum cliente encontrado. Clique em "＋ Novo Cliente" pra cadastrar o primeiro.</p>';return;}
+
+  document.getElementById('crm-cli-cnt').textContent=`${lista.length.toLocaleString('pt-BR')} cliente${lista.length!==1?'s':''}`;
+  if(!lista.length){cont.innerHTML='<div class="crm-week-empty">Nenhum cliente encontrado com estes filtros.</div>';return;}
+
   const statusLbl={active:'Ativo',prospect:'Prospect',inactive:'Inativo'};
   const statusCol={active:'var(--green)',prospect:'var(--blue)',inactive:'var(--ink4)'};
-  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.7rem">`+lista.map(c=>{
-    const tagNames=tagsByCustomer(c.id);
-    const nPeople=CRM_PEOPLE.filter(p=>p.customer_id===c.id).length;
-    const nomePrincipal=c.trade_name||c.display_name;
-    return`<div class="card" style="padding:.7rem .85rem;cursor:pointer" onclick="crmOpenCustomerEdit('${c.id}')">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem">
-        <div style="font-weight:700;font-size:.8rem">${esc(nomePrincipal)}</div>
-        ${c.status!=='active'?`<span style="font-size:.55rem;font-weight:700;color:${statusCol[c.status]||'var(--ink4)'};background:${statusCol[c.status]||'var(--ink4)'}18;padding:.1rem .4rem;border-radius:4px;white-space:nowrap">${statusLbl[c.status]||c.status}</span>`:''}
-      </div>
-      ${c.legal_name?`<div style="font-size:.62rem;color:var(--ink4)">${esc(c.legal_name)}</div>`:''}
-      <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem">
-        ${tagNames.map(tn=>`<span style="font-size:.56rem;background:var(--ltblue);color:var(--blue);padding:.08rem .35rem;border-radius:4px">${esc(tn)}</span>`).join('')}
-      </div>
-      ${nPeople>0?`<div style="font-size:.58rem;color:var(--ink4);margin-top:.4rem">${nPeople} pessoa${nPeople!==1?'s':''}</div>`:''}
-    </div>`;
-  }).join('')+`</div>`;
+
+  cont.innerHTML=`<div class="crm-client-list">
+    <div class="crm-client-head"><div>Cliente</div><div>Perfil / segmento</div><div>Rede / grupo</div><div>Contato</div></div>
+    ${lista.map(c=>{
+      const nome=c.trade_name||c.display_name;
+      const sub=[c.trade_name&&c.display_name!==c.trade_name?c.display_name:'',c.document||''].filter(Boolean).join(' · ');
+      const perfis=(c.perfil_comercial||[]);
+      const segmentos=(c.segmento||[]);
+      const grupoNome=groupName(c);
+      const people=CRM_PEOPLE.filter(p=>p.customer_id===c.id);
+      const principal=people[0];
+      const contato=principal?[principal.name,principal.role].filter(Boolean).join(' · '):`${people.length||0} contato${people.length===1?'':'s'}`;
+      return`<div class="crm-client-row" onclick="crmOpenCustomerEdit('${c.id}')">
+        <div class="crm-client-primary">
+          <div class="crm-client-name">${esc(nome)}${c.status&&c.status!=='active'?`<span class="crm-client-status" style="color:${statusCol[c.status]||'var(--ink4)'}">${esc(statusLbl[c.status]||c.status)}</span>`:''}</div>
+          ${sub?`<div class="crm-client-sub">${esc(sub)}</div>`:''}
+        </div>
+        <div class="crm-client-pills">
+          ${perfis.slice(0,3).map(v=>`<span class="crm-mini-pill">${esc(v)}</span>`).join('')}
+          ${segmentos.slice(0,2).map(v=>`<span class="crm-mini-pill seg">${esc(v)}</span>`).join('')}
+          ${!perfis.length&&!segmentos.length?'<span style="font-size:.58rem;color:var(--ink4)">—</span>':''}
+        </div>
+        <div class="crm-client-group">${grupoNome?esc(grupoNome):'<span style="color:var(--ink4)">—</span>'}</div>
+        <div class="crm-client-contact">${esc(contato)}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 function crmOpenCustomerEdit(id){
   crmEditCtx={customerId:id,tags:[],people:[],refs:[],segmento:[],perfil:[]};
@@ -3620,6 +3760,7 @@ function crmRenderMinhaSemana(){
     else if(d<=limite)proximas.push(a);
   });
   [atrasadas,hojeArr,proximas].forEach(arr=>arr.sort((a,b)=>a.due_date.localeCompare(b.due_date)));
+
   const rowHtml=a=>{
     let contexto;
     if(a.project_id){
@@ -3629,24 +3770,33 @@ function crmRenderMinhaSemana(){
       const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
       contexto=esc(c?.trade_name||c?.display_name||'?');
     }
-    return`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:7px;padding:.5rem .65rem;margin-bottom:.4rem">
-      <div style="min-width:0">
-        <div style="font-size:.72rem"><b>${contexto}</b> <span style="color:var(--ink4);font-size:.62rem">${crmFmtDate2(a.due_date)}</span></div>
-        <div style="font-size:.7rem;color:var(--ink2)">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
+    return`<div class="crm-week-row">
+      <div class="crm-week-main">
+        <div class="crm-week-title"><span class="crm-week-client">${contexto}</span><span class="crm-week-date">${crmFmtDate2(a.due_date)}</span></div>
+        <div class="crm-week-summary">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
       </div>
-      <div style="display:flex;gap:.3rem;flex-shrink:0">
-        <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModalById('${a.customer_id}','${a.id}')">Concluir</button>
-        <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmRescheduleAction('${a.id}')">Reagendar</button>
-        <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--red)" onclick="crmDismissAction('${a.id}')">Dispensar</button>
+      <div class="crm-week-actions">
+        <button class="btn btn-p" onclick="crmOpenActionModalById('${a.customer_id}','${a.id}')">Concluir</button>
+        <button class="btn btn-s" onclick="crmRescheduleAction('${a.id}')">Reagendar</button>
+        <button class="btn btn-s" style="color:var(--red)" onclick="crmDismissAction('${a.id}')">Dispensar</button>
       </div>
     </div>`;
   };
-  const bloco=(titulo,arr,cor)=>arr.length?`<div style="margin-bottom:1rem">
-    <div style="font-size:.62rem;font-weight:700;color:${cor};letter-spacing:.04em;margin-bottom:.4rem">${titulo} (${arr.length})</div>
-    ${arr.map(rowHtml).join('')}
+  const bloco=(titulo,arr)=>arr.length?`<div class="crm-week-section">
+    <div class="crm-week-head">${titulo}<span class="count">${arr.length}</span></div>${arr.map(rowHtml).join('')}
   </div>`:'';
-  const html=bloco('ATRASADAS',atrasadas,'var(--red)')+bloco('HOJE',hojeArr,'var(--blue)')+bloco(crmSemanaHorizonte===7?'PRÓXIMOS 7 DIAS':'PRÓXIMOS 30 DIAS',proximas,'var(--ink3)');
-  cont.innerHTML=html||'<p class="hint">Nada planejado — tudo em dia por aqui 🎉</p>';
+
+  cont.innerHTML=`
+    <div class="crm-week-kpis">
+      <div class="crm-week-kpi late"><div class="n">${atrasadas.length}</div><div class="l">Atrasadas</div></div>
+      <div class="crm-week-kpi today"><div class="n">${hojeArr.length}</div><div class="l">Hoje</div></div>
+      <div class="crm-week-kpi next"><div class="n">${proximas.length}</div><div class="l">Próximos ${crmSemanaHorizonte} dias</div></div>
+    </div>
+    ${bloco('Atrasadas',atrasadas)}
+    ${bloco('Hoje',hojeArr)}
+    ${bloco(crmSemanaHorizonte===7?'Próximos 7 dias':'Próximos 30 dias',proximas)}
+    ${!planejadas.length?'<div class="crm-week-empty">Nada planejado — tudo em dia por aqui.</div>':''}
+  `;
 }
 function crmFmtDate2(iso){ // "AAAA-MM-DD" -> "DD/MM/AAAA"
   const p=iso.split('-');
@@ -3686,6 +3836,35 @@ function crmFmtCadenciaHumana(dias){ // 20→"~3 semanas" · 45→"~1,5 mês" ·
   const singular=anos===1||!Number.isInteger(anos);
   return`~${txt} ${singular?'ano':'anos'}`;
 }
+let CRM_SIGNAL_ITEMS=[];
+let CRM_SIGNAL_FILTER='all';
+function crmSignalBucket(s){
+  if(s.kind==='target_sm_asia'||s.kind==='retomada_sm_asia')return'sm_asia';
+  return s.kind;
+}
+function crmSetSignalFilter(kind){
+  CRM_SIGNAL_FILTER=kind;
+  crmRenderSignals();
+}
+function crmRenderSignals(){
+  const card=document.getElementById('crm-signal-card');
+  const cont=document.getElementById('crm-signal-container');
+  const filters=document.getElementById('crm-signal-filters');
+  if(!card||!cont)return;
+  if(!CRM_SIGNAL_ITEMS.length){card.style.display='none';return;}
+  card.style.display='block';
+  const counts={
+    all:CRM_SIGNAL_ITEMS.length,
+    recompra:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='recompra').length,
+    reativacao:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='reativacao').length,
+    sm_asia:CRM_SIGNAL_ITEMS.filter(s=>crmSignalBucket(s)==='sm_asia').length,
+    projeto_parado:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='projeto_parado').length,
+  };
+  const labels=[['all','Todos'],['recompra','Recompra'],['reativacao','Reativação'],['sm_asia','SM Asia'],['projeto_parado','Projetos']];
+  if(filters)filters.innerHTML=`<div class="crm-signal-toolbar">${labels.filter(([k])=>counts[k]>0||k==='all').map(([k,l])=>`<button class="crm-signal-chip ${CRM_SIGNAL_FILTER===k?'active':''}" onclick="crmSetSignalFilter('${k}')">${l}<span class="n">${counts[k]}</span></button>`).join('')}</div>`;
+  const itens=CRM_SIGNAL_FILTER==='all'?CRM_SIGNAL_ITEMS:CRM_SIGNAL_ITEMS.filter(s=>crmSignalBucket(s)===CRM_SIGNAL_FILTER);
+  cont.innerHTML=itens.length?`<div class="crm-signal-grid">${itens.map((item,i)=>crmSignalCardHtml(item,i,itens.length)).join('')}</div>`:'<div class="crm-week-empty">Nada neste filtro.</div>';
+}
 async function crmLoadSignalRecompra(){
   const card=document.getElementById('crm-signal-card');
   const cont=document.getElementById('crm-signal-container');
@@ -3715,9 +3894,8 @@ async function crmLoadSignalRecompra(){
     ...(smAsiaRes.data||[]).map(s=>({kind:'target_sm_asia',...s})),
     ...(retomadaSmAsiaRes.data||[]).map(s=>({kind:'retomada_sm_asia',...s})),
   ];
-  if(!itens.length){card.style.display='none';return;}
-  card.style.display='block';
-  cont.innerHTML=`<div>`+itens.map((item,i)=>crmSignalCardHtml(item,i,itens.length)).join('')+`</div>`;
+  CRM_SIGNAL_ITEMS=itens;
+  crmRenderSignals();
 }
 function crmSignalCardHtml(s,i,total){
   const borda=i<total-1?'border-bottom:1px solid var(--bdr)':'';
@@ -3726,14 +3904,14 @@ function crmSignalCardHtml(s,i,total){
     const tempo=s.days_inactive==null?'sem compra comercial rastreada':`última compra há ${crmFmtCadenciaHumana(s.days_inactive)}`;
     const hist=s.order_count?`${s.order_count} operaç${s.order_count===1?'ão':'ões'} · ${Number(s.qty_total||0).toLocaleString('pt-BR')} un.`:'';
     const contexto=[s.active_projects?`${s.active_projects} projeto${s.active_projects===1?'':'s'} ativo${s.active_projects===1?'':'s'}`:'',s.planned_actions?`${s.planned_actions} ação${s.planned_actions===1?'':'ões'} planejada${s.planned_actions===1?'':'s'}`:''].filter(Boolean).join(' · ');
-    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-retomada-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
-    <div style="display:flex;align-items:baseline;gap:.4rem">
-      <span style="font-size:.72rem;font-weight:700">${esc(nome)}</span>
-      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Retomada SM Asia</span>
+    return`<div class="crm-signal-item" id="crm-signal-retomada-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
+    <div class="sig-top">
+      <span class="sig-name">${esc(nome)}</span>
+      <span class="sig-kind">Retomada SM Asia</span>
     </div>
-    <div style="font-size:.62rem;color:var(--ink3);margin:.15rem 0 .1rem;max-width:420px">Histórico SM Asia · ${esc(tempo)}${hist?' · '+esc(hist):''}</div>
+    <div class="sig-reason">Histórico SM Asia · ${esc(tempo)}${hist?' · '+esc(hist):''}</div>
     ${contexto?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem">${esc(contexto)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
-    <div style="display:flex;gap:.3rem">
+    <div class="sig-actions">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissRetomadaSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
@@ -3741,13 +3919,13 @@ function crmSignalCardHtml(s,i,total){
   </div>`;
   }
   if(s.kind==='target_sm_asia'){
-    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-sma-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
-    <div style="display:flex;align-items:baseline;gap:.4rem">
-      <span style="font-size:.72rem;font-weight:700">${esc(s.cliente)}</span>
-      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">SM Asia</span>
+    return`<div class="crm-signal-item" id="crm-signal-sma-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
+    <div class="sig-top">
+      <span class="sig-name">${esc(s.cliente)}</span>
+      <span class="sig-kind">SM Asia</span>
     </div>
-    <div style="font-size:.62rem;color:var(--ink3);margin:.15rem 0 .35rem;max-width:380px">${esc(s.reason)}</div>
-    <div style="display:flex;gap:.3rem">
+    <div class="sig-reason">${esc(s.reason)}</div>
+    <div class="sig-actions">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissTargetSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
@@ -3755,15 +3933,15 @@ function crmSignalCardHtml(s,i,total){
   }
   if(s.kind==='reativacao'){
     const tagline={relacao_consolidada:'Relação recorrente anteriormente ativa.',grande_relacao:'Conta historicamente relevante.',relacao_relevante:'Relação relevante no passado.'}[s.signal_variant]||'';
-    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-react-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
-    <div style="display:flex;align-items:baseline;gap:.4rem">
-      <span style="font-size:.72rem;font-weight:700">${esc(s.cliente)}</span>
-      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Reativação</span>
+    return`<div class="crm-signal-item" id="crm-signal-react-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
+    <div class="sig-top">
+      <span class="sig-name">${esc(s.cliente)}</span>
+      <span class="sig-kind">Reativação</span>
     </div>
-    <div style="font-size:.62rem;color:var(--ink3);margin:.15rem 0 .1rem;max-width:380px">${esc(s.reason)}</div>
+    <div class="sig-reason">${esc(s.reason)}</div>
     ${s.comportamento_observado?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.1rem">${esc(s.comportamento_observado)}</div>`:''}
     ${tagline?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem;font-style:italic">${esc(tagline)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
-    <div style="display:flex;gap:.3rem">
+    <div class="sig-actions">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissReativacaoSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
@@ -3772,13 +3950,13 @@ function crmSignalCardHtml(s,i,total){
   if(s.kind==='projeto_parado'){
     const nomeCliente=s.trade_name||s.display_name||s.prospect_name||'?';
     const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
-    return`<div style="padding:.45rem 0;${borda}" id="crm-signal-proj-${s.project_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
-    <div style="display:flex;align-items:baseline;gap:.4rem">
-      <span style="font-size:.72rem;font-weight:700">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
-      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Projeto</span>
+    return`<div class="crm-signal-item" id="crm-signal-proj-${s.project_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
+    <div class="sig-top">
+      <span class="sig-name">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
+      <span class="sig-kind">Projeto</span>
     </div>
-    <div style="font-size:.62rem;color:var(--ink3);margin:.15rem 0 .35rem;max-width:380px">${esc(s.reason)}</div>
-    <div style="display:flex;gap:.3rem">
+    <div class="sig-reason">${esc(s.reason)}</div>
+    <div class="sig-actions">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenProjectEdit('${s.project_id}')">Abrir projeto</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
@@ -3791,13 +3969,13 @@ function crmSignalCardHtml(s,i,total){
   const linhaCadencia=s.order_count>=6
     ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
     :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
-  return`<div style="padding:.45rem 0;${borda}" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
-    <div style="display:flex;align-items:baseline;gap:.4rem">
-      <span style="font-size:.72rem;font-weight:700">${esc(s.trade_name||s.display_name)}</span>
-      <span style="font-size:.55rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.04em">Recompra</span>
+  return`<div class="crm-signal-item" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
+    <div class="sig-top">
+      <span class="sig-name">${esc(s.trade_name||s.display_name)}</span>
+      <span class="sig-kind">Recompra</span>
     </div>
-    <div style="font-size:.62rem;color:var(--ink4);margin:.15rem 0 .35rem">${linhaCadencia}</div>
-    <div style="display:flex;gap:.3rem">
+    <div class="sig-reason">${linhaCadencia}</div>
+    <div class="sig-actions">
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
@@ -3807,10 +3985,18 @@ function crmSignalCardHtml(s,i,total){
 function crmCheckEmptySignalContainer(){
   // Correção de um bug latente: checar #crm-signal-container.children sempre dava 1
   // (o <div> wrapper interno nunca some sozinho) — o certo é checar os filhos DO wrapper.
-  const wrapper=document.querySelector('#crm-signal-container > div');
+  const wrapper=document.querySelector('#crm-signal-container .crm-signal-grid');
   if(!wrapper||!wrapper.children.length){
+    if(CRM_SIGNAL_FILTER!=='all'){crmRenderSignals();return;}
     document.getElementById('crm-signal-card').style.display='none';
   }
+}
+function crmRemoveSignalFromUi(kind,id){
+  CRM_SIGNAL_ITEMS=CRM_SIGNAL_ITEMS.filter(s=>{
+    if(s.kind!==kind)return true;
+    return (s.project_id||s.customer_id)!==id;
+  });
+  crmRenderSignals();
 }
 async function crmDismissSignal(customerId,lastPurchaseDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3822,9 +4008,7 @@ async function crmDismissSignal(customerId,lastPurchaseDate){
     toastSave('Erro: '+error.message);
     return;
   }
-  const el=document.getElementById(`crm-signal-${customerId}`);
-  if(el)el.remove();
-  crmCheckEmptySignalContainer();
+  crmRemoveSignalFromUi('recompra',customerId);
 }
 async function crmDismissRetomadaSmAsiaSignal(customerId,signalVariant,anchorDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3834,9 +4018,7 @@ async function crmDismissRetomadaSmAsiaSignal(customerId,signalVariant,anchorDat
     toastSave('Erro: '+error.message);
     return;
   }
-  const el=document.getElementById(`crm-signal-retomada-${customerId}`);
-  if(el)el.remove();
-  crmCheckEmptySignalContainer();
+  crmRemoveSignalFromUi('retomada_sm_asia',customerId);
 }
 async function crmDismissTargetSmAsiaSignal(customerId,signalVariant,anchorDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3846,9 +4028,7 @@ async function crmDismissTargetSmAsiaSignal(customerId,signalVariant,anchorDate)
     toastSave('Erro: '+error.message);
     return;
   }
-  const el=document.getElementById(`crm-signal-sma-${customerId}`);
-  if(el)el.remove();
-  crmCheckEmptySignalContainer();
+  crmRemoveSignalFromUi('target_sm_asia',customerId);
 }
 async function crmDismissReativacaoSignal(customerId,signalVariant,anchorDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3858,9 +4038,7 @@ async function crmDismissReativacaoSignal(customerId,signalVariant,anchorDate){
     toastSave('Erro: '+error.message);
     return;
   }
-  const el=document.getElementById(`crm-signal-react-${customerId}`);
-  if(el)el.remove();
-  crmCheckEmptySignalContainer();
+  crmRemoveSignalFromUi('reativacao',customerId);
 }
 async function crmDismissProjectSignal(projectId,signalVariant,anchorDate){
   const{error}=await _supa.from('crm_signal_dismissals').insert({
@@ -3870,9 +4048,7 @@ async function crmDismissProjectSignal(projectId,signalVariant,anchorDate){
     toastSave('Erro: '+error.message);
     return;
   }
-  const el=document.getElementById(`crm-signal-proj-${projectId}`);
-  if(el)el.remove();
-  crmCheckEmptySignalContainer();
+  crmRemoveSignalFromUi('projeto_parado',projectId);
 }
 
 /* ══════════════════════════════════════
