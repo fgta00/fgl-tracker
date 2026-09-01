@@ -4703,53 +4703,94 @@ function rv2ReadProdRows(containerId){
   });
 }
 function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto);}
+function rvPricingMath(input){
+  const produtos=input.produtos||[];
+  const qtd=produtos.reduce((a,p)=>a+(Number(p.qtd)||0),0);
+  const custoCompra=produtos.reduce((a,p)=>a+(Number(p.qtd)||0)*(Number(p.preco)||0),0);
+  const vendaProduto=produtos.reduce((a,p)=>a+(Number(p.qtd)||0)*(Number(p.pv)||0),0);
+  const cliche=Number(input.cliche)||0;
+  const freteTotal=Number(input.freteTotal)||0;
+  const freteIncluso=!!input.freteIncluso;
+  const comissaoPct=Number(input.comissaoPct)||0;
+  const fedPct=Number(input.fedPct)||0;
+  const icmsCredPct=Number(input.icmsCredPct)||0;
+  const icmsDebPct=Number(input.icmsDebPct)||0;
+
+  if(qtd<=0||vendaProduto<=0)return null;
+
+  // REGRA CANÔNICA:
+  // 1. PV = somente produtos.
+  // 2. Frete é despesa SEMPRE.
+  // 3. +Frete ativo = o mesmo frete também entra UMA VEZ na receita.
+  // 4. Comissão/federais/ICMS débito incidem sobre Receita.
+  // 5. ICMS crédito incide sobre custo da mercadoria (sem clichê/frete).
+  const receita=vendaProduto+(freteIncluso?freteTotal:0);
+  const CMV=custoCompra+cliche;
+  const lucroBruto=receita-CMV;
+  const comissao=receita*(comissaoPct/100);
+  const fed=receita*(fedPct/100);
+  const freteDespesa=freteTotal;
+  const despesasVenda=comissao+freteDespesa+fed;
+  const margemLiquida=lucroBruto-despesasVenda;
+  const credICMS=custoCompra*(icmsCredPct/100);
+  const debICMS=receita*(icmsDebPct/100);
+  const apuracaoICMS=credICMS-debICMS;
+  const margemFinal=margemLiquida+apuracaoICMS;
+
+  return{
+    qtd,custoCompra,vendaProduto,cliche,freteTotal,freteIncluso,
+    receita,CMV,lucroBruto,comissao,fed,freteDespesa,despesasVenda,margemLiquida,
+    credICMS,debICMS,apuracaoICMS,margemFinal,
+    preco:qtd?custoCompra/qtd:0,pv:qtd?vendaProduto/qtd:0,freteUnit:qtd?freteTotal/qtd:0,
+    pctMargemLiquida:receita?margemLiquida/receita:0,
+    pctMargemFinal:receita?margemFinal/receita:0,
+    custoTotal:CMV+freteTotal,
+    vendaTotal:receita,
+    lucroTotal:margemLiquida,
+    margem:receita?margemLiquida/receita:0,
+    custoLiquido:CMV+freteTotal-credICMS,
+    saldoICMS:debICMS-credICMS
+  };
+}
+
+
+function rvPricingSelfTest(){
+  const close=(a,b)=>Math.abs(a-b)<0.005;
+  const cases=[
+    {name:'sem frete',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:0,freteTotal:0,freteIncluso:false,comissaoPct:0,fedPct:0,icmsCredPct:0,icmsDebPct:0},e:{receita:20000,freteDespesa:0}},
+    {name:'frete só despesa',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:0,freteTotal:1000,freteIncluso:false,comissaoPct:0,fedPct:0,icmsCredPct:0,icmsDebPct:0},e:{receita:20000,freteDespesa:1000,margemLiquida:9000}},
+    {name:'+frete',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:0,freteTotal:1000,freteIncluso:true,comissaoPct:0,fedPct:0,icmsCredPct:0,icmsDebPct:0},e:{receita:21000,freteDespesa:1000,margemLiquida:10000}},
+    {name:'cliche',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:500,freteTotal:0,freteIncluso:false,comissaoPct:0,fedPct:0,icmsCredPct:0,icmsDebPct:0},e:{CMV:10500,margemLiquida:9500}},
+    {name:'comissao 1%',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:0,freteTotal:0,freteIncluso:false,comissaoPct:1,fedPct:0,icmsCredPct:0,icmsDebPct:0},e:{comissao:200}},
+    {name:'ICMS 4/20',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:0,freteTotal:0,freteIncluso:false,comissaoPct:0,fedPct:0,icmsCredPct:4,icmsDebPct:20},e:{credICMS:400,debICMS:4000,apuracaoICMS:-3600}},
+    {name:'Aratu imagem',i:{produtos:[{qtd:1000,preco:4.6,pv:7.9}],cliche:0,freteTotal:400,freteIncluso:true,comissaoPct:1,fedPct:5.93,icmsCredPct:4,icmsDebPct:12},e:{receita:8300,freteDespesa:400}},
+    {name:'Jones imagem',i:{produtos:[{qtd:1000,preco:10,pv:20}],cliche:500,freteTotal:1000,freteIncluso:false,comissaoPct:1,fedPct:5.93,icmsCredPct:4,icmsDebPct:20},e:{receita:20000,freteDespesa:1000,CMV:10500}}
+  ];
+  return cases.map(c=>{
+    const r=rvPricingMath(c.i);
+    const checks=Object.entries(c.e).map(([k,v])=>[k,r?.[k],v,close(r?.[k]||0,v)]);
+    return{name:c.name,ok:checks.every(x=>x[3]),checks};
+  });
+}
+
 function rv2CalcCore(cliente,fornecedor,tipo,produtos,comissaoPct,freteTotal,cliche,freteIncluso,comLogo){
   if(!cliente||!fornecedor||!produtos||!produtos.length)return null;
-  const qtd=produtos.reduce((a,p)=>a+(p.qtd||0),0);
-  const custoCompra=produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
-  const vendaProduto=produtos.reduce((a,p)=>a+(p.qtd||0)*(p.pv||0),0);
-  if(qtd<=0||vendaProduto<=0)return null;
-  const preco=custoCompra/qtd; // média ponderada — mantida por compatibilidade com telas/exports que leem 1 preço só
-  const pv=vendaProduto/qtd;   // média ponderada
-  const fedPct=RV_EMPRESA.fedPct;
   const regFor=REGIAO_MAP[fornecedor.estado]||'SE_S';
   const regCli=REGIAO_MAP[cliente.estado]||'SE_S';
   const icmsCredPct=TAB_CREDITO[tipo][fornecedor.regime][regFor];
   const icmsDebPct=TAB_DEBITO[tipo][regCli];
+  const fedPct=RV_EMPRESA.fedPct;
 
-  // ── DRE ──
-  // +Frete significa: cobrar o frete do cliente na NF.
-  // O frete continua sendo custo/despesa da empresa SEMPRE.
-  // Com +Frete: entra uma vez em Receita e uma vez em Despesa.
-  // Sem +Frete: entra somente em Despesa.
-  const receita=vendaProduto+(freteIncluso?freteTotal:0);
-  const CMV=custoCompra+cliche;                      // CMV = despesa de compra (soma) + clichê/molde/logo
-  const lucroBruto=receita-CMV;
+  const m=rvPricingMath({
+    produtos,cliche,freteTotal,freteIncluso,comissaoPct,fedPct,icmsCredPct,icmsDebPct
+  });
+  if(!m)return null;
 
-  const comissao=receita*(comissaoPct/100);
-  const fed=receita*(fedPct/100);
-  const freteDespesa=freteTotal;
-  const despesasVenda=comissao+freteDespesa+fed;      // comissão + frete (se não incluso) + PIS/COFINS/IRPJ/CSLL
-  const margemLiquida=lucroBruto-despesasVenda;        // ← RESULTADO (resumo)
-  const pctMargemLiquida=receita>0?margemLiquida/receita:0;
-
-  // ── Apuração de ICMS (não é operação — é acerto de imposto, à parte do DRE) ──
-  const credICMS=custoCompra*(icmsCredPct/100);        // crédito da compra
-  const debICMS=receita*(icmsDebPct/100);              // débito da venda
-  const apuracaoICMS=credICMS-debICMS;                 // negativo = a recolher; positivo = a recuperar
-
-  const margemFinal=margemLiquida+apuracaoICMS;         // ← só no detalhamento
-  const pctMargemFinal=receita>0?margemFinal/receita:0;
-
-  const freteUnit=qtd>0?freteTotal/qtd:0;
-  return{cliente,fornecedor,tipo,produtos,qtd,preco,pv,regFor,regCli,icmsCredPct,icmsDebPct,fedPct,
-    comissaoPct,freteTotal,freteUnit,freteIncluso:!!freteIncluso,freteDespesa,comLogo:!!comLogo,cliche,
-    receita,custoCompra,CMV,lucroBruto,comissao,fed,despesasVenda,margemLiquida,pctMargemLiquida,
-    credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
-    // vendaProduto = SOMENTE mercadoria. Frete cobrado do cliente fica separado e entra apenas em receita/vendaTotal.
-    // Isso impede o frete de contaminar o PV unitário e depois ser somado novamente no detalhamento.
-    vendaTotal:receita,vendaProduto,custoTotal:CMV+freteTotal,custoLiquido:CMV+freteTotal-credICMS,
-    lucroTotal:margemLiquida,margem:pctMargemLiquida,saldoICMS:debICMS-credICMS};
+  return{
+    cliente,fornecedor,tipo,produtos,regFor,regCli,icmsCredPct,icmsDebPct,fedPct,
+    comissaoPct,comLogo:!!comLogo,
+    ...m
+  };
 }
 function rvSafeId(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]/g,'_');}
 function rvBuildFornecedoresArray(r){
@@ -5063,7 +5104,7 @@ function rv2SalvarCotacao(){
     cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),produtores:rvProdutoresDoResultado(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
-    lucroTotal:r.lucroTotal,margem:r.margem};
+    lucroTotal:r.lucroTotal,margem:r.margem,calcVersion:'pricing_v1_canonical'};
   const lista=rvLoadCotacoes();lista.unshift(cotacao);rvSaveCotacoes(lista);
   rvSyncPush();
   rv2RenderHist();
@@ -5087,7 +5128,7 @@ function rv2CriarPedido(){
     tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
-    lucroTotal:r.lucroTotal,margem:r.margem,status,obs:''};
+    lucroTotal:r.lucroTotal,margem:r.margem,calcVersion:'pricing_v1_canonical',status,obs:''};
   const lista=rvLoadPedidos();lista.unshift(pedido);rvSavePedidos(lista);
   rvSyncPush();
   rv2RenderHist();
@@ -5145,6 +5186,9 @@ function rv2OpenEdit(kind,id){
     cpSection.style.display='none';
   }
   document.getElementById('ovl-rvedit').classList.add('open');
+  // Todos os campos do pedido já estão carregados neste ponto.
+  // O preview deve nascer SEMPRE destes valores — nunca do estado do pedido anterior.
+  rv2EditPreview();
 }
 function rv2EditPreview(){
   const cliente=RV_CLIENTES2.find(c=>c.nome===rvEl('rvedit-cliente').value);
@@ -5218,7 +5262,7 @@ function rv2SaveEdit(){
     cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:rvBuildFornecedoresArray(r),produtores:rvProdutoresDoResultado(r),tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,
-    custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
+    custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,calcVersion:'pricing_v1_canonical',updatedAt:Date.now()
   });
   if(kind==='pedido'){
     if(!Array.isArray(rec.ciDates))rec.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
@@ -5341,7 +5385,8 @@ function rvRecalcStoredPedido(p){
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,
     freteTotal:p.freteTotal||0,freteIncluso:!!p.freteIncluso,
     cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
-    lucroTotal:r.lucroTotal,margem:r.margem
+    lucroTotal:r.lucroTotal,margem:r.margem,
+    calcVersion:'pricing_v1_canonical'
   };
 }
 function rvLoadPedidosActive(){
@@ -5568,7 +5613,7 @@ function rvRenderPedidos(){
   const todos=rvLoadPedidosActive();
   const cont=rvEl('rv-pedidos-container');
   function statusLabel(p){
-    if(rvPedidoTemProducao(p)){
+    if(true){
       const dates=p.ciDates;
       if(dates){
         for(let i=dates.length-1;i>=0;i--){
@@ -5612,7 +5657,7 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td>${rvPedidoTemProducao(p)?rvMilestoneDotsHTML(p):'<span style="color:var(--ink4);font-size:.65rem">—</span>'}</td>
+      <td>${rvMilestoneDotsHTML(p)}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
