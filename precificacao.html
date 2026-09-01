@@ -4774,7 +4774,7 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
   if(!cliente||!produtos||!produtos.length)return null;
   const gruposMap={};
   produtos.forEach(p=>{
-    const fn=p.fornecedor||'';
+    const fn=(p.fornecedor||'').trim();
     if(!fn)return;
     const tp=p.tipo||'Nacional';
     const logo=!!p.comLogo;
@@ -4782,57 +4782,66 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
     if(!gruposMap[key])gruposMap[key]={fornecedorNome:fn,tipo:tp,comLogo:logo,produtos:[]};
     gruposMap[key].produtos.push(p);
   });
-  const chaves=Object.keys(gruposMap);
-  if(!chaves.length)return null;
-  const custoCompraGeral=produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
-  if(custoCompraGeral<=0)return null;
+
+  // Só entram no rateio os grupos que de fato conseguem ser calculados.
+  // Assim nenhuma parte do frete desaparece por causa de linha incompleta,
+  // fornecedor renomeado ou grupo ignorado.
+  const gruposValidos=Object.values(gruposMap).map(g=>{
+    const alvo=g.fornecedorNome.toLowerCase().trim();
+    const fornecedorObj=RV_FORNECEDORES2.find(f=>(f.nome||'').toLowerCase().trim()===alvo);
+    if(!fornecedorObj)return null;
+    const custoGrupo=g.produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
+    return{...g,fornecedorObj,custoGrupo};
+  }).filter(Boolean);
+
+  if(!gruposValidos.length)return null;
+  const custoValidoTotal=gruposValidos.reduce((a,g)=>a+g.custoGrupo,0);
+  if(custoValidoTotal<=0)return null;
 
   const subResultados=[];
-  for(const key of chaves){
-    const g=gruposMap[key];
-    const fornecedorObj=RV_FORNECEDORES2.find(f=>f.nome===g.fornecedorNome);
-    if(!fornecedorObj)continue; // fornecedor da linha não está mais cadastrado — ignora esse grupo defensivamente
-    const custoGrupo=g.produtos.reduce((a,p)=>a+(p.qtd||0)*(p.preco||0),0);
-    const proporcaoFrete=custoCompraGeral>0?custoGrupo/custoCompraGeral:0;
-    const freteGrupo=freteTotal*proporcaoFrete;   // frete é sempre rateado entre TODOS — é 1 entrega só, independente de fornecedor/tipo/logo
-    const clicheGrupo=g.produtos.reduce((a,p)=>a+(p.cliche||0),0); // clichê já é por produto — soma direta, sem rateio
-    const r=rv2CalcCore(cliente,fornecedorObj,g.tipo,g.produtos,comissaoPct,freteGrupo,clicheGrupo,freteIncluso,g.comLogo);
+  let freteJaRateado=0;
+  gruposValidos.forEach((g,idx)=>{
+    // último grupo recebe o residual: soma dos subgrupos = frete digitado EXATAMENTE.
+    const freteGrupo=idx===gruposValidos.length-1
+      ?Math.max(0,freteTotal-freteJaRateado)
+      :freteTotal*(g.custoGrupo/custoValidoTotal);
+    freteJaRateado+=freteGrupo;
+    const clicheGrupo=g.produtos.reduce((a,p)=>a+(p.cliche||0),0);
+    const r=rv2CalcCore(cliente,g.fornecedorObj,g.tipo,g.produtos,comissaoPct,freteGrupo,clicheGrupo,freteIncluso,g.comLogo);
     if(r)subResultados.push(r);
-  }
+  });
   if(!subResultados.length)return null;
 
-  // Caso trivial (1 grupo só): consolidado = o próprio sub-resultado, comportamento idêntico ao motor de hoje
   const soma=campo=>subResultados.reduce((a,r)=>a+(r[campo]||0),0);
   const receita=soma('receita'),vendaProdutoTotal=soma('vendaProduto'),custoCompra=soma('custoCompra'),CMV=soma('CMV'),
     lucroBruto=soma('lucroBruto'),comissao=soma('comissao'),fed=soma('fed'),
     despesasVenda=soma('despesasVenda'),margemLiquida=soma('margemLiquida'),
     credICMS=soma('credICMS'),debICMS=soma('debICMS'),apuracaoICMS=soma('apuracaoICMS'),
-    margemFinal=soma('margemFinal'),freteTotalSum=soma('freteTotal'),clicheSum=soma('cliche'),
-    qtdSum=soma('qtd');
-  // consolidado NUNCA é média das % — sempre derivado da soma dos valores absolutos primeiro
+    margemFinal=soma('margemFinal'),clicheSum=soma('cliche'),qtdSum=soma('qtd');
+
+  // IMPORTANTE: freteTotal consolidado é o valor que o usuário digitou.
+  // Nunca reconstruímos o total somando rateios internos.
+  const freteTotalSum=freteTotal;
+
   const pctMargemLiquida=receita>0?margemLiquida/receita:0;
   const pctMargemFinal=receita>0?margemFinal/receita:0;
-  // campos legados que rv2CalcCore devolvia como valor único — aqui viram derivados/ponderados,
-  // só pra telas que ainda leem "1 número só" (preço médio, % efetiva de crédito/débito etc.)
   const precoMedio=qtdSum>0?custoCompra/qtdSum:0;
-  // PV médio = somente venda dos produtos ÷ quantidade.
-  // Receita pode incluir frete cobrado à parte, mas esse frete NÃO altera o PV.
   const pvMedio=qtdSum>0?vendaProdutoTotal/qtdSum:0;
   const icmsCredPctEfetivo=custoCompra>0?credICMS/custoCompra*100:0;
   const icmsDebPctEfetivo=receita>0?debICMS/receita*100:0;
   const freteUnit=qtdSum>0?freteTotalSum/qtdSum:0;
   const freteDespesa=freteTotalSum;
   const fornecedorNomes=[...new Set(subResultados.map(r=>r.fornecedor.nome))];
-  const fornecedorLegado=fornecedorNomes.join(' + '); // string única pra telas que ainda esperam "1 fornecedor"
+  const fornecedorLegado=fornecedorNomes.join(' + ');
   const tiposUsados=[...new Set(subResultados.map(r=>r.tipo))];
-  const tipoLegado=tiposUsados.length===1?tiposUsados[0]:tiposUsados.join(' + '); // idem, pra telas que esperam "1 tipo"
+  const tipoLegado=tiposUsados.length===1?tiposUsados[0]:tiposUsados.join(' + ');
   const comLogoAny=subResultados.some(r=>r.comLogo);
-  const regCli=subResultados[0].regCli; // igual em todos os grupos — é sempre o mesmo cliente
-  const regFor=subResultados[0].regFor; // representativo do 1º grupo — resumo consolidado não tem "1 região" de verdade quando há vários fornecedores; o detalhe por fornecedor (r.fornecedores) tem a região correta de cada um
+  const regCli=subResultados[0].regCli;
+  const regFor=subResultados[0].regFor;
 
   return{
     multiFornecedor:subResultados.length>1,
-    fornecedores:subResultados, // sub-DRE completo por grupo (fornecedor+tipo+logo), pra telas que precisam do detalhe
+    fornecedores:subResultados,
     fornecedorNomes,fornecedorLegado,tiposUsados,tipo:tipoLegado,comLogo:comLogoAny,
     cliente,produtos,qtd:qtdSum,preco:precoMedio,pv:pvMedio,
     icmsCredPct:icmsCredPctEfetivo,icmsDebPct:icmsDebPctEfetivo,fedPct:RV_EMPRESA.fedPct,comissaoPct,
@@ -4840,8 +4849,6 @@ function rv2CalcMultiFornecedor(cliente,produtos,comissaoPct,freteTotal,freteInc
     receita,custoCompra,CMV,lucroBruto,comissao,fed,despesasVenda,margemLiquida,pctMargemLiquida,
     credICMS,debICMS,apuracaoICMS,margemFinal,pctMargemFinal,
     freteTotal:freteTotalSum,cliche:clicheSum,freteIncluso:!!freteIncluso,
-    // mesmos nomes/aliases que rv2CalcCore já usa — telas existentes (rvCPTotais, Financeiro, listagem)
-    // continuam lendo o resultado consolidado sem precisar saber que agora pode vir de vários fornecedores
     vendaTotal:receita,vendaProduto:vendaProdutoTotal,custoTotal:CMV+freteTotalSum,
     custoLiquido:CMV+freteTotalSum-credICMS,lucroTotal:margemLiquida,margem:pctMargemLiquida,
     saldoICMS:debICMS-credICMS,
@@ -5076,7 +5083,7 @@ function rv2CriarPedido(){
   const produtores=rvProdutoresDoResultado(r);
   const pedido={id:Date.now(),data:new Date().toLocaleDateString('pt-BR'),updatedAt:Date.now(),
     cliente:r.cliente.nome,fornecedor:r.fornecedorLegado,fornecedores:fornecedoresSnap,produtores,
-    ciDates:produtores.length?RV_CI_LABELS.map(()=>rvMkD(null,true)):undefined,
+    ciDates:RV_CI_LABELS.map(()=>rvMkD(null,true)),
     tipo:r.tipo,produtos:r.produtos,qtd:r.qtd,preco:r.preco,pv:r.pv,
     icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,comissaoPct:r.comissaoPct,
     freteTotal:r.freteTotal,freteIncluso:r.freteIncluso,comLogo:r.comLogo,cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
@@ -5214,6 +5221,7 @@ function rv2SaveEdit(){
     custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,lucroTotal:r.lucroTotal,margem:r.margem,updatedAt:Date.now()
   });
   if(kind==='pedido'){
+    if(!Array.isArray(rec.ciDates))rec.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
     // Recalcula fornKeys já com o fornecedores[] recém-atualizado no rec (pode ter mudado nesta edição)
     const fornKeysFinal=rvCPFornKeys(rec);
     const fornecedoresPlano={};
@@ -5299,7 +5307,46 @@ function rvRenderCotacoes(){
 // Retornam só os registros ativos (não apagados) — usar em toda tela/lista/filtro.
 // rvLoadCotacoes()/rvLoadPedidos() "crus" continuam existindo pra edição/lookup por id.
 function rvLoadCotacoesActive(){return rvLoadCotacoes().filter(c=>!c.deleted);}
-function rvLoadPedidosActive(){return rvLoadPedidos().filter(p=>!p.deleted);}
+function rvRecalcStoredPedido(p){
+  if(!p||p.deleted)return p;
+  const cliente=RV_CLIENTES2.find(c=>c.nome===p.cliente);
+  if(!cliente)return p;
+  let produtos=Array.isArray(p.produtos)?p.produtos.map(x=>({...x})):[];
+  if(!produtos.length&&p.qtd){
+    produtos=[{
+      desc:'',qtd:p.qtd||0,preco:p.preco||0,pv:p.pv||0,
+      fornecedor:p.fornecedor||'',tipo:p.tipo||'Nacional',
+      comLogo:!!p.comLogo,cliche:p.cliche||0
+    }];
+  }
+  if(!produtos.length)return p;
+  // Compatibilidade com registros antigos: completa campos por produto com os campos legados do pedido.
+  produtos=produtos.map(x=>({
+    ...x,
+    fornecedor:x.fornecedor||p.fornecedor||'',
+    tipo:x.tipo||p.tipo||'Nacional',
+    comLogo:x.comLogo!==undefined?x.comLogo:!!p.comLogo,
+    cliche:x.cliche!==undefined?x.cliche:0
+  }));
+  const r=rv2CalcMultiFornecedor(
+    cliente,produtos,p.comissaoPct||0,p.freteTotal||0,!!p.freteIncluso
+  );
+  if(!r)return p;
+  return{
+    ...p,
+    produtos,
+    fornecedor:r.fornecedorLegado||p.fornecedor,
+    fornecedores:rvBuildFornecedoresArray(r),
+    qtd:r.qtd,preco:r.preco,pv:r.pv,
+    icmsCredPct:r.icmsCredPct,icmsDebPct:r.icmsDebPct,fedPct:r.fedPct,
+    freteTotal:p.freteTotal||0,freteIncluso:!!p.freteIncluso,
+    cliche:r.cliche,custoTotal:r.custoTotal,vendaTotal:r.vendaTotal,
+    lucroTotal:r.lucroTotal,margem:r.margem
+  };
+}
+function rvLoadPedidosActive(){
+  return rvLoadPedidos().filter(p=>!p.deleted).map(rvRecalcStoredPedido);
+}
 function rvExcluirCotacao(id){
   if(!confirm('Excluir esta cotação?'))return;
   const lista=rvLoadCotacoes();
@@ -5625,7 +5672,11 @@ function rvPedidoProdutores(p){
   if(!nomes.size&&Array.isArray(p.ciDates))nomes.add(p.fornecedor||'Produção');
   return[...nomes];
 }
-function rvPedidoTemProducao(p){return rvPedidoProdutores(p).length>0;}
+function rvPedidoTemProducao(p){
+  // Marcos são acompanhamento do PEDIDO, não característica cadastral do fornecedor.
+  // Portanto todo pedido ativo/confirmado pode usar Arte/Sinal/Amostras/Fim Produção/Entrega.
+  return!!p;
+}
 function rvGetCIPedidos(){return rvLoadPedidosActive().filter(rvPedidoTemProducao);}
 function rvCIIsLate(d){
   if(!d||!d.v||!d.est)return false;
