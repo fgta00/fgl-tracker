@@ -808,7 +808,6 @@ body.dark .rv-tabs{background:#0A0F1A}
               <button type="button" data-v="PE" onclick="crmTogglePerfil('PE')">PE</button>
               <button type="button" data-v="SM BR" onclick="crmTogglePerfil('SM BR')">SM BR</button>
               <button type="button" data-v="SM Asia" onclick="crmTogglePerfil('SM Asia')">SM Asia</button>
-              <button type="button" data-v="MIX" onclick="crmTogglePerfil('MIX')">MIX</button>
               <button type="button" data-v="LOGO" onclick="crmTogglePerfil('LOGO')">LOGO</button>
             </div>
           </details>
@@ -2577,6 +2576,7 @@ function rvShowTab(id){
   }else if(id==='crm'){
     document.getElementById('ovl-rvlock').classList.remove('open');
     crmCheckAccess();
+    crmShowSubTab('semana');
   }else{
     document.getElementById('ovl-rvlock').classList.remove('open');
   }
