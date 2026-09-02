@@ -1157,7 +1157,13 @@ body.dark .rv-tabs{background:#0A0F1A}
             </div>
           </div>
         </div>
-        <div id="crm-ai-history" class="crm-ai-history"><div id="crm-ai-history-list" class="crm-ai-line">Carregando…</div></div>
+        <div id="crm-ai-history" class="crm-ai-history">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+            <div class="crm-field-label" style="margin:0">Consultas anteriores</div>
+            <button class="btn btn-s" style="font-size:.6rem;padding:.22rem .5rem" onclick="crmCloseAIHistory()">← Voltar à análise</button>
+          </div>
+          <div id="crm-ai-history-list" class="crm-ai-line">Carregando…</div>
+        </div>
       </div>
 
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
@@ -2999,7 +3005,7 @@ function crmAiReset(customerId){
   crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
   const btn=document.getElementById('crm-ai-consult-btn');
   if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='✦ Consultar IA';}
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.style.display=customerId?'inline-flex':'none';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn){historyBtn.style.display=customerId?'inline-flex':'none';historyBtn.textContent='Histórico IA';}
   ['crm-ai-panel','crm-ai-loading','crm-ai-error','crm-ai-result','crm-ai-history'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
 }
 async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
@@ -3025,6 +3031,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
   errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
   btn.disabled=true;btn.textContent='Consultando…';
   try{
     const body={customer_id:customerId,question_key:questionKey};
@@ -3033,25 +3040,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
     const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body});
     if(error||!data||data.error)throw error||new Error(data?.error||'invalid response');
     if(myToken!==crmAiRequestToken||customerId!==crmEditCtx.customerId)return;
-    crmAiLastResult=data;
-    document.getElementById('crm-ai-opportunity').textContent=data.opportunity||'Sem oportunidade clara no momento';
-    document.getElementById('crm-ai-why').textContent=data.why||'—';
-    document.getElementById('crm-ai-reading').textContent=data.reading||'—';
-    document.getElementById('crm-ai-next').textContent=data.next_step||'—';
-    const ev=document.getElementById('crm-ai-evidence');ev.replaceChildren();
-    (data.evidence||[]).slice(0,5).forEach(item=>{
-      const row=document.createElement('div');row.className='crm-ai-evidence-row';
-      const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';
-      const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);
-    });
-    document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
-    const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();
-    (data.follow_up_questions||[]).slice(0,3).forEach(question=>{
-      const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;
-      chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);
-    });
-    const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
-    document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='block';
+    crmShowAIResult(data);
     if(data._audit_warning)console.warn('CRM IA: resposta sem log de auditoria');
   }catch(e){
     if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='block';}
@@ -3070,14 +3059,33 @@ function crmAskCustomAI(){
   if(question.length<3){input?.focus();return;}
   crmConsultAI('perguntar_mais',question);
 }
+function crmShowAIResult(data){
+  if(!data||typeof data!=='object')return;
+  crmAiLastResult=data;crmAiCurrentCustomerId=crmEditCtx.customerId;
+  document.getElementById('crm-ai-panel').style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-history').style.display='none';
+  document.getElementById('crm-ai-opportunity').textContent=data.opportunity||'Sem oportunidade clara no momento';
+  document.getElementById('crm-ai-why').textContent=data.why||'—';document.getElementById('crm-ai-reading').textContent=data.reading||'—';document.getElementById('crm-ai-next').textContent=data.next_step||'—';
+  const ev=document.getElementById('crm-ai-evidence');ev.replaceChildren();
+  (data.evidence||[]).slice(0,5).forEach(item=>{const row=document.createElement('div');row.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);});
+  document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
+  const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();
+  (data.follow_up_questions||[]).slice(0,3).forEach(question=>{const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);});
+  const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
+  document.getElementById('crm-ai-result').style.display='block';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
+}
+function crmCloseAIHistory(){
+  const panel=document.getElementById('crm-ai-panel');document.getElementById('crm-ai-history').style.display='none';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
+  if(crmAiLastResult)document.getElementById('crm-ai-result').style.display='block';else panel.style.display='none';
+}
 async function crmToggleAIHistory(){
   if(!crmEditCtx.customerId||crmAiInFlight)return;
   const panel=document.getElementById('crm-ai-panel'),history=document.getElementById('crm-ai-history');
   if(history.style.display==='block'){
-    history.style.display='none';
-    if(crmAiLastResult)document.getElementById('crm-ai-result').style.display='block';else panel.style.display='none';
-    return;
+    crmCloseAIHistory();return;
   }
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='← Voltar à análise';
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-result').style.display='none';history.style.display='block';
   const list=document.getElementById('crm-ai-history-list');list.textContent='Carregando histórico…';
   const customerId=crmEditCtx.customerId;
@@ -3105,6 +3113,7 @@ function crmRenderAIHistory(container,rows){
       response.evidence.slice(0,5).forEach(item=>{const rowEl=document.createElement('div');rowEl.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const text=document.createElement('span');text.textContent=item.statement||'';rowEl.append(tag,text);evidence.append(rowEl);});
       body.append(evidence);
     }
+    const openButton=document.createElement('button');openButton.type='button';openButton.className='btn btn-s';openButton.style.cssText='font-size:.6rem;padding:.22rem .5rem';openButton.textContent='Abrir análise';openButton.addEventListener('click',()=>crmShowAIResult(response));body.append(openButton);
     details.append(body);container.append(details);
   });
 }
