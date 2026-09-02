@@ -1100,11 +1100,15 @@ body.dark .rv-tabs{background:#0A0F1A}
         <div id="crm-cust-people" style="display:flex;flex-direction:column;gap:.35rem;margin-top:.35rem"></div>
       </div>
 
-      <div class="ff" style="margin-top:.75rem"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
+      <div class="ff" style="margin-top:.75rem">
+        <label>Contexto comercial / Notas</label>
+        <textarea id="crm-cust-notes" rows="2" placeholder="Ex.: Cliente passou a comprar de concorrente; informação confirmada pela equipe. Motivo da troca ainda não identificado." style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea>
+        <div style="margin-top:.25rem;color:var(--muted);font-size:.62rem;line-height:1.35">Registre fatos conhecidos pela equipe: perdas, concorrentes, preferências, obstáculos e mudanças. Salve o cliente antes de consultar a IA.</div>
+      </div>
 
       <div id="crm-ai-panel" class="crm-ai-panel">
         <div id="crm-ai-loading" class="crm-ai-line" style="display:none">✦ Analisando o contexto comercial…</div>
-        <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)">Não foi possível consultar agora. <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmConsultAI()">Tentar novamente</button></div>
+        <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)"><span id="crm-ai-error-message">Não foi possível consultar agora.</span> <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmConsultAI()">Tentar novamente</button></div>
         <div id="crm-ai-result" style="display:none">
           <div id="crm-ai-opportunity" class="crm-ai-title"></div>
           <div class="crm-ai-line"><b>Por quê:</b> <span id="crm-ai-why"></span></div>
@@ -2952,11 +2956,20 @@ function crmAiReset(customerId){
 async function crmConsultAI(){
   if(crmAiInFlight||!crmEditCtx.customerId)return;
   const customerId=crmEditCtx.customerId,myToken=++crmAiRequestToken;
-  crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   const btn=document.getElementById('crm-ai-consult-btn');
   const panel=document.getElementById('crm-ai-panel');
+  const errorBox=document.getElementById('crm-ai-error');
+  const errorMessage=document.getElementById('crm-ai-error-message');
+  const notesNow=(document.getElementById('crm-cust-notes')?.value||'').trim();
+  const notesSaved=(CRM_CUSTOMERS.find(c=>c.id===customerId)?.notes||'').trim();
+  if(notesNow!==notesSaved){
+    panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='none';
+    errorMessage.textContent='Salve o contexto comercial antes de consultar a IA.';errorBox.style.display='block';
+    return;
+  }
+  crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
-  document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-result').style.display='none';
+  errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';document.getElementById('crm-ai-result').style.display='none';
   btn.disabled=true;btn.textContent='Consultando…';
   try{
     const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body:{customer_id:customerId,question_key:'o_que_fazer_agora'}});
