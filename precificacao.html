@@ -182,6 +182,13 @@ body.dark .modal-h{background:#1B2535}
 .crm-ai-evidence-tag.heuristic{background:var(--ltamb);color:var(--amber)}
 .crm-ai-evidence-tag.human{background:var(--ltgrn);color:var(--green)}
 .crm-ai-evidence-tag.signal{background:var(--ltred);color:var(--red)}
+.crm-ai-followups{border-top:1px solid var(--bdr);margin-top:.65rem;padding-top:.6rem}
+.crm-ai-question-menu{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;margin-top:.35rem}
+.crm-ai-question-menu select,.crm-ai-question-menu input{height:30px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink2);font-family:'IBM Plex Sans';font-size:.62rem;padding:.25rem .45rem}
+.crm-ai-question-menu select{flex:1 1 260px}.crm-ai-question-menu input{flex:1 1 280px}
+.crm-ai-suggestions{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.45rem}
+.crm-ai-suggestion{border:1px solid var(--bdr2);border-radius:999px;background:var(--card);color:var(--blue);font-family:'IBM Plex Sans';font-size:.56rem;padding:.22rem .48rem;cursor:pointer;text-align:left}
+.crm-ai-suggestion:hover{background:var(--ltblue)}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
@@ -1108,7 +1115,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
       <div id="crm-ai-panel" class="crm-ai-panel">
         <div id="crm-ai-loading" class="crm-ai-line" style="display:none">✦ Analisando o contexto comercial…</div>
-        <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)"><span id="crm-ai-error-message">Não foi possível consultar agora.</span> <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmConsultAI()">Tentar novamente</button></div>
+        <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)"><span id="crm-ai-error-message">Não foi possível consultar agora.</span> <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmRetryAI()">Tentar novamente</button></div>
         <div id="crm-ai-result" style="display:none">
           <div id="crm-ai-opportunity" class="crm-ai-title"></div>
           <div class="crm-ai-line"><b>Por quê:</b> <span id="crm-ai-why"></span></div>
@@ -1116,6 +1123,23 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="crm-ai-line"><b>Próximo passo:</b> <span id="crm-ai-next"></span></div>
           <div id="crm-ai-evidence" class="crm-ai-evidence"></div>
           <button id="crm-ai-action-btn" class="btn btn-p" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateActionFromAI()">Criar ação</button>
+          <div class="crm-ai-followups">
+            <div class="crm-field-label" style="margin:0">Perguntar à IA</div>
+            <div class="crm-ai-question-menu">
+              <select id="crm-ai-question-select">
+                <option value="o_que_fazer_agora">O que devo fazer agora?</option>
+                <option value="ampliar_fornecimento">Há oportunidade de ampliar ou mudar o fornecimento?</option>
+                <option value="resumir_historico">Resuma o histórico e o que mudou</option>
+                <option value="preparar_abordagem">Prepare minha próxima abordagem</option>
+              </select>
+              <button class="btn btn-s" style="font-size:.58rem;padding:.22rem .48rem" onclick="crmAskPresetAI()">Perguntar</button>
+            </div>
+            <div id="crm-ai-suggestions" class="crm-ai-suggestions"></div>
+            <div class="crm-ai-question-menu">
+              <input id="crm-ai-custom-question" type="text" maxlength="500" placeholder="Ou escreva uma pergunta sobre este cliente…" onkeydown="if(event.key==='Enter'){event.preventDefault();crmAskCustomAI()}">
+              <button class="btn btn-s" style="font-size:.58rem;padding:.22rem .48rem" onclick="crmAskCustomAI()">Enviar</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2945,15 +2969,15 @@ const CRM_ACTION_TYPES=[
 let crmActCtx={customerId:null,actionId:null,projectId:null,type:'whatsapp',direction:'outbound',nextOpen:false,mode:'log'};
 let crmSemanaHorizonte=7;
 let crmEditCtx={customerId:null,tags:[],people:[],refs:[],segmento:[],perfil:[]}; // estado de trabalho do modal de edição
-let crmAiLastResult=null,crmAiCurrentCustomerId=null,crmAiRequestToken=0,crmAiInFlight=false;
+let crmAiLastResult=null,crmAiCurrentCustomerId=null,crmAiRequestToken=0,crmAiInFlight=false,crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
 const CRM_AI_EVIDENCE_LABELS={fact:'Fato',heuristic:'Padrão',human:'Informação da equipe',signal:'Sinal'};
 function crmAiReset(customerId){
-  crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;
+  crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
   const btn=document.getElementById('crm-ai-consult-btn');
   if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='✦ Consultar IA';}
   ['crm-ai-panel','crm-ai-loading','crm-ai-error','crm-ai-result'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
 }
-async function crmConsultAI(){
+async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   if(crmAiInFlight||!crmEditCtx.customerId)return;
   const customerId=crmEditCtx.customerId,myToken=++crmAiRequestToken;
   const btn=document.getElementById('crm-ai-consult-btn');
@@ -2967,12 +2991,21 @@ async function crmConsultAI(){
     errorMessage.textContent='Salve o contexto comercial antes de consultar a IA.';errorBox.style.display='block';
     return;
   }
+  customQuestion=(customQuestion||'').trim().slice(0,500);
+  if(questionKey==='perguntar_mais'&&customQuestion.length<3)return;
+  const previousResponse=crmAiLastResult?{
+    opportunity:crmAiLastResult.opportunity||null,why:crmAiLastResult.why||'',reading:crmAiLastResult.reading||'',next_step:crmAiLastResult.next_step||'',evidence:crmAiLastResult.evidence||[]
+  }:null;
+  crmAiLastRequest={questionKey,customQuestion};
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
   errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';document.getElementById('crm-ai-result').style.display='none';
   btn.disabled=true;btn.textContent='Consultando…';
   try{
-    const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body:{customer_id:customerId,question_key:'o_que_fazer_agora'}});
+    const body={customer_id:customerId,question_key:questionKey};
+    if(customQuestion)body.custom_question=customQuestion;
+    if(previousResponse)body.previous_response=previousResponse;
+    const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body});
     if(error||!data||data.error)throw error||new Error(data?.error||'invalid response');
     if(myToken!==crmAiRequestToken||customerId!==crmEditCtx.customerId)return;
     crmAiLastResult=data;
@@ -2987,6 +3020,12 @@ async function crmConsultAI(){
       const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);
     });
     document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
+    const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();
+    (data.follow_up_questions||[]).slice(0,3).forEach(question=>{
+      const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;
+      chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);
+    });
+    const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
     document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='block';
     if(data._audit_warning)console.warn('CRM IA: resposta sem log de auditoria');
   }catch(e){
@@ -2994,6 +3033,17 @@ async function crmConsultAI(){
   }finally{
     if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){crmAiInFlight=false;btn.disabled=false;btn.textContent='✦ Consultar IA';}
   }
+}
+function crmRetryAI(){crmConsultAI(crmAiLastRequest.questionKey,crmAiLastRequest.customQuestion);}
+function crmAskPresetAI(){
+  const key=document.getElementById('crm-ai-question-select')?.value||'o_que_fazer_agora';
+  crmConsultAI(key,'');
+}
+function crmAskCustomAI(){
+  const input=document.getElementById('crm-ai-custom-question');
+  const question=(input?.value||'').trim();
+  if(question.length<3){input?.focus();return;}
+  crmConsultAI('perguntar_mais',question);
 }
 function crmCreateActionFromAI(){
   if(!crmAiLastResult?.action_draft||!crmAiCurrentCustomerId||crmAiCurrentCustomerId!==crmEditCtx.customerId)return;
