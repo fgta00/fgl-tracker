@@ -173,6 +173,15 @@ body.dark .modal-h{background:#1B2535}
 .crm-tl-card{flex:1 1 190px;max-width:225px;min-width:170px;border:1px solid var(--bdr);border-radius:8px;padding:.55rem .6rem;overflow-wrap:anywhere;word-break:break-word}
 .crm-tl-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.62rem;padding:0;opacity:0;transition:opacity .15s}
 .crm-tl-card:hover .crm-tl-del{opacity:1}
+.crm-ai-panel{display:none;margin:.8rem 0;border:1px solid var(--bdr);border-radius:10px;background:var(--bg);padding:.7rem .8rem}
+.crm-ai-title{font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:.35rem}
+.crm-ai-line{font-size:.65rem;color:var(--ink3);margin:.25rem 0;line-height:1.45}
+.crm-ai-evidence{display:flex;flex-direction:column;gap:.25rem;margin:.55rem 0}
+.crm-ai-evidence-row{font-size:.6rem;color:var(--ink3);display:flex;gap:.35rem;align-items:flex-start}
+.crm-ai-evidence-tag{font-size:.5rem;font-weight:700;text-transform:uppercase;white-space:nowrap;background:var(--ltblue);color:var(--blue);border-radius:999px;padding:.08rem .32rem}
+.crm-ai-evidence-tag.heuristic{background:var(--ltamb);color:var(--amber)}
+.crm-ai-evidence-tag.human{background:var(--ltgrn);color:var(--green)}
+.crm-ai-evidence-tag.signal{background:var(--ltred);color:var(--red)}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
@@ -1013,6 +1022,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <option value="prospect">Prospect</option>
           <option value="inactive">Inativo</option>
         </select>
+        <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmConsultAI()">✦ Consultar IA</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
         <button class="mcls" onclick="closeM('crmcustomer')">✕</button>
       </div>
@@ -1091,6 +1101,19 @@ body.dark .rv-tabs{background:#0A0F1A}
       </div>
 
       <div class="ff" style="margin-top:.75rem"><label>Notas</label><textarea id="crm-cust-notes" rows="1" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea></div>
+
+      <div id="crm-ai-panel" class="crm-ai-panel">
+        <div id="crm-ai-loading" class="crm-ai-line" style="display:none">✦ Analisando o contexto comercial…</div>
+        <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)">Não foi possível consultar agora. <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmConsultAI()">Tentar novamente</button></div>
+        <div id="crm-ai-result" style="display:none">
+          <div id="crm-ai-opportunity" class="crm-ai-title"></div>
+          <div class="crm-ai-line"><b>Por quê:</b> <span id="crm-ai-why"></span></div>
+          <div class="crm-ai-line"><b>Leitura:</b> <span id="crm-ai-reading"></span></div>
+          <div class="crm-ai-line"><b>Próximo passo:</b> <span id="crm-ai-next"></span></div>
+          <div id="crm-ai-evidence" class="crm-ai-evidence"></div>
+          <button id="crm-ai-action-btn" class="btn btn-p" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateActionFromAI()">Criar ação</button>
+        </div>
+      </div>
 
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
@@ -2918,6 +2941,51 @@ const CRM_ACTION_TYPES=[
 let crmActCtx={customerId:null,actionId:null,projectId:null,type:'whatsapp',direction:'outbound',nextOpen:false,mode:'log'};
 let crmSemanaHorizonte=7;
 let crmEditCtx={customerId:null,tags:[],people:[],refs:[],segmento:[],perfil:[]}; // estado de trabalho do modal de edição
+let crmAiLastResult=null,crmAiCurrentCustomerId=null,crmAiRequestToken=0,crmAiInFlight=false;
+const CRM_AI_EVIDENCE_LABELS={fact:'Fato',heuristic:'Padrão',human:'Informação da equipe',signal:'Sinal'};
+function crmAiReset(customerId){
+  crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;
+  const btn=document.getElementById('crm-ai-consult-btn');
+  if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='✦ Consultar IA';}
+  ['crm-ai-panel','crm-ai-loading','crm-ai-error','crm-ai-result'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+}
+async function crmConsultAI(){
+  if(crmAiInFlight||!crmEditCtx.customerId)return;
+  const customerId=crmEditCtx.customerId,myToken=++crmAiRequestToken;
+  crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
+  const btn=document.getElementById('crm-ai-consult-btn');
+  const panel=document.getElementById('crm-ai-panel');
+  panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
+  document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-result').style.display='none';
+  btn.disabled=true;btn.textContent='Consultando…';
+  try{
+    const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body:{customer_id:customerId,question_key:'o_que_fazer_agora'}});
+    if(error||!data||data.error)throw error||new Error(data?.error||'invalid response');
+    if(myToken!==crmAiRequestToken||customerId!==crmEditCtx.customerId)return;
+    crmAiLastResult=data;
+    document.getElementById('crm-ai-opportunity').textContent=data.opportunity||'Sem oportunidade clara no momento';
+    document.getElementById('crm-ai-why').textContent=data.why||'—';
+    document.getElementById('crm-ai-reading').textContent=data.reading||'—';
+    document.getElementById('crm-ai-next').textContent=data.next_step||'—';
+    const ev=document.getElementById('crm-ai-evidence');ev.replaceChildren();
+    (data.evidence||[]).slice(0,5).forEach(item=>{
+      const row=document.createElement('div');row.className='crm-ai-evidence-row';
+      const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';
+      const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);
+    });
+    document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
+    document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='block';
+    if(data._audit_warning)console.warn('CRM IA: resposta sem log de auditoria');
+  }catch(e){
+    if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='block';}
+  }finally{
+    if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){crmAiInFlight=false;btn.disabled=false;btn.textContent='✦ Consultar IA';}
+  }
+}
+function crmCreateActionFromAI(){
+  if(!crmAiLastResult?.action_draft||!crmAiCurrentCustomerId||crmAiCurrentCustomerId!==crmEditCtx.customerId)return;
+  crmOpenActionModal(crmAiCurrentCustomerId,null,null,crmAiLastResult.action_draft);
+}
 
 async function crmCheckAccess(){
   if(!authUser||!_supaOK){
@@ -3099,6 +3167,7 @@ function crmRenderCustomers(){
 function crmOpenCustomerEdit(id,prefill){
   if(!prefill)crmPendingWixLeadId=null;
   crmEditCtx={customerId:id,tags:[],people:[],refs:[],segmento:[],perfil:[]};
+  crmAiReset(id);
   document.getElementById('crm-cust-title').textContent=id?'Editar Cliente':'Novo Cliente';
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
   const pf=(!id&&prefill)?prefill:null;
@@ -3741,8 +3810,8 @@ function crmOpenActionModalById(customerId,actionId){
 // 1) "+ Ação" deveria expor os 2 modos (Registrar/Agendar) direto, sem precisar abrir o modal primeiro pra só então escolher.
 // 2) Dentro do modal de ação, os dados do cliente deviam ficar recolhidos/minimizados — a ação em si é o foco, não o cadastro do cliente.
 // action=null → registrar ação nova (modo log ou schedule, à escolha). action=objeto → completar (se status='planned') ou editar (se já 'done').
-function crmOpenActionModal(customerId,action,projectId){
-  crmActCtx={customerId,actionId:action?.id||null,projectId:projectId||action?.project_id||null,type:action?.type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false,mode:'log'};
+function crmOpenActionModal(customerId,action,projectId,prefill){
+  crmActCtx={customerId,actionId:action?.id||null,projectId:projectId||action?.project_id||null,type:action?.type||prefill?.action_type||'whatsapp',direction:action?.direction||'outbound',nextOpen:false,mode:'log'};
   const completando=action&&action.status==='planned';
   crmSetActMode('log'); // completar/editar sempre usa o modo "realizada" — agendar direto só faz sentido pra ação nova
   document.getElementById('crm-act-mode-toggle').style.display=action?'none':'flex'; // esconde o alternador ao completar/editar
@@ -3750,7 +3819,7 @@ function crmOpenActionModal(customerId,action,projectId){
   crmRenderActTypePills();
   if(CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir)crmSetActDirection(crmActCtx.direction);
   document.getElementById('crm-act-occurred').value=crmActTimeLocal(new Date());
-  document.getElementById('crm-act-summary').value=completando?'':(action?.summary||'');
+  document.getElementById('crm-act-summary').value=completando?'':(action?.summary||prefill?.summary||'');
   document.getElementById('crm-act-details').value=action?.details||'';
   crmToggleNextAction(false);
   document.getElementById('crm-act-next-summary').value='';
