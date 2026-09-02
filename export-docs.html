@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Proforma Invoice · Commercial Invoice · Packing List — Template Editável</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --navy:        #12233F;
+    --navy-2:      #1B3A63;
+    --teal:        #1E6E78;
+    --green:       #2E6B3E;
+    --sage:        #7FA487;
+    --paper:       #FFFFFF;
+    --ink:         #16202E;
+    --muted:       #5B6675;
+    --faint:       #93A0AE;
+    --line:        #D7DEE6;
+    --line-soft:   #EBEFF3;
+    --wash:        #F5F7F9;
+    --danger:      #B23B3B;
+
+    --font-sans: 'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:#DCE2E8; }
+  body{
+    font-family:var(--font-sans);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- shell / non-print chrome ---------- */
+  .doc-toolbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+    padding:12px 24px;
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+  }
+  .doc-toolbar .title{ font-weight:600; letter-spacing:.01em; }
+  .doc-toolbar .sub{ color:#AEC0D6; font-weight:400; }
+  .doc-toolbar button.primary{
+    font-family:var(--font-sans);
+    font-size:12.5px; font-weight:600;
+    background:var(--teal); color:#fff; border:none;
+    padding:8px 14px; border-radius:3px; cursor:pointer;
+    letter-spacing:.01em;
+  }
+  .doc-toolbar button.primary:hover{ background:#245e66; }
+  .doc-toolbar .tabs{ display:flex; gap:6px; }
+  .doc-toolbar .tabs a{
+    color:#CBD8E6; text-decoration:none; font-size:12.5px;
+    padding:6px 10px; border-radius:3px; border:1px solid transparent;
+  }
+  .doc-toolbar .tabs a:hover{ border-color:#3A5476; }
+
+  .page-stack{
+    display:flex; flex-direction:column; align-items:center;
+    gap:28px; padding:32px 16px 64px;
+  }
+
+  .sheet{
+    width:210mm; min-height:297mm;
+    background:var(--paper);
+    box-shadow:0 1px 3px rgba(16,30,50,.08), 0 10px 30px rgba(16,30,50,.14);
+    padding:12mm 12mm 10mm;
+    position:relative;
+    display:flex; flex-direction:column;
+  }
+
+  .page-flag{
+    position:absolute; top:0; left:-14mm;
+    writing-mode:vertical-rl; transform:rotate(180deg);
+    font-size:16px; letter-spacing:.1em; font-weight:700;
+    color:#fff; background:var(--teal);
+    padding:6mm 3mm; border-radius:0 3px 3px 0;
+  }
+
+  /* ---------- editing affordances ---------- */
+  [contenteditable="true"]{ outline:none; border-radius:2px; }
+  [contenteditable="true"]:hover{ background:rgba(30,110,120,.06); }
+  [contenteditable="true"]:focus{ background:rgba(30,110,120,.10); box-shadow:0 0 0 1px var(--teal) inset; }
+  [contenteditable="true"]:empty::before{ content:attr(data-placeholder); color:var(--faint); }
+
+  .icon-btn{
+    border:none; background:transparent; color:var(--danger); cursor:pointer;
+    font-size:13px; line-height:1; padding:2px 5px; border-radius:3px;
+  }
+  .icon-btn:hover{ background:#FBEAEA; }
+
+  .table-toolbar{ display:flex; justify-content:flex-end; gap:6px; margin:4mm 0 1.2mm; }
+  .table-toolbar button{
+    font-family:var(--font-sans); font-size:10.6px; font-weight:600;
+    background:#fff; border:1px solid var(--line); color:var(--navy);
+    padding:3.2px 10px; border-radius:3px; cursor:pointer;
+  }
+  .table-toolbar button:hover{ background:var(--wash); border-color:var(--teal); color:var(--teal); }
+
+  .add-col-btn{
+    border:none; background:var(--teal); color:#fff; width:100%; height:100%;
+    cursor:pointer; font-size:14px; font-weight:700; padding:2.6mm 1mm;
+  }
+  .add-col-btn:hover{ background:#245e66; }
+  .col-del{ float:right; color:#CFE3E6; font-weight:700; }
+  .col-del:hover{ color:#fff; background:rgba(0,0,0,.18); }
+
+  @media print{
+    .no-print{ display:none !important; }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus{ background:none; box-shadow:none; }
+  }
+
+  /* ---------- shared header ---------- */
+  .doc-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:16px;
+    padding-bottom:5mm;
+    border-bottom:2px solid var(--navy);
+  }
+  .brand-block{ display:flex; gap:10px; align-items:flex-start; }
+  .brand-mark{
+    width:15mm; height:15mm; flex:none;
+    background:var(--navy);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-size:8.6px; font-weight:600; letter-spacing:.03em;
+    line-height:1.3;
+    padding:3px;
+  }
+  .brand-copy{ padding-top:0; }
+  .brand-copy .company-name{
+    font-size:16.5px; font-weight:700; color:var(--navy);
+    letter-spacing:.01em; margin:0 0 1.8mm; min-width:60mm;
+  }
+  .contact-line{
+    display:flex; align-items:baseline; gap:6px;
+    font-size:10.6px; color:var(--muted); margin-bottom:0.9mm;
+  }
+  .contact-line .tag{
+    font-family:var(--font-mono); font-size:9px; font-weight:600;
+    color:var(--teal); width:9.5mm; flex:none;
+  }
+  .contact-line span[contenteditable]{ min-width:40mm; }
+
+  .doc-title-block{ text-align:right; padding-top:0; }
+  .doc-title-block h1{
+    margin:0 0 2.2mm; font-size:20px; letter-spacing:.02em;
+    color:var(--navy); font-weight:700;
+  }
+  .meta-rows{ margin-left:auto; }
+  .meta-row{
+    display:flex; justify-content:flex-end; align-items:baseline;
+    gap:8px; padding:1mm 0;
+  }
+  .meta-row .k{
+    color:var(--muted); font-weight:500; letter-spacing:.02em;
+    white-space:nowrap; font-size:11px; padding-right:2mm;
+  }
+  .meta-row .v{
+    font-family:var(--font-mono); color:var(--ink);
+    min-width:30mm; text-align:right; font-size:11px;
+  }
+
+  /* ---------- party panels ---------- */
+  .party-row{
+    display:grid; gap:5mm;
+    margin-top:4.5mm;
+  }
+  .party-row.three{ grid-template-columns:1fr 1fr 1fr; }
+  .party-row.two{ grid-template-columns:1fr 1fr; }
+
+  .party-card{ border-top:2.4px solid var(--teal); }
+  .party-card .label{
+    font-size:9.8px; font-weight:700; letter-spacing:.06em;
+    color:var(--navy); margin:1.6mm 0 1.6mm;
+    display:flex; align-items:center; gap:5px;
+  }
+  .party-card .label .dot{
+    width:5px; height:5px; border-radius:50%; background:var(--green);
+    display:inline-block;
+  }
+  .party-card .field{
+    font-size:11px; line-height:1.5; color:var(--ink);
+    min-height:8mm; white-space:pre-wrap;
+  }
+  .party-card .field .sub{ color:var(--muted); font-size:9.4px; }
+
+  /* ---------- items table ---------- */
+  .items-wrap{ margin-top:2mm; overflow-x:auto; }
+  table.items{
+    width:100%; border-collapse:collapse; font-size:9.8px;
+  }
+  table.items thead th{
+    background:var(--navy);
+    color:#fff;
+    font-weight:600; letter-spacing:.02em;
+    text-align:left;
+    padding:2mm 2mm;
+    border-right:1px solid rgba(255,255,255,.14);
+    position:relative; white-space:nowrap;
+  }
+  table.items thead th:last-child{ border-right:none; padding:0; }
+  table.items thead th.rownum{ width:6mm; }
+  table.items tbody td{
+    padding:1.8mm 2mm;
+    border-bottom:1px solid var(--line-soft);
+    border-right:1px solid var(--line-soft);
+    color:var(--ink);
+    vertical-align:top;
+  }
+  table.items tbody td:last-child{ border-right:none; text-align:center; }
+  table.items tbody tr:nth-child(even){ background:var(--wash); }
+  table.items tbody td.rownum{ font-family:var(--font-mono); color:var(--muted); text-align:right; }
+
+  /* ---------- totals ---------- */
+  .totals-row{ display:flex; justify-content:flex-end; margin-top:3.5mm; }
+  .totals-box{ width:70mm; border-top:1.6px solid var(--navy); }
+  .totals-box .line{
+    display:flex; justify-content:space-between;
+    font-size:10px; padding:1.4mm 0;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .totals-box .line .k{ color:var(--muted); }
+  .totals-box .line .v{ font-family:var(--font-mono); min-width:26mm; text-align:right; }
+  .totals-box .line.grand{
+    border-bottom:none; border-top:1.6px solid var(--navy);
+    margin-top:0.6mm; padding-top:1.8mm;
+    font-weight:700; font-size:11px; color:var(--navy);
+  }
+
+  /* ---------- terms blocks (NCM, ports, incoterm, wooden pkg, payment, bank) ---------- */
+  .terms-grid{ margin-top:5.5mm; }
+
+  .resizable-row{ display:flex; align-items:stretch; }
+  .resizable-row > .rcol{ min-width:0; }
+  .resizable-row > .rcol > .term-block{ margin-top:0; }
+  .col-resizer{
+    flex:0 0 7mm; position:relative; cursor:col-resize;
+    -webkit-user-select:none; user-select:none;
+  }
+  .col-resizer::after{
+    content:''; position:absolute; left:50%; top:2mm; bottom:2mm; width:1.4px;
+    background:var(--line); transform:translateX(-50%);
+  }
+  .col-resizer:hover::after, .col-resizer.dragging::after{ background:var(--teal); width:2px; }
+
+  .term-block{ margin-top:5.5mm; }
+  .term-block .block-title{
+    font-size:9.6px; font-weight:700; letter-spacing:.06em;
+    color:#fff; background:var(--teal);
+    padding:1.7mm 3mm; margin:0 0 1.6mm;
+  }
+  .term-block .block-title.alt{ background:var(--navy); }
+  .term-row{
+    display:flex; align-items:baseline; gap:8px;
+    padding:1.3mm 0; border-bottom:1px solid var(--line-soft);
+  }
+  .term-rows{ position:relative; }
+  .term-row .term-label{
+    font-style:italic; font-weight:700; font-size:10.4px;
+    color:var(--navy); flex:0 0 var(--label-w, 44%); min-width:0; max-width:80%;
+  }
+  .term-row .term-value{
+    font-size:10.4px; color:var(--ink); flex:1 1 0; min-width:0;
+    overflow-wrap:break-word; word-break:break-word;
+  }
+
+  .label-resizer{
+    position:absolute; top:0; bottom:0; left:var(--label-w, 44%);
+    width:9px; margin-left:-4.5px; cursor:col-resize; z-index:2;
+  }
+  .label-resizer::after{
+    content:''; position:absolute; left:50%; top:6%; bottom:6%;
+    border-left:1.4px dashed var(--line); transform:translateX(-50%);
+  }
+  .label-resizer:hover::after, .label-resizer.dragging::after{
+    border-left-color:var(--teal); border-left-width:2px; border-left-style:solid;
+  }
+
+  .note-block{ padding:0; }
+  .note-line{
+    display:flex; gap:8px; align-items:flex-start;
+    padding:1.3mm 0; border-bottom:1px solid var(--line-soft);
+  }
+  .note-line > div{ flex:1; font-size:10.4px; line-height:1.5; color:var(--ink); }
+
+  .add-link{
+    font-size:10px; color:var(--teal); background:none; border:none;
+    cursor:pointer; padding:1.3mm 0 0; font-weight:600;
+  }
+  .add-link:hover{ text-decoration:underline; }
+
+  /* ---------- bank / two-col boxes ---------- */
+  .lower-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8mm; margin-top:5.5mm; }
+
+  .sig-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:14mm;
+    margin-top:auto; padding-top:7mm;
+  }
+  .sig-cell .rule{ border-top:1px solid var(--ink); margin-bottom:1.6mm; }
+  .sig-cell .cap{ font-size:8.6px; color:var(--muted); letter-spacing:.03em; }
+
+  .doc-foot{
+    display:flex; justify-content:space-between;
+    font-size:8.2px; color:var(--faint);
+    border-top:1px solid var(--line-soft);
+    margin-top:5mm; padding-top:2mm;
+    letter-spacing:.03em;
+  }
+  .doc-foot span[contenteditable]{ min-width:20mm; }
+
+  /* ---------- print (A4) ---------- */
+  @media print{
+    @page{ size:A4; margin:0; }
+    html,body{ width:210mm; height:297mm; background:#fff; }
+    body{ background:#fff; }
+    .doc-toolbar{ display:none; }
+    .page-stack{ padding:0; gap:0; }
+    .sheet{
+      box-shadow:none; margin:0;
+      width:210mm; min-height:297mm;
+      page-break-after:always;
+    }
+    .sheet:last-child{ page-break-after:auto; }
+    .page-flag{ display:none; }
+  }
+
+  @media (max-width:900px){
+    .sheet{ width:100%; padding:8mm; }
+    .party-row.three{ grid-template-columns:1fr; }
+    .lower-grid{ grid-template-columns:1fr; }
+    .resizable-row{ flex-direction:column; }
+    .resizable-row > .rcol{ flex:1 1 auto !important; }
+    .resizable-row > .rcol > .term-block{ margin-top:6mm; }
+    .col-resizer{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="doc-toolbar">
+    <div>
+      <span class="title">Trading HK → Brasil</span>
+      <span class="sub"> · Proforma · Commercial Invoice · Packing List — template editável</span>
+    </div>
+    <div class="tabs">
+      <a href="#proforma">Proforma Invoice</a>
+      <a href="#invoice">Commercial Invoice</a>
+      <a href="#packing">Packing List</a>
+    </div>
+    <button class="primary" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <div class="page-stack">
+
+    <!-- =========================================================
+         PAGE 1 — PROFORMA INVOICE
+    ========================================================== -->
+    <section class="sheet" id="proforma">
+      <span class="page-flag no-print">PI</span>
+
+      <header class="doc-head">
+        <div class="brand-block">
+          <div class="brand-mark" contenteditable="true" data-placeholder="LOGO"></div>
+          <div class="brand-copy">
+            <p class="company-name" contenteditable="true" data-placeholder="[Seller Name]" data-field="seller_name"></p>
+            <div class="contact-line"><span class="tag">END</span><span contenteditable="true" data-placeholder="[Endereço, cidade, país]" data-field="seller_address"></span></div>
+            <div class="contact-line"><span class="tag">TEL</span><span contenteditable="true" data-placeholder="[Telefone]" data-field="seller_phone"></span></div>
+            <div class="contact-line"><span class="tag">MAIL</span><span contenteditable="true" data-placeholder="[E-mail]" data-field="seller_email"></span></div>
+          </div>
+        </div>
+        <div class="doc-title-block">
+          <h1>Proforma Invoice</h1>
+          <div class="meta-rows">
+            <div class="meta-row"><span class="k" contenteditable="true">PI Number</span><span class="v" contenteditable="true" data-placeholder="[PI NUMBER]" data-field="pi_number"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">PI Date</span><span class="v" contenteditable="true" data-placeholder="[PI DATE]" data-field="pi_date"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">Validity</span><span class="v" contenteditable="true" data-placeholder="[Validade da proposta]" data-field="pi_validity"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <button type="button" class="add-link no-print" onclick="addMetaRow(this)">+ Campo</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="party-row three">
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Seller</p>
+          <div class="field" contenteditable="true" data-placeholder="[Endereço completo, cidade, país, tel, e-mail]" data-field="seller_block"></div>
+        </div>
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Buyer</p>
+          <div class="field" contenteditable="true" data-placeholder="[Razão social, endereço, CNPJ, contato]" data-field="buyer_block"></div>
+        </div>
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Manufacturer <span class="sub">(if different from seller)</span></p>
+          <div class="field" contenteditable="true" data-placeholder="[Fábrica de origem, endereço, país]" data-field="manufacturer_block_pi"></div>
+        </div>
+      </div>
+
+      <div class="table-toolbar no-print">
+        <button onclick="addRow('tbl-pi')">+ Linha</button>
+        <button onclick="addColumn('tbl-pi')">+ Coluna</button>
+      </div>
+      <div class="items-wrap">
+        <table class="items" id="tbl-pi">
+          <thead>
+            <tr>
+              <th class="rownum">#</th>
+              <th contenteditable="true">SKU / Ref.</th>
+              <th contenteditable="true">Product Description<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">HS Code<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Origin<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Qty<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Unit<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Unit Price<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Total<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th class="no-print"><button type="button" class="add-col-btn" onclick="addColumn('tbl-pi')" title="Adicionar coluna">+</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rownum">1</td>
+              <td contenteditable="true" data-placeholder="[SKU]"></td>
+              <td contenteditable="true" data-placeholder="[Descrição do produto]"></td>
+              <td contenteditable="true" data-placeholder="[HS Code]"></td>
+              <td contenteditable="true" data-placeholder="[Origem]"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td class="no-print"><button type="button" class="icon-btn" onclick="deleteRow(this)" title="Remover linha">&times;</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals-row">
+        <div class="totals-box">
+          <div class="line"><span class="k">Total Qty</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line"><span class="k">Total Cartons</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line grand"><span class="k">Total PI Value</span><span class="v" contenteditable="true" data-placeholder="[USD 0,00]"></span></div>
+        </div>
+      </div>
+
+      <div class="term-block">
+        <p class="block-title">Shipping &amp; Compliance</p>
+        <div class="resizable-row">
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">NCM Code</span><span class="term-value" contenteditable="true" data-placeholder="[ex: 4823.61.00]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Country of Destination</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Brazil]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Country of Acquisition</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Hong Kong]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Country of Procedure</span><span class="term-value" contenteditable="true" data-placeholder="[ex: China]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Delivery Time</span><span class="term-value" contenteditable="true" data-placeholder="[ex: About the end of March]"></span></div>
+            </div>
+          </div>
+          <div class="col-resizer no-print" onmousedown="startResize(event, this)"></div>
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Destination Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de destino]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Loading Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de origem]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Incoterm</span><span class="term-value" contenteditable="true" data-placeholder="[ex: FOB Shanghai]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Wooden Packaging</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Not applicable]"></span></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-link no-print" onclick="addTermRow(this)">+ Campo</button>
+      </div>
+
+      <div class="terms-grid">
+        <div class="resizable-row">
+          <div class="rcol">
+            <div class="term-block">
+              <p class="block-title alt">Payment Terms</p>
+              <div class="note-block">
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: by T/T]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: usd 0,00 in advance on DD/MM]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: usd 0,00 against copy of CI & PL and copy of B/L]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+              </div>
+              <button type="button" class="add-link no-print" onclick="addNoteLine(this)">+ Linha</button>
+            </div>
+          </div>
+          <div class="col-resizer no-print" onmousedown="startResize(event, this)"></div>
+          <div class="rcol">
+            <div class="term-block">
+              <p class="block-title alt">Bank Information</p>
+              <div class="term-rows">
+                <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank</span><span class="term-value" contenteditable="true" data-placeholder="[Nome do banco]" data-field="bank_name"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank Address</span><span class="term-value" contenteditable="true" data-placeholder="[Endereço do banco]" data-field="bank_address"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Name</span><span class="term-value" contenteditable="true" data-placeholder="[Razão social do beneficiário]" data-field="beneficiary_name"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank Account Number</span><span class="term-value" contenteditable="true" data-placeholder="[Número da conta]" data-field="bank_account"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Swift Code</span><span class="term-value" contenteditable="true" data-placeholder="[SWIFT]" data-field="swift"></span></div>
+              </div>
+              <button type="button" class="add-link no-print" onclick="addTermRow(this)">+ Campo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sig-row">
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Authorized Signature — Seller</div></div>
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Accepted by — Buyer</div></div>
+      </div>
+
+      <div class="doc-foot">
+        <span contenteditable="true" data-placeholder="[Texto de rodapé]">CONFIDENTIAL — FOR BUSINESS USE ONLY</span>
+        <span contenteditable="true" data-placeholder="[Página]">PAGE 1 OF 3</span>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         PAGE 2 — COMMERCIAL INVOICE
+    ========================================================== -->
+    <section class="sheet" id="invoice">
+      <span class="page-flag no-print">CI</span>
+
+      <header class="doc-head">
+        <div class="brand-block">
+          <div class="brand-mark" contenteditable="true" data-placeholder="LOGO"></div>
+          <div class="brand-copy">
+            <p class="company-name" contenteditable="true" data-placeholder="[Seller Name]" data-field="seller_name"></p>
+            <div class="contact-line"><span class="tag">END</span><span contenteditable="true" data-placeholder="[Endereço, cidade, país]" data-field="seller_address"></span></div>
+            <div class="contact-line"><span class="tag">TEL</span><span contenteditable="true" data-placeholder="[Telefone]" data-field="seller_phone"></span></div>
+            <div class="contact-line"><span class="tag">MAIL</span><span contenteditable="true" data-placeholder="[E-mail]" data-field="seller_email"></span></div>
+          </div>
+        </div>
+        <div class="doc-title-block">
+          <h1>Commercial Invoice</h1>
+          <div class="meta-rows">
+            <div class="meta-row"><span class="k" contenteditable="true">Invoice No.</span><span class="v" contenteditable="true" data-placeholder="[INVOICE NUMBER]" data-field="invoice_number"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">Invoice Date</span><span class="v" contenteditable="true" data-placeholder="[INVOICE DATE]" data-field="invoice_date"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">PI Reference</span><span class="v" contenteditable="true" data-placeholder="[PI REFERENCE]" data-field="pi_reference"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">PI Date</span><span class="v" contenteditable="true" data-placeholder="[PI DATE]" data-field="pi_date"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <button type="button" class="add-link no-print" onclick="addMetaRow(this)">+ Campo</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="party-row three">
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Seller</p>
+          <div class="field" contenteditable="true" data-placeholder="[Endereço completo, cidade, país, tel, e-mail]" data-field="seller_block"></div>
+        </div>
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Buyer</p>
+          <div class="field" contenteditable="true" data-placeholder="[Razão social, endereço, CNPJ, contato]" data-field="buyer_block"></div>
+        </div>
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Manufacturer <span class="sub">(if different from seller)</span></p>
+          <div class="field" contenteditable="true" data-placeholder="[Fábrica de origem, endereço, país]" data-field="manufacturer_block"></div>
+        </div>
+      </div>
+
+      <div class="table-toolbar no-print">
+        <button onclick="addRow('tbl-ci')">+ Linha</button>
+        <button onclick="addColumn('tbl-ci')">+ Coluna</button>
+      </div>
+      <div class="items-wrap">
+        <table class="items" id="tbl-ci">
+          <thead>
+            <tr>
+              <th class="rownum">#</th>
+              <th contenteditable="true">SKU / Ref.</th>
+              <th contenteditable="true">Product Description<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">HS Code<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Origin<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Qty<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Unit<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Unit Price<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Total<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th class="no-print"><button type="button" class="add-col-btn" onclick="addColumn('tbl-ci')" title="Adicionar coluna">+</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rownum">1</td>
+              <td contenteditable="true" data-placeholder="[SKU]"></td>
+              <td contenteditable="true" data-placeholder="[Descrição do produto]"></td>
+              <td contenteditable="true" data-placeholder="[HS Code]"></td>
+              <td contenteditable="true" data-placeholder="[Origem]"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td class="no-print"><button type="button" class="icon-btn" onclick="deleteRow(this)" title="Remover linha">&times;</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals-row">
+        <div class="totals-box">
+          <div class="line"><span class="k">Total Qty</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line"><span class="k">Total Cartons</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line"><span class="k">Total Gross Wt (kg)</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line grand"><span class="k">Total Invoice Value</span><span class="v" contenteditable="true" data-placeholder="[USD 0,00]"></span></div>
+        </div>
+      </div>
+
+      <div class="term-block">
+        <p class="block-title">Shipping &amp; Compliance</p>
+        <div class="resizable-row">
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">NCM Code</span><span class="term-value" contenteditable="true" data-placeholder="[ex: 4823.61.00]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Origin</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Made in China]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Incoterm</span><span class="term-value" contenteditable="true" data-placeholder="[ex: FOB Shanghai]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Loading Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de origem]"></span></div>
+            </div>
+          </div>
+          <div class="col-resizer no-print" onmousedown="startResize(event, this)"></div>
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Destination Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de destino]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Sample Delivery</span><span class="term-value" contenteditable="true" data-placeholder="[ex: About 20 days upon sample charges receipt]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Mass Production Time</span><span class="term-value" contenteditable="true" data-placeholder="[ex: About 40 days after sample approval]"></span></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-link no-print" onclick="addTermRow(this)">+ Campo</button>
+      </div>
+
+      <div class="terms-grid">
+        <div class="resizable-row">
+          <div class="rcol">
+            <div class="term-block">
+              <p class="block-title alt">Payment Terms</p>
+              <div class="note-block">
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: by T/T]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: 35% (usd 0,00) in advance for starting mass production]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+                <div class="note-line"><div contenteditable="true" data-placeholder="[ex: 65% (usd 0,00) should be paid after shipment against copy of CI & PL and copy of B/L]"></div><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+              </div>
+              <button type="button" class="add-link no-print" onclick="addNoteLine(this)">+ Linha</button>
+            </div>
+          </div>
+          <div class="col-resizer no-print" onmousedown="startResize(event, this)"></div>
+          <div class="rcol">
+            <div class="term-block">
+              <p class="block-title alt">Bank Information</p>
+              <div class="term-rows">
+                <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank</span><span class="term-value" contenteditable="true" data-placeholder="[Nome do banco]" data-field="bank_name"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank Address</span><span class="term-value" contenteditable="true" data-placeholder="[Endereço do banco]" data-field="bank_address"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Name</span><span class="term-value" contenteditable="true" data-placeholder="[Razão social do beneficiário]" data-field="beneficiary_name"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Beneficiary Bank Account Number</span><span class="term-value" contenteditable="true" data-placeholder="[Número da conta]" data-field="bank_account"></span></div>
+              <div class="term-row"><span class="term-label" contenteditable="true">Swift Code</span><span class="term-value" contenteditable="true" data-placeholder="[SWIFT]" data-field="swift"></span></div>
+              </div>
+              <button type="button" class="add-link no-print" onclick="addTermRow(this)">+ Campo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sig-row">
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Authorized Signature — Seller</div></div>
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Date &amp; Company Stamp</div></div>
+      </div>
+
+      <div class="doc-foot">
+        <span contenteditable="true" data-placeholder="[Texto de rodapé]">CONFIDENTIAL — FOR BUSINESS USE ONLY</span>
+        <span contenteditable="true" data-placeholder="[Página]">PAGE 2 OF 3</span>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         PAGE 3 — PACKING LIST
+    ========================================================== -->
+    <section class="sheet" id="packing">
+      <span class="page-flag no-print">PL</span>
+
+      <header class="doc-head">
+        <div class="brand-block">
+          <div class="brand-mark" contenteditable="true" data-placeholder="LOGO"></div>
+          <div class="brand-copy">
+            <p class="company-name" contenteditable="true" data-placeholder="[Seller Name]" data-field="seller_name"></p>
+            <div class="contact-line"><span class="tag">END</span><span contenteditable="true" data-placeholder="[Endereço, cidade, país]" data-field="seller_address"></span></div>
+          </div>
+        </div>
+        <div class="doc-title-block">
+          <h1>Packing List</h1>
+          <div class="meta-rows">
+            <div class="meta-row"><span class="k" contenteditable="true">Packing List No.</span><span class="v" contenteditable="true" data-placeholder="[PL NUMBER]" data-field="pl_number"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">Date</span><span class="v" contenteditable="true" data-placeholder="[DATE]" data-field="pl_date"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">PI Reference</span><span class="v" contenteditable="true" data-placeholder="[PI REFERENCE]" data-field="pl_pi_reference"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <div class="meta-row"><span class="k" contenteditable="true">Invoice No.</span><span class="v" contenteditable="true" data-placeholder="[INVOICE NUMBER]" data-field="pl_invoice_number"></span><button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button></div>
+            <button type="button" class="add-link no-print" onclick="addMetaRow(this)">+ Campo</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="party-row two">
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Seller</p>
+          <div class="field" contenteditable="true" data-placeholder="[Endereço completo, cidade, país, tel, e-mail]" data-field="seller_block"></div>
+        </div>
+        <div class="party-card">
+          <p class="label"><span class="dot"></span>Buyer</p>
+          <div class="field" contenteditable="true" data-placeholder="[Razão social, endereço, CNPJ, contato]" data-field="buyer_block"></div>
+        </div>
+      </div>
+
+      <div class="table-toolbar no-print">
+        <button onclick="addRow('tbl-pl')">+ Linha</button>
+        <button onclick="addColumn('tbl-pl')">+ Coluna</button>
+      </div>
+      <div class="items-wrap">
+        <table class="items" id="tbl-pl">
+          <thead>
+            <tr>
+              <th class="rownum">#</th>
+              <th contenteditable="true">SKU / Ref.</th>
+              <th contenteditable="true">Product Description<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Origin<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">HS/NCM<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Qty/Unit<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Cartons<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">Carton Size<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">N.W. (kg)<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">G.W. (kg)<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th contenteditable="true">CBM<button type="button" class="icon-btn col-del no-print" onclick="deleteColumn(this)">&times;</button></th>
+              <th class="no-print"><button type="button" class="add-col-btn" onclick="addColumn('tbl-pl')" title="Adicionar coluna">+</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rownum">1</td>
+              <td contenteditable="true" data-placeholder="[SKU]"></td>
+              <td contenteditable="true" data-placeholder="[Descrição do produto]"></td>
+              <td contenteditable="true" data-placeholder="[Origem]"></td>
+              <td contenteditable="true" data-placeholder="[HS/NCM]"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td contenteditable="true" data-placeholder="—"></td>
+              <td class="no-print"><button type="button" class="icon-btn" onclick="deleteRow(this)" title="Remover linha">&times;</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals-row">
+        <div class="totals-box">
+          <div class="line"><span class="k">Total Cartons</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line"><span class="k">Total Net Weight (kg)</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line"><span class="k">Total Gross Weight (kg)</span><span class="v" contenteditable="true" data-placeholder="—"></span></div>
+          <div class="line grand"><span class="k">Total CBM</span><span class="v" contenteditable="true" data-placeholder="[0,00 m³]"></span></div>
+        </div>
+      </div>
+
+      <div class="term-block">
+        <p class="block-title">Shipping &amp; Compliance</p>
+        <div class="resizable-row">
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Wooden Packaging</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Not applicable — no wood]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">NCM Code</span><span class="term-value" contenteditable="true" data-placeholder="[ex: 4823.61.00]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Origin</span><span class="term-value" contenteditable="true" data-placeholder="[ex: Made in China]"></span></div>
+            </div>
+          </div>
+          <div class="col-resizer no-print" onmousedown="startResize(event, this)"></div>
+          <div class="rcol">
+            <div class="term-rows">
+              <div class="label-resizer no-print" onmousedown="startLabelResize(event, this)"></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Incoterm</span><span class="term-value" contenteditable="true" data-placeholder="[ex: FOB Shanghai]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Loading Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de origem]"></span></div>
+            <div class="term-row"><span class="term-label" contenteditable="true">Destination Port</span><span class="term-value" contenteditable="true" data-placeholder="[Porto de destino]"></span></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-link no-print" onclick="addTermRow(this)">+ Campo</button>
+      </div>
+
+      <div class="sig-row">
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Authorized Signature — Seller</div></div>
+        <div class="sig-cell"><div class="rule"></div><div class="cap">Date &amp; Company Stamp</div></div>
+      </div>
+
+      <div class="doc-foot">
+        <span contenteditable="true" data-placeholder="[Texto de rodapé]">CONFIDENTIAL — FOR BUSINESS USE ONLY</span>
+        <span contenteditable="true" data-placeholder="[Página]">PAGE 3 OF 3</span>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+  /* ---------------------------------------------------------------
+     LARGURA DE RÓTULO — arraste a régua tracejada dentro de cada
+     bloco para redistribuir o espaço entre o campo e o valor
+  ---------------------------------------------------------------- */
+  var _labelResize = null;
+
+  function startLabelResize(evt, handle){
+    evt.preventDefault();
+    var container = handle.parentElement; // .term-rows
+    var rect = container.getBoundingClientRect();
+    _labelResize = { container: container, handle: handle, rectLeft: rect.left, rectWidth: rect.width };
+    handle.classList.add('dragging');
+    document.addEventListener('mousemove', onLabelResizeMove);
+    document.addEventListener('mouseup', endLabelResize);
+  }
+
+  function onLabelResizeMove(evt){
+    if (!_labelResize) return;
+    var x = evt.clientX - _labelResize.rectLeft;
+    var pct = (x / _labelResize.rectWidth) * 100;
+    var min = 20, max = 78;
+    if (pct < min) pct = min;
+    if (pct > max) pct = max;
+    _labelResize.container.style.setProperty('--label-w', pct.toFixed(2) + '%');
+  }
+
+  function endLabelResize(){
+    if (!_labelResize) return;
+    _labelResize.handle.classList.remove('dragging');
+    _labelResize = null;
+    document.removeEventListener('mousemove', onLabelResizeMove);
+    document.removeEventListener('mouseup', endLabelResize);
+  }
+
+  /* ---------------------------------------------------------------
+     COLUNAS AJUSTÁVEIS — arraste o divisor entre duas colunas
+     (Shipping & Compliance, Payment Terms | Bank Information)
+  ---------------------------------------------------------------- */
+  var _resize = null;
+
+  function startResize(evt, handle){
+    evt.preventDefault();
+    var row = handle.parentElement;
+    var cols = row.querySelectorAll(':scope > .rcol');
+    var left = cols[0], right = cols[1];
+    var rowRect = row.getBoundingClientRect();
+    var handleRect = handle.getBoundingClientRect();
+    var totalContentWidth = rowRect.width - handleRect.width;
+    _resize = {
+      left: left, right: right, handle: handle,
+      startX: evt.clientX,
+      rowWidth: rowRect.width,
+      totalContentWidth: totalContentWidth,
+      startLeftWidth: left.getBoundingClientRect().width
+    };
+    handle.classList.add('dragging');
+    document.addEventListener('mousemove', onResizeMove);
+    document.addEventListener('mouseup', endResize);
+  }
+
+  function onResizeMove(evt){
+    if (!_resize) return;
+    var dx = evt.clientX - _resize.startX;
+    var newLeftWidth = _resize.startLeftWidth + dx;
+    var minWidth = _resize.totalContentWidth * 0.18;
+    var maxWidth = _resize.totalContentWidth * 0.82;
+    if (newLeftWidth < minWidth) newLeftWidth = minWidth;
+    if (newLeftWidth > maxWidth) newLeftWidth = maxWidth;
+    var newRightWidth = _resize.totalContentWidth - newLeftWidth;
+    // Percentuais relativos à largura TOTAL da linha (não só do conteúdo),
+    // deixando o espaço do próprio divisor (flex-basis fixo) de fora da soma —
+    // assim as duas colunas + divisor nunca ultrapassam 100% do bloco.
+    var leftPct = (newLeftWidth / _resize.rowWidth) * 100;
+    var rightPct = (newRightWidth / _resize.rowWidth) * 100;
+    _resize.left.style.flex = '0 0 ' + leftPct.toFixed(3) + '%';
+    _resize.right.style.flex = '0 0 ' + rightPct.toFixed(3) + '%';
+  }
+
+  function endResize(){
+    if (!_resize) return;
+    _resize.handle.classList.remove('dragging');
+    _resize = null;
+    document.removeEventListener('mousemove', onResizeMove);
+    document.removeEventListener('mouseup', endResize);
+  }
+
+  /* ---------------------------------------------------------------
+     TABELAS DE PRODUTOS — colunas e linhas totalmente editáveis
+  ---------------------------------------------------------------- */
+  function addColumn(tableId){
+    var table = document.getElementById(tableId);
+    var headRow = table.tHead.rows[0];
+    var insertIdx = headRow.cells.length - 1; // antes do th "+ coluna"
+
+    var th = document.createElement('th');
+    th.contentEditable = "true";
+    th.setAttribute('data-placeholder', 'Nova Coluna');
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'icon-btn col-del no-print';
+    del.innerHTML = '&times;';
+    del.setAttribute('onclick', 'deleteColumn(this)');
+    th.appendChild(del);
+    headRow.insertBefore(th, headRow.cells[insertIdx]);
+
+    var body = table.tBodies[0];
+    for (var i = 0; i < body.rows.length; i++){
+      var row = body.rows[i];
+      var td = document.createElement('td');
+      td.contentEditable = "true";
+      td.setAttribute('data-placeholder', '—');
+      row.insertBefore(td, row.cells[row.cells.length - 1]);
+    }
+  }
+
+  function deleteColumn(btn){
+    var th = btn.closest('th');
+    var table = th.closest('table');
+    var idx = th.cellIndex;
+    if (idx === 0) return; // não remove a coluna #
+    var headRow = table.tHead.rows[0];
+    headRow.removeChild(headRow.cells[idx]);
+    var body = table.tBodies[0];
+    for (var i = 0; i < body.rows.length; i++){
+      var row = body.rows[i];
+      if (row.cells[idx]) row.removeChild(row.cells[idx]);
+    }
+  }
+
+  function addRow(tableId){
+    var table = document.getElementById(tableId);
+    var body = table.tBodies[0];
+    var last = body.rows[body.rows.length - 1];
+    var clone = last.cloneNode(true);
+    for (var i = 1; i < clone.cells.length - 1; i++){
+      clone.cells[i].innerHTML = '';
+    }
+    body.appendChild(clone);
+    renumberRows(tableId);
+  }
+
+  function deleteRow(btn){
+    var row = btn.closest('tr');
+    var body = row.parentElement;
+    if (body.rows.length <= 1) return;
+    body.removeChild(row);
+    renumberRows(body.closest('table').id);
+  }
+
+  function renumberRows(tableId){
+    var table = document.getElementById(tableId);
+    var rows = table.tBodies[0].rows;
+    for (var i = 0; i < rows.length; i++){
+      rows[i].cells[0].innerText = (i + 1);
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     BLOCOS DE CAMPOS (NCM, portos, incoterm, banco...) e NOTAS
+     (payment terms, delivery time) — linhas adicionáveis/removíveis
+  ---------------------------------------------------------------- */
+  function addTermRow(btn){
+    var row = document.createElement('div');
+    row.className = 'term-row';
+    row.innerHTML =
+      '<span class="term-label" contenteditable="true" data-placeholder="Campo">Novo Campo</span>' +
+      '<span class="term-value" contenteditable="true" data-placeholder="[valor]"></span>';
+    btn.parentElement.insertBefore(row, btn);
+  }
+
+  function addMetaRow(btn){
+    var row = document.createElement('div');
+    row.className = 'meta-row';
+    row.innerHTML =
+      '<span class="k" contenteditable="true">Novo Campo</span>' +
+      '<span class="v" contenteditable="true" data-placeholder="[valor]"></span>' +
+      '<button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button>';
+    btn.parentElement.insertBefore(row, btn);
+  }
+
+  function addNoteLine(btn){
+    var noteBlock = btn.previousElementSibling;
+    var line = document.createElement('div');
+    line.className = 'note-line';
+    line.innerHTML =
+      '<div contenteditable="true" data-placeholder="[texto]"></div>' +
+      '<button type="button" class="icon-btn no-print" onclick="this.parentElement.remove()">&times;</button>';
+    noteBlock.appendChild(line);
+  }
+
+  /* ---------------------------------------------------------------
+     INTEGRAÇÃO COM O TRACKER (FGL — index.html)
+     --------------------------------------------------
+     Esta página, quando aberta a partir do botão "Gerar PI/CI/PL" no
+     Tracker, recebe os dados do pedido via postMessage (janela aberta
+     com window.open a partir do index.html). Fluxo:
+       1. Ao carregar, avisa a janela que a abriu ("docs-ready"),
+          repetindo por alguns segundos até receber os dados.
+       2. Ao receber {type:'fgl-order-data', payload}, aplica os
+          campos simples (data-field) e preenche as 3 tabelas de
+          produtos, mapeando colunas pelo TEXTO do cabeçalho (robusto
+          a você ter adicionado/removido colunas manualmente antes).
+     Se a página for aberta direto (sem vir do Tracker), nada disso
+     roda — o documento funciona normalmente em branco, como sempre.
+  ---------------------------------------------------------------- */
+  (function(){
+    if (!window.opener) return;
+    var applied = false, tries = 0;
+    var pingIv = setInterval(function(){
+      if (applied || tries > 30){ clearInterval(pingIv); return; }
+      tries++;
+      try { window.opener.postMessage('docs-ready', '*'); } catch(e){}
+    }, 250);
+
+    window.addEventListener('message', function(evt){
+      if (evt.source !== window.opener) return;
+      var msg = evt.data;
+      if (msg && msg.type === 'fgl-order-data'){
+        applied = true;
+        clearInterval(pingIv);
+        applyOrderData(msg.payload);
+      }
+    });
+  })();
+
+  function fmt2(n){
+    n = Number(n);
+    if (!isFinite(n)) return '';
+    return n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function setField(name, value){
+    if (value === undefined || value === null || value === '') return;
+    document.querySelectorAll('[data-field="' + name + '"]').forEach(function(el){
+      el.innerText = value;
+    });
+  }
+
+  function fillItemsTable(tableId, rows){
+    var table = document.getElementById(tableId);
+    if (!table || !rows || !rows.length) return;
+    var headCells = table.tHead.rows[0].cells;
+    var headers = [];
+    for (var i = 0; i < headCells.length; i++){
+      var clone = headCells[i].cloneNode(true);
+      var btns = clone.querySelectorAll('button');
+      for (var j = 0; j < btns.length; j++) btns[j].remove();
+      headers.push(clone.textContent.trim());
+    }
+    var body = table.tBodies[0];
+    body.innerHTML = '';
+    rows.forEach(function(item, i){
+      var tr = document.createElement('tr');
+      headers.forEach(function(h, idx){
+        var td = document.createElement('td');
+        if (idx === 0){
+          td.className = 'rownum';
+          td.textContent = (i + 1);
+        } else if (idx === headers.length - 1){
+          td.className = 'no-print';
+          td.innerHTML = '<button type="button" class="icon-btn" onclick="deleteRow(this)" title="Remover linha">&times;</button>';
+        } else {
+          td.contentEditable = 'true';
+          var val = '';
+          if (h === 'SKU / Ref.') val = item.sku || '';
+          else if (h === 'Product Description') val = item.desc || '';
+          else if (h === 'Qty' || h === 'Qty/Unit') val = item.qty || '';
+          else if (h === 'Unit Price') val = item.unitPrice ? fmt2(item.unitPrice) : '';
+          else if (h === 'Total') val = item.total ? fmt2(item.total) : '';
+          td.textContent = val;
+          if (!val) td.setAttribute('data-placeholder', '—');
+        }
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+
+  function applyOrderData(d){
+    if (!d) return;
+    // Seller (Perfil da Empresa, salvo no Tracker)
+    setField('seller_name', d.seller && d.seller.name);
+    setField('seller_address', d.seller && d.seller.address);
+    setField('seller_phone', d.seller && d.seller.phone);
+    setField('seller_email', d.seller && d.seller.email);
+    setField('seller_block', d.seller && [d.seller.address, d.seller.phone, d.seller.email].filter(Boolean).join('\n'));
+
+    // Banco (Perfil da Empresa)
+    setField('bank_name', d.bank && d.bank.bankName);
+    setField('bank_address', d.bank && d.bank.bankAddress);
+    setField('beneficiary_name', d.bank && d.bank.beneficiaryName);
+    setField('bank_account', d.bank && d.bank.account);
+    setField('swift', d.bank && d.bank.swift);
+
+    // Buyer / Manufacturer / referências do pedido
+    setField('buyer_block', d.buyer);
+    setField('manufacturer_block', d.supplier);
+    setField('manufacturer_block_pi', d.supplier);
+
+    setField('pi_number', d.piNumber);
+    setField('pi_date', d.piDate);
+    setField('invoice_number', d.piNumber);
+    setField('invoice_date', d.piDate);
+    setField('pi_reference', d.piNumber);
+    setField('pl_number', d.piNumber);
+    setField('pl_date', d.piDate);
+    setField('pl_pi_reference', d.piNumber);
+    setField('pl_invoice_number', d.piNumber);
+
+    // Tabelas de produtos (SKU, Descrição, Qtd, Unit Price, Total)
+    fillItemsTable('tbl-pi', d.items);
+    fillItemsTable('tbl-ci', d.items);
+    fillItemsTable('tbl-pl', d.items);
+
+    // Totais (Qty / Value) — quando existirem os campos no bloco de totais
+    document.querySelectorAll('.totals-box .line .v[data-placeholder="—"]').forEach(function(el){
+      var label = el.parentElement.querySelector('.k');
+      if (!label) return;
+      if (/Total Qty/i.test(label.textContent) && d.totalQty) el.textContent = d.totalQty;
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     Referência de payload esperado (enviado pelo index.html):
+     {
+       type: 'fgl-order-data',
+       payload: {
+         seller:{name,address,phone,email},
+         bank:{bankName,bankAddress,beneficiaryName,account,swift},
+         buyer, supplier, piNumber, piDate,
+         items:[{sku,desc,qty,unitPrice,total}, ...],
+         totalQty, totalValue
+       }
+     }
+  ---------------------------------------------------------------- */
+</script>
+
+</body>
+</html>

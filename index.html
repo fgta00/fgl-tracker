@@ -602,6 +602,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
       </div>
       <div class="brow">
         <button class="btn btns" onclick="closeOvl('order')">Cancelar</button>
+        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
         <button class="btn btnp" id="mo-btn" onclick="submitOrder()">Criar Pedido</button>
       </div>
     </div>
@@ -691,6 +692,21 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div id="doc-timeline" style="position:relative;height:70px"></div>
         </div>
         <div style="font-size:.6rem;color:var(--ink4);margin-top:.3rem">🔵 marcos de produção · 🟠 prazos de documentos/pagamentos — posições calculadas a partir dos intervalos e prazos configurados acima</div>
+      </div>
+      <div style="margin-top:1.2rem">
+        <div class="sh">🏢 Perfil da Empresa (Seller / Banco) — usado ao gerar PI/CI/PL</div>
+        <div class="fg" style="gap:.5rem">
+          <div class="ff"><label>Nome (Seller)</label><input id="cp-name" placeholder="ex: FLYON Green Light Limited"></div>
+          <div class="ff"><label>Telefone</label><input id="cp-phone" placeholder="+852 ..."></div>
+          <div class="ff full"><label>Endereço</label><input id="cp-address" placeholder="Endereço, cidade, país"></div>
+          <div class="ff full"><label>E-mail</label><input id="cp-email" placeholder="contato@..."></div>
+          <div class="ff"><label>Beneficiary Bank</label><input id="cp-bank-name" placeholder="ex: HSBC Hong Kong"></div>
+          <div class="ff"><label>Swift Code</label><input id="cp-swift" placeholder="ex: HSBCHKHHHKH"></div>
+          <div class="ff full"><label>Beneficiary Bank Address</label><input id="cp-bank-address" placeholder="Endereço do banco"></div>
+          <div class="ff"><label>Beneficiary Name</label><input id="cp-beneficiary" placeholder="Razão social do beneficiário"></div>
+          <div class="ff"><label>Beneficiary Bank Account Number</label><input id="cp-account" placeholder="Número da conta"></div>
+        </div>
+        <button class="btn btnp" style="margin-top:.6rem" onclick="saveCompanyProfile()">💾 Salvar Perfil</button>
       </div>
       <div class="brow"><button class="btn btns" onclick="closeOvl('status')">Fechar</button></div>
     </div>
@@ -1012,6 +1028,7 @@ initAuth();
    STATE (loaded after auth)
 ══════════════════════════════════════ */
 let orders=[],payments=[],ledger=[],receipts=[];
+let companyProfile={sellerName:'',sellerAddress:'',sellerPhone:'',sellerEmail:'',bankName:'',bankAddress:'',beneficiaryName:'',bankAccount:'',swift:''};
 let _activeTab='internal';
 let SLST=['PRÉ-PRODUÇÃO','EM PRODUÇÃO','PRÉ-EMBARQUE','EMBARCADO','FINALIZADO','SUSPENSO'];
 let CLIENTES=['Zona Sul','Maria Filó','Coca-Cola','Bretas','Walmart'];
@@ -1435,6 +1452,7 @@ function applyLoadedData(data){
   if(data.conteineres)CONTEINERES=data.conteineres;
   if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
   if(data.docEvents)DOC_EVENTS.forEach((ev,i)=>{if(data.docEvents[i]&&typeof data.docEvents[i].offset==='number')ev.offset=data.docEvents[i].offset;});
+  if(data.companyProfile)companyProfile=Object.assign(companyProfile,data.companyProfile);
   migrateBookingFeito();
 }
 // Migração: insere o marco "Booking Feito" (índice 5) em pedidos salvos antes dele existir,
@@ -1570,7 +1588,7 @@ function syncLinked(){
 let _syncTimer=null;
 async function saveAll(){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile};
   const payload=await encryptJSON(_cryptoKey,data);
   const encrypted=JSON.stringify(payload);
   // 1. Sempre grava no localStorage (espelho local imediato)
@@ -2655,6 +2673,60 @@ function submitOrder(){
 }
 
 /* ══════════════════════════════════════
+   GERAR PI/CI/PL — abre export-docs.html numa
+   aba nova e manda os dados do pedido por postMessage
+══════════════════════════════════════ */
+function gerarDocs(){
+  if(_editNum===null){toast('⚠ Salve o pedido antes de gerar os documentos','err');return;}
+  const o=orders.find(x=>x.num===_editNum);
+  if(!o){toast('⚠ Pedido não encontrado','err');return;}
+  const p=linkPay(o);
+  const items=((p&&p.unitPrices)||[]).filter(r=>(r.qty||0)>0).map(r=>({
+    sku:r.ref||'',
+    desc:r.desc||'',
+    qty:r.qty||0,
+    unitPrice:r.priceCli||0,
+    total:(r.qty||0)*(r.priceCli||0)
+  }));
+  if(!items.length){toast('⚠ Este pedido não tem produtos lançados','err');return;}
+  const totalQty=items.reduce((a,r)=>a+r.qty,0);
+  const totalValue=items.reduce((a,r)=>a+r.total,0);
+  const payload={
+    seller:{
+      name:companyProfile.sellerName||'',
+      address:companyProfile.sellerAddress||'',
+      phone:companyProfile.sellerPhone||'',
+      email:companyProfile.sellerEmail||''
+    },
+    bank:{
+      bankName:companyProfile.bankName||'',
+      bankAddress:companyProfile.bankAddress||'',
+      beneficiaryName:companyProfile.beneficiaryName||'',
+      account:companyProfile.bankAccount||'',
+      swift:companyProfile.swift||''
+    },
+    buyer:o.client||'',
+    supplier:(p&&p.supplier)||'',
+    piNumber:o.pi||('#'+o.num),
+    piDate:o.orderDate||'',
+    items,totalQty,totalValue
+  };
+  const win=window.open('export-docs.html','_blank');
+  if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
+  let done=false;
+  const onMsg=(evt)=>{
+    if(evt.source!==win)return;
+    if(evt.data==='docs-ready'&&!done){
+      done=true;
+      win.postMessage({type:'fgl-order-data',payload},'*');
+      window.removeEventListener('message',onMsg);
+    }
+  };
+  window.addEventListener('message',onMsg);
+  if(!companyProfile.sellerName)toast('💡 Dica: preencha o Perfil da Empresa em ⚙ Tags pra não digitar o Seller/Banco toda vez');
+}
+
+/* ══════════════════════════════════════
    INLINE EDIT
 ══════════════════════════════════════ */
 let _epCtx=null,_epOpenedAt=0;
@@ -3112,6 +3184,31 @@ function renderStatusLists(){
     <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem">${cards}</div>`;
   }).join('');
   renderDocTimeline();
+  // Perfil da Empresa
+  document.getElementById('cp-name').value=companyProfile.sellerName||'';
+  document.getElementById('cp-phone').value=companyProfile.sellerPhone||'';
+  document.getElementById('cp-address').value=companyProfile.sellerAddress||'';
+  document.getElementById('cp-email').value=companyProfile.sellerEmail||'';
+  document.getElementById('cp-bank-name').value=companyProfile.bankName||'';
+  document.getElementById('cp-swift').value=companyProfile.swift||'';
+  document.getElementById('cp-bank-address').value=companyProfile.bankAddress||'';
+  document.getElementById('cp-beneficiary').value=companyProfile.beneficiaryName||'';
+  document.getElementById('cp-account').value=companyProfile.bankAccount||'';
+}
+function saveCompanyProfile(){
+  companyProfile={
+    sellerName:document.getElementById('cp-name').value.trim(),
+    sellerPhone:document.getElementById('cp-phone').value.trim(),
+    sellerAddress:document.getElementById('cp-address').value.trim(),
+    sellerEmail:document.getElementById('cp-email').value.trim(),
+    bankName:document.getElementById('cp-bank-name').value.trim(),
+    swift:document.getElementById('cp-swift').value.trim(),
+    bankAddress:document.getElementById('cp-bank-address').value.trim(),
+    beneficiaryName:document.getElementById('cp-beneficiary').value.trim(),
+    bankAccount:document.getElementById('cp-account').value.trim()
+  };
+  saveAll();
+  toast('Perfil da empresa salvo ✓');
 }
 // Linha do tempo: posiciona marcos (fixos, via MS_GAPS acumulado) e prazos de documentos
 // (marco de referência + offset) num eixo horizontal de dias, a partir da Arte Recebida (dia 0).
@@ -3291,7 +3388,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
@@ -3311,6 +3408,7 @@ function importBackup(e){
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
       if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+      if(data.companyProfile)companyProfile=Object.assign(companyProfile,data.companyProfile);
       saveAll();renderAll();renderFinanceiro();
       toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
     }catch(err){alert('Erro ao ler backup: '+err.message);}
