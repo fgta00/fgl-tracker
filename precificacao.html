@@ -65,16 +65,6 @@ body.dark .rv2-prodcard{background:#16202E}
 .rv2-prodcard-l1,.rv2-prodcard-l2{display:grid;gap:.45rem;align-items:end}
 .rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(175px,1.7fr) minmax(138px,.9fr)}
 .rv2-prodcard-l2{grid-template-columns:minmax(62px,.58fr) minmax(72px,.62fr) minmax(72px,.62fr) minmax(142px,1.12fr) minmax(150px,1fr);margin-top:.5rem}
-/* v4.5 — alinhamento fino do card de produto */
-#ovl-rvedit .rv2-prodcard-l1,
-#ovl-rvedit .rv2-prodcard-l2{grid-template-columns:minmax(105px,.8fr) minmax(175px,1.7fr) minmax(138px,.9fr)}
-#ovl-rvedit .rv2-prodcard-l2{grid-template-columns:minmax(62px,.58fr) minmax(72px,.62fr) minmax(72px,.62fr) minmax(142px,1.12fr) minmax(150px,1fr)}
-#ovl-rvedit .rv2-origem-field{grid-column:3}
-#ovl-rvedit .rv2-prodcard-l2>.rv2-field:last-child{grid-column:5}
-/* Origem e Logo usam exatamente a mesma altura/base visual */
-#ovl-rvedit .rv2-origem-field .rv2-seg-toggle,
-#ovl-rvedit .rv2-prodcard-l2>.rv2-field:last-child .rv2-seg-toggle{height:31px;margin:0}
-
 .rv2-field{min-width:0}
 .rv2-field-label{display:block;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.045em;color:var(--ink4);margin:0 0 .18rem .05rem;white-space:nowrap}
 .rv2-field input,.rv2-field select{width:100%;height:31px;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink);padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;box-sizing:border-box}
@@ -231,11 +221,6 @@ body.dark .rv-tabs{background:#0A0F1A}
 .mlbl{font-size:.5rem;color:var(--ink4);white-space:nowrap}
 .ml2{height:2px;background:var(--bdr2);flex-shrink:0;margin-top:12px}
 .ms-row{display:flex;align-items:flex-start;gap:0}
-.rv-data-table td.rv-ms-cell{vertical-align:middle;padding-top:.42rem;padding-bottom:.42rem}
-.rv-ms-cell .ms-row{min-width:225px;justify-content:flex-start!important;align-items:flex-start}
-.rv-ms-cell .mst{min-width:34px}
-.rv-ms-cell .ml2{flex:0 0 12px}
-
 .toggle-grp button{padding:.4rem 1.1rem;font-size:.74rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
 .toggle-grp button.active{background:var(--green);color:#fff}
 .ff input.inp-auto{border-color:var(--ltgrn);background:var(--ltgrn);color:var(--green);font-weight:600}
@@ -540,6 +525,56 @@ body.dark .rv-tabs{background:#0A0F1A}
   .crm-project-row{grid-template-columns:minmax(180px,1fr) auto}.crm-project-next{grid-column:1/-1}.crm-project-date{display:none}
 }
 @media(max-width:560px){.crm-project-tools{grid-template-columns:1fr}.crm-project-tools input{grid-column:auto}.crm-project-row{grid-template-columns:1fr}.crm-project-stage{margin-top:.1rem}}
+</style>
+
+
+<style id="ui-align-v45">
+/* Pedidos: centraliza Marcos de Produção na mesma linha visual das demais colunas */
+.rv-data-table td.rv-milestones-cell{vertical-align:middle!important}
+.rv-data-table td.rv-milestones-cell .ms-row{
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:54px;
+  margin:0!important;
+}
+.rv-data-table td.rv-milestones-cell .mst{justify-content:center}
+.rv-data-table td.rv-milestones-cell .mlbl{margin-top:2px}
+.rv-data-table td.rv-milestones-cell .tl-sub{margin-top:1px}
+
+/* Editar Pedido / Cotação: as duas linhas usam a mesma grade estrutural.
+   Origem e Logo ocupam a 5ª trilha; alinhamento não depende de margens/alturas. */
+#ovl-rvedit .rv2-prodcard-l1,
+#ovl-rvedit .rv2-prodcard-l2{
+  grid-template-columns:minmax(62px,.58fr) minmax(72px,.62fr) minmax(72px,.62fr) minmax(142px,1.12fr) minmax(150px,1fr)!important;
+  align-items:end!important;
+}
+#ovl-rvedit .rv2-prod-fornecedor-field{grid-column:1 / 3}
+#ovl-rvedit .rv2-prod-descricao-field{grid-column:3 / 5}
+#ovl-rvedit .rv2-origem-field{grid-column:5}
+#ovl-rvedit .rv2-seg-toggle{
+  height:31px!important;
+  min-height:31px!important;
+  margin:0!important;
+}
+#ovl-rvedit .rv2-field{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+}
+#ovl-rvedit .rv2-field-label{
+  min-height:14px;
+  display:flex;
+  align-items:flex-end;
+  margin-bottom:.18rem!important;
+}
+#ovl-rvedit .rv2-prod-logo-field{grid-column:5}
+@media(max-width:900px){
+  #ovl-rvedit .rv2-prodcard-l1,
+  #ovl-rvedit .rv2-prodcard-l2{
+    grid-template-columns:repeat(5,minmax(118px,1fr))!important;
+    overflow-x:auto;
+  }
+}
 </style>
 
 </head>
@@ -4675,8 +4710,8 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
   const logoAtual=!!comLogoProduto;
   const opcoesForn=RV_FORNECEDORES2.map(f=>`<option value="${esc(f.nome)}"${f.nome===fornAtual?' selected':''}>${esc(f.nome)}</option>`).join('');
   row.innerHTML=`<div class="rv2-prodcard-l1">
-      <div class="rv2-field"><span class="rv2-field-label">Fornecedor</span><div class="rv2-forn-control"><select class="rv2-chip-select rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select><button type="button" class="rv2-chip-addbtn" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
-      <div class="rv2-field"><span class="rv2-field-label">Produto / descrição</span><input type="text" class="rv2-prod-desc" placeholder="Descrição do produto" value="${esc(desc)}" oninput="${onCalc}"></div>
+      <div class="rv2-field rv2-prod-fornecedor-field"><span class="rv2-field-label">Fornecedor</span><div class="rv2-forn-control"><select class="rv2-chip-select rv2-prod-forn" onchange="${onCalc}">${opcoesForn}</select><button type="button" class="rv2-chip-addbtn" onclick="rv2OpenCad('fornecedor')" title="Cadastrar / gerenciar fornecedores"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>
+      <div class="rv2-field rv2-prod-descricao-field"><span class="rv2-field-label">Produto / descrição</span><input type="text" class="rv2-prod-desc" placeholder="Descrição do produto" value="${esc(desc)}" oninput="${onCalc}"></div>
       <div class="rv2-field rv2-origem-field"><span class="rv2-field-label">Origem</span><button type="button" class="rv2-seg-toggle rv2-prod-tipo-btn" data-v="${tipoAtual}" title="${tipoAtual} — clique para alternar" onclick="rv2ToggleProdTipo(this);${onCalc}"><span data-value="Nacional" class="${tipoAtual==='Nacional'?'active':''}">Nacional</span><span data-value="Importada" class="${tipoAtual==='Importada'?'active':''}">Importado</span></button></div>
       <button type="button" class="rv2-prod-remove" title="Remover produto" onclick="this.closest('.rv2-prodcard').remove();${onCalc}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
@@ -4685,7 +4720,7 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
       <div class="rv2-field"><span class="rv2-field-label">Custo unit. R$</span><input type="number" class="mono rv2-prod-preco" placeholder="4.25" value="${preco}" min="0" step="0.01" oninput="${onCalc}"></div>
       <div class="rv2-field"><span class="rv2-field-label">PV unit. R$</span><input type="number" class="mono rv2-prod-pv" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}"></div>
       <div class="rv2-field rv2-cliche-field"><span class="rv2-field-label">Clichê / molde / logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span><input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}"></div>
-      <div class="rv2-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-seg-toggle rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Clique para alternar"><span data-value="false" class="${!logoAtual?'active':''}">Sem logo</span><span data-value="true" class="${logoAtual?'active':''}">Com logo</span></button></div>
+      <div class="rv2-field rv2-prod-logo-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-seg-toggle rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Clique para alternar"><span data-value="false" class="${!logoAtual?'active':''}">Sem logo</span><span data-value="true" class="${logoAtual?'active':''}">Com logo</span></button></div>
     </div>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
@@ -5661,7 +5696,7 @@ function rvRenderPedidos(){
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido encontrado com esses filtros.</div>';return;}
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
     <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th style="text-align:left;padding-left:18px">Marcos de Produção</th><th>Obs</th><th></th>
+    <th class="rv-num">Venda total</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
@@ -5672,7 +5707,7 @@ function rvRenderPedidos(){
       <td class="rv-num">${rvBrl(p.vendaTotal)}</td>
       <td class="rv-num rv-pos">${((p.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
-      <td class="rv-ms-cell">${rvMilestoneDotsHTML(p)}</td>
+      <td class="rv-milestones-cell">${rvMilestoneDotsHTML(p)}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
       <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
     </tr>`;
@@ -5755,7 +5790,7 @@ function rvMilestoneDotsHTML(p){
     return`${connector}<div class="mst"><div class="mc ${cls}" style="width:20px;height:20px;font-size:.6rem" onclick="event.stopPropagation();rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl" style="font-size:.48rem">${RV_CI_SHORT[i]}</span><span class="mlbl" style="color:${dateColor};font-weight:700;font-size:.48rem">${d.v?esc(d.v):'—'}</span></div>`;
   }).join('');
   const produtores=rvPedidoProdutores(p);
-  return `<div class="ms-row" onclick="event.stopPropagation()" title="${esc(produtores.length?('Produção: '+produtores.join(' + ')):'Marcos de produção')}">${dots}</div>`;
+  return `<div class="ms-row" style="justify-content:center" onclick="event.stopPropagation()" title="${esc(produtores.length?('Produção: '+produtores.join(' + ')):'Marcos de produção')}">${dots}</div>`;
 }
 let rvCICtx=null; // {pedidoId, idx}
 function rvCIOpenMarco(pedidoId,idx){
