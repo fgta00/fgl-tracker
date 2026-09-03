@@ -2745,6 +2745,11 @@ function gerarDocs(){
     supplier:(p&&p.supplier)||'',
     piNumber:o.pi||('#'+o.num),
     piDate:o.orderDate||'',
+    // Commercial Invoice emitida ao cliente. Não confundir com p.inv,
+    // que é a invoice recebida do fornecedor.
+    invoiceNumber:(p&&p.clientInv)||'',
+    // O Tracker ainda não possui campo próprio para número da Packing List.
+    packingListNumber:'',
     items,totalQty,totalValue
   };
   const win=window.open('export-docs.html','_blank');

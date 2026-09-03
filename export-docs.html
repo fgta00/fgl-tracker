@@ -995,53 +995,106 @@
      INTEGRAÇÃO COM O TRACKER (FGL — index.html)
      --------------------------------------------------
      Esta página, quando aberta a partir do botão "Gerar PI/CI/PL" no
-     Tracker, recebe os dados do pedido via postMessage (janela aberta
-     com window.open a partir do index.html). Fluxo:
-       1. Ao carregar, avisa a janela que a abriu ("docs-ready"),
-          repetindo por alguns segundos até receber os dados.
-       2. Ao receber {type:'fgl-order-data', payload}, aplica os
-          campos simples (data-field) e preenche as 3 tabelas de
-          produtos, mapeando colunas pelo TEXTO do cabeçalho (robusto
-          a você ter adicionado/removido colunas manualmente antes).
-     Se a página for aberta direto (sem vir do Tracker), nada disso
-     roda — o documento funciona normalmente em branco, como sempre.
+     Tracker (mesma origem, via window.open), recebe os dados do
+     pedido por postMessage. Fluxo:
+       1. Ao carregar, avisa window.opener ("docs-ready"), repetindo
+          por alguns segundos até receber os dados ou desistir.
+       2. Só aceita a mensagem se vier do MESMO window.opener E da
+          MESMA origem (window.location.origin) E tiver o formato
+          {type:'fgl-order-data', payload:{...}} esperado.
+       3. Preenche os campos data-field e as 3 tabelas de produto,
+          mapeando colunas pelo TEXTO do cabeçalho (robusto a colunas
+          adicionadas/removidas manualmente antes de gerar).
+       4. Todo campo preenchido continua contenteditable — nada aqui
+          desliga a edição manual depois do preenchimento.
+       5. Se abrir direto (sem Tracker) ou o handshake nunca responder,
+          mostra um aviso visível no topo — mas o documento segue
+          funcional e editável em branco, como sempre.
+     Assume mesma origem entre index.html e export-docs.html (mesmo
+     domínio/deploy) — é o que window.location.origin valida.
   ---------------------------------------------------------------- */
   (function(){
-    if (!window.opener) return;
-    var applied = false, tries = 0;
-    var pingIv = setInterval(function(){
+    var TRACKER_ORIGIN = window.location.origin;
+    var applied = false;
+    var pingIv = null;
+    var noDataTimer = null;
+
+    function showNoDataBanner(){
+      if (applied || document.getElementById('no-tracker-banner')) return;
+      var b = document.createElement('div');
+      b.id = 'no-tracker-banner';
+      b.className = 'no-print';
+      b.setAttribute('role', 'status');
+      b.style.cssText = 'position:sticky;top:0;z-index:999;background:#B23B3B;color:#fff;'
+        + 'text-align:center;padding:8px 16px;font-family:\'IBM Plex Sans\',sans-serif;'
+        + 'font-size:12.5px;font-weight:600;letter-spacing:.01em';
+      b.textContent = 'Este documento foi aberto sem dados do Tracker — preencha manualmente, ou gere de novo a partir de um pedido em "Editar Pedido → Gerar PI/CI/PL".';
+      document.body.insertBefore(b, document.body.firstChild);
+    }
+
+    function clearNoDataBanner(){
+      var b = document.getElementById('no-tracker-banner');
+      if (b) b.remove();
+    }
+
+    // Aberto direto, sem vir de nenhuma janela — nada pra esperar.
+    if (!window.opener){
+      showNoDataBanner();
+      return;
+    }
+
+    var tries = 0;
+    pingIv = setInterval(function(){
       if (applied || tries > 30){ clearInterval(pingIv); return; }
       tries++;
-      try { window.opener.postMessage('docs-ready', '*'); } catch(e){}
+      try { window.opener.postMessage('docs-ready', TRACKER_ORIGIN); } catch(e){}
     }, 250);
 
+    // Se ninguém respondeu em ~8s, avisa (documento continua editável em branco).
+    noDataTimer = setTimeout(function(){
+      if (!applied) showNoDataBanner();
+    }, 8000);
+
     window.addEventListener('message', function(evt){
-      if (evt.source !== window.opener) return;
+      if (applied) return;
+      if (evt.source !== window.opener) return;           // só a janela que nos abriu
+      if (evt.origin !== TRACKER_ORIGIN) return;           // só a mesma origem
       var msg = evt.data;
-      if (msg && msg.type === 'fgl-order-data'){
-        applied = true;
-        clearInterval(pingIv);
-        applyOrderData(msg.payload);
-      }
+      if (!msg || msg.type !== 'fgl-order-data') return;
+      if (!msg.payload || typeof msg.payload !== 'object') return; // payload ausente/mal-formado
+
+      applied = true;
+      clearInterval(pingIv);
+      clearTimeout(noDataTimer);
+      clearNoDataBanner();
+      applyOrderData(msg.payload);
     });
   })();
 
-  function fmt2(n){
-    n = Number(n);
-    if (!isFinite(n)) return '';
-    return n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  /* ---- formatação segura (nunca deixa NaN/undefined vazar pro documento) ---- */
+  function safeNum(v){
+    var n = Number(v);
+    return isFinite(n) ? n : 0;
+  }
+  function fmtQty(v){
+    var n = safeNum(v);
+    return n ? n.toLocaleString('pt-BR') : '';
+  }
+  function fmtMoney(v){
+    var n = safeNum(v);
+    return n ? n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '';
   }
 
   function setField(name, value){
     if (value === undefined || value === null || value === '') return;
     document.querySelectorAll('[data-field="' + name + '"]').forEach(function(el){
-      el.innerText = value;
+      el.innerText = String(value); // continua contenteditable — só troca o texto
     });
   }
 
   function fillItemsTable(tableId, rows){
     var table = document.getElementById(tableId);
-    if (!table || !rows || !rows.length) return;
+    if (!table || !Array.isArray(rows) || !rows.length) return;
     var headCells = table.tHead.rows[0].cells;
     var headers = [];
     for (var i = 0; i < headCells.length; i++){
@@ -1053,6 +1106,7 @@
     var body = table.tBodies[0];
     body.innerHTML = '';
     rows.forEach(function(item, i){
+      item = item || {};
       var tr = document.createElement('tr');
       headers.forEach(function(h, idx){
         var td = document.createElement('td');
@@ -1063,13 +1117,13 @@
           td.className = 'no-print';
           td.innerHTML = '<button type="button" class="icon-btn" onclick="deleteRow(this)" title="Remover linha">&times;</button>';
         } else {
-          td.contentEditable = 'true';
+          td.contentEditable = 'true'; // continua editável depois de preenchido
           var val = '';
           if (h === 'SKU / Ref.') val = item.sku || '';
           else if (h === 'Product Description') val = item.desc || '';
-          else if (h === 'Qty' || h === 'Qty/Unit') val = item.qty || '';
-          else if (h === 'Unit Price') val = item.unitPrice ? fmt2(item.unitPrice) : '';
-          else if (h === 'Total') val = item.total ? fmt2(item.total) : '';
+          else if (h === 'Qty' || h === 'Qty/Unit') val = fmtQty(item.qty);
+          else if (h === 'Unit Price') val = fmtMoney(item.unitPrice);
+          else if (h === 'Total') val = fmtMoney(item.total);
           td.textContent = val;
           if (!val) td.setAttribute('data-placeholder', '—');
         }
@@ -1079,21 +1133,36 @@
     });
   }
 
+  function fillTotals(qty, value){
+    document.querySelectorAll('.totals-box').forEach(function(box){
+      box.querySelectorAll('.line').forEach(function(line){
+        var k = line.querySelector('.k'), v = line.querySelector('.v');
+        if (!k || !v) return;
+        var label = k.textContent;
+        if (/^Total Qty$/i.test(label) && qty) v.textContent = fmtQty(qty);
+        else if (/^Total (PI Value|Invoice Value)$/i.test(label) && value) v.textContent = fmtMoney(value);
+      });
+    });
+  }
+
   function applyOrderData(d){
-    if (!d) return;
+    if (!d || typeof d !== 'object') return;
+    var seller = d.seller || {};
+    var bank = d.bank || {};
+
     // Seller (Perfil da Empresa, salvo no Tracker)
-    setField('seller_name', d.seller && d.seller.name);
-    setField('seller_address', d.seller && d.seller.address);
-    setField('seller_phone', d.seller && d.seller.phone);
-    setField('seller_email', d.seller && d.seller.email);
-    setField('seller_block', d.seller && [d.seller.address, d.seller.phone, d.seller.email].filter(Boolean).join('\n'));
+    setField('seller_name', seller.name);
+    setField('seller_address', seller.address);
+    setField('seller_phone', seller.phone);
+    setField('seller_email', seller.email);
+    setField('seller_block', [seller.address, seller.phone, seller.email].filter(Boolean).join('\n'));
 
     // Banco (Perfil da Empresa)
-    setField('bank_name', d.bank && d.bank.bankName);
-    setField('bank_address', d.bank && d.bank.bankAddress);
-    setField('beneficiary_name', d.bank && d.bank.beneficiaryName);
-    setField('bank_account', d.bank && d.bank.account);
-    setField('swift', d.bank && d.bank.swift);
+    setField('bank_name', bank.bankName);
+    setField('bank_address', bank.bankAddress);
+    setField('beneficiary_name', bank.beneficiaryName);
+    setField('bank_account', bank.account);
+    setField('swift', bank.swift);
 
     // Buyer / Manufacturer / referências do pedido
     setField('buyer_block', d.buyer);
@@ -1102,25 +1171,24 @@
 
     setField('pi_number', d.piNumber);
     setField('pi_date', d.piDate);
-    setField('invoice_number', d.piNumber);
     setField('invoice_date', d.piDate);
     setField('pi_reference', d.piNumber);
-    setField('pl_number', d.piNumber);
     setField('pl_date', d.piDate);
     setField('pl_pi_reference', d.piNumber);
-    setField('pl_invoice_number', d.piNumber);
 
-    // Tabelas de produtos (SKU, Descrição, Qtd, Unit Price, Total)
+    // CI e Packing List têm numeração própria. Nunca reutilizar o número
+    // da PI como se fosse o identificador desses documentos.
+    setField('invoice_number', d.invoiceNumber);
+    setField('pl_number', d.packingListNumber);
+    setField('pl_invoice_number', d.invoiceNumber);
+
+    // Tabelas de produtos (SKU, Descrição, Qtd, Unit Price, Total) — todas contenteditable
     fillItemsTable('tbl-pi', d.items);
     fillItemsTable('tbl-ci', d.items);
     fillItemsTable('tbl-pl', d.items);
 
-    // Totais (Qty / Value) — quando existirem os campos no bloco de totais
-    document.querySelectorAll('.totals-box .line .v[data-placeholder="—"]').forEach(function(el){
-      var label = el.parentElement.querySelector('.k');
-      if (!label) return;
-      if (/Total Qty/i.test(label.textContent) && d.totalQty) el.textContent = d.totalQty;
-    });
+    // Totais (Qty / Value) — só nas páginas que têm essas linhas (PI/CI; PL não)
+    fillTotals(d.totalQty, d.totalValue);
   }
 
   /* ---------------------------------------------------------------
@@ -1131,6 +1199,7 @@
          seller:{name,address,phone,email},
          bank:{bankName,bankAddress,beneficiaryName,account,swift},
          buyer, supplier, piNumber, piDate,
+         invoiceNumber, packingListNumber,
          items:[{sku,desc,qty,unitPrice,total}, ...],
          totalQty, totalValue
        }
