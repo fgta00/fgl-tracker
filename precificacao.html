@@ -190,6 +190,7 @@ body.dark .modal-h{background:#1B2535}
 .crm-ai-suggestion{border:1px solid var(--bdr2);border-radius:999px;background:var(--card);color:var(--blue);font-family:'IBM Plex Sans';font-size:.56rem;padding:.22rem .48rem;cursor:pointer;text-align:left}
 .crm-ai-suggestion:hover{background:var(--ltblue)}
 #ovl-crmcustomer .crm-modal{width:calc(100vw - 32px);max-width:1400px}
+#ovl-crmproject{z-index:120}
 #ovl-crmcustomer .crm-ai-title{font-size:1rem;line-height:1.35}
 #ovl-crmcustomer .crm-ai-line{font-size:.82rem;line-height:1.5}
 #ovl-crmcustomer .crm-ai-evidence-row{font-size:.74rem;line-height:1.4}
@@ -1138,7 +1139,10 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="crm-ai-line"><b>Leitura:</b> <span id="crm-ai-reading"></span></div>
           <div class="crm-ai-line"><b>Próximo passo:</b> <span id="crm-ai-next"></span></div>
           <div id="crm-ai-evidence" class="crm-ai-evidence"></div>
-          <button id="crm-ai-action-btn" class="btn btn-p" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateActionFromAI()">Criar ação</button>
+          <div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap">
+            <button id="crm-ai-action-btn" class="btn btn-p" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateActionFromAI()">Criar ação</button>
+            <button id="crm-ai-project-btn" class="btn btn-s" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateProjectFromAI()">Criar projeto</button>
+          </div>
           <div class="crm-ai-followups">
             <div class="crm-field-label" style="margin:0">Perguntar à IA</div>
             <div class="crm-ai-question-menu">
@@ -3025,7 +3029,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   customQuestion=(customQuestion||'').trim().slice(0,500);
   if(questionKey==='perguntar_mais'&&customQuestion.length<3)return;
   const previousResponse=crmAiLastResult?{
-    opportunity:crmAiLastResult.opportunity||null,why:crmAiLastResult.why||'',reading:crmAiLastResult.reading||'',next_step:crmAiLastResult.next_step||'',evidence:crmAiLastResult.evidence||[]
+    opportunity:crmAiLastResult.opportunity||null,why:crmAiLastResult.why||'',reading:crmAiLastResult.reading||'',next_step:crmAiLastResult.next_step||'',evidence:crmAiLastResult.evidence||[],project_draft:crmAiLastResult.project_draft||null
   }:null;
   crmAiLastRequest={questionKey,customQuestion};
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
@@ -3068,6 +3072,7 @@ function crmShowAIResult(data){
   const ev=document.getElementById('crm-ai-evidence');ev.replaceChildren();
   (data.evidence||[]).slice(0,5).forEach(item=>{const row=document.createElement('div');row.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);});
   document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
+  document.getElementById('crm-ai-project-btn').style.display=data.project_draft?'inline-flex':'none';
   const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();
   (data.follow_up_questions||[]).slice(0,3).forEach(question=>{const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);});
   const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
@@ -3120,6 +3125,19 @@ function crmRenderAIHistory(container,rows){
 function crmCreateActionFromAI(){
   if(!crmAiLastResult?.action_draft||!crmAiCurrentCustomerId||crmAiCurrentCustomerId!==crmEditCtx.customerId)return;
   crmOpenActionModal(crmAiCurrentCustomerId,null,null,crmAiLastResult.action_draft);
+}
+function crmCreateProjectFromAI(){
+  const draft=crmAiLastResult?.project_draft;
+  if(!draft||!crmAiCurrentCustomerId||crmAiCurrentCustomerId!==crmEditCtx.customerId)return;
+  const hypotheses=Array.isArray(draft.supply_hypotheses)&&draft.supply_hypotheses.length?draft.supply_hypotheses.join(', '):'não definida';
+  const notes=[
+    'Rascunho sugerido pela IA — revise antes de salvar.',
+    `Objetivo: ${draft.objective||'—'}`,
+    `Hipótese de fornecimento: ${hypotheses}`,
+    `Justificativa: ${draft.rationale||'—'}`,
+    `Próximo passo sugerido: ${draft.next_step||'—'}`
+  ].join('\n');
+  crmOpenProjectEdit(null,{customer_id:crmAiCurrentCustomerId,project_name:draft.project_name||'',stage:draft.stage||'Ideia',notes});
 }
 
 async function crmCheckAccess(){
@@ -4667,19 +4685,20 @@ function crmOnToggleProjectTipo(tipo){
   else document.getElementById('crm-proj-customer').value='';
   crmSetProjectTipo(tipo);
 }
-function crmOpenProjectEdit(id){
+function crmOpenProjectEdit(id,prefill){
   crmEditProjectId=id;
   const p=id?CRM_PROJECTS.find(x=>x.id===id):null;
+  const pf=!id&&prefill?prefill:null;
   document.getElementById('crm-proj-title').textContent=id?'Editar Projeto':'Novo Projeto';
-  crmPopulateProjectCustomerSelect(p?.customer_id||'');
-  document.getElementById('crm-proj-prospect').value=p?.prospect_name||'';
-  crmSetProjectTipo(p&&!p.customer_id?'prospect':'cliente');
-  document.getElementById('crm-proj-name').value=p?.project_name||'';
-  document.getElementById('crm-proj-stage').value=p?.stage||'';
+  crmPopulateProjectCustomerSelect(p?.customer_id||pf?.customer_id||'');
+  document.getElementById('crm-proj-prospect').value=p?.prospect_name||pf?.prospect_name||'';
+  crmSetProjectTipo((p&&!p.customer_id)||(!p&&pf?.prospect_name)?'prospect':'cliente');
+  document.getElementById('crm-proj-name').value=p?.project_name||pf?.project_name||'';
+  document.getElementById('crm-proj-stage').value=p?.stage||pf?.stage||'';
   document.getElementById('crm-proj-status').value=p?.status||'active';
-  document.getElementById('crm-proj-value').value=p?.potential_value??'';
-  document.getElementById('crm-proj-notes').value=p?.notes||'';
-  const temValorOuNotas=!!(p?.potential_value||p?.notes);
+  document.getElementById('crm-proj-value').value=p?.potential_value??pf?.potential_value??'';
+  document.getElementById('crm-proj-notes').value=p?.notes||pf?.notes||'';
+  const temValorOuNotas=!!(p?.potential_value||p?.notes||pf?.potential_value||pf?.notes);
   document.getElementById('crm-proj-moredetails-h').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-timeline-section').style.display=id?'block':'none';
@@ -4688,9 +4707,8 @@ function crmOpenProjectEdit(id){
   // gravar em crm_project_people) — a coluna em si continua sempre visível pro grid não quebrar,
   // só os controles de adicionar somem/aparecem.
   document.getElementById('crm-proj-people-addctrls').style.display=id?'contents':'none';
-  crmRenderProjectPeopleChips(); // limpa/mostra "—" mesmo sem id (CRM_PROJECT_PEOPLE só é populado por crmLoadProjectPeople)
+  CRM_PROJECT_PEOPLE=[];crmRenderProjectPeopleChips();
   if(id)crmLoadProjectPeople(id);
-  else CRM_PROJECT_PEOPLE=[];
   crmRenderProjectNextAction();
   document.getElementById('ovl-crmproject').classList.add('open');
 }
