@@ -17,6 +17,7 @@
   --grey:#5A6A76;--ltgry:#EDF1F4;
   --purple:#5B21B6;--ltpur:#EDE9FE;
   --teal:#0D6E6E;--ltteal:#CCEFEF;
+  --est:#F59E0B;--pending:#C8D8E4;--accent:#4DB8FF;--green-dk:#8FE3A8;--head-bg:#EDF2F7;
   --pre:#1D4ED8;--prod:#065F46;--preemb:#4338CA;--del:#7C3400;
 }
 body.dark{
@@ -25,47 +26,48 @@ body.dark{
   --navy:#0F172A;--ltblue:#1A2E48;
   --ltgrn:#0F3026;--ltamb:#3D2800;--ltred:#3D1218;
   --ltgry:#1B2535;--ltpur:#1E1040;--ltteal:#0D3230;
+  --pending:#3A4E65;--head-bg:#0A0F1A;
 }
-body.dark header{background:#0A0F1A}
+body.dark header{background:var(--head-bg)}
 body.dark .sc{box-shadow:0 1px 3px rgba(0,0,0,.25)}
 body.dark .tw{box-shadow:0 1px 4px rgba(0,0,0,.25)}
-body.dark thead .ch th{background:#0A0F1A;border-bottom-color:#2A3A4E;color:#A0B0C0}
+body.dark thead .ch th{background:var(--head-bg);border-bottom-color:var(--bdr);color:var(--ink3)}
 body.dark thead .grp th{border-right-color:rgba(255,255,255,.06)}
 body.dark tbody tr:hover{background:#1E2D42}
 body.dark tbody tr.alt{background:#141E30}
 body.dark tbody tr.alt:hover{background:#1A2940}
-body.dark td{border-bottom-color:#2A3A4E}
-body.dark .modal{background:#1B2535;color:#E8EDF2}
-body.dark .ff input,body.dark .ff select,body.dark .ff textarea{background:#111827;border-color:#3A4E65;color:#E8EDF2}
-body.dark .epop{background:#1B2535;border-color:#3B82F6;color:#E8EDF2}
-body.dark .epop input,body.dark .epop select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
-body.dark .prodrow{background:#141E30;border-color:#2A3A4E}
-body.dark .prodrow input{background:#111827;border-color:#3A4E65;color:#E8EDF2}
-body.dark .lf{background:#1A2E48;border-color:#2563EB}
-body.dark .lf.grn{background:#0F3026;border-color:#16A34A}
-body.dark .tb input,body.dark .tb select{background:#1B2535;border-color:#3A4E65;color:#E8EDF2}
+body.dark td{border-bottom-color:var(--bdr)}
+body.dark .modal{background:var(--card);color:var(--ink)}
+body.dark .ff input,body.dark .ff select,body.dark .ff textarea{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
+body.dark .epop{background:var(--card);border-color:var(--blue);color:var(--ink)}
+body.dark .epop input,body.dark .epop select{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
+body.dark .prodrow{background:#141E30;border-color:var(--bdr)}
+body.dark .prodrow input{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
+body.dark .lf{background:var(--ltblue);border-color:var(--blue)}
+body.dark .lf.grn{background:var(--ltgrn);border-color:var(--green)}
+body.dark .tb input,body.dark .tb select{background:var(--card);border-color:var(--bdr2);color:var(--ink)}
 body.dark .dest{color:#F0A030}
 body.dark .dok{color:#6EE7B7}
 body.dark .dnil{color:#506070}
-body.dark .mc.done{background:#16A34A;border-color:#16A34A}
-body.dark .mc.est{background:#D97706;border-color:#D97706}
-body.dark .mc.late{background:#DC2626;border-color:#DC2626}
-body.dark .pill{color:#E8EDF2}
+body.dark .mc.done{background:var(--green);border-color:var(--green)}
+body.dark .mc.est{background:var(--amber);border-color:var(--amber)}
+body.dark .mc.late{background:var(--red);border-color:var(--red)}
+body.dark .pill{color:var(--ink)}
 body.dark .btn-bkp{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
-body.dark .btn-add{background:#16A34A}
+body.dark .btn-add{background:var(--green)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
 header{background:var(--navy);height:52px;display:flex;align-items:center;gap:1rem;padding:0 1.4rem;position:sticky;top:0;z-index:300;box-shadow:0 2px 10px rgba(0,0,0,.4)}
 .logo{display:flex;align-items:center;gap:.5rem;color:#fff;font-weight:700;font-size:.86rem;letter-spacing:.03em}
-.logo-i{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,#1A7A45);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.logo-i{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,var(--green));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .tabs{display:flex;gap:2px;height:100%}
 .tab{background:none;border:none;color:rgba(255,255,255,.48);font-family:'IBM Plex Sans';font-size:.73rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:100%;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:inline-flex;align-items:center}
-.tab:hover{color:rgba(255,255,255,.82)}.tab.active{color:#fff;border-bottom-color:#4DB8FF}
+.tab:hover{color:rgba(255,255,255,.82)}.tab.active{color:#fff;border-bottom-color:var(--accent)}
 .subheader{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:.5rem;padding:.4rem 1.4rem;position:sticky;top:52px;z-index:290}
-body.dark .subheader{background:#0A0F1A}
+body.dark .subheader{background:var(--head-bg)}
 .stab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'IBM Plex Sans';font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:.6rem 1rem;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;outline:none}
 .stab:hover{color:rgba(255,255,255,.85)}
-.stab.active{color:#fff;border-bottom-color:#4DB8FF}
+.stab.active{color:#fff;border-bottom-color:var(--accent)}
 .hdr-r{display:flex;align-items:center;gap:.7rem}
 .hdr-d{font-size:.68rem;color:rgba(255,255,255,.35);font-family:'IBM Plex Mono'}
 .btn-add{background:var(--green);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;padding:.34rem .85rem;border-radius:7px;cursor:pointer;transition:background .15s}
@@ -108,14 +110,14 @@ thead .ch th{background:var(--navy);color:rgba(255,255,255,.78);font-size:.72rem
 thead .ch th.L{text-align:left}
 tbody tr{border-bottom:1px solid var(--bdr);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#F4F8FC}
-tbody tr.alt{background:#FAFCFE}tbody tr.alt:hover{background:#EEF4FB}
+tbody tr:hover{background:var(--ltblue)}
+tbody tr.alt{background:var(--ltblue)}tbody tr.alt:hover{background:var(--ltblue)}
 td{padding:.43rem .5rem;vertical-align:middle;text-align:center;white-space:nowrap}
 td.L{text-align:left}td.W{white-space:normal}
-td.ec:hover{background:#EEF5FF !important;outline:1.5px solid #B0D0F0;outline-offset:-1px;border-radius:3px;cursor:pointer}
+td.ec:hover{background:var(--ltblue) !important;outline:1.5px solid #B0D0F0;outline-offset:-1px;border-radius:3px;cursor:pointer}
 .pill{display:inline-block;padding:.14rem .52rem;border-radius:999px;font-size:.62rem;font-weight:700;letter-spacing:.03em;white-space:nowrap}
 .pg{background:var(--ltgrn);color:var(--green)}.pb{background:var(--ltblue);color:var(--blue)}
-.pin{background:#E0E7FF;color:#4338CA}
+.pin{background:#E0E7FF;color:var(--preemb)}
 body.dark .pin{background:#1E1B4B;color:#A5B4FC}
 .pa{background:var(--ltamb);color:var(--amber)}.pr{background:var(--ltred);color:var(--red)}
 .pgr{background:var(--ltgry);color:var(--grey)}.pp{background:var(--ltpur);color:var(--purple)}
@@ -126,16 +128,16 @@ body.dark .pin{background:#1E1B4B;color:#A5B4FC}
 .mc{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;border:2.5px solid;cursor:pointer;transition:transform .12s;z-index:1}
 .mc:hover{transform:scale(1.14)}
 .mc.done{background:var(--green);border-color:var(--green);color:#fff}
-.mc.est{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.mc.est{background:var(--est);border-color:var(--est);color:#fff}
 .mc.late{background:var(--red);border-color:var(--red);color:#fff}
-.mc.pending{background:#fff;border-color:#C8D8E4;color:#C8D8E4}
+.mc.pending{background:#fff;border-color:var(--pending);color:var(--pending)}
 .ml2{width:12px;height:2.5px;align-self:flex-start;margin-top:11px;flex-shrink:0}
-.ml2.done{background:var(--green)}.ml2.est{background:#F59E0B}.ml2.pending{background:#D0DCE8}
+.ml2.done{background:var(--green)}.ml2.est{background:var(--est)}.ml2.pending{background:var(--bdr)}
 .mlbl{font-size:.54rem;color:var(--ink4);font-weight:600;letter-spacing:.03em;text-align:center}
 .dok{color:var(--green);font-weight:600;font-family:'IBM Plex Mono';font-size:.68rem}
-.dest{color:#D97706;font-family:'IBM Plex Mono';font-size:.68rem}
+.dest{color:var(--amber);font-family:'IBM Plex Mono';font-size:.68rem}
 .dest::before{content:"~ "}
-.dnil{color:#C8D8E4}
+.dnil{color:var(--pending)}
 .dg{font-family:'IBM Plex Mono';font-size:.72rem;font-weight:600;color:var(--green);background:var(--ltgrn);padding:.12rem .38rem;border-radius:4px}
 .dw{font-family:'IBM Plex Mono';font-size:.72rem;font-weight:600;color:var(--amber);background:var(--ltamb);padding:.12rem .38rem;border-radius:4px}
 .dr{font-family:'IBM Plex Mono';font-size:.72rem;font-weight:600;color:var(--red);background:var(--ltred);padding:.12rem .38rem;border-radius:4px}
@@ -163,38 +165,38 @@ body.dark .pin{background:#1E1B4B;color:#A5B4FC}
 .toggle-grp{display:flex;border:1.5px solid var(--bdr2);border-radius:7px;overflow:hidden;width:fit-content}
 .toggle-grp button{padding:.4rem 1rem;font-size:.72rem;font-weight:600;border:none;background:var(--card);color:var(--ink3);cursor:pointer;transition:.15s;font-family:'IBM Plex Sans'}
 .toggle-grp button.active{background:var(--green);color:#fff}
-body.dark .toggle-grp button{background:#1B2535;color:var(--ink3)}
+body.dark .toggle-grp button{background:var(--card);color:var(--ink3)}
 .ff{display:flex;flex-direction:column;gap:.22rem}
 .ff.full{grid-column:1/-1}
 .ff label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3)}
-.ff input,.ff select,.ff textarea{border:1.5px solid var(--bdr2);border-radius:6px;padding:.38rem .62rem;font-family:'IBM Plex Sans';font-size:.8rem;color:var(--ink);background:#FAFCFE;outline:none;transition:border-color .15s}
+.ff input,.ff select,.ff textarea{border:1.5px solid var(--bdr2);border-radius:6px;padding:.38rem .62rem;font-family:'IBM Plex Sans';font-size:.8rem;color:var(--ink);background:var(--ltblue);outline:none;transition:border-color .15s}
 .ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--blue);background:#fff}
 .ff textarea{resize:vertical;min-height:46px}
 .brow{display:flex;gap:.5rem;justify-content:flex-end;padding-top:.8rem;border-top:1px solid var(--bdr);margin-top:.32rem}
 .btn{font-family:'IBM Plex Sans';font-weight:600;font-size:.77rem;padding:.38rem 1rem;border-radius:7px;border:none;cursor:pointer;transition:all .15s}
-.btnp{background:var(--blue);color:#fff}.btnp:hover{background:#1050A0}
+.btnp{background:var(--blue);color:#fff}.btnp:hover{background:var(--blue)}
 .btns{background:var(--ltgry);color:var(--ink2)}.btns:hover{background:var(--bdr)}
 .epop{position:fixed;z-index:800;background:var(--card);border:1.5px solid var(--blue);border-radius:10px;padding:.75rem .95rem;box-shadow:0 8px 28px rgba(0,0,0,.22);width:290px;display:none}
 .epop h4{font-size:.67rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.45rem}
 .epop label{font-size:.6rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.18rem}
-.epop input,.epop select,.epop textarea{width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.34rem .58rem;font-family:'IBM Plex Sans';font-size:.79rem;color:var(--ink);background:#FAFCFE;outline:none;margin-bottom:.4rem}
+.epop input,.epop select,.epop textarea{width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.34rem .58rem;font-family:'IBM Plex Sans';font-size:.79rem;color:var(--ink);background:var(--ltblue);outline:none;margin-bottom:.4rem}
 .epop input:focus,.epop select:focus{border-color:var(--blue)}
 .epop .chkrow{display:flex;align-items:center;gap:.38rem;font-size:.77rem;margin-bottom:.45rem;cursor:pointer}
 .epop .chkrow input{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
 .epop-btns{display:flex;gap:.35rem}
 .epop-btns button{flex:1;font-family:'IBM Plex Sans';font-weight:600;font-size:.74rem;padding:.32rem;border-radius:6px;border:none;cursor:pointer}
-.esave{background:var(--blue);color:#fff}.esave:hover{background:#1050A0}
+.esave{background:var(--blue);color:#fff}.esave:hover{background:var(--blue)}
 .ecancel{background:var(--ltgry);color:var(--ink2)}.ecancel:hover{background:var(--bdr2)}
-.eclear{background:var(--ltred);color:var(--red);font-size:.68rem !important}.eclear:hover{background:#fbd0d5}
+.eclear{background:var(--ltred);color:var(--red);font-size:.68rem !important}.eclear:hover{background:var(--ltred)}
 .lf{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--blue);border-radius:10px;padding:.85rem;margin-bottom:.9rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .lf.grn{border-left-color:var(--green)}
 .lfg{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .55rem;align-items:end}
 .lfg .ff{min-width:0}
 .lfg .lbtn{grid-column:1/-1;margin-top:.15rem}
 .lbtn{background:var(--blue);color:#fff;border:none;font-family:'IBM Plex Sans';font-weight:700;font-size:.74rem;padding:.45rem .85rem;border-radius:7px;cursor:pointer;white-space:nowrap}
-.lbtn:hover{background:#1050A0}
+.lbtn:hover{background:var(--blue)}
 .lbtn.grn{background:var(--green)}.lbtn.grn:hover{background:#145F32}
-.prodrow{display:flex;align-items:center;gap:.35rem;margin-bottom:.28rem;background:#F4F8FC;border:1px solid var(--bdr);border-radius:6px;padding:.32rem .55rem}
+.prodrow{display:flex;align-items:center;gap:.35rem;margin-bottom:.28rem;background:var(--ltblue);border:1px solid var(--bdr);border-radius:6px;padding:.32rem .55rem}
 .prodrow input{flex:1;border:1.5px solid var(--bdr2);border-radius:5px;padding:.26rem .42rem;font-family:'IBM Plex Mono';font-size:.75rem;outline:none;min-width:0;background:#fff}
 .prodrow input:focus{border-color:var(--blue)}
 .prodrow .plbl{font-size:.58rem;color:var(--ink4);font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;flex-shrink:0}
@@ -215,6 +217,21 @@ body.dark .toggle-grp button{background:#1B2535;color:var(--ink3)}
 .fin-2col .tw th:nth-child(7),.fin-2col .tw td:nth-child(7){width:12%}
 .fin-2col .tw th:nth-child(8),.fin-2col .tw td:nth-child(8){width:4%}
 @media(max-width:900px){.fin-2col{grid-template-columns:1fr}}
+@media(max-width:700px){
+  /* header fica compacto em vez de quebrar linha — .subheader mede a altura
+     dele em runtime (setupIntStickyHeader), então aqui só reduzimos conteudo,
+     nunca a altura, pra nao desalinhar esse calculo */
+  header{padding:0 .7rem;gap:.5rem}
+  .logo{font-size:.85rem}
+  #auth-status2{display:none}
+  .hdr-r .btn-bkp{padding:.3rem .45rem;font-size:.62rem}
+  /* subheader (Controle Interno/Financeiro + busca) pode quebrar linha —
+     nada depende da altura fixa dela, o JS mede em runtime */
+  .subheader{flex-wrap:wrap;height:auto;padding:.5rem .8rem}
+  .tb{gap:.3rem}
+  .modal{width:96vw;max-width:96vw}
+  #int-tbl,#cli-tbl{font-size:.68rem}
+}
 .fin-2col .tb{gap:.3rem}
 .fin-2col .tb input,.fin-2col .tb select{font-size:.66rem;padding:.25rem .4rem;max-width:100px}
 .fin-2col .tb input[type=date]{max-width:120px}
@@ -247,21 +264,21 @@ th.sortable.asc .si,th.sortable.desc .si{opacity:1;color:#7DF0C0}
 #mcal .mc-day.empty{cursor:default}
 .note-icon:hover .note-tip{display:block !important}
 /* Login screen */
-#login-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0D2B45 0%,#1A4A70 50%,#0D2B45 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
-body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%,#020617 100%)}
+#login-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--navy) 0%,#1A4A70 50%,var(--navy) 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
+body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy) 50%,#020617 100%)}
 #login-screen .login-box{background:rgba(255,255,255,.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:2.5rem;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
 #login-screen .login-logo{font-size:2.2rem;margin-bottom:.5rem}
 #login-screen h1{color:#fff;font-size:1.1rem;font-weight:700;margin-bottom:.3rem;font-family:'IBM Plex Sans'}
 #login-screen .login-sub{color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:1.5rem}
 #login-screen input{width:100%;padding:.6rem .8rem;border:1.5px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(0,0,0,.25);color:#fff;font-family:'IBM Plex Mono';font-size:1rem;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:.8rem}
 #login-screen input.wide{letter-spacing:normal;font-size:.85rem}
-#login-screen input:focus{border-color:#4DB8FF}
+#login-screen input:focus{border-color:var(--accent)}
 #login-screen input::placeholder{color:rgba(255,255,255,.25);letter-spacing:normal}
-#login-screen button{width:100%;padding:.55rem;background:linear-gradient(135deg,#2E9E6A,#1A7A45);color:#fff;border:none;border-radius:8px;font-family:'IBM Plex Sans';font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s}
+#login-screen button{width:100%;padding:.55rem;background:linear-gradient(135deg,#2E9E6A,var(--green));color:#fff;border:none;border-radius:8px;font-family:'IBM Plex Sans';font-weight:700;font-size:.82rem;cursor:pointer;transition:opacity .15s}
 #login-screen button.sec{background:rgba(255,255,255,.12)}
 #login-screen .login-btn-row{display:flex;gap:.5rem}
 #login-screen button:hover{opacity:.85}
-#login-screen .login-err{color:#F87171;font-size:.72rem;margin-top:.5rem;min-height:1rem}
+#login-screen .login-err{color:var(--red);font-size:.72rem;margin-top:.5rem;min-height:1rem}
 /* Dark mode toggle */
 .dm-toggle{background:none;border:1.5px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .dm-toggle:hover{border-color:rgba(255,255,255,.5);color:#fff}
@@ -306,14 +323,14 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
     <span id="auth-status2" style="font-size:.72rem;font-weight:600;color:rgba(255,255,255,.85);margin-right:.4rem"></span>
     <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">↓ Salvar</button>
     <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">↑ Carregar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
-    <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro">🌙</button>
+    <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro" aria-label="Alternar modo escuro">🌙</button>
   </div>
 </header>
 <div class="subheader">
   <button class="stab active" onclick="showTab('internal')">Controle Interno</button>
   <button class="stab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
   <div style="flex:1"></div>
-  <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones">📅</button>
+  <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones" aria-label="Abrir calendário de milestones">📅</button>
   <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
   <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
 </div>
@@ -431,7 +448,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <div class="date-wrap">
               <input type="text" id="l-date" placeholder="15/01/26" autocomplete="off">
               <input type="date" id="l-date-cal" onchange="datePickerSync('l-date',this.value)">
-              <button class="date-cal-btn" type="button" onclick="openCal('l-date-cal')" tabindex="-1">📅</button>
+              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('l-date-cal')" tabindex="-1">📅</button>
             </div>
           </div>
           <div class="ff"><label id="l-amt-lbl">Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01"></div>
@@ -441,7 +458,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <option value="rf">RF (importação)</option>
             <option value="trading">Trading</option>
           </select></div>
-          <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:#F0F7FF;cursor:not-allowed"></div>
+          <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:var(--ltblue);cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
           <div class="ff"><label>Notas</label><input id="l-notes" placeholder="Notas…"></div>
           <button class="lbtn" onclick="addLedger()">＋ Lançar</button>
@@ -482,12 +499,12 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
             <div class="date-wrap">
               <input type="text" id="r-date" placeholder="15/01/26" autocomplete="off">
               <input type="date" id="r-date-cal" onchange="datePickerSync('r-date',this.value)">
-              <button class="date-cal-btn" type="button" onclick="openCal('r-date-cal')" tabindex="-1">📅</button>
+              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('r-date-cal')" tabindex="-1">📅</button>
             </div>
           </div>
           <div class="ff"><label id="r-amt-lbl">Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
           <div class="ff"><label>IP</label><select id="r-pi" onchange="onRpiChange()"><option value="">— IP —</option></select></div>
-          <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:#F0FAF5;cursor:not-allowed"></div>
+          <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:var(--ltgrn);cursor:not-allowed"></div>
           <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
           <datalist id="fin-ref-tags"><option value="SINAL"><option value="BALANÇO"><option value="AMOSTRAS"></datalist>
           <div class="ff"><label>Notas</label><input id="r-notes" placeholder="Notas…"></div>
@@ -529,7 +546,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- MODAL NOVO PEDIDO -->
 <div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')">
   <div class="modal">
-    <div class="mhdr"><h2 id="mo-ttl">Novo Pedido</h2><button class="mcls" onclick="closeOvl('order')">✕</button></div>
+    <div class="mhdr"><h2 id="mo-ttl">Novo Pedido</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('order')">✕</button></div>
     <div class="mbody">
       <div class="fg">
         <div class="fsep">Identificação</div>
@@ -539,7 +556,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
             <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
-            <button class="date-cal-btn" type="button" onclick="openCal('mo-data-cal')" tabindex="-1">📅</button>
+            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal')" tabindex="-1">📅</button>
           </div>
         </div>
         <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
@@ -569,7 +586,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div class="date-wrap">
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
             <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
-            <button class="date-cal-btn" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
+            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
           </div>
         </div>
         <div class="ff"><label>Amostras</label>
@@ -624,7 +641,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- MODAL GERENCIAR STATUS -->
 <div class="ovl" id="ovl-docevent" onclick="ovlOut(event,'docevent')">
   <div class="modal" style="width:360px">
-    <div class="mhdr"><h2 id="de-title">Notificação</h2><button class="mcls" onclick="closeOvl('docevent')">✕</button></div>
+    <div class="mhdr"><h2 id="de-title">Notificação</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('docevent')">✕</button></div>
     <div class="mbody">
       <p id="de-info" style="font-size:.72rem;color:var(--ink3);margin-bottom:.7rem"></p>
       <label style="font-size:.68rem;color:var(--ink3);display:block;margin-bottom:.2rem">Data em que foi feito</label>
@@ -638,7 +655,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 </div>
 <div class="ovl" id="ovl-status" onclick="ovlOut(event,'status')">
   <div class="modal" style="width:860px">
-    <div class="mhdr"><h2>Gerenciar Cadastros</h2><button class="mcls" onclick="closeOvl('status')">✕</button></div>
+    <div class="mhdr"><h2>Gerenciar Cadastros</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('status')">✕</button></div>
     <div class="mbody">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
         <div>
@@ -646,7 +663,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div id="st-cli-list" style="margin-bottom:.6rem"></div>
           <div style="display:flex;gap:.4rem">
             <input id="st-cli-new" placeholder="Novo cliente…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
-            <button class="lbtn" style="height:32px" onclick="addMestre('cli')">＋</button>
+            <button class="lbtn" style="height:32px" onclick="addMestre('cli')" aria-label="Adicionar cliente">＋</button>
           </div>
         </div>
         <div>
@@ -654,7 +671,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div id="st-forn-list" style="margin-bottom:.6rem"></div>
           <div style="display:flex;gap:.4rem">
             <input id="st-forn-new" placeholder="Novo fornecedor…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
-            <button class="lbtn" style="height:32px" onclick="addMestre('forn')">＋</button>
+            <button class="lbtn" style="height:32px" onclick="addMestre('forn')" aria-label="Adicionar fornecedor">＋</button>
           </div>
         </div>
       </div>
@@ -664,7 +681,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div id="st-prod-list" style="margin-bottom:.6rem"></div>
           <div style="display:flex;gap:.4rem">
             <input id="st-prod-new" placeholder="Novo produto…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
-            <button class="lbtn" style="height:32px" onclick="addMestre('prod')">＋</button>
+            <button class="lbtn" style="height:32px" onclick="addMestre('prod')" aria-label="Adicionar produto">＋</button>
           </div>
         </div>
         <div>
@@ -672,7 +689,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
           <div id="st-cont-list" style="margin-bottom:.6rem"></div>
           <div style="display:flex;gap:.4rem">
             <input id="st-cont-new" placeholder="Novo contêiner…" style="flex:1;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .5rem;font-family:'IBM Plex Sans';font-size:.78rem">
-            <button class="lbtn" style="height:32px" onclick="addMestre('cont')">＋</button>
+            <button class="lbtn" style="height:32px" onclick="addMestre('cont')" aria-label="Adicionar contêiner">＋</button>
           </div>
         </div>
       </div>
@@ -716,7 +733,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- MODAL EDITAR PREÇOS -->
 <div class="ovl" id="ovl-prices" onclick="ovlOut(event,'prices')">
   <div class="modal" style="width:640px">
-    <div class="mhdr"><h2 id="pr-ttl">Editar Qtd / Preços</h2><button class="mcls" onclick="closeOvl('prices')">✕</button></div>
+    <div class="mhdr"><h2 id="pr-ttl">Editar Qtd / Preços</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('prices')">✕</button></div>
     <div class="mbody">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.6rem">
         <div style="font-size:.72rem;color:var(--ink3)"><b>IP:/b> <span id="pr-pi-lbl" style="color:var(--blue);font-family:'IBM Plex Mono'"></span></div>
@@ -748,7 +765,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- FINANCEIRO POR IP POPUP -->
 <div class="ovl" id="ovl-finpop" onclick="ovlOut(event,'finpop')">
   <div class="modal" style="width:680px;max-width:95vw">
-    <div class="mhdr"><h2 id="finpop-title">Financeiro</h2><button class="mcls" onclick="closeOvl('finpop')">✕</button></div>
+    <div class="mhdr"><h2 id="finpop-title">Financeiro</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('finpop')">✕</button></div>
     <div class="mbody" id="finpop-body"></div>
   </div>
 </div>
@@ -756,17 +773,17 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,#0F172A 50%
 <!-- CALENDAR POPUP -->
 <div class="ovl" id="ovl-calendar" onclick="ovlOut(event,'calendar')">
   <div class="modal" style="width:720px">
-    <div class="mhdr"><h2>Calendário de Milestones</h2><button class="mcls" onclick="closeOvl('calendar')">✕</button></div>
+    <div class="mhdr"><h2>Calendário de Milestones</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('calendar')">✕</button></div>
     <div class="mbody">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="calNav(-1)">◀</button>
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="calNav(-1)" aria-label="Mês anterior">◀</button>
         <h3 id="cal-title" style="font-size:.95rem;font-weight:700;color:var(--ink);margin:0"></h3>
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="calNav(1)">▶</button>
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="calNav(1)" aria-label="Próximo mês">▶</button>
       </div>
       <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:6px;overflow:hidden"></div>
       <div style="display:flex;gap:14px;margin-top:.6rem;font-size:.6rem;color:var(--ink3)">
-        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#16A34A;margin-right:3px"></span>Confirmado</span>
-        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#D97706;margin-right:3px"></span>Estimado</span>
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:3px"></span>Confirmado</span>
+        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:3px"></span>Estimado</span>
       </div>
     </div>
   </div>
@@ -1011,6 +1028,20 @@ function toast(msg,type='ok',undoable=false){
   const dur=type==='err'?4000:type==='warn'?3500:2400;
   _toastTimer=setTimeout(()=>t.classList.remove('show'),dur);
 }
+
+/* HANDLER GLOBAL DE ERRO — sem isso, um erro de JS no meio de um render
+   trava a interface em silêncio (foi exatamente a classe do bug do
+   'Embarque On Board'). Com isso, pelo menos o usuário vê um aviso em
+   vez de achar que clicou errado. Debounce de 4s pra não floodar toast
+   se algo entrar em loop de erro. */
+let _lastErrToast=0;
+function _globalErrToast(){
+  if(Date.now()-_lastErrToast<4000)return;
+  _lastErrToast=Date.now();
+  toast('⚠ Algo deu errado — tente de novo ou recarregue a página','err');
+}
+window.addEventListener('error',e=>{console.error('Erro não tratado:',e.error||e.message);_globalErrToast();});
+window.addEventListener('unhandledrejection',e=>{console.error('Promise rejeitada:',e.reason);_globalErrToast();});
 
 /* ══════════════════════════════════════
    DARK MODE
@@ -1464,6 +1495,11 @@ function migrateBookingFeito(){
       o.dates.splice(5,0,mkD(null,true));
       changed=true;
     }
+    // Rede de segurança: qualquer pedido que ainda não tenha os 9 marcos
+    // (formato desconhecido/corrompido) é completado ao final em vez de
+    // quebrar silenciosamente quando algum código acessar dates[6..8].
+    if(!o.dates||!Array.isArray(o.dates)){o.dates=[];changed=true;}
+    while(o.dates.length<9){o.dates.push(mkD(null,true));changed=true;}
   });
   if(!SLST.includes('PRÉ-EMBARQUE')){
     const idx=SLST.indexOf('EMBARCADO');
@@ -1829,8 +1865,8 @@ function renderInternal(){
       <td class="L">
         <b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b>
         <div style="display:flex;flex-direction:column;gap:1px;margin-top:.2rem">
-          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:pointer;opacity:.55;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">✏️</button>
-          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:${o.pi?'pointer':'not-allowed'};opacity:${o.pi?'.55':'.25'};transition:opacity .15s" ${o.pi?'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55"':''}>💰</button>
+          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:pointer;opacity:.55;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">✏️</button>
+          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:${o.pi?'pointer':'not-allowed'};opacity:${o.pi?'.55':'.25'};transition:opacity .15s" ${o.pi?'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55"':''}>💰</button>
         </div>
       </td>
       <td class="L">
@@ -1879,7 +1915,7 @@ function renderInternal(){
           <div style="flex:1;min-width:0">${a&&!snoozed?`<div style="display:flex;flex-direction:column;gap:1px;text-align:center">
             <div style="display:flex;align-items:center;justify-content:center;gap:4px">
               <span style="font-size:.74rem;font-weight:700;color:${a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)'};line-height:1.25">${esc(a.text)}</span>
-              <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
+              <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" aria-label="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
             <div style="font-size:.62rem;color:var(--ink3);line-height:1.25">→ ${esc(a.suggestion)}</div>
           </div>`:snoozed?`<div style="font-size:.62rem;color:var(--ink4);font-style:italic;display:flex;align-items:center;justify-content:center;gap:4px">adiado <button onclick="delete SNOOZED['${esc(a.key)}'];saveAll();renderInternal()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:.6rem;padding:0">reativar</button></div>`:(o.status==='FINALIZADO'||o.status==='SUSPENSO')?`<div style="display:flex;justify-content:center">${statusSel(o.num,o.status)}</div>`:''}</div>
@@ -1890,7 +1926,7 @@ function renderInternal(){
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
       ${msHTML(o.dates,o.num,o)}
-      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido">✕</button></td>
+      <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="delOrder(${o.num})" title="Apagar pedido" aria-label="Apagar pedido ${o.num}">✕</button></td>
     </tr>`;
   }).join('');
 }
@@ -1935,8 +1971,8 @@ function renderClient(){
   document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
     let rowStyle='';
-    if(o.status==='FINALIZADO')rowStyle=' style="background:#F0FAF5"';
-    else if(o.status==='SUSPENSO')rowStyle=' style="background:#FEF6F6"';
+    if(o.status==='FINALIZADO')rowStyle=' style="background:var(--ltgrn)"';
+    else if(o.status==='SUSPENSO')rowStyle=' style="background:var(--ltred)"';
     return`<tr${rowStyle||(i%2?'':' class="alt"')}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L"><span style="font-family:'IBM Plex Mono';font-size:.7rem;color:var(--blue)">${esc(o.po)}</span></td>
@@ -2079,7 +2115,7 @@ function renderFinanceCard(vm){
         <div>
           <div style="font-family:'IBM Plex Mono';font-weight:700;font-size:.92rem;color:var(--navy);display:flex;align-items:center;gap:.3rem">
             ${esc(p.pi)}
-            ${linkedOrd?`<button onclick="event.stopPropagation();openOrderModal(${linkedOrd.num})" title="Editar pedido (ficha completa)" style="background:none;border:none;padding:0;font-size:.68rem;cursor:pointer;opacity:.5;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">✏️</button>`:''}
+            ${linkedOrd?`<button onclick="event.stopPropagation();openOrderModal(${linkedOrd.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${linkedOrd.num}" style="background:none;border:none;padding:0;font-size:.68rem;cursor:pointer;opacity:.5;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">✏️</button>`:''}
           </div>
           <div style="font-family:'IBM Plex Mono';font-size:.6rem;color:var(--ink3)">
             <span style="color:var(--blue)">${esc(vm.po||'—')}</span>
@@ -2186,7 +2222,7 @@ const transactionConfigs={
     sortState:()=>recSort,
     amountStyle:'color:var(--teal)',
     totColor1:'var(--green)', totColor2:'var(--teal)', totLabel2:'Recebimentos',
-    footBg:'#F0FAF5', footBorder:'var(--green)',
+    footBg:'var(--ltgrn)', footBorder:'var(--green)',
     showLayerBadge:false,
     delFnName:'delReceipt', editFnName:'editRec',
     searchFields:r=>`${r.pi} ${r.client||''} ${r.ref} ${r.notes}`,
@@ -2239,7 +2275,7 @@ function buildTransactionRows(list,config){
     <td class="ec L" onclick="${config.editFnName}(${x.n},'${config.entityField}',event)">${esc(x[config.entityField])||'—'}</td>
     <td class="ec L" style="font-size:.69rem;color:var(--ink3)" onclick="${config.editFnName}(${x.n},'ref',event)">${esc(x.ref)}</td>
     <td class="ec L" style="font-size:.68rem;color:var(--ink3)" onclick="${config.editFnName}(${x.n},'notes',event)">${esc(x.notes)}</td>
-    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="${config.delFnName}(${x.n})">✕</button></td>
+    <td style="padding:0 .3rem"><button class="bsm d del-row" onclick="${config.delFnName}(${x.n})" aria-label="Apagar registro">✕</button></td>
   </tr>`;
   }).join('');
 }
@@ -2473,11 +2509,11 @@ function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   row.innerHTML=`<input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
     <input type="text" placeholder="Ref." value="${esc(ref)}" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
-    <input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #fca5a5;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
+    <input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid var(--ltred);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePricePreview()" style="border:1.5px solid #6EE7B7;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.76rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePricePreview()" style="border:1.5px solid #FCD34D;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.72rem;outline:none;width:100%">
     <input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePricePreview()" style="border:1.5px solid #FCD34D;border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Mono';font-size:.72rem;outline:none;width:100%">
-    <button onclick="this.parentElement.remove();updatePricePreview()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem;padding:0 .2rem">✕</button>`;
+    <button onclick="this.parentElement.remove();updatePricePreview()" aria-label="Remover produto" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem;padding:0 .2rem">✕</button>`;
   cont.appendChild(row);
 }
 function readPriceRows(){
@@ -2520,7 +2556,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
     <div><span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
-    <button class="rm" onclick="this.parentElement.remove();updatePreview()">✕</button>`;
+    <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>`;
   container.appendChild(row);updatePreview();
 }
 function readProdRows(){
@@ -2746,13 +2782,15 @@ function editFinField(pi,field,e){
 }
 function editMS(num,di,e){
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
+  if(!o.dates||!Array.isArray(o.dates))o.dates=[];
+  while(o.dates.length<9)o.dates.push(mkD(null,true)); // auto-repara array curto/corrompido em vez de quebrar
   const d=o.dates[di];_epCtx={type:'ms',num,di};
   const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Booking Feito','Embarque ETD','ETA Brasil','Entrada CD'];
   document.getElementById('ep-ttl').textContent=MSFULL[di];
   document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
     <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off" oninput="document.getElementById('ep-est').checked=false">
     <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value);document.getElementById('ep-est').checked=false">
-    <button class="date-cal-btn" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
+    <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
     <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i>desmarque para confirmar a data</i></label>`;
   positionEp(e);
 }
@@ -3044,7 +3082,7 @@ function renderCalendar(){
   const firstDay=new Date(_calYear,_calMonth,1).getDay();
   const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
   const isDark=document.body.classList.contains('dark');
-  const bgCell=isDark?'#1B2535':'#fff';const bgOther=isDark?'#111827':'#F8FAFC';
+  const bgCell='var(--card)';const bgOther='var(--ltblue)';
   const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
   const events={};
   orders.forEach(o=>{if(!o.dates)return;o.dates.forEach((d,mi)=>{
@@ -3056,7 +3094,7 @@ function renderCalendar(){
     }
   });});
   let h='';
-  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
+  dayNames.forEach(d=>{h+=`<div style="background:var(--head-bg);padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
   const startOff=(firstDay===0?6:firstDay-1);
   for(let i=0;i<startOff;i++) h+=`<div style="background:${bgOther};padding:4px;min-height:60px"></div>`;
   const today=new Date();
@@ -3066,7 +3104,7 @@ function renderCalendar(){
     h+=`<div style="background:${bgCell};padding:3px 4px;min-height:60px;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
     h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px">${d}</div>`;
     evts.forEach(e=>{
-      const col=e.confirmed?'#16A34A':'#D97706';
+      const col=e.confirmed?'var(--green)':'var(--amber)';
       h+=`<div style="font-size:.7rem;padding:2px 4px;margin-bottom:2px;border-radius:3px;background:${col}18;color:${col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" onclick="closeOvl('calendar');editMS(${e.num},${e.mi},event)"><b>${esc(e.ip)}</b> ${e.label}</div>`;
     });
     h+='</div>';
@@ -3133,7 +3171,7 @@ function computeAvgDocGaps(){
 function renderStatusLists(){
   ['cli','forn','prod','cont'].forEach(tipo=>{
     const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
-    document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
+    document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" aria-label="Renomear" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" aria-label="Remover" style="background:none;border:1px solid var(--ltred);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
   });
   // Render milestone gaps editor
   document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>{
@@ -3338,6 +3376,15 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeEp();document.getElementById('mcal').style.display='none';
     document.querySelectorAll('.ovl.open').forEach(o=>{const id=o.id.replace('ovl-','');closeOvl(id);});}
   if(e.key==='Enter'&&document.getElementById('epop').style.display==='block'){e.preventDefault();epSave();}
+  const typing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)||document.activeElement?.isContentEditable;
+  // Ctrl/Cmd+Z fora de um campo de texto = desfazer última ação (undo nativo do campo tem prioridade se estiver digitando)
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!typing){e.preventDefault();popUndo();}
+  // "/" fora de um campo = foca a busca da visão atual
+  if(e.key==='/'&&!typing){
+    e.preventDefault();
+    const id=_activeTab==='financeiro'?'fin-q':(rvTrackerSubview==='cliente'?'cli-q':'int-q');
+    document.getElementById(id)?.focus();
+  }
 });
 document.addEventListener('click',e=>{
   const ep=document.getElementById('epop');if(ep.style.display!=='block')return;
@@ -3375,7 +3422,7 @@ function renderMcal(){
     const isToday=today.getFullYear()===_calY&&today.getMonth()===_calM&&today.getDate()===d;
     days+=`<div class="mc-day${isToday?' today':''}${curISO===iso?' selected':''}" onclick="pickDay(${d})">${d}</div>`;
   }
-  cal.innerHTML=`<div class="mc-hdr"><button class="mc-nav" onclick="mcalNav(-1);event.stopPropagation()">‹</button><span class="mc-title">${MO[_calM]} ${_calY}</span><button class="mc-nav" onclick="mcalNav(1);event.stopPropagation()">›</button></div>
+  cal.innerHTML=`<div class="mc-hdr"><button class="mc-nav" onclick="mcalNav(-1);event.stopPropagation()" aria-label="Mês anterior">‹</button><span class="mc-title">${MO[_calM]} ${_calY}</span><button class="mc-nav" onclick="mcalNav(1);event.stopPropagation()" aria-label="Próximo mês">›</button></div>
     <div class="mc-grid"><div class="mc-dow">Seg</div><div class="mc-dow">Ter</div><div class="mc-dow">Qua</div><div class="mc-dow">Qui</div><div class="mc-dow">Sex</div><div class="mc-dow">Sáb</div><div class="mc-dow">Dom</div>${days}</div>`;
 }
 function mcalNav(dir){_calM+=dir;if(_calM<0){_calM=11;_calY--;}if(_calM>11){_calM=0;_calY++;}renderMcal();event.stopPropagation();}

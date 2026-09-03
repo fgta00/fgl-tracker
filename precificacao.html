@@ -17,6 +17,7 @@
   --grey:#5A6A76;--ltgry:#EDF1F4;
   --purple:#5B21B6;--ltpur:#EDE9FE;
   --teal:#0D6E6E;--ltteal:#CCEFEF;
+  --est:#F59E0B;--pending:#C8D8E4;--accent:#4DB8FF;--green-dk:#8FE3A8;
 }
 body.dark{
   --ink:#E8EDF2;--ink2:#D0D8E0;--ink3:#A0B0C0;--ink4:#708090;
@@ -24,14 +25,15 @@ body.dark{
   --navy:#0F172A;--ltblue:#1A2E48;
   --ltgrn:#0F3026;--ltamb:#3D2800;--ltred:#3D1218;
   --ltgry:#1B2535;--ltpur:#1E1040;--ltteal:#0D3230;
+  --pending:#3A4E65;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.4}
 .mono{font-family:'IBM Plex Mono',monospace}
 header{background:var(--navy);color:#fff;height:52px;padding:0 1.4rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.4)}
-body.dark header{background:#0A0F1A}
+body.dark header{background:var(--head-bg)}
 .logo{display:flex;align-items:center;gap:.5rem;color:#fff;font-weight:700;font-size:.86rem;letter-spacing:.03em}
-header .logo .leaf{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,#1A7A45);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+header .logo .leaf{width:26px;height:26px;background:linear-gradient(135deg,#2E9E6A,var(--green));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
 header .sub{font-size:.66rem;color:rgba(255,255,255,.55);font-weight:400}
 header .spacer{flex:1}
 .dm-toggle{background:none;border:1.5px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85rem}
@@ -60,7 +62,7 @@ header .spacer{flex:1}
 .rv2-frete-wrap .pill-toggle-sm{height:32px;white-space:nowrap}
 .rv2-products-head{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;margin-bottom:.45rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
 .rv2-products-head .fsep{margin:0;padding:0;border:0}
-.rv2-prodcard{position:relative;background:#F4F8FC;border:1px solid var(--bdr);border-radius:9px;padding:.55rem 2rem .55rem .65rem;margin-bottom:.45rem}
+.rv2-prodcard{position:relative;background:var(--ltblue);border:1px solid var(--bdr);border-radius:9px;padding:.55rem 2rem .55rem .65rem;margin-bottom:.45rem}
 body.dark .rv2-prodcard{background:#16202E}
 .rv2-prodcard-l1,.rv2-prodcard-l2{display:grid;gap:.45rem;align-items:end}
 .rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(175px,1.7fr) minmax(138px,.9fr)}
@@ -79,16 +81,16 @@ body.dark .rv2-prodcard{background:#16202E}
 .rv2-seg-toggle span.active{background:var(--green);color:#fff}
 .rv2-prod-logo-btn.active{background:var(--card);color:inherit;border-color:var(--bdr2)}
 .rv2-prod-remove{position:absolute;top:.45rem;right:.45rem;background:none;border:none;color:var(--red);cursor:pointer;padding:.1rem;display:flex;align-items:center;justify-content:center;z-index:2}
-body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
 body.dark .rv2-seg-toggle span.active{background:var(--green);color:#fff}
 @media(max-width:900px){.rv2-order-head{grid-template-columns:1fr 1fr}.rv2-order-head>.rv2-client-field{grid-column:1/-1}.rv2-prodcard-l1{grid-template-columns:1fr 1.45fr 1fr}.rv2-prodcard-l2{grid-template-columns:repeat(3,1fr)}.rv2-prodcard{padding-right:2rem}}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
 .ff input.mono{font-family:'IBM Plex Mono'}
 .ff input:focus,.ff select:focus{border-color:var(--blue)}
-body.dark .ff input,body.dark .ff select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .ff input,body.dark .ff select{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
 .grid{display:grid;gap:.7rem}
 .btn{border:none;border-radius:8px;padding:.45rem .9rem;font-family:'IBM Plex Sans';font-weight:600;font-size:.78rem;cursor:pointer}
-.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:#1050A0}
+.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:var(--blue)}
 .btn-s{background:transparent;border:1.5px solid var(--bdr2);color:var(--ink2)}
 .btn-s:hover{border-color:var(--blue);color:var(--blue)}
 .addrow{background:none;border:1.5px dashed var(--bdr2);color:var(--ink3);font-size:.72rem;padding:.35rem;border-radius:7px;cursor:pointer;width:100%}
@@ -96,7 +98,7 @@ body.dark .ff input,body.dark .ff select{background:#111827;border-color:#3A4E65
 .prow{display:grid;grid-template-columns:1.15fr .8fr .8fr 30px .65fr .75fr .85fr .5fr .5fr .5fr .45fr .6fr 24px;gap:.3rem;align-items:center;margin-bottom:.4rem;font-size:.72rem}
 .prow input{border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem .32rem;font-family:'IBM Plex Mono';font-size:.7rem;outline:none;background:var(--card);color:var(--ink);width:100%;min-width:0}
 .prow input:focus{border-color:var(--blue)}
-body.dark .prow input{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .prow input{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
 .prow .rm{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem}
 .prow .gear{background:var(--ltgry);border:1px solid var(--bdr2);border-radius:5px;cursor:pointer;font-size:.72rem;padding:.28rem 0;color:var(--ink3)}
 .prow .gear:hover{border-color:var(--blue);color:var(--blue)}
@@ -115,18 +117,18 @@ body.dark .prow input{background:#111827;border-color:#3A4E65;color:#E8EDF2}
 .cmp .lbl{color:var(--ink2);flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.15;gap:0}
 .cmp .v{justify-content:flex-end;font-family:'IBM Plex Mono';font-weight:500;text-align:right}
 .cmp .colh{justify-content:center;flex-direction:column;color:#fff;font-weight:700;font-size:.78rem;padding:.4rem .7rem;text-align:center;border-bottom:none}
-.cmp .fy{background:linear-gradient(135deg,#0D6E6E,#0A5555)}
-.cmp .av{background:linear-gradient(135deg,#0D2B45,#091F33)}
-.cmp .tr{background:linear-gradient(135deg,#1B7A45,#14602F)}
+.cmp .fy{background:linear-gradient(135deg,var(--teal),#0A5555)}
+.cmp .av{background:linear-gradient(135deg,var(--navy),#091F33)}
+.cmp .tr{background:linear-gradient(135deg,var(--green),#14602F)}
 .cmp .colh .flag{font-size:1rem;margin-bottom:2px}
 .cmp .colh .csub{font-size:.57rem;font-weight:400;opacity:.78}
 .cmp .sec{grid-column:1/-1;background:var(--navy);color:rgba(255,255,255,.85);font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .7rem}
-body.dark .cmp .sec{background:#0A0F1A}
+body.dark .cmp .sec{background:var(--head-bg)}
 .cmp .hero{background:var(--ltgry);font-weight:700;font-size:.92rem;padding:.7rem}
 .cmp .hero.v{font-size:1rem}
 .cmp .sub{font-size:.64rem;color:var(--ink4);padding:.28rem .7rem}
 .cmp .corner{background:var(--ltgry);border-bottom:1px solid var(--bdr)}
-body.dark .cmp .corner{background:#1B2535}
+body.dark .cmp .corner{background:var(--card)}
 .cmp .cash{background:var(--ltred);font-size:.82rem;padding:.4rem .7rem}
 .cmp .cash.v{font-size:.92rem}
 .cmp .dif{background:var(--ltamb);font-size:.78rem;padding:.35rem .7rem}
@@ -135,7 +137,7 @@ body.dark .cmp .corner{background:#1B2535}
 .tag{display:inline-block;font-size:.56rem;font-weight:600;padding:.08rem .35rem;border-radius:4px;margin-top:3px;margin-right:3px;background:#fff;color:var(--green)}
 .tag-cash{background:#fff;color:var(--amber)}
 .insight{background:linear-gradient(135deg,var(--ltgrn),var(--ltteal));border:1px solid var(--green);border-radius:12px;padding:1rem 1.2rem;margin-top:1rem;font-size:.85rem;line-height:1.55}
-body.dark .insight{background:linear-gradient(135deg,#0F3026,#0D3230);color:#E8EDF2}
+body.dark .insight{background:linear-gradient(135deg,var(--ltgrn),var(--ltteal));color:var(--ink)}
 .insight b{color:var(--green)}
 body.dark .insight b{color:#6EE7B7}
 .cbm-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.66rem;color:var(--ink3);background:var(--ltgry);padding:.25rem .6rem;border-radius:6px;font-family:'IBM Plex Mono'}
@@ -146,9 +148,9 @@ small.hint{color:var(--ink4);font-size:.62rem}
 #ovl-lock,#ovl-auth,#ovl-rvlock{background:rgba(8,15,25,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .ovl.open{display:flex}
 .modal{background:var(--card);border-radius:14px;width:560px;max-width:96vw;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-body.dark .modal{background:#1B2535}
+body.dark .modal{background:var(--card)}
 .modal-h{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--card)}
-body.dark .modal-h{background:#1B2535}
+body.dark .modal-h{background:var(--card)}
 .modal-h h2{font-size:.92rem;font-weight:700}
 .mcls{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--ink3)}
 .modal-b{padding:1.1rem}
@@ -210,7 +212,7 @@ body.dark .modal-h{background:#1B2535}
 .exp-row label{font-size:.7rem;color:var(--ink2)}
 .exp-row .formula{font-size:.55rem;color:var(--ink4);font-family:'IBM Plex Mono';display:inline-flex;align-items:center;gap:.3rem;flex-wrap:wrap}
 .exp-row input,.exp-row select{border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .45rem;font-family:'IBM Plex Mono';font-size:.74rem;background:var(--card);color:var(--ink);width:100%}
-body.dark .exp-row input,body.dark .exp-row select{background:#111827;border-color:#3A4E65;color:#E8EDF2}
+body.dark .exp-row input,body.dark .exp-row select{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
 .exp-sec{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin:.9rem 0 .5rem;border-bottom:1px solid var(--bdr);padding-bottom:.2rem}
 .exp-total{display:flex;justify-content:space-between;padding:.6rem .2rem 0;margin-top:.6rem;border-top:2px solid var(--bdr2);font-weight:700;font-size:.85rem}
 @media(max-width:780px){.cmp{grid-template-columns:1fr;font-size:.9rem}.prow,.prow-h{grid-template-columns:1fr 1fr;gap:.4rem}}
@@ -219,19 +221,19 @@ body.dark .exp-row input,body.dark .exp-row select{background:#111827;border-col
 header .tabs{display:flex;gap:2px;height:100%}
 header .tab{background:none;border:none;color:rgba(255,255,255,.48);font-family:'IBM Plex Sans';font-size:.73rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:0 1rem;height:100%;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:inline-flex;align-items:center}
 header .tab:hover{color:rgba(255,255,255,.82)}
-header .tab.active{color:#fff;border-bottom-color:#4DB8FF}
+header .tab.active{color:#fff;border-bottom-color:var(--accent)}
 .view{display:none}
 .view.active{display:block}
 header .hbtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);border-radius:8px;padding:.42rem .8rem;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
 header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.11)}
-#save-status{font-size:.66rem;color:#8FE3A8;font-weight:600;white-space:nowrap}
+#save-status{font-size:.66rem;color:var(--green-dk);font-weight:600;white-space:nowrap}
 
 /* ══════════════════════ REVENDA ══════════════════════ */
 .rv-tabs{display:flex;align-items:center;gap:0;background:var(--navy);margin:-1.2rem calc(-50vw + 50%) 1.1rem;padding:.4rem calc(50vw - 50% + 1.3rem)}
 .rv-tab{padding:.6rem 1rem;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border:none;background:none;cursor:pointer;color:rgba(255,255,255,.55);border-bottom:3px solid transparent;transition:.15s;font-family:'IBM Plex Sans';outline:none}
 .rv-tab:hover{color:rgba(255,255,255,.85)}
-.rv-tab.active{color:#fff;border-bottom-color:#4DB8FF}
-body.dark .rv-tabs{background:#0A0F1A}
+.rv-tab.active{color:#fff;border-bottom-color:var(--accent)}
+body.dark .rv-tabs{background:var(--head-bg)}
 .rv-pane{display:none}
 .rv-pane.active{display:block}
 .badge-regime{background:rgba(255,255,255,.15);color:#fff;font-size:.66rem;padding:.22rem .6rem;border-radius:20px;white-space:nowrap}
@@ -246,7 +248,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 .mc{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;border:2px solid;cursor:pointer;transition:transform .12s;flex-shrink:0}
 .mc:hover{transform:scale(1.12)}
 .mc.done{background:var(--green);border-color:var(--green);color:#fff}
-.mc.est{background:#F59E0B;border-color:#F59E0B;color:#fff}
+.mc.est{background:var(--est);border-color:var(--est);color:#fff}
 .mc.late{background:var(--red);border-color:var(--red);color:#fff}
 .mc.pending{background:var(--card);border-color:var(--bdr2);color:var(--bdr2)}
 .mst{display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -625,7 +627,7 @@ body.dark .rv-tabs{background:#0A0F1A}
   <button class="hbtn" id="btn-security" onclick="openSecurityModal()" title="Trocar senha da conta ou dos cofres" style="display:none">🔐 Segurança</button>
   <button class="hbtn" onclick="loadState(false)">↑ Carregar</button>
   <button class="hbtn" onclick="saveState()">↓ Salvar</button>
-  <button class="dm-toggle" id="dm" onclick="toggleDark()">🌙</button>
+  <button class="dm-toggle" id="dm" onclick="toggleDark()" aria-label="Alternar modo escuro">🌙</button>
 </header>
 
 <div id="view-import" class="view">
@@ -730,7 +732,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
           <div class="rv2-order-head">
-            <div class="ff rv2-client-field"><label>Cliente</label><div class="rv2-client-wrap"><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select><button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button></div></div>
+            <div class="ff rv2-client-field"><label>Cliente</label><div class="rv2-client-wrap"><select id="rv2-cliente" onchange="rv2OnClienteChange()"><option value="">— selecione —</option></select><button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes" aria-label="Cadastrar / gerenciar clientes">＋</button></div></div>
             <div class="ff"><label style="visibility:hidden">Frete</label><div class="rv2-frete-wrap" style="align-items:flex-start"><button type="button" class="pill-toggle-sm" id="rv2-frete-incluso-btn" onclick="rv2ToggleFreteIncluso()" title="Se ativo, o frete de entrega vira parte da Receita de Venda (e paga imposto sobre isso) em vez de ser descontado como despesa">+ Frete</button><div style="flex:1;min-width:0;position:relative"><label style="position:absolute;bottom:calc(100% + .28rem);left:0;margin:0">Frete R$</label><input type="number" class="mono" id="rv2-frete" value="0" step="0.01" min="0" oninput="rv2Calc()" style="width:100%"></div></div></div>
             <div class="ff"><label>Comissão %</label><input type="number" class="mono" id="rv2-comissao" value="0" step="0.1" min="0" oninput="rv2Calc()"></div>
           </div>
@@ -812,7 +814,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <input id="finr-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderFin()" style="flex:1">
           <span id="msf-finr-cl-wrap"></span>
           <span id="msf-finr-forn-wrap"></span>
-          <button class="btn btn-s" onclick="rvOpenCalPopup()" title="Calendário de pagamentos/recebimentos">📅</button>
+          <button class="btn btn-s" onclick="rvOpenCalPopup()" title="Calendário de pagamentos/recebimentos" aria-label="Abrir calendário de pagamentos/recebimentos">📅</button>
         </div>
         <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
       </div>
@@ -949,7 +951,7 @@ body.dark .rv-tabs{background:#0A0F1A}
       <span id="crm-proj-title">Projeto</span>
       <div style="display:flex;align-items:center;gap:.5rem">
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveProject()">Salvar</button>
-        <button class="mcls" onclick="closeM('crmproject')">✕</button>
+        <button class="mcls" aria-label="Fechar" onclick="closeM('crmproject')">✕</button>
       </div>
     </div>
     <div class="modal-b">
@@ -995,7 +997,7 @@ body.dark .rv-tabs{background:#0A0F1A}
               <select id="crm-proj-person-select" style="font-size:.66rem;padding:.15rem .3rem;border:1px solid var(--bdr2);border-radius:5px;max-width:130px">
                 <option value="">— selecione —</option>
               </select>
-              <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddPersonToProject()">＋</button>
+              <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddPersonToProject()" aria-label="Adicionar pessoa ao projeto">＋</button>
             </span>
           </div>
         </div>
@@ -1048,7 +1050,7 @@ body.dark .rv-tabs{background:#0A0F1A}
         <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmConsultAI()">✦ Consultar IA</button>
         <button class="btn btn-s" id="crm-ai-history-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmToggleAIHistory()">Histórico IA</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
-        <button class="mcls" onclick="closeM('crmcustomer')">✕</button>
+        <button class="mcls" aria-label="Fechar" onclick="closeM('crmcustomer')">✕</button>
       </div>
     </div>
     <div class="modal-b">
@@ -1105,7 +1107,7 @@ body.dark .rv-tabs{background:#0A0F1A}
             <select id="crm-cust-group" style="flex:1;min-width:0;font-size:.69rem;padding:.28rem .45rem;border:1px solid var(--bdr2);border-radius:8px;height:31px;background:var(--bg);color:var(--ink2)">
               <option value="">— nenhum —</option>
             </select>
-            <button class="btn btn-s" style="font-size:.66rem;padding:0;width:31px;height:31px;border-radius:8px;flex-shrink:0" onclick="crmToggleGroupCreate()">＋</button>
+            <button class="btn btn-s" style="font-size:.66rem;padding:0;width:31px;height:31px;border-radius:8px;flex-shrink:0" onclick="crmToggleGroupCreate()" aria-label="Criar grupo">＋</button>
           </div>
           <div id="crm-group-create-wrap" style="display:none;gap:.3rem;margin-top:.3rem">
             <input type="text" id="crm-group-new" placeholder="nome do novo grupo…" style="flex:1;min-width:0;border:1px solid var(--bdr2);border-radius:8px;padding:.25rem .5rem;font-size:.7rem">
@@ -1228,7 +1230,7 @@ body.dark .rv-tabs{background:#0A0F1A}
             <option value="wix">Wix</option>
           </select>
           <input type="text" id="crm-ref-value" placeholder="nome/ID no sistema de origem" style="flex:1;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .6rem;font-size:.76rem">
-          <button class="btn btn-s" onclick="crmAddExternalRef()">＋</button>
+          <button class="btn btn-s" onclick="crmAddExternalRef()" aria-label="Adicionar referência externa">＋</button>
         </div>
       </div>
     </div>
@@ -1238,7 +1240,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CRM — REVISÃO TINY (fila permanente de resolução humana — só bloqueante) -->
 <div class="ovl" id="ovl-crmreview" onclick="if(event.target===this)closeM('crmreview')">
   <div class="modal" style="max-width:640px">
-    <div class="modal-h"><span>Revisão Tiny <span id="crm-review-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" onclick="closeM('crmreview')">✕</button></div>
+    <div class="modal-h"><span>Revisão Tiny <span id="crm-review-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" aria-label="Fechar" onclick="closeM('crmreview')">✕</button></div>
     <div class="modal-b">
       <p class="hint" style="margin-bottom:.7rem">Casos que o matching automático não resolveu sozinho. Você decide — vincular a um cliente existente, criar um novo, ou manter só como registro bruto (não vira cliente CRM).</p>
       <div id="crm-review-list"></div>
@@ -1249,7 +1251,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CRM — AUDITORIA / AVISOS (informativo, não bloqueante — não precisa de decisão) -->
 <div class="ovl" id="ovl-crmaudit" onclick="if(event.target===this)closeM('crmaudit')">
   <div class="modal" style="max-width:640px">
-    <div class="modal-h"><span>Auditoria / Avisos <span id="crm-audit-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" onclick="closeM('crmaudit')">✕</button></div>
+    <div class="modal-h"><span>Auditoria / Avisos <span id="crm-audit-title-count" style="font-weight:400;color:var(--ink4);font-size:.7rem"></span></span><button class="mcls" aria-label="Fechar" onclick="closeM('crmaudit')">✕</button></div>
     <div class="modal-b">
       <p class="hint" style="margin-bottom:.7rem">Registros informativos — o cliente já foi criado/vinculado normalmente, isso é só um aviso (ex: nome parecido com CNPJ diferente, correção de vínculo antigo). Não exige nenhuma decisão, só "marcar como visto" se quiser limpar a lista.</p>
       <div id="crm-audit-list"></div>
@@ -1261,7 +1263,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CRM — REAGENDAR (campo de data de verdade, nunca texto livre em AAAA-MM-DD) -->
 <div class="ovl" id="ovl-crmresched" onclick="if(event.target===this)closeM('crmresched')">
   <div class="modal" style="max-width:320px">
-    <div class="modal-h"><span>Reagendar</span><button class="mcls" onclick="closeM('crmresched')">✕</button></div>
+    <div class="modal-h"><span>Reagendar</span><button class="mcls" aria-label="Fechar" onclick="closeM('crmresched')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Nova data</label><input type="date" id="crm-resched-date"></div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="crmRescheduleConfirm()">💾 Confirmar</button>
@@ -1271,7 +1273,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <div class="ovl" id="ovl-crmaction" onclick="if(event.target===this)closeM('crmaction')">
   <div class="modal" style="max-width:480px">
-    <div class="modal-h"><span id="crm-act-title">Registrar Ação</span><button class="mcls" onclick="closeM('crmaction')">✕</button></div>
+    <div class="modal-h"><span id="crm-act-title">Registrar Ação</span><button class="mcls" aria-label="Fechar" onclick="closeM('crmaction')">✕</button></div>
     <div class="modal-b">
       <div class="toggle-grp" id="crm-act-mode-toggle" style="margin-bottom:.8rem">
         <button type="button" class="active" onclick="crmSetActMode('log')">✓ Registrar ação realizada</button>
@@ -1318,12 +1320,12 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- EDITAR MARCO (Controle de Produção de produção) -->
 <div class="ovl" id="ovl-ciedit" onclick="if(event.target===this)closeM('ciedit')">
   <div class="modal" style="max-width:340px">
-    <div class="modal-h"><span id="ciedit-title">Marco</span><button class="mcls" onclick="closeM('ciedit')">✕</button></div>
+    <div class="modal-h"><span id="ciedit-title">Marco</span><button class="mcls" aria-label="Fechar" onclick="closeM('ciedit')">✕</button></div>
     <div class="modal-b">
-      <div class="ff"><label>Data (DD/MM/AA)</label><input type="text" id="ciedit-data" placeholder="15/03/26"></div>
+      <div class="ff"><label>Data (DD/MM/AA)</label><input type="text" id="ciedit-data" placeholder="15/03/26" oninput="document.getElementById('ciedit-confirmado').checked=true"></div>
       <div class="ff" style="margin-top:.5rem">
         <label style="display:flex;align-items:center;gap:.4rem;font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;cursor:pointer">
-          <input type="checkbox" id="ciedit-confirmado" style="width:auto"> Já confirmado (não é mais previsão)
+          <input type="checkbox" id="ciedit-confirmado" style="width:auto"> Já confirmado — desmarque para deixar como previsão (laranja)
         </label>
       </div>
       <div style="display:flex;gap:.5rem;margin-top:1rem">
@@ -1337,7 +1339,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CADASTRO RÁPIDO — CLIENTE / FORNECEDOR -->
 <div class="ovl" id="ovl-rvcad" onclick="if(event.target===this)closeM('rvcad')">
   <div class="modal" style="max-width:440px">
-    <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="mcls" onclick="closeM('rvcad')">✕</button></div>
+    <div class="modal-h"><span id="rvcad-title">Novo cliente</span><button class="mcls" aria-label="Fechar" onclick="closeM('rvcad')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Nome</label><input type="text" id="rvcad-nome" placeholder="Ex: Zona Sul"></div>
       <div class="ff" style="margin-top:.5rem"><label>Estado (UF)</label>
@@ -1364,7 +1366,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- MINHA EMPRESA (AV) — regime e alíquota federal -->
 <div class="ovl" id="ovl-rvempresa" onclick="if(event.target===this)closeM('rvempresa')">
   <div class="modal" style="max-width:360px">
-    <div class="modal-h"><span>Minha Empresa — Ânima Verde</span><button class="mcls" onclick="closeM('rvempresa')">✕</button></div>
+    <div class="modal-h"><span>Minha Empresa — Ânima Verde</span><button class="mcls" aria-label="Fechar" onclick="closeM('rvempresa')">✕</button></div>
     <div class="modal-b">
       <div class="ff"><label>Regime fiscal</label>
         <div style="padding:.5rem .7rem;background:var(--ltgrn);color:var(--green);border-radius:7px;font-size:.8rem;font-weight:600">Lucro Presumido (RJ)</div>
@@ -1378,7 +1380,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- EDITAR COTAÇÃO/PEDIDO SALVO -->
 <div class="ovl" id="ovl-rvedit" onclick="if(event.target===this)closeM('rvedit')">
   <div class="modal" style="max-width:820px;width:min(820px,calc(100vw - 32px))">
-    <div class="modal-h"><span id="rvedit-title">Editar</span><div style="display:flex;align-items:center;gap:.5rem"><button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="rv2SaveEdit()">Salvar</button><button class="mcls" onclick="closeM('rvedit')">✕</button></div></div>
+    <div class="modal-h"><span id="rvedit-title">Editar</span><div style="display:flex;align-items:center;gap:.5rem"><button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="rv2SaveEdit()">Salvar</button><button class="mcls" aria-label="Fechar" onclick="closeM('rvedit')">✕</button></div></div>
     <div class="modal-b">
       <div class="sh" style="margin-bottom:.8rem">Dados da Venda</div>
 
@@ -1387,7 +1389,7 @@ body.dark .rv-tabs{background:#0A0F1A}
           <label>Cliente</label>
           <div class="rv2-client-wrap">
             <select id="rvedit-cliente"></select>
-            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes">＋</button>
+            <button class="btn btn-s" onclick="rv2OpenCad('cliente')" title="Cadastrar / gerenciar clientes" aria-label="Cadastrar / gerenciar clientes">＋</button>
           </div>
         </div>
 
@@ -1451,7 +1453,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CONDIÇÕES DE PAGAMENTO E RECEBIMENTO — definidas na criação do pedido -->
 <div class="ovl" id="ovl-condpagto" onclick="if(event.target===this)closeM('condpagto')">
   <div class="modal" style="max-width:640px">
-    <div class="modal-h"><span id="cp-title">Condições de Pagamento e Recebimento</span><button class="mcls" onclick="closeM('condpagto')">✕</button></div>
+    <div class="modal-h"><span id="cp-title">Condições de Pagamento e Recebimento</span><button class="mcls" aria-label="Fechar" onclick="closeM('condpagto')">✕</button></div>
     <div class="modal-b">
       <p style="font-size:.68rem;color:var(--ink3);margin-bottom:.8rem">Defina em quantos dias após o pedido cada parcela vence, e o % (ou valor) dela — até somar 100% do total de cada parte. A Ref padronizada (SINAL/SALDO/AMOSTRAS) ajuda a organizar os lançamentos depois.</p>
 
@@ -1478,7 +1480,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
 <div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
   <div class="modal" style="width:min(1150px, calc(100vw - 48px));max-width:min(1150px, calc(100vw - 48px))">
-    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" onclick="closeM('finr')">✕</button></div>
+    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" aria-label="Fechar" onclick="closeM('finr')">✕</button></div>
     <div class="modal-b" id="finr-body"></div>
   </div>
 </div>
@@ -1487,12 +1489,12 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- CALENDÁRIO — pagamentos/recebimentos agendados e feitos -->
 <div class="ovl" id="ovl-rvcal" onclick="if(event.target===this)closeM('rvcal')">
   <div class="modal" style="max-width:min(920px, calc(100vw - 48px))">
-    <div class="modal-h"><span>Calendário — Pagamentos e Recebimentos</span><button class="mcls" onclick="closeM('rvcal')">✕</button></div>
+    <div class="modal-h"><span>Calendário — Pagamentos e Recebimentos</span><button class="mcls" aria-label="Fechar" onclick="closeM('rvcal')">✕</button></div>
     <div class="modal-b">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(-1)">◀</button>
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(-1)" aria-label="Mês anterior">◀</button>
         <h3 id="rvcal-title" style="font-size:.95rem;font-weight:700;color:var(--ink);margin:0"></h3>
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(1)">▶</button>
+        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(1)" aria-label="Próximo mês">▶</button>
       </div>
       <div id="rvcal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:6px;overflow:hidden"></div>
       <div style="display:flex;gap:14px;margin-top:.6rem;font-size:.6rem;color:var(--ink3)">
@@ -1506,7 +1508,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 
 <div class="ovl" id="ovl-security" onclick="if(event.target===this)closeM('security')">
   <div class="modal" style="max-width:420px">
-    <div class="modal-h"><span>Segurança</span><button class="mcls" onclick="closeM('security')">✕</button></div>
+    <div class="modal-h"><span>Segurança</span><button class="mcls" aria-label="Fechar" onclick="closeM('security')">✕</button></div>
     <div class="modal-b">
       <div class="fsep">Senha da conta</div>
       <p style="font-size:.68rem;color:var(--ink3);margin:.3rem 0 .5rem">É a senha do seu login (e-mail + senha). Não é a senha de nenhum cofre.</p>
@@ -1536,7 +1538,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- POPUP ALÍQUOTAS POR PRODUTO -->
 <div class="ovl" id="ovl-ncm" onclick="if(event.target===this)closeM('ncm')">
   <div class="modal" style="width:420px">
-    <div class="modal-h"><h2 id="ncm-title">Alíquotas de importação</h2><button class="mcls" onclick="closeM('ncm')">✕</button></div>
+    <div class="modal-h"><h2 id="ncm-title">Alíquotas de importação</h2><button class="mcls" aria-label="Fechar" onclick="closeM('ncm')">✕</button></div>
     <div class="modal-b">
       <small class="hint" style="display:block;margin-bottom:.8rem">Alíquotas específicas desta NCM. Padrão: 4202.92.00 (sacolas).</small>
       <div class="exp-row"><label>I.I. %</label><input class="mono" id="ncm-ii" type="number" step="0.01"><span class="formula">× CIF</span></div>
@@ -1551,7 +1553,7 @@ body.dark .rv-tabs{background:#0A0F1A}
 <!-- POPUP DESPESAS DESTINO -->
 <div class="ovl" id="ovl-exp" onclick="if(event.target===this)closeM('exp')">
   <div class="modal">
-    <div class="modal-h"><h2>Despesas de destino — conferência</h2><button class="mcls" onclick="closeM('exp')">✕</button></div>
+    <div class="modal-h"><h2>Despesas de destino — conferência</h2><button class="mcls" aria-label="Fechar" onclick="closeM('exp')">✕</button></div>
     <div class="modal-b">
       <small class="hint" style="display:block;margin-bottom:.5rem">Custos portuários/frete, comuns às rotas BR. Taxas em US$ convertem pelo câmbio. As com fórmula recalculam sozinhas.</small>
 
@@ -1655,7 +1657,7 @@ function renderProds(){
       <input value="${esc(p.desc)}" placeholder="Sacola Ráfia G" oninput="upd(${i},'desc',this.value)">
       <input value="${esc(p.sku)}" class="mono" placeholder="SKU" oninput="upd(${i},'sku',this.value)">
       <input value="${esc(p.ncm)}" class="mono" oninput="upd(${i},'ncm',this.value)">
-      <button class="gear" onclick="openNCM(${i})" title="Alíquotas desta NCM">⚙</button>
+      <button class="gear" onclick="openNCM(${i})" title="Alíquotas desta NCM" aria-label="Editar alíquotas desta NCM">⚙</button>
       <input value="${p.qty||''}" class="mono" type="number" oninput="upd(${i},'qty',this.value)">
       <input value="${p.fob||''}" class="mono" type="number" step="0.001" oninput="upd(${i},'fob',this.value)">
       <input value="${p.oem||''}" class="mono" type="number" oninput="upd(${i},'oem',this.value)">
@@ -1664,7 +1666,7 @@ function renderProds(){
       <input value="${p.cxH||''}" class="mono" type="number" oninput="upd(${i},'cxH',this.value)">
       <input value="${p.unCx||''}" class="mono" type="number" oninput="upd(${i},'unCx',this.value)">
       <input value="${p.pesoCx||''}" class="mono" type="number" step="0.001" oninput="upd(${i},'pesoCx',this.value)">
-      <button class="rm" onclick="rmProd(${i})">✕</button>
+      <button class="rm" onclick="rmProd(${i})" aria-label="Remover produto">✕</button>
     </div>`).join('');
 }
 function upd(i,k,v){prods[i][k]=(k==='desc'||k==='ncm'||k==='sku')?v:(parseFloat(v)||0);recalc();}
@@ -2483,6 +2485,18 @@ function toastSave(msg){
   setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2600);
 }
 
+/* HANDLER GLOBAL DE ERRO — sem isso, um erro de JS no meio de um render
+   trava a interface em silêncio, sem nenhum aviso. Debounce de 4s pra
+   não floodar aviso se algo entrar em loop de erro. */
+let _lastErrToastPC=0;
+function _globalErrToastPC(){
+  if(Date.now()-_lastErrToastPC<4000)return;
+  _lastErrToastPC=Date.now();
+  toastSave('⚠ Algo deu errado — tente de novo ou recarregue a página');
+}
+window.addEventListener('error',e=>{console.error('Erro não tratado:',e.error||e.message);_globalErrToastPC();});
+window.addEventListener('unhandledrejection',e=>{console.error('Promise rejeitada:',e.reason);_globalErrToastPC();});
+
 /* ════════ ABAS ════════ */
 function showTab(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -2620,7 +2634,7 @@ function updateRvSyncStatus(msg){
   if(!el)return;
   if(msg){el.title='Cotações/Pedidos compartilhados: '+msg;return;}
   if(!authUser){el.title='Cotações/Pedidos compartilhados: entre com sua conta primeiro';el.style.color='';return;}
-  if(rvSyncPass){el.title='Cotações/Pedidos compartilhados: conectado ✓ (sincroniza sozinho)';el.style.color='#8FE3A8';}
+  if(rvSyncPass){el.title='Cotações/Pedidos compartilhados: conectado ✓ (sincroniza sozinho)';el.style.color='var(--green-dk)';}
   else{el.title='Cotações/Pedidos compartilhados: bloqueados (abra a aba PROD BR pra desbloquear)';el.style.color='';}
 }
 async function rvCloudGet(){
@@ -3584,7 +3598,7 @@ function crmRenderCustRefs(){
   const lbl={rv_clientes2:'PROD BR',tiny:'Tiny/Olist',prod_asia:'PROD ASIA',wix:'Wix'};
   document.getElementById('crm-cust-refs').innerHTML=crmEditCtx.refs.map((r,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.2rem 0;border-bottom:1px solid var(--bdr)">
     <span style="font-size:.68rem"><b>${lbl[r.source]||r.source}</b>: ${esc(r.external_id)} ${r.confidence==='suggested'?'<span style="color:var(--amber);font-size:.58rem">(sugerido)</span>':''}</span>
-    <button onclick="crmEditCtx.refs.splice(${i},1);crmRenderCustRefs()" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+    <button onclick="crmEditCtx.refs.splice(${i},1);crmRenderCustRefs()" aria-label="Remover referência" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
   </div>`).join('')||'<span class="hint" style="font-size:.65rem">nenhuma referência ainda</span>';
 }
 function crmAddExternalRef(){
@@ -5316,7 +5330,7 @@ function rv2RenderCadList(){
     <td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'estado',this.value)">${ESTADOS.map(([uf])=>`<option value="${uf}"${uf===item.estado?' selected':''}>${uf}</option>`).join('')}</select></td>
     ${rv2CadTipo==='fornecedor'?`<td><select style="border:1px solid var(--bdr2);border-radius:5px;padding:.25rem .3rem;font-size:.75rem;background:var(--card);color:var(--ink)" onchange="rv2UpdateCadField(${i},'regime',this.value)"><option value="LP"${item.regime==='LP'?' selected':''}>LP</option><option value="SN"${item.regime==='SN'?' selected':''}>SN</option></select></td>
     <td style="text-align:center"><input type="checkbox" ${item.produtor?'checked':''} onchange="rv2UpdateCadField(${i},'produtor',this.checked)"></td>`:''}
-    <td><button class="btn-rvdel" onclick="rv2DeleteCad(${i})" title="Apagar">🗑</button></td>
+    <td><button class="btn-rvdel" onclick="rv2DeleteCad(${i})" title="Apagar" aria-label="Apagar">🗑</button></td>
   </tr>`).join('')+'</tbody></table>';
 }
 function rv2UpdateCadField(idx,field,value){
@@ -5613,7 +5627,7 @@ function rvRenderCotacoes(){
       <td class="rv-num rv-pos">${rvBrl(c.lucroTotal)}</td>
       <td style="white-space:nowrap">
         ${jaConvertida?'':`<button class="btn-rvsm btn-conv" onclick="event.stopPropagation();rvConverterEmPedido(${c.id})">→ Pedido</button>`}
-        <button class="btn-rvdel" onclick="event.stopPropagation();rvExcluirCotacao(${c.id})" title="Excluir">🗑</button>
+        <button class="btn-rvdel" onclick="event.stopPropagation();rvExcluirCotacao(${c.id})" title="Excluir" aria-label="Excluir cotação">🗑</button>
       </td>
     </tr>`;
   });
@@ -5819,7 +5833,7 @@ function rvCPRenderRows(tipo){
     <div><select style="width:100%;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem .2rem;font-size:.68rem" onchange="rvCPUpdateParcela('${tipo}',${i},'ref',this.value)">
       ${RV_FIN_REF_TAGS.map(t=>`<option value="${t}"${r.ref===t?' selected':''}>${t}</option>`).join('')}
     </select><div style="font-size:.5rem;color:var(--ink4);text-align:center;margin-top:.15rem">ref.</div></div>
-    <button onclick="rvCPRemoveParcela('${tipo}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding-bottom:.55rem">✕</button>
+    <button onclick="rvCPRemoveParcela('${tipo}',${i})" aria-label="Remover parcela" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;padding-bottom:.55rem">✕</button>
   </div>`).join('');
   rvCPRenderSum(tipo);
 }
@@ -5931,7 +5945,7 @@ function rvRenderPedidos(){
       <td class="rv-num rv-pos">${rvBrl(p.lucroTotal)}</td>
       <td class="rv-milestones-cell">${rvMilestoneDotsHTML(p)}</td>
       <td onclick="event.stopPropagation()"><input type="text" value="${esc(p.obs||'')}" placeholder="obs…" style="width:110px;border:1px solid var(--bdr2);border-radius:5px;padding:.2rem .35rem;font-size:.68rem;background:var(--card);color:var(--ink)" onchange="rvUpdateObs(${p.id},this.value)"></td>
-      <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir">🗑</button></td>
+      <td onclick="event.stopPropagation()"><button class="btn-rvdel" onclick="rvExcluirPedido(${p.id})" title="Excluir" aria-label="Excluir pedido">🗑</button></td>
     </tr>`;
   });
   const totVenda=lista.reduce((a,p)=>a+(p.vendaTotal||0),0);
@@ -6008,7 +6022,7 @@ function rvMilestoneDotsHTML(p){
     const cls=d.v&&!d.est?'done':d.v&&d.est?(rvCIIsLate(d)?'late':'est'):'pending';
     const icon=cls==='done'?'✓':(cls==='est'||cls==='late')?'●':'';
     const connector=i>0?`<div class="ml2" style="width:12px"></div>`:'';
-    const dateColor=cls==='late'?'var(--red)':cls==='done'?'var(--green)':cls==='est'?'#B85C00':'var(--ink4)';
+    const dateColor=cls==='late'?'var(--red)':cls==='done'?'var(--green)':cls==='est'?'var(--amber)':'var(--ink4)';
     return`${connector}<div class="mst"><div class="mc ${cls}" style="width:20px;height:20px;font-size:.6rem" onclick="event.stopPropagation();rvCIOpenMarco(${p.id},${i})" title="${RV_CI_LABELS[i]}${d.v?' — '+esc(d.v):''}${cls==='late'?' (ATRASADO)':''}">${icon}</div><span class="mlbl" style="font-size:.48rem">${RV_CI_SHORT[i]}</span><span class="mlbl" style="color:${dateColor};font-weight:700;font-size:.48rem">${d.v?esc(d.v):'—'}</span></div>`;
   }).join('');
   const produtores=rvPedidoProdutores(p);
@@ -6019,7 +6033,8 @@ function rvCIOpenMarco(pedidoId,idx){
   const lista=rvLoadPedidos();
   const p=lista.find(x=>x.id===pedidoId);
   if(!p)return;
-  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  if(!p.ciDates||!Array.isArray(p.ciDates))p.ciDates=[];
+  while(p.ciDates.length<RV_CI_LABELS.length)p.ciDates.push(rvMkD(null,true)); // auto-repara array curto/corrompido
   rvCICtx={pedidoId,idx};
   const d=p.ciDates[idx];
   rvEl('ciedit-title').textContent=RV_CI_LABELS[idx]+' — '+esc(p.cliente);
@@ -6033,7 +6048,8 @@ function rvCISaveMarco(){
   const lista=rvLoadPedidos();
   const p=lista.find(x=>x.id===pedidoId);
   if(!p)return;
-  if(!p.ciDates)p.ciDates=RV_CI_LABELS.map(()=>rvMkD(null,true));
+  if(!p.ciDates||!Array.isArray(p.ciDates))p.ciDates=[];
+  while(p.ciDates.length<RV_CI_LABELS.length)p.ciDates.push(rvMkD(null,true));
   const raw=rvEl('ciedit-data').value.trim();
   const norm=rvNormDate(raw);
   if(raw&&!norm){toastSave('Data inválida — use DD/MM/AA');return;}
@@ -6215,7 +6231,7 @@ function rvRenderFin(){
       <div style="font-size:.72rem;color:var(--ink4);margin-bottom:.65rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
       ${rvParcelaStatusBadge(p)}
       ${bar('Pagar Fornecedor',pagoForn,totForn,'var(--red)')}
-      ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'#B85C00'):''}
+      ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'var(--amber)'):''}
       ${bar('Receber Cliente',recCli,tot.cliente,'var(--green)')}
     </div>`;
   }).join('')+`</div>`;
@@ -6251,7 +6267,7 @@ function rvRenderCalendar(){
   const firstDay=new Date(_rvCalYear,_rvCalMonth,1).getDay();
   const daysInMonth=new Date(_rvCalYear,_rvCalMonth+1,0).getDate();
   const isDark=document.body.classList.contains('dark');
-  const bgCell=isDark?'#1B2535':'#fff';const bgOther=isDark?'#111827':'#F8FAFC';
+  const bgCell=isDark?'var(--card)':'#fff';const bgOther=isDark?'var(--bg)':'var(--ltblue)';
   const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
   const pedidosAtivos=rvLoadPedidosActive();
   const pedidoById={};pedidosAtivos.forEach(p=>pedidoById[p.id]=p);
@@ -6265,7 +6281,7 @@ function rvRenderCalendar(){
   rvLoadLedgerR().forEach(l=>{const p=pedidoById[l.pedidoId];if(!p)return;addEv(l.date,'pagar',p,l.amount,l.ref);});
   rvLoadReceiptsR().forEach(r=>{const p=pedidoById[r.pedidoId];if(!p)return;addEv(r.date,'receber',p,r.amount,r.ref);});
   let h='';
-  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'#0A0F1A':'#EDF2F7'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
+  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'var(--head-bg)':'var(--bg)'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
   const startOff=(firstDay===0?6:firstDay-1);
   for(let i=0;i<startOff;i++)h+=`<div style="background:${bgOther};min-width:0;height:82px"></div>`;
   const today=new Date();
@@ -6297,7 +6313,7 @@ function rvFinPartyRows(pedidoId,party,total,isReceipt){
       return`<tr>
       <td>${esc(l.date)}${futuro?' <span style="font-size:.55rem;font-weight:700;color:var(--amber);background:var(--ltamb);padding:.05rem .35rem;border-radius:4px" title="Data ainda não chegou — não entra no total pago/recebido até lá">agendado</span>':''}</td>
       <td class="rv-num">${rvBrl(l.amount)}</td><td>${esc(l.ref||'—')}</td><td style="font-size:.65rem;color:var(--ink3)">${esc(l.notes||'')}</td>
-      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`;
+      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" aria-label="Remover lançamento" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`;
     }).join('')
     +'</tbody></table>';
 }
@@ -6483,7 +6499,7 @@ initAuth().then(()=>{
   <div class="modal" style="width:520px">
     <div class="modal-h">
       <h2>Enviar WhatsApp</h2>
-      <button class="mcls" onclick="crmCloseWhatsApp()">✕</button>
+      <button class="mcls" aria-label="Fechar" onclick="crmCloseWhatsApp()">✕</button>
     </div>
     <div class="modal-b">
       <div id="crm-wa-person" style="font-size:.78rem;font-weight:600;color:var(--ink2);margin-bottom:.15rem"></div>
