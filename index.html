@@ -153,8 +153,13 @@ body.dark .pin{background:#1E1B4B;color:#A5B4FC}
 .ovl.open{opacity:1;pointer-events:all}
 .modal{background:var(--card);border-radius:12px;width:820px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 28px 70px rgba(0,0,0,.4);transform:translateY(12px);transition:transform .2s}
 .ovl.open .modal{transform:translateY(0)}
-.mhdr{background:var(--navy);padding:.88rem 1.3rem;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2}
+.mhdr{background:var(--navy);padding:.72rem 1rem .72rem 1.3rem;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:.65rem;position:sticky;top:0;z-index:2}
 .mhdr h2{color:#fff;font-size:.88rem;font-weight:700}
+.mhdr-actions{display:flex;align-items:center;justify-content:flex-end;gap:.42rem;margin-left:auto}
+.mhdr-actions .btn{white-space:nowrap;padding:.34rem .72rem;font-size:.69rem}
+.mhdr-actions .btns{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.mhdr-actions .btns:hover{background:rgba(255,255,255,.22)}
+.mhdr-actions .btnp{box-shadow:0 1px 0 rgba(255,255,255,.12) inset}
 .mcls{background:none;border:none;color:rgba(255,255,255,.45);font-size:1.05rem;cursor:pointer;padding:.18rem .4rem;border-radius:4px}
 .mcls:hover{color:#fff}
 .mbody{padding:1.15rem}
@@ -230,6 +235,10 @@ body.dark .toggle-grp button{background:var(--card);color:var(--ink3)}
   .subheader{flex-wrap:wrap;height:auto;padding:.5rem .8rem}
   .tb{gap:.3rem}
   .modal{width:96vw;max-width:96vw}
+  .mhdr{padding:.62rem .72rem .62rem .9rem;gap:.4rem;flex-wrap:wrap}
+  .mhdr h2{font-size:.78rem}
+  .mhdr-actions{order:3;width:100%;gap:.3rem;margin-left:0;justify-content:flex-end}
+  .mhdr-actions .btn{font-size:.62rem;padding:.3rem .5rem}
   #int-tbl,#cli-tbl{font-size:.68rem}
 }
 .fin-2col .tb{gap:.3rem}
@@ -546,7 +555,15 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 <!-- MODAL NOVO PEDIDO -->
 <div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')">
   <div class="modal">
-    <div class="mhdr"><h2 id="mo-ttl">Novo Pedido</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('order')">✕</button></div>
+    <div class="mhdr">
+      <h2 id="mo-ttl">Novo Pedido</h2>
+      <div class="mhdr-actions">
+        <button class="btn btns" onclick="closeOvl('order')">Cancelar</button>
+        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
+        <button class="btn btnp" id="mo-btn" onclick="submitOrder()">Criar Pedido</button>
+      </div>
+      <button class="mcls" aria-label="Fechar" onclick="closeOvl('order')">✕</button>
+    </div>
     <div class="mbody">
       <div class="fg">
         <div class="fsep">Identificação</div>
@@ -616,11 +633,6 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
         </div>
         <div class="fsep">Notas</div>
         <div class="ff full"><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div>
-      </div>
-      <div class="brow">
-        <button class="btn btns" onclick="closeOvl('order')">Cancelar</button>
-        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
-        <button class="btn btnp" id="mo-btn" onclick="submitOrder()">Criar Pedido</button>
       </div>
     </div>
   </div>
