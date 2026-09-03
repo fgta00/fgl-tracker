@@ -2750,10 +2750,10 @@ function editMS(num,di,e){
   const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Booking Feito','Embarque ETD','ETA Brasil','Entrada CD'];
   document.getElementById('ep-ttl').textContent=MSFULL[di];
   document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
-    <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
-    <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value)">
+    <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off" oninput="document.getElementById('ep-est').checked=false">
+    <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value);document.getElementById('ep-est').checked=false">
     <button class="date-cal-btn" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
-    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja)</label>`;
+    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i>desmarque para confirmar a data</i></label>`;
   positionEp(e);
 }
 function editLed(n,field,e){
@@ -2806,10 +2806,11 @@ function epSave(){
     // Auto-status baseado nos milestones
     autoStatus(o);
     // Propagar ETD/ETA para payments
+    // (índices pós-migração Booking Feito: 6=Embarque ETD, 7=ETA Brasil)
     const p=linkPay(o);
     if(p){
-      if(_epCtx.di===5) p.etd=normDate(val)||'—';
-      if(_epCtx.di===6) p.eta=normDate(val)||'—';
+      if(_epCtx.di===6) p.etd=normDate(val)||'—';
+      if(_epCtx.di===7) p.eta=normDate(val)||'—';
     }
   } else if(_epCtx.type==='order'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
