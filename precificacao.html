@@ -4267,6 +4267,21 @@ function crmSetSignalFilter(kind){
   CRM_SIGNAL_FILTER=kind;
   crmRenderSignals();
 }
+function crmAnalyzeSignal(customerId,kind){
+  if(!customerId){toastSave('Vincule o projeto a um cliente antes de analisar com a IA.');return;}
+  const label={
+    recompra:'Recompra',
+    reativacao:'Reativação',
+    target_sm_asia:'Oportunidade SM Asia',
+    retomada_sm_asia:'Retomada SM Asia',
+    projeto_parado:'Projeto Parado'
+  }[kind]||'Vale sua atenção';
+  crmOpenCustomerEdit(customerId);
+  const question=`Analise especificamente o sinal ativo de ${label} deste cliente. Avalie se merece atuação agora, diferencie fatos de hipóteses, considere ações e projetos existentes e proponha o próximo passo comercial mais útil.`;
+  setTimeout(()=>{
+    if(crmEditCtx.customerId===customerId)crmConsultAI('perguntar_mais',question);
+  },0);
+}
 function crmRenderSignals(){
   const card=document.getElementById('crm-signal-card');
   const cont=document.getElementById('crm-signal-container');
@@ -4333,6 +4348,7 @@ function crmSignalCardHtml(s,i,total){
     <div class="sig-reason">Histórico SM Asia · ${esc(tempo)}${hist?' · '+esc(hist):''}</div>
     ${contexto?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem">${esc(contexto)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
     <div class="sig-actions">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','retomada_sm_asia')">✦ Analisar</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissRetomadaSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
@@ -4347,6 +4363,7 @@ function crmSignalCardHtml(s,i,total){
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
     <div class="sig-actions">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','target_sm_asia')">✦ Analisar</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissTargetSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
@@ -4363,6 +4380,7 @@ function crmSignalCardHtml(s,i,total){
     ${s.comportamento_observado?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.1rem">${esc(s.comportamento_observado)}</div>`:''}
     ${tagline?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem;font-style:italic">${esc(tagline)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
     <div class="sig-actions">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','reativacao')">✦ Analisar</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissReativacaoSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
@@ -4378,6 +4396,7 @@ function crmSignalCardHtml(s,i,total){
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
     <div class="sig-actions">
+      ${s.customer_id?`<button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','projeto_parado')">✦ Analisar</button>`:''}
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenProjectEdit('${s.project_id}')">Abrir projeto</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
@@ -4397,6 +4416,7 @@ function crmSignalCardHtml(s,i,total){
     </div>
     <div class="sig-reason">${linhaCadencia}</div>
     <div class="sig-actions">
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','recompra')">✦ Analisar</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
       <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
       <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
