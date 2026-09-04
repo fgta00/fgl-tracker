@@ -562,7 +562,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
       <h2 id="mo-ttl">Novo Pedido</h2>
       <div class="mhdr-actions">
         <button class="btn btns" onclick="closeOvl('order')">Cancelar</button>
-        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
+        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">Gerar PI/CI/PL</button>
         <button class="btn btnp" id="mo-btn" onclick="submitOrder()">Criar Pedido</button>
       </div>
       <button class="mcls" aria-label="Fechar" onclick="closeOvl('order')">✕</button>
@@ -783,7 +783,7 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
     <div class="mhdr">
       <h2 id="finpop-title">Financeiro</h2>
       <div class="mhdr-actions">
-        <button class="btn btns" id="finpop-gerar-docs" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
+        <button class="btn btns" id="finpop-gerar-docs" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">Gerar PI/CI/PL</button>
       </div>
       <button class="mcls" aria-label="Fechar" onclick="closeOvl('finpop')">✕</button>
     </div>
@@ -1080,6 +1080,11 @@ initAuth();
    STATE (loaded after auth)
 ══════════════════════════════════════ */
 let orders=[],payments=[],ledger=[],receipts=[];
+// Ícones de linha (outline) reutilizados nos botões de Editar/Financeiro/Gerar Docs —
+// usam currentColor, então herdam a cor do botão (inclusive no hover) sem CSS extra.
+function icoEdit(s=17){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;}
+function icoCard(s=17){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`;}
+function icoFolder(s=17){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;}
 let companyProfile={sellerName:'',sellerAddress:'',sellerPhone:'',sellerEmail:'',bankName:'',bankAddress:'',beneficiaryName:'',bankAccount:'',swift:''};
 let _activeTab='internal';
 let SLST=['PRÉ-PRODUÇÃO','EM PRODUÇÃO','PRÉ-EMBARQUE','EMBARCADO','FINALIZADO','SUSPENSO'];
@@ -1939,10 +1944,10 @@ function renderInternal(){
           <span style="flex-shrink:0">${daysCell(o.dates,o.status)}</span>
         </div>`;
         inner+=docEventsChecklistHTML(o);
-        inner+=`<div class="sit-actions" style="display:flex;justify-content:flex-end;gap:9px;margin-top:2px;padding-top:4px;border-top:1px dashed var(--bdr)">
-          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:pointer;color:var(--ink3)">✏️</button>
-          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">💰</button>
-          <button onclick="${o.pi?`gerarDocsFromPI('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">📄</button>
+        inner+=`<div class="sit-actions" style="display:flex;justify-content:flex-end;gap:11px;margin-top:2px;padding-top:4px;border-top:1px dashed var(--bdr)">
+          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;line-height:1;cursor:pointer;color:var(--ink3)">${icoEdit(18)}</button>
+          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">${icoCard(18)}</button>
+          <button onclick="${o.pi?`gerarDocsFromPI('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">${icoFolder(18)}</button>
         </div>`;
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
@@ -3022,7 +3027,7 @@ function openFinPopup(pi){
     }).join('');
     h+=`<div style="margin-bottom:1rem;border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
       <div onclick="finPopupToggleItems(this)" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:var(--ltgry);font-size:.68rem;font-weight:700;color:var(--ink2);user-select:none">
-        <span>📦 Detalhe por produto (${fpItems.length} ${fpItems.length===1?'item':'itens'})</span>
+        <span>Detalhe por produto (${fpItems.length} ${fpItems.length===1?'item':'itens'})</span>
         <span class="fp-items-arrow" style="display:inline-block;transition:transform .15s">▸</span>
       </div>
       <div class="fp-items-detail" style="display:none;padding:.5rem .7rem;overflow-x:auto">
