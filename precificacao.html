@@ -206,6 +206,30 @@ body.dark .modal-h{background:var(--card)}
 .crm-ai-history-date{color:var(--ink4);font-family:'IBM Plex Mono';font-size:.56rem;white-space:nowrap}
 .crm-ai-history-question{font-weight:600;flex:1}
 .crm-ai-history-body{border-top:1px solid var(--bdr);padding:.5rem .6rem}
+.crm-ai-workspace{display:grid;grid-template-columns:minmax(0,7fr) minmax(230px,3fr);gap:.75rem;align-items:start}
+.crm-ai-main{min-width:0}
+.crm-ai-inspector{position:sticky;top:58px;border-left:1px solid var(--bdr);padding-left:.75rem;min-height:180px}
+.crm-ai-inspector-title{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);margin-bottom:.45rem}
+.crm-ai-inspector-body{font-size:.7rem;line-height:1.45;color:var(--ink3)}
+.crm-ai-thread{border-top:1px solid var(--bdr);margin-top:.7rem;padding-top:.65rem;display:flex;flex-direction:column;gap:.55rem}
+.crm-ai-turn{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:.55rem .65rem}
+.crm-ai-turn-q{font-size:.68rem;font-weight:700;color:var(--navy);margin-bottom:.3rem}
+.crm-ai-turn-a{font-size:.74rem;line-height:1.5;color:var(--ink3)}
+.crm-ai-next-update{margin-top:.4rem;padding:.4rem .5rem;border-left:3px solid var(--blue);background:var(--ltblue);font-size:.68rem;color:var(--ink2)}
+.crm-ai-evidence-row{cursor:pointer;border-radius:6px;padding:.12rem .2rem;margin-left:-.2rem}
+.crm-ai-evidence-row:hover{background:var(--card)}
+.crm-ai-evidence-more summary{cursor:pointer;font-size:.62rem;color:var(--blue);margin-top:.25rem}
+.crm-ai-commandbar{display:flex;align-items:center;justify-content:space-between;gap:.45rem;flex-wrap:wrap;margin-top:.55rem}
+.crm-ai-execute{position:relative}
+.crm-ai-execute-menu{display:none;position:absolute;z-index:25;left:0;top:calc(100% + 4px);min-width:155px;background:var(--card);border:1px solid var(--bdr);border-radius:8px;box-shadow:0 8px 22px rgba(0,0,0,.12);padding:.25rem}
+.crm-ai-execute.open .crm-ai-execute-menu{display:block}
+.crm-ai-execute-menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:.35rem .45rem;border-radius:5px;font-size:.64rem;color:var(--ink2);cursor:pointer}
+.crm-ai-execute-menu button:hover{background:var(--bg)}
+.crm-ai-stale{display:none;background:var(--ltamb);color:var(--amber);border-radius:7px;padding:.4rem .55rem;font-size:.64rem;margin-bottom:.55rem}
+.crm-timeline{display:block}
+.crm-tl-card{max-width:none;min-width:0;border:0;border-bottom:1px solid var(--bdr);border-radius:0;padding:.38rem .15rem;max-height:54px;overflow:hidden;transition:max-height .2s,background .15s;cursor:pointer}
+.crm-tl-card:hover,.crm-tl-card.open{max-height:220px;background:var(--bg)}
+@media(max-width:900px){.crm-ai-workspace{grid-template-columns:1fr}.crm-ai-inspector{position:static;border-left:0;border-top:1px solid var(--bdr);padding:.65rem 0 0;min-height:0}}
 @media(max-width:720px){#ovl-crmcustomer .crm-modal{width:calc(100vw - 16px)}#ovl-crmcustomer .crm-ai-line{font-size:.76rem}}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
 .exp-row{display:grid;grid-template-columns:1.25fr .85fr 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
@@ -393,6 +417,10 @@ body.dark .rv-tabs{background:var(--head-bg)}
   display:grid;grid-template-columns:minmax(0,1.8fr) minmax(130px,.8fr) 150px;
   gap:.55rem;align-items:end;margin-bottom:.65rem;
 }
+.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(330px,1fr);gap:1rem;align-items:start}
+.crm-cust-profile-main{min-width:0}
+.crm-cust-people-panel{border-left:1px solid var(--bdr);padding-left:.85rem;min-width:0}
+.crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(110px,1fr) minmax(120px,1.15fr) minmax(115px,.9fr) auto;max-width:none;column-gap:.35rem}
 .crm-person-row{
   display:grid;grid-template-columns:190px 205px 175px auto;
   grid-template-rows:auto auto;column-gap:.6rem;row-gap:.02rem;
@@ -414,6 +442,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
   .crm-person-phone{grid-column:2;grid-row:2}
   .crm-person-actions{grid-column:1 / -1;grid-row:3}
 }
+@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-people-panel{border-left:0;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
 </style>
 
 
@@ -533,15 +562,12 @@ body.dark .rv-tabs{background:var(--head-bg)}
 
 
 <style id="crm-projects-ui-v2">
-.crm-project-tools{display:grid;grid-template-columns:minmax(240px,1fr) 160px 150px 170px;gap:.45rem;margin:.7rem 0 .45rem}
+.crm-project-tools{display:grid;grid-template-columns:minmax(240px,1fr) 180px 180px;gap:.45rem;margin:.7rem 0 .45rem}
 .crm-project-tools input,.crm-project-tools select{height:34px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);padding:.3rem .5rem;font-size:.64rem;outline:none}
 .crm-project-tools input:focus,.crm-project-tools select:focus{border-color:var(--blue)}
 .crm-project-summary{display:flex;gap:.38rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .65rem}
 .crm-project-stat{font-size:.59rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:999px;padding:.2rem .48rem}
-.crm-project-stat.filter{font-family:'IBM Plex Sans';cursor:pointer;transition:.15s}
-.crm-project-stat.filter:hover,.crm-project-stat.filter.active{border-color:var(--blue);background:var(--ltblue);color:var(--blue)}
 .crm-project-stat b{font-family:'IBM Plex Mono';color:var(--ink)}
-.crm-project-ritual{display:flex;align-items:center;gap:.45rem;margin:-.2rem 0 .65rem;padding:.38rem .55rem;border-left:3px solid var(--blue);background:var(--ltblue);border-radius:0 7px 7px 0;font-size:.59rem;color:var(--ink3);line-height:1.4}
 .crm-project-list{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
 .crm-project-row{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(120px,.8fr) minmax(190px,1.15fr) auto;gap:.7rem;align-items:center;padding:.62rem .7rem;border-bottom:1px solid var(--bdr);cursor:pointer}
 .crm-project-row:last-child{border-bottom:0}
@@ -913,21 +939,13 @@ body.dark .rv-tabs{background:var(--head-bg)}
                 <option value="paused">Pausados</option>
                 <option value="lost">Perdidos</option>
               </select>
-              <select id="crm-proj-health-filter" onchange="crmRenderProjects()">
-                <option value="">Toda saúde comercial</option>
-                <option value="decision">Zona de decisão</option>
-                <option value="no_action">Sem próxima ação</option>
-                <option value="overdue">Ação vencida</option>
-              </select>
             </div>
             <div class="crm-project-summary">
-              <button type="button" class="crm-project-stat filter" data-health="" onclick="crmSetProjectHealthFilter('')"><b id="crm-proj-count-active">—</b> em andamento</button>
-              <button type="button" class="crm-project-stat filter" data-health="decision" onclick="crmSetProjectHealthFilter('decision')"><b id="crm-proj-count-decision">—</b> na zona de decisão</button>
-              <button type="button" class="crm-project-stat filter" data-health="no_action" onclick="crmSetProjectHealthFilter('no_action')"><b id="crm-proj-count-noaction">—</b> sem próxima ação</button>
-              <button type="button" class="crm-project-stat filter" data-health="overdue" onclick="crmSetProjectHealthFilter('overdue')"><b id="crm-proj-count-overdue">—</b> ação vencida</button>
+              <span class="crm-project-stat"><b id="crm-proj-count-active">—</b> em andamento</span>
+              <span class="crm-project-stat"><b id="crm-proj-count-noaction">—</b> sem próxima ação</span>
+              <span class="crm-project-stat"><b id="crm-proj-count-overdue">—</b> ação vencida</span>
               <span id="crm-proj-filter-count" style="font-size:.58rem;color:var(--ink4);margin-left:auto"></span>
             </div>
-            <div class="crm-project-ritual"><b>Revisão semanal:</b> comece pela zona de decisão, resolva projetos sem próxima ação e reagende o que venceu. Comunicação registrada não conta como avanço de etapa.</div>
             <div id="crm-projects-container"><p class="hint">Carregando…</p></div>
           </div>
         </div>
@@ -1058,14 +1076,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <option value="prospect">Prospect</option>
           <option value="inactive">Inativo</option>
         </select>
-        <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmConsultAI()">✦ Consultar IA</button>
-        <button class="btn btn-s" id="crm-ai-history-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmToggleAIHistory()">Histórico IA</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
         <button class="mcls" aria-label="Fechar" onclick="closeM('crmcustomer')">✕</button>
       </div>
     </div>
     <div class="modal-b">
       <div id="crm-wix-prefill" class="crm-wix-prefill"></div>
+      <div class="crm-cust-profile-grid">
+      <div class="crm-cust-profile-main">
       <div class="crm-cust-identity">
         <div class="ff">
           <label>Razão Social / Nome</label>
@@ -1127,14 +1145,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
         </div>
       </div>
 
-      <div style="border-top:1px solid var(--bdr);margin:.85rem 0 .65rem"></div>
-
-      <div>
+      </div>
+      <div class="crm-cust-people-panel">
         <div style="display:flex;align-items:center;gap:.35rem">
           <div class="crm-field-label" style="margin:0">Pessoas</div>
           <button class="btn btn-s" title="Adicionar pessoa" aria-label="Adicionar pessoa" style="font-size:.72rem;padding:0;width:28px;height:28px;border-radius:8px" onclick="crmAddPersonRow()">＋</button>
         </div>
         <div id="crm-cust-people" style="display:flex;flex-direction:column;gap:.35rem;margin-top:.35rem"></div>
+      </div>
       </div>
 
       <div class="ff" style="margin-top:.75rem">
@@ -1144,34 +1162,48 @@ body.dark .rv-tabs{background:var(--head-bg)}
       </div>
 
       <div id="crm-ai-panel" class="crm-ai-panel">
+        <div class="crm-ai-commandbar" style="margin:0 0 .55rem">
+          <div class="crm-field-label" style="margin:0">✦ Leitura da IA</div>
+          <div style="display:flex;gap:.35rem">
+            <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmConsultAI()">Consultar contexto</button>
+            <button class="btn btn-s" id="crm-ai-history-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmToggleAIHistory()">Histórico</button>
+          </div>
+        </div>
+        <div id="crm-ai-stale" class="crm-ai-stale">Há dados novos desde esta análise. A leitura anterior foi preservada; considere consultar novamente.</div>
         <div id="crm-ai-loading" class="crm-ai-line" style="display:none">✦ Analisando o contexto comercial…</div>
         <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)"><span id="crm-ai-error-message">Não foi possível consultar agora.</span> <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmRetryAI()">Tentar novamente</button></div>
         <div id="crm-ai-result" style="display:none">
-          <div id="crm-ai-opportunity" class="crm-ai-title"></div>
-          <div class="crm-ai-line"><b>Por quê:</b> <span id="crm-ai-why"></span></div>
-          <div class="crm-ai-line"><b>Leitura:</b> <span id="crm-ai-reading"></span></div>
-          <div class="crm-ai-line"><b>Próximo passo:</b> <span id="crm-ai-next"></span></div>
-          <div id="crm-ai-evidence" class="crm-ai-evidence"></div>
-          <div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap">
-            <button id="crm-ai-action-btn" class="btn btn-p" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateActionFromAI()">Criar ação</button>
-            <button id="crm-ai-project-btn" class="btn btn-s" style="display:none;font-size:.6rem;padding:.22rem .5rem" onclick="crmCreateProjectFromAI()">Criar projeto</button>
-          </div>
-          <div class="crm-ai-followups">
-            <div class="crm-field-label" style="margin:0">Perguntar à IA</div>
-            <div class="crm-ai-question-menu">
-              <select id="crm-ai-question-select">
-                <option value="o_que_fazer_agora">O que devo fazer agora?</option>
-                <option value="ampliar_fornecimento">Há oportunidade de ampliar ou mudar o fornecimento?</option>
-                <option value="resumir_historico">Resuma o histórico e o que mudou</option>
-                <option value="preparar_abordagem">Prepare minha próxima abordagem</option>
-              </select>
-              <button class="btn btn-s" style="font-size:.58rem;padding:.22rem .48rem" onclick="crmAskPresetAI()">Perguntar</button>
+          <div class="crm-ai-workspace">
+            <div class="crm-ai-main">
+              <div id="crm-ai-opportunity" class="crm-ai-title"></div>
+              <div class="crm-ai-line"><b>Por quê:</b> <span id="crm-ai-why"></span></div>
+              <div class="crm-ai-line"><b>Leitura:</b> <span id="crm-ai-reading"></span></div>
+              <div class="crm-ai-line"><b>Próximo passo:</b> <span id="crm-ai-next"></span></div>
+              <div id="crm-ai-evidence" class="crm-ai-evidence"></div>
+              <div class="crm-ai-commandbar">
+                <div class="crm-ai-execute" id="crm-ai-execute">
+                  <button class="btn btn-p" style="font-size:.62rem;padding:.25rem .55rem" onclick="crmToggleAIExecute(event)">Executar ▾</button>
+                  <div class="crm-ai-execute-menu">
+                    <button id="crm-ai-action-btn" style="display:none" onclick="crmCreateActionFromAI()">＋ Criar ação</button>
+                    <button id="crm-ai-project-btn" style="display:none" onclick="crmCreateProjectFromAI()">＋ Criar projeto</button>
+                    <button id="crm-ai-email-btn" style="display:none" onclick="crmPrepareEmailFromAI()">✉ Preparar e-mail</button>
+                  </div>
+                </div>
+              </div>
+              <div id="crm-ai-thread" class="crm-ai-thread" style="display:none"></div>
+              <div class="crm-ai-followups">
+                <div class="crm-field-label" style="margin:0">Continuar a investigação</div>
+                <div id="crm-ai-suggestions" class="crm-ai-suggestions"></div>
+                <div class="crm-ai-question-menu">
+                  <input id="crm-ai-custom-question" type="text" maxlength="500" placeholder="Pergunte algo sobre este cliente…" onkeydown="if(event.key==='Enter'){event.preventDefault();crmAskCustomAI()}">
+                  <button class="btn btn-p" style="font-size:.58rem;padding:.22rem .48rem" onclick="crmAskCustomAI()">Enviar</button>
+                </div>
+              </div>
             </div>
-            <div id="crm-ai-suggestions" class="crm-ai-suggestions"></div>
-            <div class="crm-ai-question-menu">
-              <input id="crm-ai-custom-question" type="text" maxlength="500" placeholder="Ou escreva uma pergunta sobre este cliente…" onkeydown="if(event.key==='Enter'){event.preventDefault();crmAskCustomAI()}">
-              <button class="btn btn-s" style="font-size:.58rem;padding:.22rem .48rem" onclick="crmAskCustomAI()">Enviar</button>
-            </div>
+            <aside class="crm-ai-inspector">
+              <div class="crm-ai-inspector-title">Contexto e auditoria</div>
+              <div id="crm-ai-inspector-body" class="crm-ai-inspector-body">Clique numa evidência, resposta ou ação sugerida para ver sua origem e seus limites.</div>
+            </aside>
           </div>
         </div>
         <div id="crm-ai-history" class="crm-ai-history">
@@ -3009,7 +3041,7 @@ let rvSacachoEditing=false;
    admin via SQL (sem auto-cadastro) — ver crmCheckAccess().
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
-let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[];
+let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[],CRM_COMMUNICATIONS=[];
 let CRM_WIX_LEADS=[];
 let crmPendingWixLeadId=null;
 let crmWixResolvedOpen=false;
@@ -3022,7 +3054,8 @@ let crmActCtx={customerId:null,actionId:null,projectId:null,type:'whatsapp',dire
 let crmSemanaHorizonte=7;
 let crmEditCtx={customerId:null,tags:[],people:[],refs:[],segmento:[],perfil:[]}; // estado de trabalho do modal de edição
 let crmAiLastResult=null,crmAiCurrentCustomerId=null,crmAiRequestToken=0,crmAiInFlight=false,crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
-const CRM_AI_EVIDENCE_LABELS={fact:'Fato',heuristic:'Padrão',human:'Informação da equipe',signal:'Sinal'};
+let crmAiThread={threadId:null,initial:null,turns:[],lastConsultationId:null,snapshotAt:null};
+const CRM_AI_EVIDENCE_LABELS={fact:'Fato',heuristic:'Padrão',human:'Informação da equipe',signal:'Sinal',communication:'Comunicação'};
 const CRM_AI_QUESTION_LABELS={
   o_que_fazer_agora:'O que devo fazer com este cliente agora?',
   ampliar_fornecimento:'Há oportunidade de ampliar ou mudar o fornecimento?',
@@ -3031,11 +3064,13 @@ const CRM_AI_QUESTION_LABELS={
   perguntar_mais:'Pergunta de continuidade'
 };
 function crmAiReset(customerId){
-  crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
+  crmAiRequestToken++;crmAiInFlight=false;crmAiLastResult=null;crmAiCurrentCustomerId=customerId||null;crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};crmAiThread={threadId:null,initial:null,turns:[],lastConsultationId:null,snapshotAt:null};
   const btn=document.getElementById('crm-ai-consult-btn');
-  if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='✦ Consultar IA';}
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn){historyBtn.style.display=customerId?'inline-flex':'none';historyBtn.textContent='Histórico IA';}
-  ['crm-ai-panel','crm-ai-loading','crm-ai-error','crm-ai-result','crm-ai-history'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='Consultar contexto';}
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn){historyBtn.style.display=customerId?'inline-flex':'none';historyBtn.textContent='Histórico';}
+  ['crm-ai-loading','crm-ai-error','crm-ai-result','crm-ai-history'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  const panel=document.getElementById('crm-ai-panel');if(panel)panel.style.display=customerId?'block':'none';
+  const stale=document.getElementById('crm-ai-stale');if(stale)stale.style.display='none';
 }
 async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   if(crmAiInFlight||!crmEditCtx.customerId)return;
@@ -3053,35 +3088,30 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   }
   customQuestion=(customQuestion||'').trim().slice(0,500);
   if(questionKey==='perguntar_mais'&&customQuestion.length<3)return;
-  const previousResponse=crmAiLastResult?{
-    opportunity:crmAiLastResult.opportunity||null,why:crmAiLastResult.why||'',reading:crmAiLastResult.reading||'',next_step:crmAiLastResult.next_step||'',evidence:crmAiLastResult.evidence||[],project_draft:crmAiLastResult.project_draft||null
-  }:null;
+  const isFollowUp=questionKey==='perguntar_mais';
+  if(isFollowUp&&!crmAiThread.threadId){errorMessage.textContent='Inicie a leitura do contexto antes de continuar a investigação.';panel.style.display='block';errorBox.style.display='block';return;}
   crmAiLastRequest={questionKey,customQuestion};
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
-  errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
+  errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';if(!isFollowUp)document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico';
   btn.disabled=true;btn.textContent='Consultando…';
   try{
     const body={customer_id:customerId,question_key:questionKey};
     if(customQuestion)body.custom_question=customQuestion;
-    if(previousResponse)body.previous_response=previousResponse;
+    if(isFollowUp){body.thread_id=crmAiThread.threadId;body.parent_id=crmAiThread.lastConsultationId;}
     const{data,error}=await _supa.functions.invoke('crm-ai-consult',{body});
     if(error||!data||data.error)throw error||new Error(data?.error||'invalid response');
     if(myToken!==crmAiRequestToken||customerId!==crmEditCtx.customerId)return;
-    crmShowAIResult(data);
+    if(isFollowUp)crmAppendAIFollowUp(data,customQuestion);else crmShowAIResult(data);
     if(data._audit_warning)console.warn('CRM IA: resposta sem log de auditoria');
   }catch(e){
     if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='block';}
   }finally{
-    if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){crmAiInFlight=false;btn.disabled=false;btn.textContent='✦ Consultar IA';}
+    if(myToken===crmAiRequestToken&&customerId===crmEditCtx.customerId){crmAiInFlight=false;btn.disabled=false;btn.textContent='Consultar contexto';}
   }
 }
 function crmRetryAI(){crmConsultAI(crmAiLastRequest.questionKey,crmAiLastRequest.customQuestion);}
-function crmAskPresetAI(){
-  const key=document.getElementById('crm-ai-question-select')?.value||'o_que_fazer_agora';
-  crmConsultAI(key,'');
-}
 function crmAskCustomAI(){
   const input=document.getElementById('crm-ai-custom-question');
   const question=(input?.value||'').trim();
@@ -3090,24 +3120,40 @@ function crmAskCustomAI(){
 }
 function crmShowAIResult(data){
   if(!data||typeof data!=='object')return;
-  crmAiLastResult=data;crmAiCurrentCustomerId=crmEditCtx.customerId;
+  crmAiLastResult=data;crmAiCurrentCustomerId=crmEditCtx.customerId;crmAiThread={threadId:data.meta?.thread_id||data.thread_id||null,initial:data,turns:[],lastConsultationId:data.meta?.consultation_id||null,snapshotAt:data.meta?.data_snapshot_at||null};
   document.getElementById('crm-ai-panel').style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-history').style.display='none';
-  document.getElementById('crm-ai-opportunity').textContent=data.opportunity||'Sem oportunidade clara no momento';
+  document.getElementById('crm-ai-opportunity').textContent=data.title||data.opportunity||'Sem oportunidade clara no momento';
   document.getElementById('crm-ai-why').textContent=data.why||'—';document.getElementById('crm-ai-reading').textContent=data.reading||'—';document.getElementById('crm-ai-next').textContent=data.next_step||'—';
-  const ev=document.getElementById('crm-ai-evidence');ev.replaceChildren();
-  (data.evidence||[]).slice(0,5).forEach(item=>{const row=document.createElement('div');row.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);ev.append(row);});
-  document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'inline-flex':'none';
-  document.getElementById('crm-ai-project-btn').style.display=data.project_draft?'inline-flex':'none';
-  const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();
-  (data.follow_up_questions||[]).slice(0,3).forEach(question=>{const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);});
+  crmRenderAIEvidence(document.getElementById('crm-ai-evidence'),data.evidence||[]);
+  document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'block':'none';document.getElementById('crm-ai-project-btn').style.display=data.project_draft?'block':'none';crmUpdateAIEmailOption();crmRenderAISuggestions(data.follow_up_questions||[]);
   const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
+  const thread=document.getElementById('crm-ai-thread');thread.replaceChildren();thread.style.display='none';crmCheckAIStale(data);
   document.getElementById('crm-ai-result').style.display='block';
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico';
 }
+function crmRenderAIEvidence(container,items){
+  container.replaceChildren();const list=(items||[]).slice(0,5);if(!list.length)return;
+  const append=(host,item)=>{const row=document.createElement('div');row.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const tx=document.createElement('span');tx.textContent=item.statement||'';row.append(tag,tx);row.addEventListener('click',()=>crmInspectAI('Evidência',item.statement,item.source_kind,item.source_id));host.append(row);};
+  list.slice(0,2).forEach(item=>append(container,item));if(list.length>2){const more=document.createElement('details');more.className='crm-ai-evidence-more';const summary=document.createElement('summary');summary.textContent=`Ver mais ${list.length-2} evidência${list.length-2===1?'':'s'}`;more.append(summary);list.slice(2).forEach(item=>append(more,item));container.append(more);}
+}
+function crmRenderAISuggestions(questions){const suggestions=document.getElementById('crm-ai-suggestions');suggestions.replaceChildren();(questions||[]).slice(0,3).forEach(question=>{const chip=document.createElement('button');chip.type='button';chip.className='crm-ai-suggestion';chip.textContent=question;chip.addEventListener('click',()=>crmConsultAI('perguntar_mais',question));suggestions.append(chip);});}
+function crmAppendAIFollowUp(data,question){
+  if(!data||typeof data!=='object')return;crmAiLastResult={...crmAiLastResult,action_draft:data.action_draft||crmAiLastResult?.action_draft,project_draft:data.project_draft||crmAiLastResult?.project_draft};crmAiThread.turns.push({question,data});crmAiThread.lastConsultationId=data.meta?.consultation_id||crmAiThread.lastConsultationId;
+  const thread=document.getElementById('crm-ai-thread');thread.style.display='flex';const turn=document.createElement('div');turn.className='crm-ai-turn';const q=document.createElement('div');q.className='crm-ai-turn-q';q.textContent=question;const a=document.createElement('div');a.className='crm-ai-turn-a';a.textContent=data.answer||'—';turn.append(q,a);
+  if(data.implication){const implication=document.createElement('div');implication.className='crm-ai-line';const b=document.createElement('b');b.textContent='O que isso muda: ';implication.append(b,document.createTextNode(data.implication));turn.append(implication);}
+  if(data.next_step_update){const update=document.createElement('div');update.className='crm-ai-next-update';update.textContent='Próximo passo proposto: '+data.next_step_update;update.addEventListener('click',()=>crmInspectAI('Mudança proposta',data.next_step_update,'ai_follow_up',data.meta?.consultation_id));turn.append(update);}
+  const evidence=document.createElement('div');evidence.className='crm-ai-evidence';crmRenderAIEvidence(evidence,data.evidence||[]);turn.append(evidence);a.addEventListener('click',()=>crmInspectAI('Resposta da IA',data.answer,data.meta?.response_type,data.meta?.consultation_id));thread.append(turn);
+  document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='block';document.getElementById('crm-ai-action-btn').style.display=crmAiLastResult.action_draft?'block':'none';document.getElementById('crm-ai-project-btn').style.display=crmAiLastResult.project_draft?'block':'none';crmRenderAISuggestions(data.follow_up_questions||[]);document.getElementById('crm-ai-custom-question').value='';turn.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function crmInspectAI(title,text,sourceKind,sourceId){const box=document.getElementById('crm-ai-inspector-body');box.replaceChildren();const h=document.createElement('b');h.textContent=title;const p=document.createElement('div');p.style.marginTop='.35rem';p.textContent=text||'Sem conteúdo adicional.';box.append(h,p);if(sourceKind||sourceId){const meta=document.createElement('div');meta.style.cssText='margin-top:.55rem;color:var(--ink4);font-size:.6rem';meta.textContent=[sourceKind&&`Origem: ${sourceKind}`,sourceId&&`ID: ${sourceId}`].filter(Boolean).join(' · ');box.append(meta);}}
+function crmToggleAIExecute(event){event.stopPropagation();document.getElementById('crm-ai-execute')?.classList.toggle('open');}
+function crmUpdateAIEmailOption(){const hasEmail=crmEditCtx.people.some(p=>String(p.email||'').trim());document.getElementById('crm-ai-email-btn').style.display=hasEmail?'block':'none';}
+function crmPrepareEmailFromAI(){document.getElementById('crm-ai-execute')?.classList.remove('open');const person=crmEditCtx.people.find(p=>String(p.email||'').trim());if(!person)return;crmInspectAI('E-mail em preparação',`Destinatário: ${person.name||person.email} <${person.email}>. O envio pelo Gmail será habilitado após a autorização do Google Workspace; nenhum e-mail foi enviado.`,'crm_people',person.id||null);}
+function crmCheckAIStale(data){const stale=document.getElementById('crm-ai-stale');const snapshot=data.meta?.data_snapshot_at,latest=data.latest_relevant_data_at;stale.style.display=snapshot&&latest&&new Date(latest)>new Date(snapshot)?'block':'none';}
 function crmCloseAIHistory(){
   const panel=document.getElementById('crm-ai-panel');document.getElementById('crm-ai-history').style.display='none';
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico IA';
-  if(crmAiLastResult)document.getElementById('crm-ai-result').style.display='block';else panel.style.display='none';
+  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico';
+  panel.style.display=crmEditCtx.customerId?'block':'none';document.getElementById('crm-ai-result').style.display=crmAiLastResult?'block':'none';
 }
 async function crmToggleAIHistory(){
   if(!crmEditCtx.customerId||crmAiInFlight)return;
@@ -3119,7 +3165,7 @@ async function crmToggleAIHistory(){
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-result').style.display='none';history.style.display='block';
   const list=document.getElementById('crm-ai-history-list');list.textContent='Carregando histórico…';
   const customerId=crmEditCtx.customerId;
-  const{data,error}=await _supa.from('crm_ai_consultations').select('id,question_key,response_json,created_at,user_id').eq('customer_id',customerId).order('created_at',{ascending:false}).limit(30);
+  const{data,error}=await _supa.from('crm_ai_consultations').select('id,question_key,response_json,created_at,user_id,thread_id,parent_id,response_type,data_snapshot_at').eq('customer_id',customerId).order('created_at',{ascending:false}).limit(30);
   if(customerId!==crmEditCtx.customerId||history.style.display!=='block')return;
   if(error){list.textContent='Não foi possível carregar o histórico da IA.';return;}
   crmRenderAIHistory(list,data||[]);
@@ -3137,15 +3183,21 @@ function crmRenderAIHistory(container,rows){
     summary.append(date,question,author);details.append(summary);
     const body=document.createElement('div');body.className='crm-ai-history-body';
     const addLine=(label,value)=>{if(!value)return;const line=document.createElement('div');line.className='crm-ai-line';const strong=document.createElement('b');strong.textContent=label+': ';const text=document.createElement('span');text.textContent=value;line.append(strong,text);body.append(line);};
-    addLine('Oportunidade',response.opportunity||'Sem oportunidade clara');addLine('Por quê',response.why);addLine('Leitura',response.reading);addLine('Próximo passo',response.next_step);
+    if((row.response_type||response.meta?.response_type)==='follow_up'){addLine('Resposta',response.answer);addLine('O que isso muda',response.implication);addLine('Próximo passo proposto',response.next_step_update);}else{addLine('Oportunidade',response.title||response.opportunity||'Sem oportunidade clara');addLine('Por quê',response.why);addLine('Leitura',response.reading);addLine('Próximo passo',response.next_step);}
     if(Array.isArray(response.evidence)&&response.evidence.length){
       const evidence=document.createElement('div');evidence.className='crm-ai-evidence';
       response.evidence.slice(0,5).forEach(item=>{const rowEl=document.createElement('div');rowEl.className='crm-ai-evidence-row';const tag=document.createElement('span');tag.className='crm-ai-evidence-tag '+item.type;tag.textContent=CRM_AI_EVIDENCE_LABELS[item.type]||'Evidência';const text=document.createElement('span');text.textContent=item.statement||'';rowEl.append(tag,text);evidence.append(rowEl);});
       body.append(evidence);
     }
-    const openButton=document.createElement('button');openButton.type='button';openButton.className='btn btn-s';openButton.style.cssText='font-size:.6rem;padding:.22rem .5rem';openButton.textContent='Abrir análise';openButton.addEventListener('click',()=>crmShowAIResult(response));body.append(openButton);
+    if((row.response_type||response.meta?.response_type)!=='follow_up'){const openButton=document.createElement('button');openButton.type='button';openButton.className='btn btn-s';openButton.style.cssText='font-size:.6rem;padding:.22rem .5rem';openButton.textContent='Abrir investigação';openButton.addEventListener('click',()=>crmOpenAIThread(row.thread_id||response.meta?.thread_id,row));body.append(openButton);}
     details.append(body);container.append(details);
   });
+}
+async function crmOpenAIThread(threadId,fallbackRow){
+  let rows=[];if(threadId){const{data,error}=await _supa.from('crm_ai_consultations').select('id,question_key,response_json,created_at,thread_id,parent_id,response_type,data_snapshot_at').eq('customer_id',crmEditCtx.customerId).eq('thread_id',threadId).order('created_at',{ascending:true});if(!error)rows=data||[];}
+  if(!rows.length&&fallbackRow)rows=[fallbackRow];const initial=rows.find(r=>(r.response_type||r.response_json?.meta?.response_type)!=='follow_up')||rows[0];if(!initial)return;
+  const base={...(initial.response_json||{}),meta:{...(initial.response_json?.meta||{}),consultation_id:initial.id,thread_id:initial.thread_id||threadId,data_snapshot_at:initial.data_snapshot_at}};crmShowAIResult(base);
+  rows.filter(r=>(r.response_type||r.response_json?.meta?.response_type)==='follow_up').forEach(r=>{const response={...(r.response_json||{}),meta:{...(r.response_json?.meta||{}),consultation_id:r.id,thread_id:r.thread_id||threadId,parent_id:r.parent_id}};crmAppendAIFollowUp(response,response.meta?.asked_question||CRM_AI_QUESTION_LABELS[r.question_key]||'Pergunta de continuidade');});crmCloseAIHistory();
 }
 function crmCreateActionFromAI(){
   if(!crmAiLastResult?.action_draft||!crmAiCurrentCustomerId||crmAiCurrentCustomerId!==crmEditCtx.customerId)return;
@@ -3245,7 +3297,7 @@ async function crmFetchAll(table, selectStr, eqFilters){
   return all;
 }
 async function crmLoadAll(){
-  const[cust,tags,ctags,people,refs,actions,groups]=await Promise.all([
+  const[cust,tags,ctags,people,refs,actions,groups,communications]=await Promise.all([
     crmFetchAll('crm_customers','*',{deleted:false}),
     crmFetchAll('crm_tags','*'),
     crmFetchAll('crm_customer_tags','*'),
@@ -3253,6 +3305,7 @@ async function crmLoadAll(){
     crmFetchAll('crm_customer_external_refs','*',{deleted:false}),
     crmFetchAll('crm_actions','*',{deleted:false}),
     crmFetchAll('crm_groups','*',{deleted:false}),
+    crmFetchAll('crm_communications','*'),
   ]);
   CRM_CUSTOMERS=cust;
   CRM_TAGS=tags;
@@ -3261,6 +3314,7 @@ async function crmLoadAll(){
   CRM_EXTERNAL_REFS=refs;
   CRM_ACTIONS=actions;
   CRM_GROUPS=groups;
+  CRM_COMMUNICATIONS=communications;
   crmRenderCustomers();
   if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
@@ -3373,6 +3427,7 @@ function crmOpenCustomerEdit(id,prefill){
   }
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();crmRenderCustSegmento();crmRenderPerfilToggle();
   crmPopulateGroupSelect(c?.group_id||'');
+  const aiPanel=document.getElementById('crm-ai-panel'),purchase=document.getElementById('crm-cust-purchase-section');if(aiPanel&&purchase&&purchase.nextElementSibling!==aiPanel)aiPanel.parentNode.insertBefore(purchase,aiPanel);
   document.getElementById('crm-group-create-wrap').style.display='none';
   document.getElementById('crm-cust-timeline-section').style.display=id?'block':'none';
   if(id){document.getElementById('crm-tl-periodo').value='30';crmRenderTimeline();}
@@ -3464,13 +3519,13 @@ function crmRenderCustPeople(){
       <input class="crm-person-role" type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="width:100%;border:none;background:none;font-size:.62rem;color:var(--ink4);padding:.05rem 0 0;min-width:0">
       <input class="crm-person-email" type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       <div class="crm-person-phone" style="display:flex;align-items:center;gap:.3rem;min-width:0">
-        <input type="text" value="${esc(p.phone||'')}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
-        ${p.id&&p.phone?`<button type="button" class="btn btn-s" onclick="crmOpenWhatsApp(${i})" style="font-size:.56rem;padding:.13rem .35rem;white-space:nowrap;color:var(--green);border-color:var(--green)" title="Enviar pelo WhatsApp Business Platform">WhatsApp</button>`:''}
+        <input type="text" value="${esc(crmFormatPhone(p.phone||''))}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
     </div>`;
   }).join(''):'<span class="crm-empty" style="font-size:.68rem;padding:.2rem 0">Nenhum contato cadastrado</span>';
 }
+function crmFormatPhone(value){const raw=String(value||'').trim(),d=raw.replace(/\D/g,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;if(d.length===13&&d.startsWith('55'))return`+55 (${d.slice(2,4)}) ${d.slice(4,9)}-${d.slice(9)}`;return raw;}
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
 
 let crmWaCtx={customerId:null,personId:null,personIndex:null};
@@ -4131,7 +4186,7 @@ function crmActionListHtml(acoes){
     const proxima=CRM_ACTIONS.find(x=>x.parent_action_id===a.id&&!x.deleted);
     const cor=CRM_TYPE_COLOR[a.type]||'grey';
     const statusTxt=a.direction?(a.direction==='inbound'?'Recebida':'Enviada'):(a.type==='other'?'Manual':'Realizada');
-    return`<div class="crm-tl-card">
+    return`<div class="crm-tl-card" onclick="this.classList.toggle('open')">
       <div style="display:flex;gap:.5rem;align-items:flex-start">
         ${crmTypeIconBadge(a.type)}
         <div style="flex:1;min-width:0">
@@ -4144,10 +4199,11 @@ function crmActionListHtml(acoes){
       ${proxima?`<div style="margin-top:.4rem;padding-top:.35rem;border-top:1px dashed var(--bdr);font-size:.64rem;color:${proxima.status==='dismissed'?'var(--ink4)':'var(--blue)'};overflow-wrap:anywhere">
         ${proxima.status==='dismissed'?'✕ dispensada':'📅 próxima: '}${esc(proxima.summary)}${proxima.status!=='dismissed'?` — ${esc(proxima.due_date)}`:''}
       </div>`:''}
-      <button class="crm-tl-del" onclick="crmDeleteAction('${a.id}')" title="Excluir">excluir</button>
+      <button class="crm-tl-del" onclick="event.stopPropagation();crmDeleteAction('${a.id}')" title="Excluir">excluir</button>
     </div>`;
   }).join('');
 }
+function crmCommunicationListHtml(items){return items.map(m=>{const when=m.sent_at||m.received_at||m.created_at;const label=m.channel==='whatsapp'?'WhatsApp':'E-mail';const direction=m.direction==='inbound'?'Recebido':'Enviado';const summary=m.subject||m.excerpt||'(sem assunto)';return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(m.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b> <span style="color:var(--ink4)">· ${direction} · ${esc(m.status||'registrado')}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)}</div></div></div></div>`;}).join('');}
 function crmRenderTimeline(){
   const cont=document.getElementById('crm-cust-timeline');
   if(!cont||!crmEditCtx.customerId)return;
@@ -4158,7 +4214,10 @@ function crmRenderTimeline(){
   const limite=new Date();limite.setDate(limite.getDate()-dias);
   const feitas=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='done'&&msfMatch('crm-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
     .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
-  cont.innerHTML=crmActionListHtml(feitas);
+  const comms=CRM_COMMUNICATIONS.filter(m=>m.customer_id===crmEditCtx.customerId&&new Date(m.sent_at||m.received_at||m.created_at)>=limite);
+  const mixed=[...feitas.map(a=>({kind:'action',date:a.occurred_at,item:a})),...comms.map(m=>({kind:'communication',date:m.sent_at||m.received_at||m.created_at,item:m}))].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!mixed.length){cont.innerHTML='<p class="hint" style="margin-top:.4rem">Nenhuma atividade registrada nesse período.</p>';return;}
+  cont.innerHTML=mixed.map(x=>x.kind==='action'?crmActionListHtml([x.item]):crmCommunicationListHtml([x.item])).join('');
 }
 function crmRenderProjectTimeline(){
   const cont=document.getElementById('crm-proj-timeline');
@@ -4621,7 +4680,6 @@ let CRM_PROJECTS=[];
 let crmEditProjectId=null;
 const CRM_PROJECT_STATUS_LBL={active:'Em andamento',won:'Ganho',lost:'Perdido',paused:'Pausado'};
 const CRM_PROJECT_STATUS_COL={active:'var(--blue)',won:'var(--green)',lost:'var(--red)',paused:'var(--ink4)'};
-const CRM_PROJECT_DECISION_STAGES=new Set(['Amostra/Cotação','Validação','Decisão']);
 
 async function crmLoadProjects(){
   CRM_PROJECTS=await crmFetchAll('crm_projects','*',{deleted:false});
@@ -4638,11 +4696,6 @@ function crmProjectNextAction(p){
   return CRM_ACTIONS.filter(a=>a.project_id===p.id&&a.status==='planned'&&!a.deleted)
     .sort((a,b)=>String(a.due_date||'9999').localeCompare(String(b.due_date||'9999')))[0]||null;
 }
-function crmProjectIsDecisionZone(p){return CRM_PROJECT_DECISION_STAGES.has((p.stage||'').trim());}
-function crmSetProjectHealthFilter(value){
-  const el=document.getElementById('crm-proj-health-filter');if(el)el.value=value||'';
-  crmRenderProjects();
-}
 function crmInitProjectFilters(){
   const sel=document.getElementById('crm-proj-stage-filter');if(!sel)return;
   const current=sel.value;
@@ -4657,34 +4710,22 @@ function crmRenderProjects(){
 
   const today=new Date();today.setHours(0,0,0,0);
   const active=CRM_PROJECTS.filter(p=>p.status==='active');
-  const decision=active.filter(crmProjectIsDecisionZone).length;
   const noAction=active.filter(p=>!crmProjectNextAction(p)).length;
   const overdue=active.filter(p=>{
     const a=crmProjectNextAction(p);if(!a?.due_date)return false;
     const d=new Date(a.due_date+'T00:00:00');return d<today;
   }).length;
   const eA=document.getElementById('crm-proj-count-active');if(eA)eA.textContent=active.length;
-  const eD=document.getElementById('crm-proj-count-decision');if(eD)eD.textContent=decision;
   const eN=document.getElementById('crm-proj-count-noaction');if(eN)eN.textContent=noAction;
   const eO=document.getElementById('crm-proj-count-overdue');if(eO)eO.textContent=overdue;
 
   const q=norm(document.getElementById('crm-proj-q')?.value||'');
   const stage=document.getElementById('crm-proj-stage-filter')?.value||'';
   const status=document.getElementById('crm-proj-status-filter')?.value??'active';
-  const health=document.getElementById('crm-proj-health-filter')?.value||'';
-
-  document.querySelectorAll('.crm-project-stat.filter').forEach(btn=>btn.classList.toggle('active',(btn.dataset.health||'')===health));
 
   let arr=CRM_PROJECTS.filter(p=>{
     if(status&&p.status!==status)return false;
     if(stage&&(p.stage||'')!==stage)return false;
-    const next=crmProjectNextAction(p);
-    if(health==='decision'&&!crmProjectIsDecisionZone(p))return false;
-    if(health==='no_action'&&next)return false;
-    if(health==='overdue'){
-      if(!next?.due_date)return false;
-      const due=new Date(next.due_date+'T00:00:00');if(!(due<today))return false;
-    }
     if(q&&!norm([p.project_name,crmProjectClienteLabel(p),p.prospect_name,p.stage].filter(Boolean).join(' ')).includes(q))return false;
     return true;
   });
@@ -4720,7 +4761,7 @@ function crmRenderProjects(){
         <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
         <div class="crm-project-client">${esc(cliente)}</div>
       </div>
-      <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.potential_value!=null?`<div style="font-size:.56rem;color:var(--ink3);margin-top:.2rem">${crmFmtBRL(p.potential_value)}</div>`:''}${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
+      <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
       ${nextHtml}
       <div class="crm-project-date">${prox?.due_date?crmFmtDate2(prox.due_date):'—'}</div>
     </div>`;
@@ -4801,7 +4842,7 @@ function crmRenderProjectNextAction(){
   if(!proxima){
     cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .7rem">
       <span class="crm-empty">Nenhuma ação planejada</span>
-      <button class="btn btn-p" style="font-size:.62rem;padding:.24rem .55rem" onclick="crmCreateActionForProject()">＋ Criar próxima ação</button>
+      <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
     </div>`;
     return;
   }
