@@ -101,6 +101,9 @@ main{max-width:2400px;margin:0 auto;padding:1rem 1.2rem}
 .bsm.d{color:var(--red)}.bsm.d:hover{background:var(--ltred);border-color:var(--red)}
 tr .del-row{opacity:0;transition:opacity .15s}
 tr:hover .del-row{opacity:1}
+tr .sit-actions{opacity:0;transition:opacity .15s}
+tr:hover .sit-actions{opacity:1}
+tr .sit-actions button:hover{color:var(--blue) !important}
 .tw{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow-x:auto;overflow-y:visible;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:11.5px}
 thead .grp th{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:.38rem .5rem;text-align:center;border-right:2px solid rgba(255,255,255,.14)}
@@ -777,7 +780,13 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 <!-- FINANCEIRO POR IP POPUP -->
 <div class="ovl" id="ovl-finpop" onclick="ovlOut(event,'finpop')">
   <div class="modal" style="width:680px;max-width:95vw">
-    <div class="mhdr"><h2 id="finpop-title">Financeiro</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('finpop')">✕</button></div>
+    <div class="mhdr">
+      <h2 id="finpop-title">Financeiro</h2>
+      <div class="mhdr-actions">
+        <button class="btn btns" id="finpop-gerar-docs" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">📄 Gerar PI/CI/PL</button>
+      </div>
+      <button class="mcls" aria-label="Fechar" onclick="closeOvl('finpop')">✕</button>
+    </div>
     <div class="mbody" id="finpop-body"></div>
   </div>
 </div>
@@ -1876,10 +1885,6 @@ function renderInternal(){
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L">
         <b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b>
-        <div style="display:flex;flex-direction:column;gap:1px;margin-top:.2rem">
-          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:pointer;opacity:.55;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">✏️</button>
-          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.7rem;line-height:1.3;cursor:${o.pi?'pointer':'not-allowed'};opacity:${o.pi?'.55':'.25'};transition:opacity .15s" ${o.pi?'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55"':''}>💰</button>
-        </div>
       </td>
       <td class="L">
         <div style="display:flex;align-items:center;gap:5px">
@@ -1934,6 +1939,11 @@ function renderInternal(){
           <span style="flex-shrink:0">${daysCell(o.dates,o.status)}</span>
         </div>`;
         inner+=docEventsChecklistHTML(o);
+        inner+=`<div class="sit-actions" style="display:flex;justify-content:flex-end;gap:9px;margin-top:2px;padding-top:4px;border-top:1px dashed var(--bdr)">
+          <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:pointer;color:var(--ink3)">✏️</button>
+          <button onclick="${o.pi?`openFinPopup('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Ver Financeiro deste IP':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">💰</button>
+          <button onclick="${o.pi?`gerarDocsFromPI('${esc(o.pi)}')`:''}" ${o.pi?'':'disabled'} title="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" aria-label="${o.pi?'Gerar PI/CI/PL':'Sem IP vinculada ainda'}" style="background:none;border:none;padding:0;font-size:.72rem;line-height:1;cursor:${o.pi?'pointer':'not-allowed'};color:${o.pi?'var(--ink3)':'var(--ink4)'}">📄</button>
+        </div>`;
         inner+=`</div>`;
         return`<div style="display:flex;background:${bgTint};width:100%" onmouseover="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=1)" onmouseout="this.querySelector('.snz-btn')&&(this.querySelector('.snz-btn').style.opacity=0)"><div style="width:5px;background:${urgCol};flex-shrink:0"></div>${inner}</div>`;
       })()}</td>
@@ -2724,9 +2734,10 @@ function submitOrder(){
    GERAR PI/CI/PL — abre export-docs.html numa
    aba nova e manda os dados do pedido por postMessage
 ══════════════════════════════════════ */
-function gerarDocs(){
-  if(_editNum===null){toast('⚠ Salve o pedido antes de gerar os documentos','err');return;}
-  const o=orders.find(x=>x.num===_editNum);
+function gerarDocs(num){
+  const orderNum=(num===undefined||num===null)?_editNum:num;
+  if(orderNum===null||orderNum===undefined){toast('⚠ Salve o pedido antes de gerar os documentos','err');return;}
+  const o=orders.find(x=>x.num===orderNum);
   if(!o){toast('⚠ Pedido não encontrado','err');return;}
   const p=linkPay(o);
   const items=((p&&p.unitPrices)||[]).filter(r=>(r.qty||0)>0).map(r=>({
@@ -2766,17 +2777,31 @@ function gerarDocs(){
   };
   const win=window.open('export-docs.html','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
+  const TRACKER_ORIGIN=window.location.origin;
   let done=false;
+  const cleanup=()=>{window.removeEventListener('message',onMsg);clearTimeout(timer);};
   const onMsg=(evt)=>{
-    if(evt.source!==win)return;
-    if(evt.data==='docs-ready'&&!done){
+    if(done)return;
+    if(evt.source!==win)return;          // só a aba que acabamos de abrir
+    if(evt.origin!==TRACKER_ORIGIN)return; // só a mesma origem
+    if(evt.data==='docs-ready'){
       done=true;
-      win.postMessage({type:'fgl-order-data',payload},'*');
-      window.removeEventListener('message',onMsg);
+      win.postMessage({type:'fgl-order-data',payload},TRACKER_ORIGIN);
+      cleanup();
     }
   };
+  const timer=setTimeout(()=>{
+    if(done)return;
+    cleanup();
+    toast('⚠ export-docs.html não respondeu — confirme que o arquivo está na mesma pasta/origem do Tracker','err');
+  },8000);
   window.addEventListener('message',onMsg);
   if(!companyProfile.sellerName)toast('💡 Dica: preencha o Perfil da Empresa em ⚙ Tags pra não digitar o Seller/Banco toda vez');
+}
+function gerarDocsFromPI(pi){
+  const o=orders.find(x=>x.pi===pi);
+  if(!o){toast('⚠ Pedido não encontrado para esta IP','err');return;}
+  gerarDocs(o.num);
 }
 
 /* ══════════════════════════════════════
@@ -2962,6 +2987,8 @@ function openFinPopup(pi){
   const recs=receipts.filter(r=>r.pi===pi).sort((a,b)=>dispToISO(a.date)<dispToISO(b.date)?-1:1);
 
   document.getElementById('finpop-title').innerHTML=`Financeiro — <span style="font-family:'IBM Plex Mono'">${esc(pi)}</span> <span style="font-size:.7rem;color:var(--ink3);font-weight:400">${esc(o?.client||p.client||'')}</span>${isC?` <span style="font-size:.62rem;color:#fff;background:var(--navy);padding:.1rem .4rem;border-radius:4px">🇧🇷 ${o?.rotaAV==='trading'?'Via Trading':'Direta'}</span>`:''}`;
+  const gerarBtn=document.getElementById('finpop-gerar-docs');
+  if(gerarBtn)gerarBtn.onclick=()=>gerarDocsFromPI(pi);
 
   // Top summary
   let h=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem">
@@ -2978,6 +3005,41 @@ function openFinPopup(pi){
       <div style="font-size:1rem;font-weight:700;color:${mg>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${fUSD(mg)} <span style="font-size:.7rem">(${pM}%)</span></div>
     </div>
   </div>`;
+
+  // Detalhe por produto (qtd/PU/total — forn. e cliente), colapsado por padrão
+  const fpItems=(p.unitPrices||[]).filter(r=>(r.qty||0)>0);
+  if(fpItems.length){
+    const fpRows=fpItems.map(r=>{
+      const tFi=(r.qty||0)*(r.priceForn||0),tCi=(r.qty||0)*(r.priceCli||0);
+      return`<tr>
+        <td style="padding:.32rem .45rem;font-size:.66rem;border-bottom:1px solid var(--bdr)">${esc(r.desc||'—')}${r.ref?` <span style="color:var(--ink4)">· ${esc(r.ref)}</span>`:''}</td>
+        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';border-bottom:1px solid var(--bdr)">${(r.qty||0).toLocaleString('pt-BR')}</td>
+        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';color:var(--red);border-bottom:1px solid var(--bdr)">${fUSD(r.priceForn||0)}</td>
+        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';color:var(--teal);border-bottom:1px solid var(--bdr)">${fUSD(r.priceCli||0)}</td>
+        <td style="padding:.32rem .45rem;font-size:.68rem;text-align:right;font-family:'IBM Plex Mono';font-weight:700;color:var(--red);border-bottom:1px solid var(--bdr)">${fUSD(tFi)}</td>
+        <td style="padding:.32rem .45rem;font-size:.68rem;text-align:right;font-family:'IBM Plex Mono';font-weight:700;color:var(--teal);border-bottom:1px solid var(--bdr)">${fUSD(tCi)}</td>
+      </tr>`;
+    }).join('');
+    h+=`<div style="margin-bottom:1rem;border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
+      <div onclick="finPopupToggleItems(this)" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:var(--ltgry);font-size:.68rem;font-weight:700;color:var(--ink2);user-select:none">
+        <span>📦 Detalhe por produto (${fpItems.length} ${fpItems.length===1?'item':'itens'})</span>
+        <span class="fp-items-arrow" style="display:inline-block;transition:transform .15s">▸</span>
+      </div>
+      <div class="fp-items-detail" style="display:none;padding:.5rem .7rem;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:520px">
+          <thead><tr>
+            <th style="text-align:left;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Produto</th>
+            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Qtd</th>
+            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">PU Forn.</th>
+            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">PU Cli.</th>
+            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Total Forn.</th>
+            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Total Cli.</th>
+          </tr></thead>
+          <tbody>${fpRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
 
   if(isC&&o){
     h+=`<div style="font-size:.62rem;color:var(--ink3);background:var(--ltblue);border-radius:6px;padding:.4rem .6rem;margin-bottom:1rem">
@@ -3091,6 +3153,12 @@ function openFinPopup(pi){
 
   document.getElementById('finpop-body').innerHTML=h;
   document.getElementById('ovl-finpop').classList.add('open');
+}
+function finPopupToggleItems(el){
+  const box=el.nextElementSibling,arrow=el.querySelector('.fp-items-arrow');
+  const open=box.style.display==='block';
+  box.style.display=open?'none':'block';
+  if(arrow)arrow.style.transform=open?'rotate(0deg)':'rotate(90deg)';
 }
 function openCalPopup(){renderCalendar();document.getElementById('ovl-calendar').classList.add('open');}
 function calNav(dir){_calMonth+=dir;if(_calMonth>11){_calMonth=0;_calYear++;}if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
