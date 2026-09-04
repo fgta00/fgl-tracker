@@ -2991,7 +2991,7 @@ function openFinPopup(pi){
   const pays=ledger.filter(l=>l.pi===pi).sort((a,b)=>dispToISO(a.date)<dispToISO(b.date)?-1:1);
   const recs=receipts.filter(r=>r.pi===pi).sort((a,b)=>dispToISO(a.date)<dispToISO(b.date)?-1:1);
 
-  document.getElementById('finpop-title').innerHTML=`Financeiro — <span style="font-family:'IBM Plex Mono'">${esc(pi)}</span> <span style="font-size:.7rem;color:var(--ink3);font-weight:400">${esc(o?.client||p.client||'')}</span>${isC?` <span style="font-size:.62rem;color:#fff;background:var(--navy);padding:.1rem .4rem;border-radius:4px">🇧🇷 ${o?.rotaAV==='trading'?'Via Trading':'Direta'}</span>`:''}`;
+  document.getElementById('finpop-title').innerHTML=`Financeiro — <span style="font-family:'IBM Plex Mono'">${esc(pi)}</span> <span style="font-size:.7rem;color:var(--ink3);font-weight:400">${esc(o?.client||p.client||'')}</span>${isC?` <span style="font-size:.62rem;color:#fff;background:var(--navy);padding:.1rem .4rem;border-radius:4px">🇧🇷 ${o?.rotaAV==='trading'?'Via Trading':'Direta'}</span>`:''}${o?` <button onclick="openOrderModal(${o.num})" title="Editar pedido (ficha completa)" aria-label="Editar pedido ${o.num}" style="background:none;border:none;padding:0;line-height:1;cursor:pointer;color:rgba(255,255,255,.6);vertical-align:-2px;margin-left:2px" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.6)'">${icoEdit(15)}</button>`:''}`;
   const gerarBtn=document.getElementById('finpop-gerar-docs');
   if(gerarBtn)gerarBtn.onclick=()=>gerarDocsFromPI(pi);
 
