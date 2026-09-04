@@ -533,12 +533,15 @@ body.dark .rv-tabs{background:var(--head-bg)}
 
 
 <style id="crm-projects-ui-v2">
-.crm-project-tools{display:grid;grid-template-columns:minmax(240px,1fr) 180px 180px;gap:.45rem;margin:.7rem 0 .45rem}
+.crm-project-tools{display:grid;grid-template-columns:minmax(240px,1fr) 160px 150px 170px;gap:.45rem;margin:.7rem 0 .45rem}
 .crm-project-tools input,.crm-project-tools select{height:34px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);padding:.3rem .5rem;font-size:.64rem;outline:none}
 .crm-project-tools input:focus,.crm-project-tools select:focus{border-color:var(--blue)}
 .crm-project-summary{display:flex;gap:.38rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .65rem}
 .crm-project-stat{font-size:.59rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:999px;padding:.2rem .48rem}
+.crm-project-stat.filter{font-family:'IBM Plex Sans';cursor:pointer;transition:.15s}
+.crm-project-stat.filter:hover,.crm-project-stat.filter.active{border-color:var(--blue);background:var(--ltblue);color:var(--blue)}
 .crm-project-stat b{font-family:'IBM Plex Mono';color:var(--ink)}
+.crm-project-ritual{display:flex;align-items:center;gap:.45rem;margin:-.2rem 0 .65rem;padding:.38rem .55rem;border-left:3px solid var(--blue);background:var(--ltblue);border-radius:0 7px 7px 0;font-size:.59rem;color:var(--ink3);line-height:1.4}
 .crm-project-list{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
 .crm-project-row{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(120px,.8fr) minmax(190px,1.15fr) auto;gap:.7rem;align-items:center;padding:.62rem .7rem;border-bottom:1px solid var(--bdr);cursor:pointer}
 .crm-project-row:last-child{border-bottom:0}
@@ -910,13 +913,21 @@ body.dark .rv-tabs{background:var(--head-bg)}
                 <option value="paused">Pausados</option>
                 <option value="lost">Perdidos</option>
               </select>
+              <select id="crm-proj-health-filter" onchange="crmRenderProjects()">
+                <option value="">Toda saúde comercial</option>
+                <option value="decision">Zona de decisão</option>
+                <option value="no_action">Sem próxima ação</option>
+                <option value="overdue">Ação vencida</option>
+              </select>
             </div>
             <div class="crm-project-summary">
-              <span class="crm-project-stat"><b id="crm-proj-count-active">—</b> em andamento</span>
-              <span class="crm-project-stat"><b id="crm-proj-count-noaction">—</b> sem próxima ação</span>
-              <span class="crm-project-stat"><b id="crm-proj-count-overdue">—</b> ação vencida</span>
+              <button type="button" class="crm-project-stat filter" data-health="" onclick="crmSetProjectHealthFilter('')"><b id="crm-proj-count-active">—</b> em andamento</button>
+              <button type="button" class="crm-project-stat filter" data-health="decision" onclick="crmSetProjectHealthFilter('decision')"><b id="crm-proj-count-decision">—</b> na zona de decisão</button>
+              <button type="button" class="crm-project-stat filter" data-health="no_action" onclick="crmSetProjectHealthFilter('no_action')"><b id="crm-proj-count-noaction">—</b> sem próxima ação</button>
+              <button type="button" class="crm-project-stat filter" data-health="overdue" onclick="crmSetProjectHealthFilter('overdue')"><b id="crm-proj-count-overdue">—</b> ação vencida</button>
               <span id="crm-proj-filter-count" style="font-size:.58rem;color:var(--ink4);margin-left:auto"></span>
             </div>
+            <div class="crm-project-ritual"><b>Revisão semanal:</b> comece pela zona de decisão, resolva projetos sem próxima ação e reagende o que venceu. Comunicação registrada não conta como avanço de etapa.</div>
             <div id="crm-projects-container"><p class="hint">Carregando…</p></div>
           </div>
         </div>
@@ -4610,6 +4621,7 @@ let CRM_PROJECTS=[];
 let crmEditProjectId=null;
 const CRM_PROJECT_STATUS_LBL={active:'Em andamento',won:'Ganho',lost:'Perdido',paused:'Pausado'};
 const CRM_PROJECT_STATUS_COL={active:'var(--blue)',won:'var(--green)',lost:'var(--red)',paused:'var(--ink4)'};
+const CRM_PROJECT_DECISION_STAGES=new Set(['Amostra/Cotação','Validação','Decisão']);
 
 async function crmLoadProjects(){
   CRM_PROJECTS=await crmFetchAll('crm_projects','*',{deleted:false});
@@ -4626,6 +4638,11 @@ function crmProjectNextAction(p){
   return CRM_ACTIONS.filter(a=>a.project_id===p.id&&a.status==='planned'&&!a.deleted)
     .sort((a,b)=>String(a.due_date||'9999').localeCompare(String(b.due_date||'9999')))[0]||null;
 }
+function crmProjectIsDecisionZone(p){return CRM_PROJECT_DECISION_STAGES.has((p.stage||'').trim());}
+function crmSetProjectHealthFilter(value){
+  const el=document.getElementById('crm-proj-health-filter');if(el)el.value=value||'';
+  crmRenderProjects();
+}
 function crmInitProjectFilters(){
   const sel=document.getElementById('crm-proj-stage-filter');if(!sel)return;
   const current=sel.value;
@@ -4640,22 +4657,34 @@ function crmRenderProjects(){
 
   const today=new Date();today.setHours(0,0,0,0);
   const active=CRM_PROJECTS.filter(p=>p.status==='active');
+  const decision=active.filter(crmProjectIsDecisionZone).length;
   const noAction=active.filter(p=>!crmProjectNextAction(p)).length;
   const overdue=active.filter(p=>{
     const a=crmProjectNextAction(p);if(!a?.due_date)return false;
     const d=new Date(a.due_date+'T00:00:00');return d<today;
   }).length;
   const eA=document.getElementById('crm-proj-count-active');if(eA)eA.textContent=active.length;
+  const eD=document.getElementById('crm-proj-count-decision');if(eD)eD.textContent=decision;
   const eN=document.getElementById('crm-proj-count-noaction');if(eN)eN.textContent=noAction;
   const eO=document.getElementById('crm-proj-count-overdue');if(eO)eO.textContent=overdue;
 
   const q=norm(document.getElementById('crm-proj-q')?.value||'');
   const stage=document.getElementById('crm-proj-stage-filter')?.value||'';
   const status=document.getElementById('crm-proj-status-filter')?.value??'active';
+  const health=document.getElementById('crm-proj-health-filter')?.value||'';
+
+  document.querySelectorAll('.crm-project-stat.filter').forEach(btn=>btn.classList.toggle('active',(btn.dataset.health||'')===health));
 
   let arr=CRM_PROJECTS.filter(p=>{
     if(status&&p.status!==status)return false;
     if(stage&&(p.stage||'')!==stage)return false;
+    const next=crmProjectNextAction(p);
+    if(health==='decision'&&!crmProjectIsDecisionZone(p))return false;
+    if(health==='no_action'&&next)return false;
+    if(health==='overdue'){
+      if(!next?.due_date)return false;
+      const due=new Date(next.due_date+'T00:00:00');if(!(due<today))return false;
+    }
     if(q&&!norm([p.project_name,crmProjectClienteLabel(p),p.prospect_name,p.stage].filter(Boolean).join(' ')).includes(q))return false;
     return true;
   });
@@ -4691,7 +4720,7 @@ function crmRenderProjects(){
         <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
         <div class="crm-project-client">${esc(cliente)}</div>
       </div>
-      <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
+      <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.potential_value!=null?`<div style="font-size:.56rem;color:var(--ink3);margin-top:.2rem">${crmFmtBRL(p.potential_value)}</div>`:''}${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
       ${nextHtml}
       <div class="crm-project-date">${prox?.due_date?crmFmtDate2(prox.due_date):'—'}</div>
     </div>`;
@@ -4772,7 +4801,7 @@ function crmRenderProjectNextAction(){
   if(!proxima){
     cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .7rem">
       <span class="crm-empty">Nenhuma ação planejada</span>
-      <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
+      <button class="btn btn-p" style="font-size:.62rem;padding:.24rem .55rem" onclick="crmCreateActionForProject()">＋ Criar próxima ação</button>
     </div>`;
     return;
   }
