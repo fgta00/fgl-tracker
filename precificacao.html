@@ -414,12 +414,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
 }
 .crm-dropdown-menu button:hover{background:var(--bg)}
 .crm-cust-identity{
-  display:grid;grid-template-columns:minmax(0,1.8fr) minmax(130px,.8fr) 150px;
+  display:grid;grid-template-columns:minmax(260px,2.15fr) minmax(150px,1fr) minmax(145px,.8fr);
   gap:.55rem;align-items:end;margin-bottom:.65rem;
 }
-.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(330px,1fr);gap:1rem;align-items:start}
+.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(330px,1.45fr);gap:1rem;align-items:start}
 .crm-cust-profile-main{min-width:0}
 .crm-cust-people-panel{border-left:1px solid var(--bdr);padding-left:.85rem;min-width:0}
+.crm-cust-class-grid{display:grid;grid-template-columns:minmax(135px,.8fr) minmax(135px,.8fr) minmax(210px,1.25fr);gap:.55rem;align-items:start;margin-top:.15rem}
+.crm-cust-class-grid>div{width:auto!important;min-width:0}
 .crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(110px,1fr) minmax(120px,1.15fr) minmax(115px,.9fr) auto;max-width:none;column-gap:.35rem}
 .crm-person-row{
   display:grid;grid-template-columns:190px 205px 175px auto;
@@ -1099,7 +1101,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
         </div>
       </div>
 
-      <div class="crm-cust-class-grid" style="display:flex;align-items:flex-start;gap:.65rem;margin-top:.15rem;flex-wrap:wrap">
+      <div class="crm-cust-class-grid">
         <div style="width:175px">
           <div class="crm-field-label">Segmento</div>
           <details id="crm-segmento-details" style="position:relative">
@@ -1165,7 +1167,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
         <div class="crm-ai-commandbar" style="margin:0 0 .55rem">
           <div class="crm-field-label" style="margin:0">✦ Leitura da IA</div>
           <div style="display:flex;gap:.35rem">
-            <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmConsultAI()">Consultar contexto</button>
+            <button class="btn btn-s" id="crm-ai-consult-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmOpenAIRefreshInspector()">Consultar contexto</button>
             <button class="btn btn-s" id="crm-ai-history-btn" style="display:none;font-size:.62rem;padding:.2rem .55rem" onclick="crmToggleAIHistory()">Histórico</button>
           </div>
         </div>
@@ -1201,7 +1203,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
               </div>
             </div>
             <aside class="crm-ai-inspector">
-              <div class="crm-ai-inspector-title">Contexto e auditoria</div>
+              <div id="crm-ai-inspector-title" class="crm-ai-inspector-title">Contexto e auditoria</div>
               <div id="crm-ai-inspector-body" class="crm-ai-inspector-body">Clique numa evidência, resposta ou ação sugerida para ver sua origem e seus limites.</div>
             </aside>
           </div>
@@ -3093,7 +3095,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   crmAiLastRequest={questionKey,customQuestion};
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='block';
-  errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';if(!isFollowUp)document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
+  errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';if(!isFollowUp&&!crmAiLastResult)document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
   const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico';
   btn.disabled=true;btn.textContent='Consultando…';
   try{
@@ -3128,6 +3130,7 @@ function crmShowAIResult(data){
   document.getElementById('crm-ai-action-btn').style.display=data.action_draft?'block':'none';document.getElementById('crm-ai-project-btn').style.display=data.project_draft?'block':'none';crmUpdateAIEmailOption();crmRenderAISuggestions(data.follow_up_questions||[]);
   const customInput=document.getElementById('crm-ai-custom-question');if(customInput)customInput.value='';
   const thread=document.getElementById('crm-ai-thread');thread.replaceChildren();thread.style.display='none';crmCheckAIStale(data);
+  document.getElementById('crm-ai-inspector-title').textContent='Contexto e auditoria';document.getElementById('crm-ai-inspector-body').textContent='Clique numa evidência, resposta ou ação sugerida para ver sua origem e seus limites.';
   document.getElementById('crm-ai-result').style.display='block';
   const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='Histórico';
 }
@@ -3145,7 +3148,10 @@ function crmAppendAIFollowUp(data,question){
   const evidence=document.createElement('div');evidence.className='crm-ai-evidence';crmRenderAIEvidence(evidence,data.evidence||[]);turn.append(evidence);a.addEventListener('click',()=>crmInspectAI('Resposta da IA',data.answer,data.meta?.response_type,data.meta?.consultation_id));thread.append(turn);
   document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='block';document.getElementById('crm-ai-action-btn').style.display=crmAiLastResult.action_draft?'block':'none';document.getElementById('crm-ai-project-btn').style.display=crmAiLastResult.project_draft?'block':'none';crmRenderAISuggestions(data.follow_up_questions||[]);document.getElementById('crm-ai-custom-question').value='';turn.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function crmInspectAI(title,text,sourceKind,sourceId){const box=document.getElementById('crm-ai-inspector-body');box.replaceChildren();const h=document.createElement('b');h.textContent=title;const p=document.createElement('div');p.style.marginTop='.35rem';p.textContent=text||'Sem conteúdo adicional.';box.append(h,p);if(sourceKind||sourceId){const meta=document.createElement('div');meta.style.cssText='margin-top:.55rem;color:var(--ink4);font-size:.6rem';meta.textContent=[sourceKind&&`Origem: ${sourceKind}`,sourceId&&`ID: ${sourceId}`].filter(Boolean).join(' · ');box.append(meta);}}
+function crmInspectAI(title,text,sourceKind,sourceId){document.getElementById('crm-ai-inspector-title').textContent='Contexto e auditoria';const box=document.getElementById('crm-ai-inspector-body');box.replaceChildren();const h=document.createElement('b');h.textContent=title;const p=document.createElement('div');p.style.marginTop='.35rem';p.textContent=text||'Sem conteúdo adicional.';box.append(h,p);if(sourceKind||sourceId){const meta=document.createElement('div');meta.style.cssText='margin-top:.55rem;color:var(--ink4);font-size:.6rem';meta.textContent=[sourceKind&&`Origem: ${sourceKind}`,sourceId&&`ID: ${sourceId}`].filter(Boolean).join(' · ');box.append(meta);}}
+function crmOpenAIRefreshInspector(){
+  if(!crmAiLastResult){crmConsultAI();return;}const title=document.getElementById('crm-ai-inspector-title'),box=document.getElementById('crm-ai-inspector-body');title.textContent='Nova leitura';box.replaceChildren();const p=document.createElement('div');p.textContent='A análise atual continuará preservada no Histórico. Consulte novamente somente se houver informação nova ou se quiser uma releitura completa do contexto.';const btn=document.createElement('button');btn.type='button';btn.className='btn btn-p';btn.style.cssText='font-size:.62rem;padding:.25rem .55rem;margin-top:.6rem';btn.textContent='Gerar nova leitura';btn.addEventListener('click',()=>crmConsultAI());box.append(p,btn);
+}
 function crmToggleAIExecute(event){event.stopPropagation();document.getElementById('crm-ai-execute')?.classList.toggle('open');}
 function crmUpdateAIEmailOption(){const hasEmail=crmEditCtx.people.some(p=>String(p.email||'').trim());document.getElementById('crm-ai-email-btn').style.display=hasEmail?'block':'none';}
 function crmPrepareEmailFromAI(){document.getElementById('crm-ai-execute')?.classList.remove('open');const person=crmEditCtx.people.find(p=>String(p.email||'').trim());if(!person)return;crmInspectAI('E-mail em preparação',`Destinatário: ${person.name||person.email} <${person.email}>. O envio pelo Gmail será habilitado após a autorização do Google Workspace; nenhum e-mail foi enviado.`,'crm_people',person.id||null);}
@@ -3157,17 +3163,11 @@ function crmCloseAIHistory(){
 }
 async function crmToggleAIHistory(){
   if(!crmEditCtx.customerId||crmAiInFlight)return;
-  const panel=document.getElementById('crm-ai-panel'),history=document.getElementById('crm-ai-history');
-  if(history.style.display==='block'){
-    crmCloseAIHistory();return;
-  }
-  const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn)historyBtn.textContent='← Voltar à análise';
-  panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-result').style.display='none';history.style.display='block';
-  const list=document.getElementById('crm-ai-history-list');list.textContent='Carregando histórico…';
-  const customerId=crmEditCtx.customerId;
+  const customerId=crmEditCtx.customerId,title=document.getElementById('crm-ai-inspector-title'),list=document.getElementById('crm-ai-inspector-body');title.textContent='Histórico da IA';list.textContent='Carregando histórico…';
   const{data,error}=await _supa.from('crm_ai_consultations').select('id,question_key,response_json,created_at,user_id,thread_id,parent_id,response_type,data_snapshot_at').eq('customer_id',customerId).order('created_at',{ascending:false}).limit(30);
-  if(customerId!==crmEditCtx.customerId||history.style.display!=='block')return;
+  if(customerId!==crmEditCtx.customerId)return;
   if(error){list.textContent='Não foi possível carregar o histórico da IA.';return;}
+  if(!crmAiLastResult&&data?.length){const initial=data.find(r=>(r.response_type||r.response_json?.meta?.response_type)!=='follow_up');if(initial)await crmOpenAIThread(initial.thread_id||initial.response_json?.meta?.thread_id,initial);title.textContent='Histórico da IA';}
   crmRenderAIHistory(list,data||[]);
 }
 function crmRenderAIHistory(container,rows){
@@ -3519,7 +3519,7 @@ function crmRenderCustPeople(){
       <input class="crm-person-role" type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="width:100%;border:none;background:none;font-size:.62rem;color:var(--ink4);padding:.05rem 0 0;min-width:0">
       <input class="crm-person-email" type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       <div class="crm-person-phone" style="display:flex;align-items:center;gap:.3rem;min-width:0">
-        <input type="text" value="${esc(crmFormatPhone(p.phone||''))}" placeholder="telefone" onchange="crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
+        <input type="text" value="${esc(crmFormatPhone(p.phone||''))}" placeholder="telefone" oninput="crmEditCtx.people[${i}].phone=this.value" onblur="this.value=crmFormatPhone(this.value);crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
     </div>`;
