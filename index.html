@@ -1366,7 +1366,7 @@ function openDocEventModal(num,key){
   document.getElementById('de-info').textContent=`Prazo: ${due||'—'} (a partir de ${DOC_BASE_LBL[ev.baseIdx]})`;
   document.getElementById('de-date').value=done||todayDisp();
   document.getElementById('de-unconfirm-btn').style.display=done?'block':'none';
-  document.getElementById('ovl-docevent').classList.add('open');
+  document.getElementById('ovl-docevent').classList.add('open');ovlToFront('ovl-docevent');
 }
 function docEventModalSave(){
   if(!_deCtx)return;
@@ -2526,7 +2526,7 @@ function editOrderPrices(pi,e){
   const cont=document.getElementById('pr-rows');cont.innerHTML='';
   (p.unitPrices||[{desc:'',ref:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
   updatePricePreview();
-  document.getElementById('ovl-prices').classList.add('open');
+  document.getElementById('ovl-prices').classList.add('open');ovlToFront('ovl-prices');
 }
 function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
   const cont=document.getElementById('pr-rows');
@@ -2665,7 +2665,7 @@ function openOrderModal(num){
   document.getElementById('mo-cl-list').innerHTML=allClis.map(c=>`<option value="${esc(c)}">`).join('');
   document.getElementById('mo-sup-list').innerHTML=allForn.map(s=>`<option value="${esc(s)}">`).join('');
   populateDatalistsMestre();
-  document.getElementById('ovl-order').classList.add('open');
+  document.getElementById('ovl-order').classList.add('open');ovlToFront('ovl-order');
 }
 function submitOrder(){
   const po=document.getElementById('mo-po').value.trim()||'—';
@@ -2837,7 +2837,7 @@ function editMS(num,di,e){
     <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off" oninput="document.getElementById('ep-est').checked=false">
     <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value);document.getElementById('ep-est').checked=false">
     <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
-    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i>desmarque para confirmar a data</i></label>`;
+    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i style="font-size:.85em;font-weight:400;color:var(--ink3)">desmarque para confirmar a data</i></label>`;
   positionEp(e);
 }
 function editLed(n,field,e){
@@ -3156,7 +3156,7 @@ function openFinPopup(pi){
   </div>`;
 
   document.getElementById('finpop-body').innerHTML=h;
-  document.getElementById('ovl-finpop').classList.add('open');
+  document.getElementById('ovl-finpop').classList.add('open');ovlToFront('ovl-finpop');
 }
 function finPopupToggleItems(el){
   const box=el.nextElementSibling,arrow=el.querySelector('.fp-items-arrow');
@@ -3164,7 +3164,7 @@ function finPopupToggleItems(el){
   box.style.display=open?'none':'block';
   if(arrow)arrow.style.transform=open?'rotate(0deg)':'rotate(90deg)';
 }
-function openCalPopup(){renderCalendar();document.getElementById('ovl-calendar').classList.add('open');}
+function openCalPopup(){renderCalendar();document.getElementById('ovl-calendar').classList.add('open');ovlToFront('ovl-calendar');}
 function calNav(dir){_calMonth+=dir;if(_calMonth>11){_calMonth=0;_calYear++;}if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
 function renderCalendar(){
   document.getElementById('cal-title').textContent=MO[_calMonth]+' '+_calYear;
@@ -3204,7 +3204,18 @@ function renderCalendar(){
   document.getElementById('cal-grid').innerHTML=h;
 }
 function ovlOut(e,id){if(e.target===document.getElementById(`ovl-${id}`))closeOvl(id);}
-function closeOvl(id){document.getElementById(`ovl-${id}`).classList.remove('open');}
+function closeOvl(id){
+  const el=document.getElementById(`ovl-${id}`);
+  el.classList.remove('open');
+  el.style.zIndex='';
+}
+let _ovlZTop=500;
+function ovlToFront(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  _ovlZTop++;
+  el.style.zIndex=_ovlZTop;
+}
 
 /* ══════════════════════════════════════
    EXPORT
@@ -3226,7 +3237,7 @@ function dlFile(href,name){const a=document.createElement('a');a.href=href;a.dow
 /* ══════════════════════════════════════
    STATUS MANAGEMENT
 ══════════════════════════════════════ */
-function openStatusModal(){renderStatusLists();document.getElementById('ovl-status').classList.add('open');}
+function openStatusModal(){renderStatusLists();document.getElementById('ovl-status').classList.add('open');ovlToFront('ovl-status');}
 // Médias reais observadas — baseadas em pedidos FINALIZADOS, pra orientar ajuste dos intervalos padrão
 function computeAvgMilestoneGaps(){
   const fin=orders.filter(o=>o.status==='FINALIZADO'&&o.dates);
