@@ -426,12 +426,13 @@ body.dark .rv-tabs{background:var(--head-bg)}
   display:grid;grid-template-columns:minmax(260px,2.15fr) minmax(150px,1fr) minmax(145px,.8fr);
   gap:.55rem;align-items:end;margin-bottom:.65rem;
 }
-.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(330px,1.45fr);gap:1rem;align-items:start}
-.crm-cust-profile-main{min-width:0}
-.crm-cust-people-panel{border-left:1px solid var(--bdr);padding-left:.85rem;min-width:0}
-.crm-cust-class-grid{display:grid;grid-template-columns:minmax(135px,.8fr) minmax(135px,.8fr) minmax(210px,1.25fr);gap:.55rem;align-items:start;margin-top:.15rem}
+.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(230px,.8fr);gap:.75rem 1rem;align-items:start}
+.crm-cust-profile-main{display:contents}
+.crm-cust-profile-main .crm-cust-identity{grid-column:1;grid-row:1;margin-bottom:0}
+.crm-cust-people-panel{grid-column:1/-1;grid-row:2;border-top:1px solid var(--bdr);padding:.55rem 0 0;min-width:0}
+.crm-cust-class-grid{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:.42rem;align-items:stretch;margin-top:0}
 .crm-cust-class-grid>div{width:auto!important;min-width:0}
-.crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(110px,1fr) minmax(120px,1.15fr) minmax(115px,.9fr) auto;max-width:none;column-gap:.35rem}
+.crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(160px,.8fr) minmax(210px,1fr) minmax(160px,.75fr) auto;max-width:850px;column-gap:.55rem}
 .crm-person-row{
   display:grid;grid-template-columns:190px 205px 175px auto;
   grid-template-rows:auto auto;column-gap:.6rem;row-gap:.02rem;
@@ -453,7 +454,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
   .crm-person-phone{grid-column:2;grid-row:2}
   .crm-person-actions{grid-column:1 / -1;grid-row:3}
 }
-@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-people-panel{border-left:0;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
+@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:.55rem}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
 </style>
 
 
@@ -581,36 +582,35 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-project-stat b{font-family:'IBM Plex Mono';color:var(--ink)}
 .crm-project-stat:hover,.crm-project-stat.active{border-color:var(--blue);color:var(--blue);background:var(--ltblue)}
 .crm-project-stat.warn b{color:var(--amber)}.crm-project-stat.danger b{color:var(--red)}
-.crm-project-list{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
-.crm-project-list-head,.crm-project-row{display:grid;grid-template-columns:minmax(220px,1.55fr) minmax(105px,.65fr) minmax(220px,1.35fr) minmax(180px,.9fr);gap:.7rem;align-items:center}
-.crm-project-list-head{padding:.38rem .7rem;background:var(--ltgry);border-bottom:1px solid var(--bdr);font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)}
-.crm-project-row{position:relative;padding:.58rem .7rem .58rem .82rem;border-bottom:1px solid var(--bdr);cursor:pointer}
+.crm-project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;background:transparent}
+.crm-project-list-head{display:none}
+.crm-project-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main stage" "next next" "deadline deadline";gap:.48rem .65rem;align-items:start;padding:.7rem .75rem .65rem .86rem;border:1px solid var(--bdr);border-radius:9px;background:var(--card);cursor:pointer;overflow:hidden}
 .crm-project-row:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr)}
 .crm-project-row.overdue:before{background:var(--red)}.crm-project-row.no-action:before{background:var(--amber)}.crm-project-row.on-track:before{background:var(--green)}
-.crm-project-row:last-child{border-bottom:0}
-.crm-project-row:hover{background:var(--ltgry)}
-.crm-project-main{min-width:0}
+.crm-project-row:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.crm-project-main{grid-area:main;min-width:0}
+.crm-project-row>div:nth-child(2){grid-area:stage;justify-self:end}
 .crm-project-name{font-size:.69rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-client{font-size:.59rem;color:var(--ink3);margin-top:.12rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-stage{font-size:.58rem;font-weight:700;color:var(--blue);background:var(--ltblue);border-radius:999px;padding:.16rem .42rem;width:max-content;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crm-project-next{font-size:.61rem;color:var(--ink2);min-width:0}
+.crm-project-next{grid-area:next;font-size:.61rem;color:var(--ink2);min-width:0;min-height:1.2rem;padding:.08rem 0}
 .crm-project-next b{font-weight:600;color:var(--ink)}
 .crm-project-next.empty{color:var(--amber)}
 .crm-project-date{font-family:'IBM Plex Mono';font-size:.57rem;color:var(--ink4);white-space:nowrap}
-.crm-project-deadline{font-size:.59rem;color:var(--ink3)}
+.crm-project-deadline{grid-area:deadline;display:flex;align-items:center;justify-content:space-between;gap:.55rem;border-top:1px solid var(--bdr);padding-top:.45rem;font-size:.59rem;color:var(--ink3)}
+.crm-project-deadline-copy{min-width:0}
 .crm-project-deadline strong{display:block;font-size:.64rem;color:var(--ink);margin-bottom:.08rem}
 .crm-project-deadline.overdue strong{color:var(--red)}.crm-project-deadline.no-action strong{color:var(--amber)}
-.crm-project-quick{display:flex;gap:.25rem;margin-top:.3rem;opacity:.18;transition:opacity .15s}
-.crm-project-row:hover .crm-project-quick,.crm-project-row:focus-within .crm-project-quick{opacity:1}
+.crm-project-quick{display:flex;gap:.25rem;margin:0;opacity:1;flex:0 0 auto}
 .crm-project-quick button{font-size:.54rem!important;padding:.14rem .34rem!important}
 .crm-project-section{display:flex;align-items:center;gap:.45rem;margin:.72rem 0 .38rem;font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
 .crm-project-section:after{content:"";height:1px;background:var(--bdr);flex:1}
 .crm-project-closed{opacity:.72}
+@media(max-width:1050px){.crm-project-list{grid-template-columns:1fr}}
 @media(max-width:850px){
   .crm-project-tools{grid-template-columns:1fr 1fr}.crm-project-tools input{grid-column:1/-1}
-  .crm-project-list-head{display:none}.crm-project-row{grid-template-columns:minmax(180px,1fr) auto}.crm-project-next{grid-column:1/-1}.crm-project-deadline{grid-column:1/-1}.crm-project-quick{opacity:1}
 }
-@media(max-width:560px){.crm-project-tools{grid-template-columns:1fr}.crm-project-tools input{grid-column:auto}.crm-project-row{grid-template-columns:1fr}.crm-project-stage{margin-top:.1rem}}
+@media(max-width:560px){.crm-project-tools{grid-template-columns:1fr}.crm-project-tools input{grid-column:auto}.crm-project-row{grid-template-columns:1fr;grid-template-areas:"main" "stage" "next" "deadline"}.crm-project-row>div:nth-child(2){justify-self:start}.crm-project-deadline{align-items:flex-start;flex-direction:column}.crm-project-stage{margin-top:.1rem}}
 </style>
 
 
@@ -4812,11 +4812,11 @@ function crmRenderProjects(){
       </div>
       <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
       ${nextHtml}
-      <div class="crm-project-deadline ${health.kind}"><strong>${health.label}</strong>${health.detail}${quick}</div>
+      <div class="crm-project-deadline ${health.kind}"><div class="crm-project-deadline-copy"><strong>${health.label}</strong><span>${health.detail}</span></div>${quick}</div>
     </div>`;
   };
 
-  cont.innerHTML=`<div class="crm-project-list"><div class="crm-project-list-head"><span>Projeto / cliente</span><span>Etapa</span><span>Próxima ação</span><span>Prazo</span></div>${arr.map(row).join('')}</div>`;
+  cont.innerHTML=`<div class="crm-project-list">${arr.map(row).join('')}</div>`;
 }
 function crmCreateActionForProjectId(projectId){const p=CRM_PROJECTS.find(x=>x.id===projectId);if(p)crmOpenActionModal(p.customer_id||null,null,p.id);}
 function crmPopulateProjectCustomerSelect(selectedId){
