@@ -577,10 +577,16 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-project-tools input,.crm-project-tools select{height:34px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);padding:.3rem .5rem;font-size:.64rem;outline:none}
 .crm-project-tools input:focus,.crm-project-tools select:focus{border-color:var(--blue)}
 .crm-project-summary{display:flex;gap:.38rem;align-items:center;flex-wrap:wrap;margin:.2rem 0 .65rem}
-.crm-project-stat{font-size:.59rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:999px;padding:.2rem .48rem}
+.crm-project-stat{font-family:'IBM Plex Sans';font-size:.59rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:999px;padding:.2rem .48rem;cursor:pointer}
 .crm-project-stat b{font-family:'IBM Plex Mono';color:var(--ink)}
+.crm-project-stat:hover,.crm-project-stat.active{border-color:var(--blue);color:var(--blue);background:var(--ltblue)}
+.crm-project-stat.warn b{color:var(--amber)}.crm-project-stat.danger b{color:var(--red)}
 .crm-project-list{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
-.crm-project-row{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(120px,.8fr) minmax(190px,1.15fr) auto;gap:.7rem;align-items:center;padding:.62rem .7rem;border-bottom:1px solid var(--bdr);cursor:pointer}
+.crm-project-list-head,.crm-project-row{display:grid;grid-template-columns:minmax(220px,1.55fr) minmax(105px,.65fr) minmax(220px,1.35fr) minmax(180px,.9fr);gap:.7rem;align-items:center}
+.crm-project-list-head{padding:.38rem .7rem;background:var(--ltgry);border-bottom:1px solid var(--bdr);font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)}
+.crm-project-row{position:relative;padding:.58rem .7rem .58rem .82rem;border-bottom:1px solid var(--bdr);cursor:pointer}
+.crm-project-row:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr)}
+.crm-project-row.overdue:before{background:var(--red)}.crm-project-row.no-action:before{background:var(--amber)}.crm-project-row.on-track:before{background:var(--green)}
 .crm-project-row:last-child{border-bottom:0}
 .crm-project-row:hover{background:var(--ltgry)}
 .crm-project-main{min-width:0}
@@ -589,14 +595,20 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-project-stage{font-size:.58rem;font-weight:700;color:var(--blue);background:var(--ltblue);border-radius:999px;padding:.16rem .42rem;width:max-content;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-next{font-size:.61rem;color:var(--ink2);min-width:0}
 .crm-project-next b{font-weight:600;color:var(--ink)}
-.crm-project-next.empty{color:var(--red)}
+.crm-project-next.empty{color:var(--amber)}
 .crm-project-date{font-family:'IBM Plex Mono';font-size:.57rem;color:var(--ink4);white-space:nowrap}
+.crm-project-deadline{font-size:.59rem;color:var(--ink3)}
+.crm-project-deadline strong{display:block;font-size:.64rem;color:var(--ink);margin-bottom:.08rem}
+.crm-project-deadline.overdue strong{color:var(--red)}.crm-project-deadline.no-action strong{color:var(--amber)}
+.crm-project-quick{display:flex;gap:.25rem;margin-top:.3rem;opacity:.18;transition:opacity .15s}
+.crm-project-row:hover .crm-project-quick,.crm-project-row:focus-within .crm-project-quick{opacity:1}
+.crm-project-quick button{font-size:.54rem!important;padding:.14rem .34rem!important}
 .crm-project-section{display:flex;align-items:center;gap:.45rem;margin:.72rem 0 .38rem;font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
 .crm-project-section:after{content:"";height:1px;background:var(--bdr);flex:1}
 .crm-project-closed{opacity:.72}
 @media(max-width:850px){
   .crm-project-tools{grid-template-columns:1fr 1fr}.crm-project-tools input{grid-column:1/-1}
-  .crm-project-row{grid-template-columns:minmax(180px,1fr) auto}.crm-project-next{grid-column:1/-1}.crm-project-date{display:none}
+  .crm-project-list-head{display:none}.crm-project-row{grid-template-columns:minmax(180px,1fr) auto}.crm-project-next{grid-column:1/-1}.crm-project-deadline{grid-column:1/-1}.crm-project-quick{opacity:1}
 }
 @media(max-width:560px){.crm-project-tools{grid-template-columns:1fr}.crm-project-tools input{grid-column:auto}.crm-project-row{grid-template-columns:1fr}.crm-project-stage{margin-top:.1rem}}
 </style>
@@ -952,9 +964,9 @@ body.dark .rv-tabs{background:var(--head-bg)}
               </select>
             </div>
             <div class="crm-project-summary">
-              <span class="crm-project-stat"><b id="crm-proj-count-active">—</b> em andamento</span>
-              <span class="crm-project-stat"><b id="crm-proj-count-noaction">—</b> sem próxima ação</span>
-              <span class="crm-project-stat"><b id="crm-proj-count-overdue">—</b> ação vencida</span>
+              <button class="crm-project-stat" data-project-quick="all" onclick="crmProjectQuickFilter('all')"><b id="crm-proj-count-active">—</b> em andamento</button>
+              <button class="crm-project-stat warn" data-project-quick="noaction" onclick="crmProjectQuickFilter('noaction')"><b id="crm-proj-count-noaction">—</b> sem próxima ação</button>
+              <button class="crm-project-stat danger" data-project-quick="overdue" onclick="crmProjectQuickFilter('overdue')"><b id="crm-proj-count-overdue">—</b> ação vencida</button>
               <span id="crm-proj-filter-count" style="font-size:.58rem;color:var(--ink4);margin-left:auto"></span>
             </div>
             <div id="crm-projects-container"><p class="hint">Carregando…</p></div>
@@ -4699,6 +4711,7 @@ async function crmDismissWixLead(wixId){
 ══════════════════════════════════════ */
 let CRM_PROJECTS=[];
 let crmEditProjectId=null;
+let crmProjectQuick='all';
 const CRM_PROJECT_STATUS_LBL={active:'Em andamento',won:'Ganho',lost:'Perdido',paused:'Pausado'};
 const CRM_PROJECT_STATUS_COL={active:'var(--blue)',won:'var(--green)',lost:'var(--red)',paused:'var(--ink4)'};
 
@@ -4716,6 +4729,15 @@ function crmProjectClienteLabel(p){
 function crmProjectNextAction(p){
   return CRM_ACTIONS.filter(a=>a.project_id===p.id&&a.status==='planned'&&!a.deleted)
     .sort((a,b)=>String(a.due_date||'9999').localeCompare(String(b.due_date||'9999')))[0]||null;
+}
+function crmProjectQuickFilter(mode){crmProjectQuick=crmProjectQuick===mode&&mode!=='all'?'all':mode;crmRenderProjects();}
+function crmProjectDeadlineInfo(action,today){
+  if(!action?.due_date)return{kind:'no-action',label:'Sem próxima ação',detail:'Agende o próximo movimento'};
+  const d=new Date(action.due_date+'T00:00:00'),days=Math.round((d-today)/86400000);
+  if(days<0)return{kind:'overdue',label:`Vencida há ${Math.abs(days)} dia${Math.abs(days)===1?'':'s'}`,detail:crmFmtDate2(action.due_date)};
+  if(days===0)return{kind:'due-soon',label:'Vence hoje',detail:crmFmtDate2(action.due_date)};
+  if(days===1)return{kind:'due-soon',label:'Vence amanhã',detail:crmFmtDate2(action.due_date)};
+  return{kind:'on-track',label:`Em ${days} dias`,detail:crmFmtDate2(action.due_date)};
 }
 function crmInitProjectFilters(){
   const sel=document.getElementById('crm-proj-stage-filter');if(!sel)return;
@@ -4743,16 +4765,22 @@ function crmRenderProjects(){
   const q=norm(document.getElementById('crm-proj-q')?.value||'');
   const stage=document.getElementById('crm-proj-stage-filter')?.value||'';
   const status=document.getElementById('crm-proj-status-filter')?.value??'active';
+  document.querySelectorAll('[data-project-quick]').forEach(b=>b.classList.toggle('active',b.dataset.projectQuick===crmProjectQuick));
 
   let arr=CRM_PROJECTS.filter(p=>{
     if(status&&p.status!==status)return false;
     if(stage&&(p.stage||'')!==stage)return false;
     if(q&&!norm([p.project_name,crmProjectClienteLabel(p),p.prospect_name,p.stage].filter(Boolean).join(' ')).includes(q))return false;
+    const prox=crmProjectNextAction(p),health=crmProjectDeadlineInfo(prox,today);
+    if(crmProjectQuick==='noaction'&&health.kind!=='no-action')return false;
+    if(crmProjectQuick==='overdue'&&health.kind!=='overdue')return false;
     return true;
   });
 
   arr.sort((a,b)=>{
     const aa=crmProjectNextAction(a),bb=crmProjectNextAction(b);
+    const ha=crmProjectDeadlineInfo(aa,today),hb=crmProjectDeadlineInfo(bb,today),rank={overdue:0,'no-action':1,'due-soon':2,'on-track':3};
+    if(rank[ha.kind]!==rank[hb.kind])return rank[ha.kind]-rank[hb.kind];
     const da=aa?.due_date||'9999-12-31',db=bb?.due_date||'9999-12-31';
     if(da!==db)return da.localeCompare(db);
     return crmProjectClienteLabel(a).localeCompare(crmProjectClienteLabel(b),'pt-BR');
@@ -4771,25 +4799,26 @@ function crmRenderProjects(){
   const row=p=>{
     const cliente=crmProjectClienteLabel(p);
     const prox=crmProjectNextAction(p);
-    let nextHtml='<div class="crm-project-next empty">Sem próxima ação</div>';
+    const health=crmProjectDeadlineInfo(prox,today);
+    let nextHtml='<div class="crm-project-next empty">Próximo movimento ainda não definido</div>';
     if(prox){
-      const d=prox.due_date?new Date(prox.due_date+'T00:00:00'):null;
-      const isOver=d&&d<today;
-      nextHtml=`<div class="crm-project-next${isOver?' empty':''}"><b>${isOver?'Vencida':'Próxima'}:</b> ${esc(prox.summary||'Ação')} ${prox.due_date?`· ${crmFmtDate2(prox.due_date)}`:''}</div>`;
+      nextHtml=`<div class="crm-project-next${health.kind==='overdue'?' empty':''}">${esc(prox.summary||'Ação')}</div>`;
     }
-    return`<div class="crm-project-row${p.status!=='active'?' crm-project-closed':''}" onclick="crmOpenProjectEdit('${p.id}')">
+    const quick=prox?`<div class="crm-project-quick"><button class="btn btn-s" onclick="event.stopPropagation();crmOpenActionModalById(null,'${prox.id}')">✓ Concluir</button><button class="btn btn-s" onclick="event.stopPropagation();crmRescheduleAction('${prox.id}')">Reagendar</button></div>`:`<div class="crm-project-quick"><button class="btn btn-p" onclick="event.stopPropagation();crmCreateActionForProjectId('${p.id}')">＋ Agendar ação</button></div>`;
+    return`<div class="crm-project-row ${health.kind}${p.status!=='active'?' crm-project-closed':''}" onclick="crmOpenProjectEdit('${p.id}')">
       <div class="crm-project-main">
         <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
-        <div class="crm-project-client">${esc(cliente)}</div>
+        <div class="crm-project-client">${esc(cliente)}${p.potential_value?` · ${crmFmtBRL(Number(p.potential_value))}`:''}</div>
       </div>
       <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
       ${nextHtml}
-      <div class="crm-project-date">${prox?.due_date?crmFmtDate2(prox.due_date):'—'}</div>
+      <div class="crm-project-deadline ${health.kind}"><strong>${health.label}</strong>${health.detail}${quick}</div>
     </div>`;
   };
 
-  cont.innerHTML=`<div class="crm-project-list">${arr.map(row).join('')}</div>`;
+  cont.innerHTML=`<div class="crm-project-list"><div class="crm-project-list-head"><span>Projeto / cliente</span><span>Etapa</span><span>Próxima ação</span><span>Prazo</span></div>${arr.map(row).join('')}</div>`;
 }
+function crmCreateActionForProjectId(projectId){const p=CRM_PROJECTS.find(x=>x.id===projectId);if(p)crmOpenActionModal(p.customer_id||null,null,p.id);}
 function crmPopulateProjectCustomerSelect(selectedId){
   const sel=document.getElementById('crm-proj-customer');
   const opts=['<option value="">— selecione —</option>']
