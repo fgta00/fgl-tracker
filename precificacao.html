@@ -235,6 +235,19 @@ body.dark .modal-h{background:var(--card)}
 .crm-ai-execute-menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:.35rem .45rem;border-radius:5px;font-size:.64rem;color:var(--ink2);cursor:pointer}
 .crm-ai-execute-menu button:hover{background:var(--bg)}
 .crm-ai-stale{display:none;background:var(--ltamb);color:var(--amber);border-radius:7px;padding:.4rem .55rem;font-size:.64rem;margin-bottom:.55rem}
+.crm-email-modal{width:min(720px,calc(100vw - 24px))}
+.crm-email-grid{display:grid;grid-template-columns:1fr;gap:.65rem}
+.crm-email-grid .ff label{font-size:.62rem}
+.crm-email-grid input,.crm-email-grid select,.crm-email-grid textarea{width:100%;border:1px solid var(--bdr2);border-radius:8px;background:var(--card);color:var(--ink2);font-family:'IBM Plex Sans';font-size:.76rem;padding:.48rem .58rem}
+.crm-email-grid textarea{min-height:190px;resize:vertical;line-height:1.5}
+.crm-email-ai-note{font-size:.62rem;color:var(--ink4);background:var(--ltblue);border-radius:7px;padding:.45rem .55rem}
+.crm-email-state{display:none;font-size:.65rem;font-weight:700;border-radius:7px;padding:.45rem .55rem}
+.crm-email-state.sending,.crm-email-state.verifying{display:block;background:var(--ltamb);color:var(--amber)}
+.crm-email-state.sent{display:block;background:var(--ltgrn);color:var(--green)}
+.crm-email-state.failed{display:block;background:var(--ltred);color:var(--red)}
+.crm-email-actions{display:flex;justify-content:flex-end;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}
+.crm-email-check{display:flex;align-items:center;gap:.4rem;margin-right:auto;font-size:.66rem;color:var(--ink3)}
+.crm-email-check input{width:auto}
 .crm-timeline{display:block}
 .crm-tl-card{max-width:none;min-width:0;border:0;border-bottom:1px solid var(--bdr);border-radius:0;padding:.38rem .15rem;max-height:54px;overflow:hidden;transition:max-height .2s,background .15s;cursor:pointer}
 .crm-tl-card:hover,.crm-tl-card.open{max-height:220px;background:var(--bg)}
@@ -435,8 +448,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2.7fr) minmax(260px,.8fr);gap:.7rem 1rem;align-items:start}
 .crm-cust-profile-main{display:contents}
 .crm-cust-profile-main .crm-cust-identity{grid-column:1;grid-row:1;margin-bottom:0}
-.crm-cust-people-panel{grid-column:1;grid-row:2;border-top:1px solid var(--bdr);padding:.62rem 0 0;min-width:0}
-.crm-cust-class-grid{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:.42rem;align-items:stretch;margin-top:0;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:.7rem .75rem}
+.crm-cust-people-panel{grid-column:1;grid-row:2;border-top:1px solid var(--bdr);padding:.5rem 0 0;margin-top:-1.5rem;min-width:0}
+.crm-cust-class-grid{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:.42rem;align-items:stretch;margin-top:0;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:.45rem .75rem .7rem}
 .crm-cust-class-grid .crm-cust-section-title{margin-bottom:.08rem}
 .crm-cust-class-grid>div{width:auto!important;min-width:0}
 .crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(160px,.8fr) minmax(210px,1fr) minmax(160px,.75fr) auto;max-width:850px;column-gap:.55rem}
@@ -465,7 +478,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
   .crm-person-phone{grid-column:2;grid-row:2}
   .crm-person-actions{grid-column:1 / -1;grid-row:3}
 }
-@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{grid-column:1;grid-row:auto;display:grid;grid-template-columns:repeat(3,1fr);margin-top:.2rem}.crm-cust-class-grid .crm-cust-section-title{grid-column:1/-1}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
+@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{grid-column:1;grid-row:auto;display:grid;grid-template-columns:repeat(3,1fr);margin-top:.2rem}.crm-cust-class-grid .crm-cust-section-title{grid-column:1/-1}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0;margin-top:0}}
 @media(max-width:700px){.crm-cust-identity{grid-template-columns:1fr}.crm-cust-identity .crm-cust-section-title,.crm-cust-identity .crm-cust-name-field,.crm-cust-identity .crm-cust-doc-field,.crm-cust-identity .crm-cust-trade-field{grid-column:1;grid-row:auto}.crm-cust-timeline-head{align-items:flex-start}.crm-cust-timeline-tools{align-items:stretch}.crm-cust-timeline-tools>*{flex:1 1 140px}}
 </style>
 
@@ -1216,7 +1229,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div class="crm-cust-people-panel">
         <div style="display:flex;align-items:center;gap:.35rem">
           <div class="crm-cust-section-title" style="margin:0">Pessoas</div>
-          <button class="btn btn-s" title="Adicionar pessoa" aria-label="Adicionar pessoa" style="font-size:.62rem;padding:.2rem .5rem;border-radius:8px" onclick="crmAddPersonRow()">＋ Adicionar pessoa</button>
+          <button class="btn btn-s" title="Adicionar pessoa" aria-label="Adicionar pessoa" style="font-size:.72rem;padding:0;width:31px;height:31px;border-radius:8px" onclick="crmAddPersonRow()">＋</button>
         </div>
         <div id="crm-cust-people" style="display:flex;flex-direction:column;gap:.35rem;margin-top:.35rem"></div>
       </div>
@@ -1753,6 +1766,32 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div id="rvlock-err" style="color:var(--red);font-size:.72rem;margin-top:.4rem;min-height:1.2em"></div>
       <button class="btn btn-p" style="width:100%;margin-top:.7rem" onclick="tryRvUnlock()">Entrar</button>
       <p style="font-size:.6rem;color:var(--ink4);margin-top:.7rem">Clique fora pra voltar à Calculadora (sem barreira nenhuma pra usá-la).</p>
+    </div>
+  </div>
+</div>
+
+<!-- CRM — COMPOSER DE E-MAIL (envio sempre explícito) -->
+<div class="ovl" id="ovl-crmemail" onclick="if(event.target===this)closeM('crmemail')">
+  <div class="modal crm-email-modal">
+    <div class="modal-h">
+      <span>Preparar e-mail</span>
+      <button class="mcls" aria-label="Fechar" onclick="closeM('crmemail')">✕</button>
+    </div>
+    <div class="modal-b">
+      <div class="crm-email-grid">
+        <div class="crm-email-ai-note">Rascunho sugerido pela IA — revise destinatário, assunto e texto antes de enviar.</div>
+        <div class="ff"><label>Destinatário</label><select id="crm-email-person" onchange="crmEmailSelectPerson()"></select></div>
+        <div class="ff"><label>E-mail</label><input id="crm-email-to" type="email" readonly></div>
+        <div class="ff"><label>Assunto</label><input id="crm-email-subject" type="text" maxlength="180"></div>
+        <div class="ff"><label>Mensagem</label><textarea id="crm-email-body" maxlength="10000"></textarea></div>
+        <div class="ff"><label>Ação vinculada (opcional)</label><select id="crm-email-action" onchange="crmEmailActionChanged()"><option value="">Nenhuma ação</option></select></div>
+        <div id="crm-email-state" class="crm-email-state"></div>
+      </div>
+      <div class="crm-email-actions">
+        <label id="crm-email-action-wrap" class="crm-email-check" style="display:none"><input id="crm-email-complete-action" type="checkbox" checked> Marcar a ação vinculada como concluída após o envio</label>
+        <button class="btn btn-s" onclick="closeM('crmemail')">Cancelar</button>
+        <button id="crm-email-send-btn" class="btn btn-p" onclick="crmSendEmail()">Enviar e-mail</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3130,6 +3169,7 @@ let crmEditCtx={customerId:null,tags:[],people:[],refs:[],segmento:[],perfil:[]}
 let crmAiLastResult=null,crmAiCurrentCustomerId=null,crmAiRequestToken=0,crmAiInFlight=false,crmAiLastRequest={questionKey:'o_que_fazer_agora',customQuestion:''};
 let crmAiThread={threadId:null,initial:null,turns:[],lastConsultationId:null,snapshotAt:null};
 let crmAiStatusTimer=null,crmAiStatusStartedAt=0;
+let crmEmailCtx={idempotencyKey:null,aiDraft:'',sourceConsultationId:null,sending:false};
 const CRM_AI_EVIDENCE_LABELS={fact:'Fato',heuristic:'Padrão',human:'Informação da equipe',signal:'Sinal',communication:'Comunicação'};
 const CRM_AI_QUESTION_LABELS={
   o_que_fazer_agora:'O que devo fazer com este cliente agora?',
@@ -3239,7 +3279,53 @@ function crmOpenAIRefreshInspector(){
 }
 function crmToggleAIExecute(event){event.stopPropagation();document.getElementById('crm-ai-execute')?.classList.toggle('open');}
 function crmUpdateAIEmailOption(){const hasEmail=crmEditCtx.people.some(p=>String(p.email||'').trim());document.getElementById('crm-ai-email-btn').style.display=hasEmail?'block':'none';}
-function crmPrepareEmailFromAI(){document.getElementById('crm-ai-execute')?.classList.remove('open');const person=crmEditCtx.people.find(p=>String(p.email||'').trim());if(!person)return;crmInspectAI('E-mail em preparação',`Destinatário: ${person.name||person.email} <${person.email}>. O envio pelo Gmail será habilitado após a autorização do Google Workspace; nenhum e-mail foi enviado.`,'crm_people',person.id||null);}
+function crmEmailDraftText(){
+  const last=crmAiThread.turns[crmAiThread.turns.length-1];
+  if(last&&/(e-mail|email|mensagem|escreva|prepare)/i.test(last.question||''))return crmPlainAIText(last.data?.answer||'');
+  return crmPlainAIText(crmAiLastResult?.action_draft?.summary||crmAiLastResult?.next_step||'');
+}
+function crmPrepareEmailFromAI(){
+  document.getElementById('crm-ai-execute')?.classList.remove('open');
+  const people=crmEditCtx.people.filter(p=>String(p.email||'').trim());if(!people.length)return;
+  const customer=CRM_CUSTOMERS.find(c=>c.id===crmEditCtx.customerId);
+  const draft=crmEmailDraftText();
+  crmEmailCtx={idempotencyKey:crypto.randomUUID(),aiDraft:draft,sourceConsultationId:crmAiThread.lastConsultationId||crmAiLastResult?.meta?.consultation_id||null,sending:false};
+  const personSelect=document.getElementById('crm-email-person');
+  personSelect.innerHTML=people.map((p,i)=>`<option value="${i}">${esc(p.name||p.email)} — ${esc(p.email)}</option>`).join('');
+  const planned=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='planned'&&!a.deleted);
+  document.getElementById('crm-email-action').innerHTML='<option value="">Nenhuma ação</option>'+planned.map(a=>`<option value="${esc(a.id)}">${esc(a.summary)}${a.due_date?' — '+esc(a.due_date):''}</option>`).join('');
+  document.getElementById('crm-email-subject').value=`Ânima Verde — ${customer?.trade_name||customer?.display_name||'contato'}`;
+  document.getElementById('crm-email-body').value=draft;
+  document.getElementById('crm-email-state').className='crm-email-state';document.getElementById('crm-email-state').textContent='';
+  document.getElementById('crm-email-send-btn').disabled=false;document.getElementById('crm-email-send-btn').textContent='Enviar e-mail';
+  document.getElementById('crm-email-action').value='';crmEmailActionChanged();crmEmailSelectPerson();
+  document.getElementById('ovl-crmemail').classList.add('open');
+  crmInspectAI('Rascunho de e-mail','O texto sugerido e o texto efetivamente enviado são registrados separadamente. Nada será enviado sem clicar em “Enviar e-mail”.','crm_ai_consultations',crmEmailCtx.sourceConsultationId);
+}
+function crmEmailSelectPerson(){
+  const people=crmEditCtx.people.filter(p=>String(p.email||'').trim());const i=Number(document.getElementById('crm-email-person').value||0);document.getElementById('crm-email-to').value=people[i]?.email||'';
+}
+function crmEmailActionChanged(){
+  const has=!!document.getElementById('crm-email-action').value;document.getElementById('crm-email-action-wrap').style.display=has?'flex':'none';
+}
+function crmEmailSetState(state,text){const el=document.getElementById('crm-email-state');el.className='crm-email-state '+state;el.textContent=text;}
+async function crmSendEmail(){
+  if(crmEmailCtx.sending)return;
+  const to=document.getElementById('crm-email-to').value.trim(),subject=document.getElementById('crm-email-subject').value.trim(),body=document.getElementById('crm-email-body').value.trim();
+  if(!to||!/^\S+@\S+\.\S+$/.test(to)){crmEmailSetState('failed','Revise o destinatário.');return;}
+  if(!subject){crmEmailSetState('failed','Preencha o assunto.');return;}if(!body){crmEmailSetState('failed','Escreva a mensagem.');return;}
+  if(!confirm(`Enviar agora para ${to}?`))return;
+  crmEmailCtx.sending=true;const btn=document.getElementById('crm-email-send-btn');btn.disabled=true;btn.textContent='Enviando…';crmEmailSetState('sending','Enviando pelo Gmail… não feche esta janela.');
+  const actionId=document.getElementById('crm-email-action').value||null;
+  try{
+    const{data,error}=await _supa.functions.invoke('crm-email-send',{body:{customer_id:crmEditCtx.customerId,person_id:(crmEditCtx.people.filter(p=>String(p.email||'').trim())[Number(document.getElementById('crm-email-person').value||0)]?.id)||null,to,subject,body,ai_draft:crmEmailCtx.aiDraft||null,source_consultation_id:crmEmailCtx.sourceConsultationId,action_id:actionId,complete_action:!!actionId&&document.getElementById('crm-email-complete-action').checked,idempotency_key:crmEmailCtx.idempotencyKey}});
+    if(error)throw error;
+    if(data?.status==='sent'){crmEmailSetState('sent','E-mail enviado e registrado na Timeline.');btn.textContent='Enviado';await crmLoadAll();setTimeout(()=>closeM('crmemail'),1200);return;}
+    if(data?.status==='sending'||data?.status==='verifying'){crmEmailSetState('verifying','Envio em verificação. Não tente novamente agora; o registro foi preservado contra duplicidade.');btn.textContent='Em verificação';await crmLoadAll();return;}
+    throw new Error(data?.error||'Falha no envio');
+  }catch(e){crmEmailSetState('failed','Não foi possível confirmar o envio. Verifique o estado na Timeline antes de tentar novamente.');btn.disabled=false;btn.textContent='Tentar novamente';}
+  finally{crmEmailCtx.sending=false;}
+}
 function crmCheckAIStale(data){const stale=document.getElementById('crm-ai-stale');const snapshot=data.meta?.data_snapshot_at,latest=data.latest_relevant_data_at;stale.style.display=snapshot&&latest&&new Date(latest)>new Date(snapshot)?'block':'none';}
 function crmCloseAIHistory(){
   const panel=document.getElementById('crm-ai-panel');document.getElementById('crm-ai-history').style.display='none';
@@ -3608,7 +3694,7 @@ function crmRenderCustPeople(){
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
     </div>`;
-  }).join(''):'<div class="crm-cust-empty-people">Ainda não há contatos cadastrados para este cliente. Use “Adicionar pessoa” para incluir o primeiro.</div>';
+  }).join(''):'<div class="crm-cust-empty-people">Ainda não há contatos cadastrados para este cliente. Use “+” para incluir o primeiro.</div>';
 }
 function crmFormatPhone(value){const raw=String(value||'').trim(),d=raw.replace(/\D/g,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;if(d.length===13&&d.startsWith('55'))return`+55 (${d.slice(2,4)}) ${d.slice(4,9)}-${d.slice(9)}`;return raw;}
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
@@ -4288,7 +4374,7 @@ function crmActionListHtml(acoes){
     </div>`;
   }).join('');
 }
-function crmCommunicationListHtml(items){return items.map(m=>{const when=m.sent_at||m.received_at||m.created_at;const label=m.channel==='whatsapp'?'WhatsApp':'E-mail';const direction=m.direction==='inbound'?'Recebido':'Enviado';const summary=m.subject||m.excerpt||'(sem assunto)';return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(m.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b> <span style="color:var(--ink4)">· ${direction} · ${esc(m.status||'registrado')}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)}</div></div></div></div>`;}).join('');}
+function crmCommunicationListHtml(items){return items.map(m=>{const when=m.sent_at||m.received_at||m.created_at;const label=m.channel==='whatsapp'?'WhatsApp':'E-mail';const direction=m.direction==='inbound'?'Recebido':'Enviado';const summary=m.subject||m.excerpt||'(sem assunto)';const age=Date.now()-new Date(m.created_at).getTime();const state=m.status==='sending'&&age>120000?'em verificação':({sending:'enviando',sent:'enviado',failed:'falhou',received:'recebido',delivered:'entregue'}[m.status]||m.status||'registrado');const stateColor=m.status==='failed'?'var(--red)':(m.status==='sending'?'var(--amber)':'var(--ink4)');return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(m.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b> <span style="color:${stateColor}">· ${direction} · ${esc(state)}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)}</div></div></div></div>`;}).join('');}
 function crmRenderTimeline(){
   const cont=document.getElementById('crm-cust-timeline');
   if(!cont||!crmEditCtx.customerId)return;
