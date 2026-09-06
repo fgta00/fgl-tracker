@@ -300,23 +300,42 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 </style>
 <style id="prod-asia-ui-v1">
 /* Refinamento visual do Controle Interno — sem alterar lógica ou dados. */
+header{height:46px;padding:0 1rem;gap:.65rem;box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.subheader{top:46px;padding:.18rem 1rem;min-height:42px}
+.tab{padding:0 .78rem;font-size:.7rem}.stab{padding:.48rem .8rem;font-size:.69rem}
+.hdr-r{gap:.42rem}.hdr-r .btn-bkp{padding:.26rem .55rem;font-size:.66rem}
+main{padding:.8rem 1rem}
 #view-internal .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
-#view-internal .sc{min-width:145px;flex:0 1 178px;justify-content:flex-start;padding:.48rem .68rem}
+#view-internal .sc{min-width:145px;flex:0 1 178px;justify-content:flex-start;padding:.48rem .68rem;border-color:var(--bdr);box-shadow:none}
 #view-internal .sc:nth-child(n+6){flex-basis:220px}
 #view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
+#int-tbl,#int-sticky-clone table{font-size:12px}
 #int-tbl th:nth-child(5){min-width:280px!important}
-#int-tbl td{padding:.34rem .42rem}
+#int-tbl td{padding:.48rem .42rem}
+#int-tbl thead .grp th,#int-sticky-clone thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
+#int-tbl thead .grp th:nth-child(2),#int-sticky-clone thead .grp th:nth-child(2){border-top-color:#6E9ABD}
+#int-tbl thead .grp th:nth-child(3),#int-sticky-clone thead .grp th:nth-child(3){border-top-color:var(--blue)}
+#int-tbl thead .grp th:nth-child(4),#int-sticky-clone thead .grp th:nth-child(4){border-top-color:var(--green)}
+#int-tbl thead .grp th:nth-child(5),#int-sticky-clone thead .grp th:nth-child(5){border-top-color:var(--purple)}
+#int-tbl thead .grp th:nth-child(6),#int-sticky-clone thead .grp th:nth-child(6){border-top-color:var(--amber)}
+#int-tbl thead .ch th,#int-sticky-clone thead .ch th{background:#FAFBFC!important;color:var(--ink2)!important;border-right:1px solid var(--bdr)!important;border-bottom:1px solid var(--bdr2)!important}
+#int-tbl tbody td:nth-child(5)>div{background:transparent!important}
 #int-tbl tbody tr.alt{background:#F7FAFD}
 #int-tbl tbody tr:hover,#int-tbl tbody tr.alt:hover{background:var(--ltblue)}
 #int-tbl .mc{width:24px;height:24px;font-size:.7rem}
 #int-tbl .ml2{margin-top:10px}
 #int-tbl .mlbl{font-size:.52rem}
 body.dark #int-tbl tbody tr.alt{background:#111B2B}
+body.dark #int-tbl thead .grp th,body.dark #int-sticky-clone thead .grp th{background:#172235!important;color:var(--ink3)!important}
+body.dark #int-tbl thead .ch th,body.dark #int-sticky-clone thead .ch th{background:#101A2A!important;color:var(--ink2)!important}
 body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 .prod-asia-toolbar-actions{margin-left:auto;display:flex;align-items:center;gap:.4rem}
 #int-tbl .ms-cell{position:relative;min-width:68px}
+#int-tbl thead .ch th:nth-child(n+6):nth-child(-n+14),
+#int-tbl tbody td:nth-child(n+6):nth-child(-n+14),
+#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:72px!important;min-width:72px!important;max-width:72px!important}
 #int-tbl .ms-cell::before{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:3px;background:var(--bdr2);z-index:0}
 #int-tbl .ms-cell.done::before{background:var(--green)}
 #int-tbl .ms-cell.est::before{background:var(--amber)}
@@ -1965,12 +1984,13 @@ function renderInternal(){
         const a=nextAction(o);
         const snoozed=a&&isSnoozed(a.key);
         const urgCol=(!a||snoozed)?'transparent':a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)';
-        const bgTint=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
+        const bgTint='transparent';
+        const alertBg=(!a||snoozed)?'transparent':a.level==='crit'?'var(--ltred)':a.level==='warn'?'var(--ltamb)':'var(--ltgrn)';
         let inner=`<div style="display:flex;flex-direction:column;gap:5px;padding:.55rem .6rem;flex:1">`;
         inner+=`<div style="display:flex;align-items:center;gap:8px">
           <div style="flex:1;min-width:0">${a&&!snoozed?`<div style="display:flex;flex-direction:column;gap:1px;text-align:center">
             <div style="display:flex;align-items:center;justify-content:center;gap:4px">
-              <span style="font-size:.74rem;font-weight:700;color:${a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)'};line-height:1.25">${esc(a.text)}</span>
+              <span style="font-size:.74rem;font-weight:700;color:${a.level==='crit'?'var(--red)':a.level==='warn'?'var(--amber)':'var(--green)'};background:${alertBg};border-radius:999px;padding:.16rem .48rem;line-height:1.25">${esc(a.text)}</span>
               <button onclick="snoozeAlert('${esc(a.key)}',event)" title="Adiar 7 dias" aria-label="Adiar 7 dias" class="snz-btn" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:.7rem;padding:0 2px;flex-shrink:0;opacity:0;transition:opacity .15s">⏱</button>
             </div>
             <div style="font-size:.62rem;color:var(--ink3);line-height:1.25">→ ${esc(a.suggestion)}</div>
