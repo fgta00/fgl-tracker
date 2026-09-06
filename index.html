@@ -305,12 +305,13 @@ header{height:46px;padding:0 1rem;gap:.65rem;box-shadow:0 1px 5px rgba(0,0,0,.25
 .tab{padding:0 .78rem;font-size:.7rem}.stab{padding:.48rem .8rem;font-size:.69rem}
 .hdr-r{gap:.42rem}.hdr-r .btn-bkp{padding:.26rem .55rem;font-size:.66rem}
 main{padding:.8rem 1rem}
-#view-internal .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
-#view-internal .sc{min-width:118px;flex:0 1 138px;justify-content:flex-start;padding:.44rem .58rem;border-color:var(--bdr);box-shadow:none}
-#view-internal .sc:nth-child(n+6){flex-basis:172px}
-#view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view-internal .sbar,#view-client .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
+#view-internal .sc,#view-client .sc{min-width:118px;flex:0 1 138px;justify-content:flex-start;padding:.44rem .58rem;border-color:var(--bdr);box-shadow:none}
+#view-internal .sc:nth-child(n+6),#view-client .sc:nth-child(n+6){flex-basis:172px}
+#view-internal .slbl,#view-client .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
+#cli-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
 #int-tbl{table-layout:fixed;min-width:1450px}
 #int-tbl col.milestone-col{width:5%}
@@ -351,6 +352,32 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-node .mc.pending{width:12px!important;height:12px!important;background:var(--card)}
 body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{background:var(--card)}
 body.dark #int-tbl .ms-node .mc.done{background:transparent}
+#view-client>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
+#view-client .tw table{font-size:12px}
+#view-client thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
+#view-client thead .grp th:nth-child(2){border-top-color:var(--blue)}
+#view-client thead .grp th:nth-child(3){border-top-color:var(--amber)}
+#view-client thead .ch th{background:#FAFBFC!important;color:var(--ink2)!important;border-right:1px solid var(--bdr)!important;border-bottom:1px solid var(--bdr2)!important}
+#view-client tbody td{padding:.48rem .5rem}
+#view-client tbody tr.alt{background:#F7FAFD}
+#view-client tbody tr:hover,#view-client tbody tr.alt:hover{background:var(--ltblue)}
+#view-client .ms{width:100%;justify-content:center;align-items:flex-start}
+#view-client .mst{min-width:34px;position:relative}
+#view-client .ml2{flex:1;min-width:8px;max-width:24px;height:3px;margin-top:10px}
+#view-client .ml2.late{background:var(--red)}
+#view-client .mc{width:18px!important;height:18px!important;font-size:.68rem!important;border-width:2px!important;background:var(--card)}
+#view-client tr.alt .mc{background:#F7FAFD}
+#view-client .mc.done{border:0!important;background:transparent;color:var(--green);font-size:.9rem!important}
+#view-client .mc.est{background:var(--card);color:var(--amber)}
+#view-client .mc.late{background:var(--card);color:var(--red)}
+#view-client .mc.pending{width:12px!important;height:12px!important;background:var(--card);margin-top:3px}
+#view-client .mlbl{font-size:.52rem!important;color:var(--ink4)}
+body.dark #view-client>.tb{box-shadow:none}
+body.dark #view-client tbody tr.alt{background:#111B2B}
+body.dark #view-client thead .grp th{background:#172235!important;color:var(--ink3)!important}
+body.dark #view-client thead .ch th{background:#101A2A!important;color:var(--ink2)!important}
+body.dark #view-client .mc,body.dark #view-client tr.alt .mc{background:var(--card)}
+body.dark #view-client .mc.done{background:transparent}
 @media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:125px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
 </style>
 <style id="fgl-window-design-system-v1">
@@ -496,22 +523,30 @@ body.dark .ovl .mhdr{background:var(--card);color:var(--ink)}
 
 <!-- ═══ VISÃO CLIENTE (agora uma opção dentro de Controle Interno) ═══ -->
 <div id="view-client" style="display:none">
+  <div class="sbar" id="cli-sum"></div>
   <div class="tb">
     <input id="cli-q" placeholder="🔍 Buscar PO, produto…" oninput="renderClient()">
     <span id="msf-cli-st-wrap"></span>
     <span id="msf-cli-cl-wrap"></span>
     <span class="finfo" id="cli-cnt"></span>
-    <div class="ml" style="display:flex;gap:.5rem;align-items:center">
+    <div class="prod-asia-toolbar-actions">
+      <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
+      <button class="bsm" onclick="openStatusModal()">🏷 Tags</button>
+      <button class="bsm" onclick="exportClientCSV()">⬇ CSV</button>
       <div class="toggle-grp ci-subview-toggle">
         <button data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
         <button class="active" data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
       </div>
-      <button class="bsm" onclick="exportClientCSV()">⬇ CSV</button>
     </div>
   </div>
   <div class="tw">
     <table>
       <thead>
+        <tr class="grp">
+          <th colspan="6">PEDIDO</th>
+          <th>PROGRESSO</th>
+          <th colspan="2">ENTREGA</th>
+        </tr>
         <tr class="ch">
           <th class="L" style="min-width:28px">#</th>
           <th class="L" style="min-width:72px">PO#</th>
@@ -1945,7 +1980,7 @@ function renderSummary(){
   const fin=orders.filter(o=>o.status==='FINALIZADO').length;
   const totPagar=payments.reduce((a,p)=>a+Math.max(0,pTotalForn(p)-piPaid(p.pi)),0);
   const totReceber=payments.reduce((a,p)=>a+Math.max(0,pTotalVenda(p)-piReceived(p.pi)),0);
-  document.getElementById('int-sum').innerHTML=[
+  const summaryHtml=[
     {l:'Pré-Produção',v:pre,d:'var(--amber)',c:'var(--amber)'},
     {l:'Em Produção',v:prod,d:'var(--purple)',c:'var(--purple)'},
     {l:'Pré-Embarque',v:preemb,d:'var(--preemb)',c:'var(--preemb)'},
@@ -1954,6 +1989,8 @@ function renderSummary(){
     {l:'A Pagar Forn.',v:fUSD(totPagar),d:'var(--red)',c:'var(--red)'},
     {l:'A Receber Cli.',v:fUSD(totReceber),d:'var(--blue)',c:'var(--blue)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:${String(x.v).length>8?'.85rem':'1.18rem'}">${x.v}</div></div></div>`).join('');
+  document.getElementById('int-sum').innerHTML=summaryHtml;
+  const clientSummary=document.getElementById('cli-sum');if(clientSummary)clientSummary.innerHTML=summaryHtml;
 }
 
 /* ══════════════════════════════════════
@@ -2092,10 +2129,7 @@ function renderClient(){
   const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&msfMatch('cli-st',o.status)&&msfMatch('cli-cl',o.client);});
   document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
-    let rowStyle='';
-    if(o.status==='FINALIZADO')rowStyle=' style="background:var(--ltgrn)"';
-    else if(o.status==='SUSPENSO')rowStyle=' style="background:var(--ltred)"';
-    return`<tr${rowStyle||(i%2?'':' class="alt"')}>
+    return`<tr${i%2?'':' class="alt"'}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L"><span style="font-family:'IBM Plex Mono';font-size:.7rem;color:var(--blue)">${esc(o.po)}</span></td>
       <td class="L"><b>${esc(o.client)}</b></td>
