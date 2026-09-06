@@ -353,6 +353,40 @@ body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{backgroun
 body.dark #int-tbl .ms-node .mc.done{background:transparent}
 @media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:125px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
 </style>
+<style id="fgl-window-design-system-v1">
+/* Padrão visual das janelas — derivado do PROD ASIA final. */
+:root{--ui-modal-radius:12px;--ui-control-radius:7px;--ui-control-h:34px;--ui-modal-pad:1rem;--ui-section-gap:.85rem}
+.ovl{background:rgba(8,15,25,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);padding:14px}
+.ovl .modal{border-radius:var(--ui-modal-radius);border:1px solid rgba(160,181,202,.28);box-shadow:0 22px 64px rgba(8,21,36,.3)}
+.ovl .mhdr{min-height:52px;padding:.68rem var(--ui-modal-pad);background:var(--card);border-bottom:1px solid var(--bdr);border-radius:var(--ui-modal-radius) var(--ui-modal-radius) 0 0;color:var(--ink);z-index:20}
+.ovl .mhdr h2{font-family:'IBM Plex Sans',sans-serif;font-size:.86rem;font-weight:700;line-height:1.25;color:var(--ink);letter-spacing:0}
+.ovl .mhdr-actions{gap:.4rem}
+.ovl .mhdr-actions .btns{background:var(--card);color:var(--ink2);border:1px solid var(--bdr2)}
+.ovl .mhdr-actions .btns:hover{background:var(--ltblue);border-color:var(--blue);color:var(--blue)}
+.ovl .mcls{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;color:var(--ink3);font-size:1rem;line-height:1}
+.ovl .mcls:hover{background:var(--ltgry);color:var(--ink)}
+.ovl .mbody{padding:var(--ui-modal-pad)}
+.ovl .ff{gap:.25rem}
+.ovl .ff label{font-family:'IBM Plex Sans',sans-serif;font-size:.61rem;font-weight:700;line-height:1.25;letter-spacing:.055em;text-transform:uppercase;color:var(--ink3)}
+.ovl .ff input,.ovl .ff select,.ovl .ff textarea,.ovl .epop input,.ovl .epop select,.ovl .epop textarea{min-height:var(--ui-control-h);border:1px solid var(--bdr2);border-radius:var(--ui-control-radius);background:var(--card);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:.76rem;padding:.4rem .55rem;box-shadow:none}
+.ovl .ff textarea{min-height:68px;line-height:1.45;resize:vertical}
+.ovl .ff input:focus,.ovl .ff select:focus,.ovl .ff textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,104,190,.1);outline:none;background:var(--card)}
+.ovl .hint,.ovl .hint-sm{font-size:.57rem;line-height:1.4;color:var(--ink4)}
+.ovl .fsep{margin:var(--ui-section-gap) 0 .45rem;padding:0 0 .3rem;background:transparent;border-radius:0;border-bottom:1px solid var(--bdr);color:var(--ink3);font-size:.61rem;font-weight:700;line-height:1.3;letter-spacing:.065em;text-transform:uppercase}
+.ovl .fsep:first-child{margin-top:0}
+.ovl .btn{min-height:31px;border-radius:var(--ui-control-radius);font-family:'IBM Plex Sans',sans-serif;font-size:.68rem;font-weight:700;padding:.32rem .65rem}
+.ovl .btnp{background:var(--green);color:#fff;border:1px solid var(--green)}
+.ovl .btns{background:var(--card);color:var(--ink2);border:1px solid var(--bdr2)}
+.ovl .brow{display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-top:.85rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
+.ovl .brow .btn{min-width:84px}
+.ovl table{font-family:'IBM Plex Sans',sans-serif}
+.epop,.msf-panel{border:1px solid var(--bdr2);border-radius:9px;background:var(--card);box-shadow:0 10px 28px rgba(8,21,36,.18)}
+.epop{padding:.75rem}.epop label{font-size:.61rem;font-weight:700;letter-spacing:.055em;text-transform:uppercase;color:var(--ink3)}
+.epop input,.epop select,.epop textarea,.msf-search{min-height:32px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);font-family:'IBM Plex Sans',sans-serif;font-size:.72rem}
+.epop-btns button{min-height:31px;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:.68rem;font-weight:700}
+body.dark .ovl .mhdr{background:var(--card);color:var(--ink)}
+@media(max-width:720px){.ovl{padding:8px}.ovl .mhdr{padding:.58rem .7rem}.ovl .mbody{padding:.75rem}.ovl .fg,.ovl .grid-av{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <!-- LOGIN SCREEN -->

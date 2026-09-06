@@ -674,6 +674,35 @@ body.dark .rv-tabs{background:var(--head-bg)}
 }
 </style>
 
+<style id="fgl-window-design-system-v1">
+/* Padrão visual das janelas — derivado do cabeçalho final de Clientes. */
+:root{--ui-modal-radius:12px;--ui-control-radius:7px;--ui-control-h:34px;--ui-modal-pad:1rem;--ui-section-gap:.85rem}
+.ovl{padding:14px;background:rgba(8,15,25,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.ovl .modal{border-radius:var(--ui-modal-radius);box-shadow:0 22px 64px rgba(8,21,36,.28);border:1px solid rgba(160,181,202,.28)}
+.ovl .modal-h{min-height:52px;padding:.68rem var(--ui-modal-pad);z-index:20;border-radius:var(--ui-modal-radius) var(--ui-modal-radius) 0 0;background:var(--card);border-bottom:1px solid var(--bdr)}
+.ovl .modal-h>span,.ovl .modal-h>h2{font-family:'IBM Plex Sans',sans-serif;font-size:.86rem;font-weight:700;line-height:1.25;color:var(--ink);letter-spacing:0}
+.ovl .modal-b{padding:var(--ui-modal-pad)}
+.ovl .mcls{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;color:var(--ink3);font-size:1rem;line-height:1}
+.ovl .mcls:hover{background:var(--ltgry);color:var(--ink)}
+.ovl .ff{gap:.25rem}
+.ovl .ff label,.ovl .crm-field-label{font-family:'IBM Plex Sans',sans-serif;font-size:.61rem;font-weight:700;line-height:1.25;letter-spacing:.055em;text-transform:uppercase;color:var(--ink3)}
+.ovl .ff input,.ovl .ff select,.ovl .ff textarea{min-height:var(--ui-control-h);border:1px solid var(--bdr2);border-radius:var(--ui-control-radius);background:var(--card);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:.76rem;padding:.4rem .55rem;box-shadow:none}
+.ovl .ff textarea{min-height:68px;line-height:1.45;resize:vertical}
+.ovl .ff input:focus,.ovl .ff select:focus,.ovl .ff textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,104,190,.1);outline:none;background:var(--card)}
+.ovl .ff .formula,.ovl .hint,.ovl .hint-sm{font-size:.57rem;line-height:1.4;color:var(--ink4)}
+.ovl .fsep{margin:var(--ui-section-gap) 0 .45rem;padding:0 0 .3rem;background:transparent;border-radius:0;border-bottom:1px solid var(--bdr);color:var(--ink3);font-size:.61rem;font-weight:700;line-height:1.3;letter-spacing:.065em;text-transform:uppercase}
+.ovl .fsep:first-child{margin-top:0}
+.ovl .btn{min-height:31px;border-radius:var(--ui-control-radius);font-family:'IBM Plex Sans',sans-serif;font-size:.68rem;font-weight:700;padding:.32rem .65rem}
+.ovl .btn-p{background:var(--blue);color:#fff;border:1px solid var(--blue)}
+.ovl .btn-s{background:var(--card);color:var(--ink2);border:1px solid var(--bdr2)}
+.ovl .btn-s:hover{background:var(--ltblue);border-color:var(--blue);color:var(--blue)}
+.ovl .tb{align-items:center}
+.ovl table{font-family:'IBM Plex Sans',sans-serif}
+.ovl .crm-empty{line-height:1.45;color:var(--ink4)}
+.msf-panel,.crm-dropdown-menu{border:1px solid var(--bdr2);border-radius:9px;background:var(--card);box-shadow:0 10px 28px rgba(8,21,36,.16)}
+.msf-search{min-height:32px;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:.7rem}
+@media(max-width:720px){.ovl{padding:8px}.ovl .modal-h{padding:.58rem .7rem}.ovl .modal-b{padding:.75rem}.ovl .fg,.ovl .grid-av{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <header>
