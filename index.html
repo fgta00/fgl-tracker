@@ -306,12 +306,14 @@ header{height:46px;padding:0 1rem;gap:.65rem;box-shadow:0 1px 5px rgba(0,0,0,.25
 .hdr-r{gap:.42rem}.hdr-r .btn-bkp{padding:.26rem .55rem;font-size:.66rem}
 main{padding:.8rem 1rem}
 #view-internal .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
-#view-internal .sc{min-width:145px;flex:0 1 178px;justify-content:flex-start;padding:.48rem .68rem;border-color:var(--bdr);box-shadow:none}
-#view-internal .sc:nth-child(n+6){flex-basis:220px}
+#view-internal .sc{min-width:118px;flex:0 1 138px;justify-content:flex-start;padding:.44rem .58rem;border-color:var(--bdr);box-shadow:none}
+#view-internal .sc:nth-child(n+6){flex-basis:172px}
 #view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
+#int-tbl{table-layout:fixed;min-width:1450px}
+#int-tbl col.milestone-col{width:5%}
 #int-tbl th:nth-child(5){min-width:280px!important}
 #int-tbl td{padding:.48rem .42rem}
 #int-tbl thead .grp th,#int-sticky-clone thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
@@ -335,7 +337,7 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-cell{position:relative;min-width:68px}
 #int-tbl thead .ch th:nth-child(n+6):nth-child(-n+14),
 #int-tbl tbody td:nth-child(n+6):nth-child(-n+14),
-#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:72px!important;min-width:72px!important;max-width:72px!important}
+#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:5%!important;min-width:0!important;max-width:none!important}
 #int-tbl .ms-cell::before{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:3px;background:var(--bdr2);z-index:0}
 #int-tbl .ms-cell.done::before{background:var(--green)}
 #int-tbl .ms-cell.est::before{background:var(--amber)}
@@ -349,7 +351,7 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-node .mc.pending{width:12px!important;height:12px!important;background:var(--card)}
 body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{background:var(--card)}
 body.dark #int-tbl .ms-node .mc.done{background:transparent}
-@media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:150px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
+@media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:125px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -420,6 +422,11 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
   </div>
   <div class="tw">
     <table id="int-tbl">
+      <colgroup>
+        <col style="width:2.5%"><col style="width:15%"><col style="width:11%"><col style="width:5%"><col style="width:19%">
+        <col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col">
+        <col style="width:2.5%">
+      </colgroup>
       <thead>
         <tr class="grp">
           <th colspan="4" style="background:#091A2A;text-align:center">PEDIDOS</th>
