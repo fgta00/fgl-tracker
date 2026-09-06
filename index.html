@@ -300,8 +300,9 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 </style>
 <style id="prod-asia-ui-v1">
 /* Refinamento visual do Controle Interno — sem alterar lógica ou dados. */
-#view-internal .sbar{display:grid;grid-template-columns:repeat(7,minmax(125px,1fr));gap:.55rem;margin-bottom:.7rem}
-#view-internal .sc{min-width:0;justify-content:flex-start;padding:.48rem .68rem}
+#view-internal .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
+#view-internal .sc{min-width:145px;flex:0 1 178px;justify-content:flex-start;padding:.48rem .68rem}
+#view-internal .sc:nth-child(n+6){flex-basis:220px}
 #view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
@@ -314,8 +315,22 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 #int-tbl .mlbl{font-size:.52rem}
 body.dark #int-tbl tbody tr.alt{background:#111B2B}
 body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
-@media(max-width:1250px){#view-internal .sbar{grid-template-columns:repeat(4,minmax(125px,1fr))}}
-@media(max-width:760px){#view-internal .sbar{display:flex;overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:150px}#int-q{width:100%;min-width:100%}}
+.prod-asia-toolbar-actions{margin-left:auto;display:flex;align-items:center;gap:.4rem}
+#int-tbl .ms-cell{position:relative;min-width:68px}
+#int-tbl .ms-cell::before{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:3px;background:var(--bdr2);z-index:0}
+#int-tbl .ms-cell.done::before{background:var(--green)}
+#int-tbl .ms-cell.est::before{background:var(--amber)}
+#int-tbl .ms-cell.late::before{background:var(--red)}
+#int-tbl .ms-node{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1px}
+#int-tbl .ms-node .mc{background:var(--card);width:18px!important;height:18px!important;font-size:.68rem!important;border-width:2px!important}
+#int-tbl tr.alt .ms-node .mc{background:#F7FAFD}
+#int-tbl .ms-node .mc.done{border:0!important;background:transparent;color:var(--green);font-size:.9rem!important}
+#int-tbl .ms-node .mc.est{background:var(--card);color:var(--amber)}
+#int-tbl .ms-node .mc.late{background:var(--card);color:var(--red)}
+#int-tbl .ms-node .mc.pending{width:12px!important;height:12px!important;background:var(--card)}
+body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{background:var(--card)}
+body.dark #int-tbl .ms-node .mc.done{background:transparent}
+@media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:150px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -362,8 +377,6 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
   <button class="stab" onclick="showTab('financeiro')" id="tab-fin">Financeiro</button>
   <div style="flex:1"></div>
   <button class="btn-bkp" onclick="openCalPopup()" title="Calendário de milestones" aria-label="Abrir calendário de milestones">📅</button>
-  <button class="btn-bkp" onclick="openStatusModal()">⚙ Tags</button>
-  <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
 </div>
 <main>
 
@@ -376,12 +389,14 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
     <span id="msf-int-st-wrap"></span>
     <span id="msf-int-cl-wrap"></span>
     <span class="finfo" id="int-cnt"></span>
-    <div class="ml" style="display:flex;gap:.5rem;align-items:center">
+    <div class="prod-asia-toolbar-actions">
+      <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
+      <button class="bsm" onclick="openStatusModal()">🏷 Tags</button>
+      <button class="bsm" onclick="exportCSV()">⬇ CSV</button>
       <div class="toggle-grp ci-subview-toggle">
         <button class="active" data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
         <button data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
       </div>
-      <button class="bsm" onclick="exportCSV()">⬇ CSV</button>
     </div>
   </div>
   <div class="tw">
@@ -1776,7 +1791,7 @@ function msHTML(dates,num,o){
       const prevISO=dispToISO(dates[i-1].v),curISO=dispToISO(d.v);
       if(prevISO&&curISO){const dd=Math.round((new Date(curISO+'T00:00')-new Date(prevISO+'T00:00'))/864e5);
         gap=`<span style="font-size:.62rem;color:var(--ink3);font-family:'IBM Plex Mono';line-height:1;font-weight:500">${dd}d</span>`;}}
-    return`<td style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div style="display:flex;flex-direction:column;align-items:center;gap:1px">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}" style="width:22px;height:22px;font-size:.62rem;border-width:2px">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
+    return`<td class="ms-cell ${cls}" style="padding:.25rem .15rem;cursor:pointer;text-align:center" onclick="editMS(${num},${i},event)"><div class="ms-node">${gap||'<span style="font-size:.5rem;line-height:1">&nbsp;</span>'}<div class="mc ${cls}">${icon}</div><span class="${dateClass}" style="font-size:.62rem;line-height:1.2">${dateDisp||'—'}</span></div></td>`;
   }).join('');
 }
 /* Gantt functions for Timeline tab */
