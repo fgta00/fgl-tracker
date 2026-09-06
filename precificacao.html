@@ -424,13 +424,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-dropdown-menu button:hover{background:var(--bg)}
 .crm-cust-section-title{font-size:.82rem;font-weight:700;color:var(--navy);margin:0 0 .52rem;line-height:1.2}
 .crm-cust-identity{
-  display:grid;grid-template-columns:minmax(280px,1.45fr) minmax(220px,1fr);
+  display:grid;grid-template-columns:minmax(280px,1.55fr) minmax(175px,.55fr) minmax(210px,.9fr);
   gap:.48rem .65rem;align-items:end;margin-bottom:0;
 }
 .crm-cust-identity .crm-cust-section-title{grid-column:1/-1}
-.crm-cust-identity .crm-cust-name-field{grid-column:1;grid-row:2 / span 2;align-self:start}
+.crm-cust-identity .crm-cust-name-field{grid-column:1;grid-row:2;align-self:end}
 .crm-cust-identity .crm-cust-doc-field{grid-column:2;grid-row:2}
-.crm-cust-identity .crm-cust-trade-field{grid-column:2;grid-row:3}
+.crm-cust-identity .crm-cust-trade-field{grid-column:3;grid-row:2}
+.crm-cust-identity .crm-cust-doc-field input{font-family:'IBM Plex Mono',monospace;font-size:.7rem!important}
 .crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2.7fr) minmax(260px,.8fr);gap:.7rem 1rem;align-items:start}
 .crm-cust-profile-main{display:contents}
 .crm-cust-profile-main .crm-cust-identity{grid-column:1;grid-row:1;margin-bottom:0}
