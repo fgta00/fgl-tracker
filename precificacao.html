@@ -422,17 +422,27 @@ body.dark .rv-tabs{background:var(--head-bg)}
   padding:.32rem .45rem;font-size:.7rem;border-radius:5px;color:var(--ink2);
 }
 .crm-dropdown-menu button:hover{background:var(--bg)}
+.crm-cust-section-title{font-size:.82rem;font-weight:700;color:var(--navy);margin:0 0 .52rem;line-height:1.2}
 .crm-cust-identity{
-  display:grid;grid-template-columns:minmax(260px,2.15fr) minmax(150px,1fr) minmax(145px,.8fr);
-  gap:.55rem;align-items:end;margin-bottom:.65rem;
+  display:grid;grid-template-columns:minmax(280px,1.45fr) minmax(220px,1fr);
+  gap:.48rem .65rem;align-items:end;margin-bottom:0;
 }
-.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(230px,.8fr);gap:.75rem 1rem;align-items:start}
+.crm-cust-identity .crm-cust-section-title{grid-column:1/-1}
+.crm-cust-identity .crm-cust-name-field{grid-column:1;grid-row:2 / span 2;align-self:start}
+.crm-cust-identity .crm-cust-doc-field{grid-column:2;grid-row:2}
+.crm-cust-identity .crm-cust-trade-field{grid-column:2;grid-row:3}
+.crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2.7fr) minmax(260px,.8fr);gap:.7rem 1rem;align-items:start}
 .crm-cust-profile-main{display:contents}
 .crm-cust-profile-main .crm-cust-identity{grid-column:1;grid-row:1;margin-bottom:0}
-.crm-cust-people-panel{grid-column:1/-1;grid-row:2;border-top:1px solid var(--bdr);padding:.55rem 0 0;min-width:0}
-.crm-cust-class-grid{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:.42rem;align-items:stretch;margin-top:0}
+.crm-cust-people-panel{grid-column:1;grid-row:2;border-top:1px solid var(--bdr);padding:.62rem 0 0;min-width:0}
+.crm-cust-class-grid{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:.42rem;align-items:stretch;margin-top:0;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:.7rem .75rem}
+.crm-cust-class-grid .crm-cust-section-title{margin-bottom:.08rem}
 .crm-cust-class-grid>div{width:auto!important;min-width:0}
 .crm-cust-people-panel .crm-person-row{grid-template-columns:minmax(160px,.8fr) minmax(210px,1fr) minmax(160px,.75fr) auto;max-width:850px;column-gap:.55rem}
+.crm-cust-empty-people{font-size:.66rem;color:var(--ink4);padding:.35rem .05rem .12rem;line-height:1.4}
+.crm-ai-empty{padding:.35rem .1rem .15rem;color:var(--ink3);font-size:.68rem;line-height:1.45}
+.crm-cust-timeline-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.35rem}
+.crm-cust-timeline-tools{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;padding:.1rem 0 .35rem}
 .crm-person-row{
   display:grid;grid-template-columns:190px 205px 175px auto;
   grid-template-rows:auto auto;column-gap:.6rem;row-gap:.02rem;
@@ -454,7 +464,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
   .crm-person-phone{grid-column:2;grid-row:2}
   .crm-person-actions{grid-column:1 / -1;grid-row:3}
 }
-@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:.55rem}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
+@media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{grid-column:1;grid-row:auto;display:grid;grid-template-columns:repeat(3,1fr);margin-top:.2rem}.crm-cust-class-grid .crm-cust-section-title{grid-column:1/-1}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0}}
+@media(max-width:700px){.crm-cust-identity{grid-template-columns:1fr}.crm-cust-identity .crm-cust-section-title,.crm-cust-identity .crm-cust-name-field,.crm-cust-identity .crm-cust-doc-field,.crm-cust-identity .crm-cust-trade-field{grid-column:1;grid-row:auto}.crm-cust-timeline-head{align-items:flex-start}.crm-cust-timeline-tools{align-items:stretch}.crm-cust-timeline-tools>*{flex:1 1 140px}}
 </style>
 
 
@@ -1099,7 +1110,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <option value="prospect">Prospect</option>
           <option value="inactive">Inativo</option>
         </select>
-        <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveCustomer()">Salvar</button>
+        <button class="btn btn-p" style="font-size:.62rem;padding:.24rem .65rem" onclick="crmSaveCustomer()">Salvar</button>
+        <button class="btn btn-s" style="font-size:.62rem;padding:.22rem .58rem" onclick="closeM('crmcustomer')">Cancelar</button>
         <button class="mcls" aria-label="Fechar" onclick="closeM('crmcustomer')">✕</button>
       </div>
     </div>
@@ -1108,21 +1120,23 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div class="crm-cust-profile-grid">
       <div class="crm-cust-profile-main">
       <div class="crm-cust-identity">
-        <div class="ff">
-          <label>Razão Social / Nome</label>
+        <div class="crm-cust-section-title">Identificação</div>
+        <div class="ff crm-cust-name-field">
+          <label>Nome principal (Razão Social)</label>
           <input type="text" id="crm-cust-name" placeholder="Nome do cliente" style="font-size:.82rem;font-weight:600;padding:.38rem .55rem">
         </div>
-        <div class="ff">
-          <label>Nome Fantasia</label>
-          <input type="text" id="crm-cust-trade" placeholder="opcional" style="font-size:.72rem;padding:.38rem .5rem">
-        </div>
-        <div class="ff">
-          <label>CNPJ/CPF</label>
+        <div class="ff crm-cust-doc-field">
+          <label>Documento (CNPJ/CPF)</label>
           <input type="text" id="crm-cust-doc" placeholder="opcional" style="font-size:.72rem;padding:.38rem .5rem">
+        </div>
+        <div class="ff crm-cust-trade-field">
+          <label>Nome fantasia <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink4)">(opcional)</span></label>
+          <input type="text" id="crm-cust-trade" placeholder="opcional" style="font-size:.72rem;padding:.38rem .5rem">
         </div>
       </div>
 
       <div class="crm-cust-class-grid">
+        <div class="crm-cust-section-title">Classificação</div>
         <div style="width:175px">
           <div class="crm-field-label">Segmento</div>
           <details id="crm-segmento-details" style="position:relative">
@@ -1171,17 +1185,18 @@ body.dark .rv-tabs{background:var(--head-bg)}
       </div>
       <div class="crm-cust-people-panel">
         <div style="display:flex;align-items:center;gap:.35rem">
-          <div class="crm-field-label" style="margin:0">Pessoas</div>
-          <button class="btn btn-s" title="Adicionar pessoa" aria-label="Adicionar pessoa" style="font-size:.72rem;padding:0;width:28px;height:28px;border-radius:8px" onclick="crmAddPersonRow()">＋</button>
+          <div class="crm-cust-section-title" style="margin:0">Pessoas</div>
+          <button class="btn btn-s" title="Adicionar pessoa" aria-label="Adicionar pessoa" style="font-size:.62rem;padding:.2rem .5rem;border-radius:8px" onclick="crmAddPersonRow()">＋ Adicionar pessoa</button>
         </div>
         <div id="crm-cust-people" style="display:flex;flex-direction:column;gap:.35rem;margin-top:.35rem"></div>
       </div>
       </div>
 
-      <div class="ff" style="margin-top:.75rem">
+      <div class="ff" style="margin-top:.85rem">
+        <div class="crm-cust-section-title">Notas e contexto</div>
         <label>Contexto comercial / Notas</label>
-        <textarea id="crm-cust-notes" rows="2" placeholder="Ex.: Cliente passou a comprar de concorrente; informação confirmada pela equipe. Motivo da troca ainda não identificado." style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea>
-        <div style="margin-top:.25rem;color:var(--muted);font-size:.62rem;line-height:1.35">Registre fatos conhecidos pela equipe: perdas, concorrentes, preferências, obstáculos e mudanças. Salve o cliente antes de consultar a IA.</div>
+        <textarea id="crm-cust-notes" rows="3" placeholder="Ex.: Cliente passou a comprar de concorrente; informação confirmada pela equipe. Motivo da troca ainda não identificado." style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.48rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem;resize:vertical"></textarea>
+        <div style="margin-top:.25rem;color:var(--muted);font-size:.62rem;line-height:1.35">Registre fatos conhecidos pela equipe — perdas, concorrentes, preferências, obstáculos e mudanças. Salve antes de consultar a IA.</div>
       </div>
 
       <div id="crm-ai-panel" class="crm-ai-panel">
@@ -1195,6 +1210,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
           </div>
         </div>
         <div id="crm-ai-stale" class="crm-ai-stale">Há dados novos desde esta análise. A leitura anterior foi preservada; considere consultar novamente.</div>
+        <div id="crm-ai-empty" class="crm-ai-empty">A IA ainda não analisou este cliente. Consulte o contexto para iniciar uma leitura comercial.</div>
         <div id="crm-ai-loading" class="crm-ai-line" style="display:none">✦ Analisando o contexto comercial…</div>
         <div id="crm-ai-error" class="crm-ai-line" style="display:none;color:var(--red)"><span id="crm-ai-error-message">Não foi possível consultar agora.</span> <button class="btn btn-s" style="font-size:.56rem;padding:.12rem .35rem" onclick="crmRetryAI()">Tentar novamente</button></div>
         <div id="crm-ai-result" style="display:none">
@@ -1265,8 +1281,12 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div style="border-top:1px solid var(--bdr);margin:1.1rem 0"></div>
 
       <div id="crm-cust-timeline-section" style="display:none">
-        <div class="crm-field-label">Timeline</div>
-        <div class="tb" style="padding:.3rem 0;gap:.4rem">
+        <div class="crm-cust-timeline-head">
+          <div class="crm-cust-section-title" style="margin:0">Atividade</div>
+          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
+        </div>
+        <div class="crm-field-label" style="margin-bottom:.22rem">Timeline</div>
+        <div class="crm-cust-timeline-tools">
           <span id="msf-crm-acttype-wrap"></span>
           <select id="crm-tl-periodo" onchange="crmRenderTimeline()" style="font-size:.72rem;padding:.3rem .5rem">
             <option value="7">últimos 7 dias</option>
@@ -1274,7 +1294,6 @@ body.dark .rv-tabs{background:var(--head-bg)}
             <option value="90">últimos 90 dias</option>
             <option value="9999">tudo</option>
           </select>
-          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
         </div>
         <div id="crm-cust-timeline" class="crm-timeline"></div>
       </div>
@@ -3096,6 +3115,7 @@ function crmAiReset(customerId){
   if(btn){btn.style.display=customerId?'inline-flex':'none';btn.disabled=false;btn.textContent='Consultar contexto';}
   const historyBtn=document.getElementById('crm-ai-history-btn');if(historyBtn){historyBtn.style.display=customerId?'inline-flex':'none';historyBtn.textContent='Histórico';}
   ['crm-ai-loading','crm-ai-error','crm-ai-result','crm-ai-history'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  const empty=document.getElementById('crm-ai-empty');if(empty)empty.style.display=customerId?'block':'none';
   const panel=document.getElementById('crm-ai-panel');if(panel)panel.style.display=customerId?'block':'none';
   const stale=document.getElementById('crm-ai-stale');if(stale)stale.style.display='none';
   const header=document.getElementById('crm-ai-header');if(header)header.classList.remove('is-loading','is-done');
@@ -3115,6 +3135,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   const notesNow=(document.getElementById('crm-cust-notes')?.value||'').trim();
   const notesSaved=(CRM_CUSTOMERS.find(c=>c.id===customerId)?.notes||'').trim();
   if(notesNow!==notesSaved){
+    const empty=document.getElementById('crm-ai-empty');if(empty)empty.style.display='none';
     panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-result').style.display='none';
     errorMessage.textContent='Salve o contexto comercial antes de consultar a IA.';errorBox.style.display='block';
     return;
@@ -3125,6 +3146,7 @@ async function crmConsultAI(questionKey='o_que_fazer_agora',customQuestion=''){
   if(isFollowUp&&!crmAiThread.threadId){errorMessage.textContent='Inicie a leitura do contexto antes de continuar a investigação.';panel.style.display='block';errorBox.style.display='block';return;}
   crmAiLastRequest={questionKey,customQuestion};
   crmAiInFlight=true;crmAiCurrentCustomerId=customerId;
+  const empty=document.getElementById('crm-ai-empty');if(empty)empty.style.display='none';
   crmStartAIStatus();
   panel.style.display='block';document.getElementById('crm-ai-loading').style.display='none';
   errorMessage.textContent='Não foi possível consultar agora.';errorBox.style.display='none';if(!isFollowUp&&!crmAiLastResult)document.getElementById('crm-ai-result').style.display='none';document.getElementById('crm-ai-history').style.display='none';
@@ -3156,7 +3178,7 @@ function crmPlainAIText(value){return String(value||'').replace(/\*\*/g,'').repl
 function crmShowAIResult(data){
   if(!data||typeof data!=='object')return;
   crmAiLastResult=data;crmAiCurrentCustomerId=crmEditCtx.customerId;crmAiThread={threadId:data.meta?.thread_id||data.thread_id||null,initial:data,turns:[],lastConsultationId:data.meta?.consultation_id||null,snapshotAt:data.meta?.data_snapshot_at||null};
-  document.getElementById('crm-ai-panel').style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-history').style.display='none';
+  document.getElementById('crm-ai-panel').style.display='block';document.getElementById('crm-ai-loading').style.display='none';document.getElementById('crm-ai-error').style.display='none';document.getElementById('crm-ai-history').style.display='none';document.getElementById('crm-ai-empty').style.display='none';
   document.getElementById('crm-ai-opportunity').textContent=crmPlainAIText(data.title||data.opportunity||'Sem oportunidade clara no momento');
   document.getElementById('crm-ai-why').textContent=crmPlainAIText(data.why)||'—';document.getElementById('crm-ai-reading').textContent=crmPlainAIText(data.reading)||'—';document.getElementById('crm-ai-next').textContent=crmPlainAIText(data.next_step)||'—';
   crmRenderAIEvidence(document.getElementById('crm-ai-evidence'),data.evidence||[]);
@@ -3556,7 +3578,7 @@ function crmRenderCustPeople(){
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
     </div>`;
-  }).join(''):'<span class="crm-empty" style="font-size:.68rem;padding:.2rem 0">Nenhum contato cadastrado</span>';
+  }).join(''):'<div class="crm-cust-empty-people">Ainda não há contatos cadastrados para este cliente. Use “Adicionar pessoa” para incluir o primeiro.</div>';
 }
 function crmFormatPhone(value){const raw=String(value||'').trim(),d=raw.replace(/\D/g,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;if(d.length===13&&d.startsWith('55'))return`+55 (${d.slice(2,4)}) ${d.slice(4,9)}-${d.slice(9)}`;return raw;}
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
