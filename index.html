@@ -298,6 +298,25 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
 #app-wrap{display:none}
 #app-wrap.authed{display:block}
 </style>
+<style id="prod-asia-ui-v1">
+/* Refinamento visual do Controle Interno — sem alterar lógica ou dados. */
+#view-internal .sbar{display:grid;grid-template-columns:repeat(7,minmax(125px,1fr));gap:.55rem;margin-bottom:.7rem}
+#view-internal .sc{min-width:0;justify-content:flex-start;padding:.48rem .68rem}
+#view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
+#int-q{width:min(330px,28vw);min-width:225px}
+#int-tbl th:nth-child(5){min-width:280px!important}
+#int-tbl td{padding:.34rem .42rem}
+#int-tbl tbody tr.alt{background:#F7FAFD}
+#int-tbl tbody tr:hover,#int-tbl tbody tr.alt:hover{background:var(--ltblue)}
+#int-tbl .mc{width:24px;height:24px;font-size:.7rem}
+#int-tbl .ml2{margin-top:10px}
+#int-tbl .mlbl{font-size:.52rem}
+body.dark #int-tbl tbody tr.alt{background:#111B2B}
+body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
+@media(max-width:1250px){#view-internal .sbar{grid-template-columns:repeat(4,minmax(125px,1fr))}}
+@media(max-width:760px){#view-internal .sbar{display:flex;overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:150px}#int-q{width:100%;min-width:100%}}
+</style>
 </head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -333,8 +352,8 @@ body.dark #login-screen{background:linear-gradient(135deg,#020617 0%,var(--navy)
   <div class="hdr-r">
     <span id="sync-status" style="font-size:.62rem;font-weight:600;margin-right:.5rem" title="Estado da sincronização com a nuvem"></span>
     <span id="auth-status2" style="font-size:.72rem;font-weight:600;color:rgba(255,255,255,.85);margin-right:.4rem"></span>
-    <button class="btn-bkp" onclick="exportBackup()" title="Baixar backup JSON">↓ Salvar</button>
-    <label class="btn-bkp" style="cursor:pointer" title="Restaurar backup JSON">↑ Carregar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
+    <button class="btn-bkp" onclick="exportBackup()" title="Baixar uma cópia de segurança em JSON">↓ Backup</button>
+    <label class="btn-bkp" style="cursor:pointer" title="Restaurar uma cópia de segurança em JSON">↑ Restaurar<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     <button class="dm-toggle" onclick="toggleDark()" id="dm-btn" title="Modo escuro" aria-label="Alternar modo escuro">🌙</button>
   </div>
 </header>
