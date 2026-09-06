@@ -3085,6 +3085,10 @@ function showTab(id){
   _activeTab=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  // A visão Cliente é uma subvisão do Controle Interno e não usa a classe .view.
+  // Ao navegar para outro módulo, ela precisa ser ocultada explicitamente.
+  const clientView=document.getElementById('view-client');
+  if(clientView&&id!=='internal')clientView.style.display='none';
   document.getElementById('view-'+id).classList.add('active');
   const tabs={internal:0,financeiro:1};
   document.querySelectorAll('.stab')[tabs[id]]?.classList.add('active');
