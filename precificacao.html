@@ -196,7 +196,10 @@ body.dark .modal-h{background:var(--card)}
 #ovl-crmproject{z-index:120}
 #ovl-crmproject .crm-modal{width:min(1040px,calc(100vw - 28px));max-width:1040px}
 #ovl-crmresched,#ovl-crmaction{z-index:140}
+#ovl-crmprojectperson{z-index:145}
 .crm-proj-contacts{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
+.crm-proj-people-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.28rem}
+.crm-proj-people-head label{margin:0}
 .crm-proj-contact{display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1.1fr) minmax(145px,.8fr) auto;gap:.55rem;align-items:center;padding:.48rem .6rem;border-top:1px solid var(--bdr);font-size:.68rem;color:var(--ink2)}
 .crm-proj-contact:first-child{border-top:0}.crm-proj-contact-name{font-weight:700;color:var(--ink)}.crm-proj-contact-role{display:block;margin-top:.06rem;font-size:.58rem;font-weight:400;color:var(--ink4)}
 .crm-proj-contact-email,.crm-proj-contact-phone{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crm-proj-contact-link{min-width:72px;text-align:center}
@@ -445,13 +448,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-dropdown-menu button:hover{background:var(--bg)}
 .crm-cust-section-title{font-size:.82rem;font-weight:700;color:var(--navy);margin:0 0 .52rem;line-height:1.2}
 .crm-cust-identity{
-  display:grid;grid-template-columns:minmax(280px,1.55fr) minmax(175px,.55fr) minmax(210px,.9fr);
+  display:grid;grid-template-columns:minmax(280px,1.55fr) minmax(80px,.28fr) minmax(175px,.55fr) minmax(210px,.9fr);
   gap:.48rem .65rem;align-items:end;margin-bottom:0;
 }
 .crm-cust-identity .crm-cust-section-title{grid-column:1/-1}
 .crm-cust-identity .crm-cust-name-field{grid-column:1;grid-row:2;align-self:end}
-.crm-cust-identity .crm-cust-doc-field{grid-column:2;grid-row:2}
-.crm-cust-identity .crm-cust-trade-field{grid-column:3;grid-row:2}
+.crm-cust-identity .crm-cust-state-field{grid-column:2;grid-row:2}
+.crm-cust-identity .crm-cust-doc-field{grid-column:3;grid-row:2}
+.crm-cust-identity .crm-cust-trade-field{grid-column:4;grid-row:2}
 .crm-cust-identity .crm-cust-doc-field input{font-family:'IBM Plex Mono',monospace;font-size:.7rem!important}
 .crm-cust-profile-grid{display:grid;grid-template-columns:minmax(0,2.7fr) minmax(260px,.8fr);gap:.7rem 1rem;align-items:start}
 .crm-cust-profile-main{display:contents}
@@ -492,7 +496,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
   .crm-person-actions{grid-column:1 / -1;grid-row:3}
 }
 @media(max-width:1000px){.crm-cust-profile-grid{grid-template-columns:1fr}.crm-cust-profile-main{display:block}.crm-cust-profile-main .crm-cust-identity{display:grid}.crm-cust-class-grid{grid-column:1;grid-row:auto;display:grid;grid-template-columns:repeat(3,1fr);margin-top:.2rem}.crm-cust-class-grid .crm-cust-section-title{grid-column:1/-1}.crm-cust-people-panel{grid-column:1;grid-row:auto;border-top:1px solid var(--bdr);padding:.65rem 0 0;margin-top:0}}
-@media(max-width:700px){.crm-cust-identity{grid-template-columns:1fr}.crm-cust-identity .crm-cust-section-title,.crm-cust-identity .crm-cust-name-field,.crm-cust-identity .crm-cust-doc-field,.crm-cust-identity .crm-cust-trade-field{grid-column:1;grid-row:auto}.crm-cust-timeline-head{align-items:flex-start}.crm-cust-timeline-tools{align-items:stretch}.crm-cust-timeline-tools>*{flex:1 1 140px}}
+@media(max-width:700px){.crm-cust-identity{grid-template-columns:1fr}.crm-cust-identity .crm-cust-section-title,.crm-cust-identity .crm-cust-name-field,.crm-cust-identity .crm-cust-state-field,.crm-cust-identity .crm-cust-doc-field,.crm-cust-identity .crm-cust-trade-field{grid-column:1;grid-row:auto}.crm-cust-timeline-head{align-items:flex-start}.crm-cust-timeline-tools{align-items:stretch}.crm-cust-timeline-tools>*{flex:1 1 140px}}
 </style>
 
 
@@ -1112,9 +1116,9 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente" style="display:none">
         </div>
         <div class="ff" id="crm-proj-people-section">
-          <label>Pessoas do cliente</label>
+          <div class="crm-proj-people-head"><label id="crm-proj-people-label">Pessoas do cliente</label><button type="button" id="crm-proj-person-add-btn" class="btn btn-s" style="font-size:.68rem;padding:.18rem .48rem" onclick="crmOpenProjectPersonModal()" aria-label="Adicionar pessoa">＋</button></div>
           <div id="crm-proj-people" class="crm-proj-contacts"></div>
-          <div id="crm-proj-people-addctrls" class="hint" style="display:none;margin-top:.25rem">Use “Vincular” para incluir uma pessoa neste projeto.</div>
+          <div id="crm-proj-people-addctrls" class="hint" style="display:none;margin-top:.25rem">Use “+” para vincular uma pessoa existente ou cadastrar uma nova.</div>
         </div>
       </div>
 
@@ -1140,8 +1144,33 @@ body.dark .rv-tabs{background:var(--head-bg)}
         <div class="crm-section" style="margin:0;padding:0;border:none">Mais Detalhes</div><span class="chev">▶</span>
       </div>
       <div class="collap-body" id="crm-proj-moredetails-body">
-        <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" id="crm-proj-value" placeholder="opcional, só contexto"></div>
-        <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea></div>
+        <div class="ff" style="margin-top:.5rem"><label>Valor potencial (opcional)</label><input type="number" min="0" step="0.01" id="crm-proj-value" placeholder="Estimativa de receita da oportunidade, em R$"><p class="hint" style="font-size:.58rem;margin-top:.18rem">Estimativa comercial; não é custo, lucro nem valor já confirmado.</p></div>
+        <div class="ff" style="margin-top:.5rem"><label>Notas</label><textarea id="crm-proj-notes" rows="3" placeholder="Necessidade, produtos, volumes, obstáculos e contexto da oportunidade…" style="width:100%;border:1.5px solid var(--bdr2);border-radius:7px;padding:.4rem .6rem;font-family:'IBM Plex Sans';font-size:.8rem"></textarea><p class="hint" style="font-size:.58rem;margin-top:.18rem">Informações qualitativas para orientar as próximas ações e a leitura da IA.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CRM — PESSOA DO PROJETO: existente ou nova -->
+<div class="ovl" id="ovl-crmprojectperson" onclick="if(event.target===this)closeM('crmprojectperson')">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-h"><span>Adicionar pessoa ao projeto</span><button class="mcls" aria-label="Fechar" onclick="closeM('crmprojectperson')">✕</button></div>
+    <div class="modal-b">
+      <div class="toggle-grp" id="crm-proj-person-mode" style="margin-bottom:.8rem">
+        <button type="button" class="active" onclick="crmSetProjectPersonMode('existing')">Pessoa existente</button>
+        <button type="button" onclick="crmSetProjectPersonMode('new')">Nova pessoa</button>
+      </div>
+      <div id="crm-proj-person-existing">
+        <div class="ff"><label>Buscar e selecionar</label><input id="crm-proj-person-q" type="text" placeholder="Nome, empresa, e-mail ou telefone…" oninput="crmPopulateProjectExistingPeople()"></div>
+        <div class="ff" style="margin-top:.5rem"><select id="crm-proj-person-existing-select" size="6" style="min-height:150px"></select></div>
+        <button class="btn btn-p" style="width:100%;margin-top:.75rem" onclick="crmConfirmExistingProjectPerson()">Vincular pessoa</button>
+      </div>
+      <div id="crm-proj-person-new" style="display:none">
+        <div class="ff"><label>Nome</label><input id="crm-proj-person-new-name" type="text" placeholder="Nome da pessoa"></div>
+        <div class="ff" style="margin-top:.5rem"><label>Cargo</label><input id="crm-proj-person-new-role" type="text" placeholder="Cargo ou função (opcional)"></div>
+        <div class="ff" style="margin-top:.5rem"><label>E-mail</label><input id="crm-proj-person-new-email" type="email" placeholder="email@empresa.com"></div>
+        <div class="ff" style="margin-top:.5rem"><label>WhatsApp / telefone</label><input id="crm-proj-person-new-phone" type="text" placeholder="(21) 99999-9999"></div>
+        <button class="btn btn-p" style="width:100%;margin-top:.75rem" onclick="crmCreateProjectPerson()">Cadastrar e vincular</button>
       </div>
     </div>
   </div>
@@ -1176,6 +1205,10 @@ body.dark .rv-tabs{background:var(--head-bg)}
         <div class="ff crm-cust-name-field">
           <label>Nome principal (Razão Social)</label>
           <input type="text" id="crm-cust-name" placeholder="Nome do cliente" style="font-size:.82rem;font-weight:600;padding:.38rem .55rem">
+        </div>
+        <div class="ff crm-cust-state-field">
+          <label>Estado (UF)</label>
+          <select id="crm-cust-state"><option value="">—</option></select>
         </div>
         <div class="ff crm-cust-doc-field">
           <label>Documento (CNPJ/CPF)</label>
@@ -3586,6 +3619,9 @@ function crmOpenCustomerEdit(id,prefill){
   const c=id?CRM_CUSTOMERS.find(x=>x.id===id):null;
   const pf=(!id&&prefill)?prefill:null;
   document.getElementById('crm-cust-name').value=c?.display_name||pf?.display_name||'';
+  const stateSel=document.getElementById('crm-cust-state');
+  stateSel.innerHTML='<option value="">—</option>'+ESTADOS.map(([uf,nome])=>`<option value="${uf}">${uf} · ${esc(nome)}</option>`).join('');
+  stateSel.value=c?.state||pf?.state||'';
   document.getElementById('crm-cust-trade').value=c?.trade_name||'';
   document.getElementById('crm-cust-legal').value=c?.legal_name||'';
   const temLegalName=!!(c?.legal_name&&c.legal_name.trim());
@@ -3879,6 +3915,7 @@ async function crmSaveCustomer(){
     display_name,
     trade_name:document.getElementById('crm-cust-trade').value.trim()||null,
     legal_name:document.getElementById('crm-cust-legal').value.trim()||null,
+    state:document.getElementById('crm-cust-state').value||null,
     document:document.getElementById('crm-cust-doc').value.trim()||null,
     status:document.getElementById('crm-cust-status').value,
     notes:document.getElementById('crm-cust-notes').value.trim()||null,
@@ -4995,8 +5032,9 @@ function crmSetProjectTipo(tipo){
   document.getElementById('crm-proj-tipo-btn-prospect').classList.toggle('active',tipo==='prospect');
   document.getElementById('crm-proj-customer').style.display=tipo==='cliente'?'block':'none';
   document.getElementById('crm-proj-prospect').style.display=tipo==='cliente'?'none':'block';
-  document.getElementById('crm-proj-people-section').style.display=tipo==='cliente'?'block':'none';
-  if(tipo==='cliente')crmRenderProjectPeopleChips();
+  document.getElementById('crm-proj-people-section').style.display='block';
+  document.getElementById('crm-proj-people-label').textContent=tipo==='cliente'?'Pessoas do cliente':'Pessoas do prospect';
+  crmRenderProjectPeopleChips();
 }
 function crmOnToggleProjectTipo(tipo){
   // troca MANUAL (clique do usuário) — limpa o campo que sai de cena, senão o valor antigo
@@ -5083,15 +5121,7 @@ function crmRenderProjectNextAction(){
   </div>`;
 }
 
-/* ══════════════════════════════════════
-   CRM — PESSOAS DO PROJETO (Fase 4) — liga pessoa JÁ EXISTENTE via crm_project_people,
-   nunca cria pessoa nova (crm_people fica intocado, customer_id continua NOT NULL).
-   Gravação imediata (add/remove já persiste, não espera "Salvar projeto").
-   Limitação consciente da V1: projeto prospect (sem customer_id) só pode ligar pessoas
-   que já existem em algum cliente — não é possível cadastrar um contato novo direto
-   pelo Projeto. Fica registrado como ponto de revisão futura (identidade de Pessoas
-   independente de Cliente/prospecção), não implementado agora.
-══════════════════════════════════════ */
+/* CRM — PESSOAS DO PROJETO: cliente e prospect aceitam vínculo existente ou pessoa nova. */
 let CRM_PROJECT_PEOPLE=[];
 async function crmLoadProjectPeople(projectId){
   const{data,error}=await _supa.from('crm_project_people').select('*').eq('project_id',projectId);
@@ -5109,10 +5139,13 @@ function crmRenderProjectPeopleChips(){
   const cont=document.getElementById('crm-proj-people');
   if(!cont)return;
   const customerId=document.getElementById('crm-proj-customer')?.value||null;
+  const prospect=document.getElementById('crm-proj-tipo-btn-prospect')?.classList.contains('active');
   const jaLigados=new Set(CRM_PROJECT_PEOPLE.map(pp=>pp.person_id));
-  const pessoas=customerId?CRM_PEOPLE.filter(p=>!p.deleted&&p.customer_id===customerId):[];
-  if(!customerId){cont.innerHTML='<div class="crm-empty" style="padding:.55rem .65rem">Escolha um cliente para ver seus contatos.</div>';return;}
-  if(!pessoas.length){cont.innerHTML='<div class="crm-empty" style="padding:.55rem .65rem">Este cliente ainda não possui pessoas cadastradas.</div>';return;}
+  const pessoas=prospect
+    ?CRM_PEOPLE.filter(p=>!p.deleted&&jaLigados.has(p.id))
+    :(customerId?CRM_PEOPLE.filter(p=>!p.deleted&&p.customer_id===customerId):[]);
+  if(!prospect&&!customerId){cont.innerHTML='<div class="crm-empty" style="padding:.55rem .65rem">Escolha um cliente para ver seus contatos.</div>';return;}
+  if(!pessoas.length){cont.innerHTML=`<div class="crm-empty" style="padding:.55rem .65rem">${prospect?'Nenhuma pessoa vinculada a este prospect.':'Este cliente ainda não possui pessoas cadastradas.'} Use “+” para adicionar.</div>`;return;}
   cont.innerHTML=pessoas.map(p=>{
     const linked=jaLigados.has(p.id),disabled=!crmEditProjectId;
     return`<div class="crm-proj-contact">
@@ -5124,6 +5157,52 @@ function crmRenderProjectPeopleChips(){
   }).join('');
 }
 function crmProjectCustomerChanged(){crmRenderProjectPeopleChips();}
+function crmOpenProjectPersonModal(){
+  if(!crmEditProjectId){toastSave('Salve o projeto antes de adicionar pessoas.');return;}
+  crmSetProjectPersonMode('existing');
+  document.getElementById('crm-proj-person-q').value='';
+  ['name','role','email','phone'].forEach(k=>document.getElementById('crm-proj-person-new-'+k).value='');
+  crmPopulateProjectExistingPeople();
+  document.getElementById('ovl-crmprojectperson').classList.add('open');
+}
+function crmSetProjectPersonMode(mode){
+  document.querySelectorAll('#crm-proj-person-mode button').forEach((b,i)=>b.classList.toggle('active',(mode==='existing')===(i===0)));
+  document.getElementById('crm-proj-person-existing').style.display=mode==='existing'?'block':'none';
+  document.getElementById('crm-proj-person-new').style.display=mode==='new'?'block':'none';
+}
+function crmPopulateProjectExistingPeople(){
+  const sel=document.getElementById('crm-proj-person-existing-select');if(!sel)return;
+  const q=norm(document.getElementById('crm-proj-person-q')?.value||'');
+  const linked=new Set(CRM_PROJECT_PEOPLE.map(pp=>pp.person_id));
+  const people=CRM_PEOPLE.filter(p=>!p.deleted&&!linked.has(p.id)).filter(p=>{
+    const c=CRM_CUSTOMERS.find(x=>x.id===p.customer_id);
+    return!q||norm([p.name,p.role,p.email,p.phone,c?.trade_name,c?.display_name].filter(Boolean).join(' ')).includes(q);
+  }).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  sel.innerHTML=people.length?people.map(p=>{
+    const c=CRM_CUSTOMERS.find(x=>x.id===p.customer_id),company=c?(c.trade_name||c.display_name):'sem cliente';
+    return`<option value="${p.id}">${esc(p.name||'Sem nome')} · ${esc(company)}${p.email?' · '+esc(p.email):''}</option>`;
+  }).join(''):'<option value="">Nenhuma pessoa encontrada</option>';
+}
+async function crmConfirmExistingProjectPerson(){
+  const personId=document.getElementById('crm-proj-person-existing-select').value;
+  if(!personId){toastSave('Selecione uma pessoa.');return;}
+  await crmAddPersonToProject(personId);
+  closeM('crmprojectperson');
+}
+async function crmCreateProjectPerson(){
+  const name=document.getElementById('crm-proj-person-new-name').value.trim();
+  if(!name){toastSave('Preencha o nome da pessoa.');return;}
+  const prospect=document.getElementById('crm-proj-tipo-btn-prospect').classList.contains('active');
+  const customerId=prospect?null:(document.getElementById('crm-proj-customer').value||null);
+  if(!prospect&&!customerId){toastSave('Escolha o cliente antes de cadastrar a pessoa.');return;}
+  const payload={customer_id:customerId,name,role:document.getElementById('crm-proj-person-new-role').value.trim()||null,email:document.getElementById('crm-proj-person-new-email').value.trim()||null,phone:document.getElementById('crm-proj-person-new-phone').value.trim()||null};
+  const{data,error}=await _supa.from('crm_people').insert(payload).select().single();
+  if(error){toastSave('Erro ao cadastrar pessoa: '+error.message);return;}
+  CRM_PEOPLE.push(data);
+  await crmAddPersonToProject(data.id);
+  closeM('crmprojectperson');
+  toastSave('Pessoa cadastrada e vinculada ✓');
+}
 async function crmAddPersonToProject(personId){
   if(!personId)return;
   const{error}=await _supa.from('crm_project_people').insert({project_id:crmEditProjectId,person_id:personId});
@@ -5159,6 +5238,13 @@ async function crmSaveProject(){
     ({error}=await _supa.from('crm_projects').insert(payload));
   }
   if(error){toastSave('Erro ao salvar projeto: '+error.message);return;}
+  // Ao converter Prospect em Cliente, as pessoas criadas sem cliente passam a integrar
+  // o cadastro escolhido. Pessoas já pertencentes a outro cliente não são deslocadas.
+  if(customerId&&crmEditProjectId&&CRM_PROJECT_PEOPLE.length){
+    const linkedIds=CRM_PROJECT_PEOPLE.map(pp=>pp.person_id);
+    const{error:peopleError}=await _supa.from('crm_people').update({customer_id:customerId}).in('id',linkedIds).is('customer_id',null);
+    if(peopleError){toastSave('Projeto salvo, mas revise o vínculo das pessoas: '+peopleError.message);}
+  }
   closeM('crmproject');
   toastSave('Projeto salvo ✓');
   await crmLoadProjects();
