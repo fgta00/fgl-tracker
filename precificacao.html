@@ -161,6 +161,7 @@ body.dark .modal-h{background:var(--card)}
 .crm-section:first-child{margin-top:0;padding-top:0;border-top:none}
 .crm-row-proj-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.6rem}
 .crm-row-proj-tipo{display:grid;grid-template-columns:auto 2fr 1.4fr;gap:.6rem;align-items:end}
+#crm-proj-people-section{grid-column:1/-1;margin-top:.15rem}
 .crm-row-proj-next{display:grid;grid-template-columns:2.5fr 1fr;gap:.6rem}
 .crm-row-cli-main{display:grid;grid-template-columns:1.6fr 1.2fr .9fr .8fr;gap:.6rem}
 @media(max-width:720px){.crm-row-proj-main,.crm-row-cli-main{grid-template-columns:1fr}.crm-row-proj-tipo,.crm-row-proj-next{grid-template-columns:1fr}.crm-cust-class-grid{grid-template-columns:1fr!important}}
@@ -193,6 +194,13 @@ body.dark .modal-h{background:var(--card)}
 .crm-ai-suggestion:hover{background:var(--ltblue)}
 #ovl-crmcustomer .crm-modal{width:calc(100vw - 32px);max-width:1400px}
 #ovl-crmproject{z-index:120}
+#ovl-crmproject .crm-modal{width:min(1040px,calc(100vw - 28px));max-width:1040px}
+#ovl-crmresched,#ovl-crmaction{z-index:140}
+.crm-proj-contacts{border:1px solid var(--bdr);border-radius:9px;overflow:hidden;background:var(--card)}
+.crm-proj-contact{display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1.1fr) minmax(145px,.8fr) auto;gap:.55rem;align-items:center;padding:.48rem .6rem;border-top:1px solid var(--bdr);font-size:.68rem;color:var(--ink2)}
+.crm-proj-contact:first-child{border-top:0}.crm-proj-contact-name{font-weight:700;color:var(--ink)}.crm-proj-contact-role{display:block;margin-top:.06rem;font-size:.58rem;font-weight:400;color:var(--ink4)}
+.crm-proj-contact-email,.crm-proj-contact-phone{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crm-proj-contact-link{min-width:72px;text-align:center}
+@media(max-width:760px){.crm-proj-contact{grid-template-columns:1fr 1fr}.crm-proj-contact-link{justify-self:start}}
 #ovl-crmcustomer .crm-ai-title{font-size:1rem;line-height:1.35}
 #ovl-crmcustomer .crm-ai-line{font-size:.82rem;line-height:1.5}
 #ovl-crmcustomer .crm-ai-evidence-row{font-size:.74rem;line-height:1.4}
@@ -468,6 +476,11 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-person-email{grid-column:2;grid-row:1}
 .crm-person-phone{grid-column:3;grid-row:1}
 .crm-person-actions{grid-column:4;grid-row:1 / span 2}
+.crm-person-channel{display:flex;align-items:center;gap:.25rem;min-width:0}
+.crm-person-channel input{flex:1;min-width:0}
+.crm-person-channel-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink3);font-size:.62rem;font-weight:700;cursor:pointer;padding:0}
+.crm-person-channel-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--ltblue)}
+.crm-person-channel-btn.wa:hover{border-color:var(--green);color:var(--green);background:var(--ltgrn)}
 @media(max-width:700px){
   .crm-modal{width:min(680px,calc(100vw - 20px))}
   .crm-cust-identity{grid-template-columns:1fr}
@@ -1056,6 +1069,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
     <div class="modal-h">
       <span id="crm-proj-title">Projeto</span>
       <div style="display:flex;align-items:center;gap:.5rem">
+        <button id="crm-proj-add-action-btn" class="btn btn-p" style="font-size:.62rem;padding:.2rem .55rem;display:none" onclick="crmCreateActionForProject()">＋ Ação</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveProject()">Salvar</button>
         <button class="mcls" aria-label="Fechar" onclick="closeM('crmproject')">✕</button>
       </div>
@@ -1068,8 +1082,10 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <input type="text" id="crm-proj-stage" list="crm-proj-stage-list" placeholder="ex: Descoberta">
           <datalist id="crm-proj-stage-list">
             <option value="Ideia"><option value="Descoberta"><option value="Interesse">
-            <option value="Desenvolvimento"><option value="Amostra/Cotação">
-            <option value="Validação"><option value="Decisão">
+            <option value="Briefing"><option value="Desenvolvimento"><option value="Cotação">
+            <option value="Amostra"><option value="Amostra/Cotação"><option value="Validação">
+            <option value="Negociação"><option value="Aprovação"><option value="Decisão">
+            <option value="Pedido">
           </datalist>
         </div>
         <div class="ff">
@@ -1092,20 +1108,13 @@ body.dark .rv-tabs{background:var(--head-bg)}
         </div>
         <div class="ff">
           <label>Cliente / Prospect</label>
-          <select id="crm-proj-customer"></select>
+          <select id="crm-proj-customer" onchange="crmProjectCustomerChanged()"></select>
           <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente" style="display:none">
         </div>
         <div class="ff" id="crm-proj-people-section">
-          <label>Pessoas</label>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;border:1.5px solid var(--bdr2);border-radius:7px;padding:.3rem .4rem;min-height:2.1rem">
-            <span id="crm-proj-people" style="display:contents"></span>
-            <span id="crm-proj-people-addctrls" style="display:none">
-              <select id="crm-proj-person-select" style="font-size:.66rem;padding:.15rem .3rem;border:1px solid var(--bdr2);border-radius:5px;max-width:130px">
-                <option value="">— selecione —</option>
-              </select>
-              <button class="btn btn-s" style="font-size:.6rem;padding:.15rem .4rem" onclick="crmAddPersonToProject()" aria-label="Adicionar pessoa ao projeto">＋</button>
-            </span>
-          </div>
+          <label>Pessoas do cliente</label>
+          <div id="crm-proj-people" class="crm-proj-contacts"></div>
+          <div id="crm-proj-people-addctrls" class="hint" style="display:none;margin-top:.25rem">Use “Vincular” para incluir uma pessoa neste projeto.</div>
         </div>
       </div>
 
@@ -1779,7 +1788,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
     </div>
     <div class="modal-b">
       <div class="crm-email-grid">
-        <div class="crm-email-ai-note">Rascunho sugerido pela IA — revise destinatário, assunto e texto antes de enviar.</div>
+        <div id="crm-email-draft-note" class="crm-email-ai-note">Revise destinatário, assunto e texto antes de enviar.</div>
         <div class="ff"><label>Destinatário</label><select id="crm-email-person" onchange="crmEmailSelectPerson()"></select></div>
         <div class="ff"><label>E-mail</label><input id="crm-email-to" type="email" readonly></div>
         <div class="ff"><label>Assunto</label><input id="crm-email-subject" type="text" maxlength="180"></div>
@@ -3284,7 +3293,7 @@ function crmEmailDraftText(){
   if(last&&/(e-mail|email|mensagem|escreva|prepare)/i.test(last.question||''))return crmPlainAIText(last.data?.answer||'');
   return crmPlainAIText(crmAiLastResult?.action_draft?.summary||crmAiLastResult?.next_step||'');
 }
-function crmPrepareEmailFromAI(){
+function crmPrepareEmailFromAI(preferredPersonIndex){
   document.getElementById('crm-ai-execute')?.classList.remove('open');
   const people=crmEditCtx.people.filter(p=>String(p.email||'').trim());if(!people.length)return;
   const customer=CRM_CUSTOMERS.find(c=>c.id===crmEditCtx.customerId);
@@ -3292,10 +3301,12 @@ function crmPrepareEmailFromAI(){
   crmEmailCtx={idempotencyKey:crypto.randomUUID(),aiDraft:draft,sourceConsultationId:crmAiThread.lastConsultationId||crmAiLastResult?.meta?.consultation_id||null,sending:false};
   const personSelect=document.getElementById('crm-email-person');
   personSelect.innerHTML=people.map((p,i)=>`<option value="${i}">${esc(p.name||p.email)} — ${esc(p.email)}</option>`).join('');
+  if(Number.isInteger(preferredPersonIndex)){const preferred=crmEditCtx.people[preferredPersonIndex];const filteredIndex=people.findIndex(p=>(preferred?.id&&p.id===preferred.id)||p.email===preferred?.email);if(filteredIndex>=0)personSelect.value=String(filteredIndex);}
   const planned=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='planned'&&!a.deleted);
   document.getElementById('crm-email-action').innerHTML='<option value="">Nenhuma ação</option>'+planned.map(a=>`<option value="${esc(a.id)}">${esc(a.summary)}${a.due_date?' — '+esc(a.due_date):''}</option>`).join('');
   document.getElementById('crm-email-subject').value=`Ânima Verde — ${customer?.trade_name||customer?.display_name||'contato'}`;
   document.getElementById('crm-email-body').value=draft;
+  document.getElementById('crm-email-draft-note').textContent=draft?'Rascunho sugerido pela IA — revise destinatário, assunto e texto antes de enviar.':'Escreva e revise a mensagem antes de enviar. Nenhum e-mail será enviado automaticamente.';
   document.getElementById('crm-email-state').className='crm-email-state';document.getElementById('crm-email-state').textContent='';
   document.getElementById('crm-email-send-btn').disabled=false;document.getElementById('crm-email-send-btn').textContent='Enviar e-mail';
   document.getElementById('crm-email-action').value='';crmEmailActionChanged();crmEmailSelectPerson();
@@ -3688,9 +3699,13 @@ function crmRenderCustPeople(){
     return`<div class="crm-person-row">
       <input class="crm-person-name" type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="width:100%;border:none;background:none;font-size:.84rem;font-weight:600;color:var(--ink);padding:0;min-width:0">
       <input class="crm-person-role" type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="width:100%;border:none;background:none;font-size:.62rem;color:var(--ink4);padding:.05rem 0 0;min-width:0">
-      <input class="crm-person-email" type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
-      <div class="crm-person-phone" style="display:flex;align-items:center;gap:.3rem;min-width:0">
+      <div class="crm-person-email crm-person-channel">
+        <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
+        ${p.email?`<button type="button" class="crm-person-channel-btn" title="Preparar e-mail" aria-label="Preparar e-mail para ${esc(p.name||p.email)}" onclick="crmOpenEmailForPerson(${i})">✉</button>`:''}
+      </div>
+      <div class="crm-person-phone crm-person-channel">
         <input type="text" value="${esc(crmFormatPhone(p.phone||''))}" placeholder="telefone" oninput="crmEditCtx.people[${i}].phone=this.value" onblur="this.value=crmFormatPhone(this.value);crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
+        ${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp" aria-label="Abrir WhatsApp de ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppDirect(${i})">W</button>`:''}
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
     </div>`;
@@ -3698,6 +3713,17 @@ function crmRenderCustPeople(){
 }
 function crmFormatPhone(value){const raw=String(value||'').trim(),d=raw.replace(/\D/g,'');if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;if(d.length===13&&d.startsWith('55'))return`+55 (${d.slice(2,4)}) ${d.slice(4,9)}-${d.slice(9)}`;return raw;}
 function crmAddPersonRow(){crmEditCtx.people.push({name:'',role:'',relationship_type:'',email:'',phone:''});crmRenderCustPeople();}
+function crmOpenEmailForPerson(personIndex){
+  const p=crmEditCtx.people[personIndex];
+  if(!crmEditCtx.customerId||!p?.id){toastSave('Salve a Pessoa antes de preparar o e-mail.');return;}
+  crmPrepareEmailFromAI(personIndex);
+}
+function crmOpenWhatsAppDirect(personIndex){
+  const p=crmEditCtx.people[personIndex];if(!p?.phone)return;
+  let digits=String(p.phone).replace(/\D/g,'');if(digits.startsWith('00'))digits=digits.slice(2);if(digits.length===10||digits.length===11)digits='55'+digits;
+  if(digits.length<10){toastSave('Revise o telefone antes de abrir o WhatsApp.');return;}
+  window.open(`https://wa.me/${digits}`,'_blank','noopener');
+}
 
 let crmWaCtx={customerId:null,personId:null,personIndex:null};
 
@@ -4969,6 +4995,8 @@ function crmSetProjectTipo(tipo){
   document.getElementById('crm-proj-tipo-btn-prospect').classList.toggle('active',tipo==='prospect');
   document.getElementById('crm-proj-customer').style.display=tipo==='cliente'?'block':'none';
   document.getElementById('crm-proj-prospect').style.display=tipo==='cliente'?'none':'block';
+  document.getElementById('crm-proj-people-section').style.display=tipo==='cliente'?'block':'none';
+  if(tipo==='cliente')crmRenderProjectPeopleChips();
 }
 function crmOnToggleProjectTipo(tipo){
   // troca MANUAL (clique do usuário) — limpa o campo que sai de cena, senão o valor antigo
@@ -4994,11 +5022,12 @@ function crmOpenProjectEdit(id,prefill){
   document.getElementById('crm-proj-moredetails-h').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-moredetails-body').classList.toggle('open',temValorOuNotas);
   document.getElementById('crm-proj-timeline-section').style.display=id?'block':'none';
+  document.getElementById('crm-proj-add-action-btn').style.display=id?'inline-flex':'none';
   if(id){document.getElementById('crm-proj-tl-periodo').value='30';crmRenderProjectTimeline();}
   // Pessoas só pode vincular depois que o projeto existe (precisa de project_id de verdade pra
   // gravar em crm_project_people) — a coluna em si continua sempre visível pro grid não quebrar,
   // só os controles de adicionar somem/aparecem.
-  document.getElementById('crm-proj-people-addctrls').style.display=id?'contents':'none';
+  document.getElementById('crm-proj-people-addctrls').style.display=id?'block':'none';
   CRM_PROJECT_PEOPLE=[];crmRenderProjectPeopleChips();
   if(id)crmLoadProjectPeople(id);
   crmRenderProjectNextAction();
@@ -5069,7 +5098,6 @@ async function crmLoadProjectPeople(projectId){
   if(error){console.error('crmLoadProjectPeople',error);CRM_PROJECT_PEOPLE=[];}
   else CRM_PROJECT_PEOPLE=data||[];
   crmRenderProjectPeopleChips();
-  crmPopulateProjectPersonSelect();
 }
 function crmProjectPersonLabel(pp){
   const p=CRM_PEOPLE.find(x=>x.id===pp.person_id);
@@ -5080,28 +5108,23 @@ function crmProjectPersonLabel(pp){
 function crmRenderProjectPeopleChips(){
   const cont=document.getElementById('crm-proj-people');
   if(!cont)return;
-  cont.innerHTML=CRM_PROJECT_PEOPLE.length
-    ?CRM_PROJECT_PEOPLE.map(pp=>`<span class="crm-chip">${esc(crmProjectPersonLabel(pp))}<span class="x" onclick="crmRemovePersonFromProject('${pp.person_id}')">✕</span></span>`).join('')
-    :'<span class="crm-empty">—</span>';
-}
-function crmPopulateProjectPersonSelect(){
-  const sel=document.getElementById('crm-proj-person-select');
-  if(!sel)return;
-  const proj=CRM_PROJECTS.find(x=>x.id===crmEditProjectId);
+  const customerId=document.getElementById('crm-proj-customer')?.value||null;
   const jaLigados=new Set(CRM_PROJECT_PEOPLE.map(pp=>pp.person_id));
-  const disponiveis=CRM_PEOPLE.filter(p=>!p.deleted&&!jaLigados.has(p.id));
-  const temCliente=proj&&proj.customer_id;
-  const deste=temCliente?disponiveis.filter(p=>p.customer_id===proj.customer_id):[];
-  const outros=temCliente?disponiveis.filter(p=>p.customer_id!==proj.customer_id):disponiveis;
-  const opt=p=>`<option value="${p.id}">${esc(p.name)}${p.role?' · '+esc(p.role):''}</option>`;
-  let html='<option value="">— selecione —</option>';
-  if(deste.length)html+=`<optgroup label="Deste cliente">${deste.map(opt).join('')}</optgroup>`;
-  if(outros.length)html+=`<optgroup label="${deste.length?'Outras pessoas':'Pessoas existentes'}">${outros.map(opt).join('')}</optgroup>`;
-  sel.innerHTML=html;
+  const pessoas=customerId?CRM_PEOPLE.filter(p=>!p.deleted&&p.customer_id===customerId):[];
+  if(!customerId){cont.innerHTML='<div class="crm-empty" style="padding:.55rem .65rem">Escolha um cliente para ver seus contatos.</div>';return;}
+  if(!pessoas.length){cont.innerHTML='<div class="crm-empty" style="padding:.55rem .65rem">Este cliente ainda não possui pessoas cadastradas.</div>';return;}
+  cont.innerHTML=pessoas.map(p=>{
+    const linked=jaLigados.has(p.id),disabled=!crmEditProjectId;
+    return`<div class="crm-proj-contact">
+      <div class="crm-proj-contact-name">${esc(p.name||'Sem nome')}<span class="crm-proj-contact-role">${esc(p.role||'Cargo não informado')}</span></div>
+      <div class="crm-proj-contact-email">${p.email?esc(p.email):'<span class="crm-empty">E-mail não informado</span>'}</div>
+      <div class="crm-proj-contact-phone">${p.phone?esc(crmFormatPhone(p.phone)):'<span class="crm-empty">Telefone não informado</span>'}</div>
+      <button type="button" class="btn btn-s crm-proj-contact-link" ${disabled?'disabled title="Salve o projeto antes de vincular"':''} onclick="${linked?`crmRemovePersonFromProject('${p.id}')`:`crmAddPersonToProject('${p.id}')`}">${linked?'✓ Vinculada':'＋ Vincular'}</button>
+    </div>`;
+  }).join('');
 }
-async function crmAddPersonToProject(){
-  const sel=document.getElementById('crm-proj-person-select');
-  const personId=sel.value;
+function crmProjectCustomerChanged(){crmRenderProjectPeopleChips();}
+async function crmAddPersonToProject(personId){
   if(!personId)return;
   const{error}=await _supa.from('crm_project_people').insert({project_id:crmEditProjectId,person_id:personId});
   if(error&&error.code!=='23505'){toastSave('Erro ao vincular pessoa: '+error.message);return;} // 23505 = já vinculado, trata como sucesso silencioso
