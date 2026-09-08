@@ -160,7 +160,7 @@ body.dark .modal-h{background:var(--card)}
 .crm-section{font-size:.66rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-top:1.1rem;margin-bottom:.5rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
 .crm-section:first-child{margin-top:0;padding-top:0;border-top:none}
 .crm-row-proj-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.6rem}
-.crm-row-proj-tipo{display:grid;grid-template-columns:auto 2fr 1.4fr;gap:.6rem;align-items:end}
+.crm-row-proj-tipo{display:grid;grid-template-columns:auto minmax(220px,1.5fr) 90px minmax(150px,.65fr) minmax(170px,.8fr);gap:.6rem;align-items:end}
 #crm-proj-people-section{grid-column:1/-1;margin-top:.15rem}
 .crm-row-proj-next{display:grid;grid-template-columns:2.5fr 1fr;gap:.6rem}
 .crm-row-cli-main{display:grid;grid-template-columns:1.6fr 1.2fr .9fr .8fr;gap:.6rem}
@@ -203,7 +203,9 @@ body.dark .modal-h{background:var(--card)}
 .crm-proj-contact{display:grid;grid-template-columns:minmax(150px,1fr) minmax(180px,1.1fr) minmax(145px,.8fr) auto;gap:.55rem;align-items:center;padding:.48rem .6rem;border-top:1px solid var(--bdr);font-size:.68rem;color:var(--ink2)}
 .crm-proj-contact:first-child{border-top:0}.crm-proj-contact-name{font-weight:700;color:var(--ink)}.crm-proj-contact-role{display:block;margin-top:.06rem;font-size:.58rem;font-weight:400;color:var(--ink4)}
 .crm-proj-contact-email,.crm-proj-contact-phone{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crm-proj-contact-link{min-width:72px;text-align:center}
-@media(max-width:760px){.crm-proj-contact{grid-template-columns:1fr 1fr}.crm-proj-contact-link{justify-self:start}}
+.crm-proj-company-field input[readonly],.crm-proj-company-field select:disabled{background:var(--bg);color:var(--ink3);opacity:1}
+@media(max-width:1050px){.crm-row-proj-tipo{grid-template-columns:auto 1fr 90px 1fr}.crm-proj-trade-field{grid-column:2/-1}}
+@media(max-width:760px){.crm-proj-contact{grid-template-columns:1fr 1fr}.crm-proj-contact-link{justify-self:start}.crm-row-proj-tipo{grid-template-columns:1fr}.crm-row-proj-tipo>*{grid-column:auto!important}}
 #ovl-crmcustomer .crm-ai-title{font-size:1rem;line-height:1.35}
 #ovl-crmcustomer .crm-ai-line{font-size:.82rem;line-height:1.5}
 #ovl-crmcustomer .crm-ai-evidence-row{font-size:.74rem;line-height:1.4}
@@ -1073,7 +1075,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
     <div class="modal-h">
       <span id="crm-proj-title">Projeto</span>
       <div style="display:flex;align-items:center;gap:.5rem">
-        <button id="crm-proj-add-action-btn" class="btn btn-p" style="font-size:.62rem;padding:.2rem .55rem;display:none" onclick="crmCreateActionForProject()">＋ Ação</button>
+        <button id="crm-proj-add-action-btn" class="btn btn-p" style="font-size:.62rem;padding:.2rem .55rem;height:30px;display:none;align-items:center;justify-content:center;line-height:1" onclick="crmCreateActionForProject()">＋ Ação</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveProject()">Salvar</button>
         <button class="mcls" aria-label="Fechar" onclick="closeM('crmproject')">✕</button>
       </div>
@@ -1114,6 +1116,19 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <label>Cliente / Prospect</label>
           <select id="crm-proj-customer" onchange="crmProjectCustomerChanged()"></select>
           <input type="text" id="crm-proj-prospect" placeholder="Nome da empresa/pessoa, ainda sem cadastro de cliente" style="display:none">
+          <button type="button" id="crm-proj-convert-btn" class="btn btn-s" style="display:none;margin-top:.3rem;font-size:.6rem;padding:.2rem .45rem;color:var(--green);border-color:var(--green)" onclick="crmConvertProspectToCustomer()">Transformar em cliente</button>
+        </div>
+        <div class="ff crm-proj-company-field">
+          <label>Estado</label>
+          <select id="crm-proj-company-state"></select>
+        </div>
+        <div class="ff crm-proj-company-field">
+          <label>CNPJ/CPF</label>
+          <input type="text" id="crm-proj-company-doc" placeholder="opcional">
+        </div>
+        <div class="ff crm-proj-company-field crm-proj-trade-field">
+          <label>Nome fantasia</label>
+          <input type="text" id="crm-proj-company-trade" placeholder="opcional">
         </div>
         <div class="ff" id="crm-proj-people-section">
           <div class="crm-proj-people-head"><label id="crm-proj-people-label">Pessoas do cliente</label><button type="button" id="crm-proj-person-add-btn" class="btn btn-s" style="font-size:.68rem;padding:.18rem .48rem" onclick="crmOpenProjectPersonModal()" aria-label="Adicionar pessoa">＋</button></div>
@@ -4295,6 +4310,25 @@ function crmOpenActionModal(customerId,action,projectId,prefill){
   document.getElementById('crm-act-sched-date').value='';
   document.getElementById('ovl-crmaction').classList.add('open');
 }
+async function crmEnsureActionProjectLink(rpcData,projectId,status,summary,dateField,dateValue,knownId){
+  if(!projectId)return;
+  let actionId=knownId||null;
+  if(!actionId){
+    if(typeof rpcData==='string')actionId=rpcData;
+    else if(Array.isArray(rpcData))actionId=rpcData[0]?.id||Object.values(rpcData[0]||{}).find(v=>typeof v==='string'&&/^[0-9a-f-]{36}$/i.test(v));
+    else if(rpcData&&typeof rpcData==='object')actionId=rpcData.id||Object.values(rpcData).find(v=>typeof v==='string'&&/^[0-9a-f-]{36}$/i.test(v));
+  }
+  if(!actionId){
+    let q=_supa.from('crm_actions').select('id,project_id').eq('status',status).eq('summary',summary).eq('responsible_user_id',authUser.id);
+    if(dateField&&dateValue)q=q.eq(dateField,dateValue);
+    const{data}=await q.order('created_at',{ascending:false}).limit(1);
+    actionId=data?.[0]?.id||null;
+  }
+  if(actionId){
+    const{error}=await _supa.from('crm_actions').update({project_id:projectId}).eq('id',actionId);
+    if(error)console.error('crmEnsureActionProjectLink',error);
+  }
+}
 async function crmSaveAction(){
   const hasDir=CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir;
 
@@ -4303,7 +4337,7 @@ async function crmSaveAction(){
     const schedDate=document.getElementById('crm-act-sched-date').value;
     if(!schedSummary){toastSave('Preencha o que precisa ser feito');return;}
     if(!schedDate){toastSave('Preencha a data');return;}
-    const{error}=await _supa.rpc('crm_save_action',{
+    const{data,error}=await _supa.rpc('crm_save_action',{
       p_customer_id:crmActCtx.customerId,
       p_type:crmActCtx.type,
       p_direction:null,
@@ -4318,6 +4352,7 @@ async function crmSaveAction(){
       p_project_id:crmActCtx.projectId,
     });
     if(error){toastSave('Erro ao agendar: '+error.message);return;}
+    await crmEnsureActionProjectLink(data,crmActCtx.projectId,'planned',schedSummary,'due_date',schedDate,null);
     closeM('crmaction');
     toastSave('Ação agendada ✓');
     await crmLoadAll();
@@ -4347,6 +4382,7 @@ async function crmSaveAction(){
     p_project_id:crmActCtx.projectId,
   });
   if(error){toastSave('Erro ao salvar ação: '+error.message);return;}
+  await crmEnsureActionProjectLink(data,crmActCtx.projectId,'done',summary,'occurred_at',occurredISO,crmActCtx.actionId);
   closeM('crmaction');
   toastSave('Ação salva ✓');
   await crmLoadAll();
@@ -5006,7 +5042,7 @@ function crmRenderProjects(){
       nextHtml=`<div class="crm-project-next${health.kind==='overdue'?' empty':''}">${esc(prox.summary||'Ação')}</div>`;
     }
     const quick=prox?`<div class="crm-project-quick"><button class="btn btn-s" onclick="event.stopPropagation();crmOpenActionModalById(null,'${prox.id}')">✓ Concluir</button><button class="btn btn-s" onclick="event.stopPropagation();crmRescheduleAction('${prox.id}')">Reagendar</button></div>`:`<div class="crm-project-quick"><button class="btn btn-p" onclick="event.stopPropagation();crmCreateActionForProjectId('${p.id}')">＋ Agendar ação</button></div>`;
-    return`<div class="crm-project-row ${health.kind}${p.status!=='active'?' crm-project-closed':''}" onclick="crmOpenProjectEdit('${p.id}')">
+    return`<div class="crm-project-row ${health.kind}${p.status!=='active'?' crm-project-closed':''}" role="button" tabindex="0" aria-label="Abrir projeto ${esc(p.project_name||'Projeto')}" onclick="crmOpenProjectEdit('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();crmOpenProjectEdit('${p.id}')}">
       <div class="crm-project-main">
         <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
         <div class="crm-project-client">${esc(cliente)}${p.potential_value?` · ${crmFmtBRL(Number(p.potential_value))}`:''}</div>
@@ -5034,6 +5070,12 @@ function crmSetProjectTipo(tipo){
   document.getElementById('crm-proj-prospect').style.display=tipo==='cliente'?'none':'block';
   document.getElementById('crm-proj-people-section').style.display='block';
   document.getElementById('crm-proj-people-label').textContent=tipo==='cliente'?'Pessoas do cliente':'Pessoas do prospect';
+  const prospect=tipo==='prospect';
+  document.getElementById('crm-proj-company-state').disabled=!prospect;
+  document.getElementById('crm-proj-company-doc').readOnly=!prospect;
+  document.getElementById('crm-proj-company-trade').readOnly=!prospect;
+  document.getElementById('crm-proj-convert-btn').style.display=prospect&&crmEditProjectId?'inline-flex':'none';
+  if(!prospect)crmProjectCustomerChanged();
   crmRenderProjectPeopleChips();
 }
 function crmOnToggleProjectTipo(tipo){
@@ -5050,6 +5092,11 @@ function crmOpenProjectEdit(id,prefill){
   document.getElementById('crm-proj-title').textContent=id?'Editar Projeto':'Novo Projeto';
   crmPopulateProjectCustomerSelect(p?.customer_id||pf?.customer_id||'');
   document.getElementById('crm-proj-prospect').value=p?.prospect_name||pf?.prospect_name||'';
+  const projectState=document.getElementById('crm-proj-company-state');
+  projectState.innerHTML='<option value="">—</option>'+ESTADOS.map(([uf])=>`<option value="${uf}">${uf}</option>`).join('');
+  projectState.value=p?.prospect_state||pf?.prospect_state||'';
+  document.getElementById('crm-proj-company-doc').value=p?.prospect_document||pf?.prospect_document||'';
+  document.getElementById('crm-proj-company-trade').value=p?.prospect_trade_name||pf?.prospect_trade_name||'';
   crmSetProjectTipo((p&&!p.customer_id)||(!p&&pf?.prospect_name)?'prospect':'cliente');
   document.getElementById('crm-proj-name').value=p?.project_name||pf?.project_name||'';
   document.getElementById('crm-proj-stage').value=p?.stage||pf?.stage||'';
@@ -5092,17 +5139,16 @@ function crmRenderProjectNextAction(){
   const cont=document.getElementById('crm-proj-next-action');
   if(!cont)return;
   if(!crmEditProjectId){cont.innerHTML='';return;}
-  const proxima=CRM_ACTIONS.filter(a=>a.project_id===crmEditProjectId&&a.status==='planned'&&!a.deleted)
-    .sort((a,b)=>new Date(a.due_date)-new Date(b.due_date))[0];
-  if(!proxima){
+  const planejadas=CRM_ACTIONS.filter(a=>a.project_id===crmEditProjectId&&a.status==='planned'&&!a.deleted)
+    .sort((a,b)=>String(a.due_date||'9999').localeCompare(String(b.due_date||'9999')));
+  if(!planejadas.length){
     cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;border:1px solid var(--bdr);border-radius:8px;padding:.5rem .7rem">
       <span class="crm-empty">Nenhuma ação planejada</span>
       <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmCreateActionForProject()">＋ Criar ação</button>
     </div>`;
     return;
   }
-  const responsavel=crmResolveResponsavel(proxima.responsible_user_id);
-  cont.innerHTML=`<div style="display:flex;align-items:center;gap:.65rem;border:1px solid var(--bdr);border-radius:8px;padding:.6rem .75rem">
+  const card=proxima=>{const responsavel=crmResolveResponsavel(proxima.responsible_user_id);return`<div style="display:flex;align-items:center;gap:.65rem;border:1px solid var(--bdr);border-radius:8px;padding:.6rem .75rem">
     <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:var(--ltblue);flex-shrink:0">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     </span>
@@ -5118,7 +5164,8 @@ function crmRenderProjectNextAction(){
       <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem;border-color:var(--green);color:var(--green)" onclick="crmOpenActionModalById(null,'${proxima.id}')">✓ Concluir</button>
       <button class="btn btn-s" style="font-size:.66rem;padding:.3rem .6rem;border-color:var(--blue);color:var(--blue)" onclick="crmRescheduleAction('${proxima.id}')">Reagendar</button>
     </div>
-  </div>`;
+  </div>`;};
+  cont.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem"><span class="crm-field-label" style="margin:0">Ações planejadas · ${planejadas.length}</span><button class="btn btn-s" style="font-size:.62rem;padding:.2rem .5rem" onclick="crmCreateActionForProject()">＋ Outra ação</button></div><div style="display:flex;flex-direction:column;gap:.4rem">${planejadas.map(card).join('')}</div>`;
 }
 
 /* CRM — PESSOAS DO PROJETO: cliente e prospect aceitam vínculo existente ou pessoa nova. */
@@ -5156,7 +5203,43 @@ function crmRenderProjectPeopleChips(){
     </div>`;
   }).join('');
 }
-function crmProjectCustomerChanged(){crmRenderProjectPeopleChips();}
+function crmProjectCustomerChanged(){
+  const customerId=document.getElementById('crm-proj-customer')?.value||null;
+  const c=CRM_CUSTOMERS.find(x=>x.id===customerId);
+  const state=document.getElementById('crm-proj-company-state');
+  if(state)state.value=c?.state||'';
+  const doc=document.getElementById('crm-proj-company-doc');if(doc)doc.value=c?.document||'';
+  const trade=document.getElementById('crm-proj-company-trade');if(trade)trade.value=c?.trade_name||'';
+  crmRenderProjectPeopleChips();
+}
+async function crmConvertProspectToCustomer(){
+  if(!crmEditProjectId)return;
+  const project=CRM_PROJECTS.find(p=>p.id===crmEditProjectId);
+  const displayName=document.getElementById('crm-proj-prospect').value.trim();
+  const documentValue=document.getElementById('crm-proj-company-doc').value.trim();
+  if(!displayName){toastSave('Preencha o nome do prospect antes de transformar em cliente.');return;}
+  const existing=documentValue?CRM_CUSTOMERS.find(c=>!c.deleted&&normPhoneSimple(c.document)===normPhoneSimple(documentValue)):null;
+  if(existing){
+    if(!confirm(`Já existe um cliente com este documento: ${existing.trade_name||existing.display_name}. Vincular este projeto a ele?`))return;
+    await crmFinishProspectConversion(existing.id);
+    return;
+  }
+  if(!confirm(`Criar ${displayName} no cadastro de Clientes e vincular este projeto?`))return;
+  const payload={display_name:displayName,trade_name:document.getElementById('crm-proj-company-trade').value.trim()||null,state:document.getElementById('crm-proj-company-state').value||null,document:documentValue||null,status:'active',owner_user_id:authUser.id};
+  const{data,error}=await _supa.from('crm_customers').insert(payload).select().single();
+  if(error){toastSave('Erro ao criar cliente: '+error.message);return;}
+  CRM_CUSTOMERS.push(data);
+  await crmFinishProspectConversion(data.id);
+}
+async function crmFinishProspectConversion(customerId){
+  const{error}=await _supa.from('crm_projects').update({customer_id:customerId,prospect_name:null,prospect_state:null,prospect_document:null,prospect_trade_name:null}).eq('id',crmEditProjectId);
+  if(error){toastSave('Erro ao vincular projeto ao cliente: '+error.message);return;}
+  const linkedIds=CRM_PROJECT_PEOPLE.map(pp=>pp.person_id);
+  if(linkedIds.length)await _supa.from('crm_people').update({customer_id:customerId}).in('id',linkedIds).is('customer_id',null);
+  await Promise.all([crmLoadAll(),crmLoadProjects()]);
+  crmOpenProjectEdit(crmEditProjectId);
+  toastSave('Prospect transformado em cliente ✓');
+}
 function crmOpenProjectPersonModal(){
   if(!crmEditProjectId){toastSave('Salve o projeto antes de adicionar pessoas.');return;}
   crmSetProjectPersonMode('existing');
@@ -5224,6 +5307,9 @@ async function crmSaveProject(){
   const payload={
     customer_id:customerId,
     prospect_name:customerId?null:prospectName,
+    prospect_state:customerId?null:(document.getElementById('crm-proj-company-state').value||null),
+    prospect_document:customerId?null:(document.getElementById('crm-proj-company-doc').value.trim()||null),
+    prospect_trade_name:customerId?null:(document.getElementById('crm-proj-company-trade').value.trim()||null),
     project_name:projectName,
     stage:document.getElementById('crm-proj-stage').value.trim()||'Ideia',
     status:document.getElementById('crm-proj-status').value,
