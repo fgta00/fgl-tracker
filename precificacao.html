@@ -263,7 +263,8 @@ body.dark .modal-h{background:var(--card)}
 .crm-email-check input{width:auto}
 .crm-timeline{display:block}
 .crm-tl-card{max-width:none;min-width:0;border:0;border-bottom:1px solid var(--bdr);border-radius:0;padding:.38rem .15rem;max-height:54px;overflow:hidden;transition:max-height .2s,background .15s;cursor:pointer}
-.crm-tl-card:hover,.crm-tl-card.open{max-height:220px;background:var(--bg)}
+.crm-tl-card:hover,.crm-tl-card.open{max-height:520px;background:var(--bg)}
+.crm-tl-card.open .crm-tl-detail{display:block!important}
 @media(max-width:900px){.crm-ai-workspace{grid-template-columns:1fr}.crm-ai-inspector{position:static;border-left:0;border-top:1px solid var(--bdr);padding:.65rem 0 0;min-height:0}}
 @media(max-width:720px){#ovl-crmcustomer .crm-modal{width:calc(100vw - 16px)}#ovl-crmcustomer .crm-ai-line{font-size:.76rem}}
 @media(max-width:720px){.crm-kpi-strip{grid-template-columns:repeat(2,1fr)}.crm-tl-card{flex-basis:100%;max-width:none}}
@@ -1383,7 +1384,11 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div id="crm-cust-timeline-section" style="display:none">
         <div class="crm-cust-timeline-head">
           <div class="crm-cust-section-title" style="margin:0">Atividade</div>
-          <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span id="crm-gmail-sync-status" style="font-size:.6rem;color:var(--ink4)"></span>
+            <button id="crm-gmail-sync-btn" class="btn btn-s" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmSyncGmail()">↻ E-mails</button>
+            <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
+          </div>
         </div>
         <div class="crm-field-label" style="margin-bottom:.22rem">Timeline</div>
         <div class="crm-cust-timeline-tools">
@@ -3478,12 +3483,15 @@ async function crmCheckAccess(){
 // já que o CRM lê direto da tabela (sem cache local tipo vault) e outra pessoa pode editar
 // ao mesmo tempo. Sem Realtime por enquanto, só polling — critério aprovado era "aparece sem
 // precisar recarregar a página", não "em tempo real".
-let _crmAutoRefreshTimer=null;
+let _crmAutoRefreshTimer=null,_crmGmailSyncTimer=null;
 function crmStartAutoRefresh(){
-  if(_crmAutoRefreshTimer)return;
-  _crmAutoRefreshTimer=setInterval(()=>{
+  if(!_crmAutoRefreshTimer)_crmAutoRefreshTimer=setInterval(()=>{
     if(CRM_ROLE&&_rvCurTab==='crm')crmLoadAll();
   },30000);
+  if(!_crmGmailSyncTimer){
+    setTimeout(()=>{if(CRM_ROLE&&_rvCurTab==='crm')crmSyncGmail(true);},1500);
+    _crmGmailSyncTimer=setInterval(()=>{if(CRM_ROLE&&_rvCurTab==='crm')crmSyncGmail(true);},300000);
+  }
 }
 function crmShowSubTab(id,skipReclick){
   if(isMetaReviewer()&&id!=='clientes')id='clientes';
@@ -4482,7 +4490,19 @@ function crmActionListHtml(acoes){
     </div>`;
   }).join('');
 }
-function crmCommunicationListHtml(items){return items.map(m=>{const when=m.sent_at||m.received_at||m.created_at;const label=m.channel==='whatsapp'?'WhatsApp':'E-mail';const direction=m.direction==='inbound'?'Recebido':'Enviado';const summary=m.subject||m.excerpt||'(sem assunto)';const age=Date.now()-new Date(m.created_at).getTime();const state=m.status==='sending'&&age>120000?'em verificação':({sending:'enviando',sent:'enviado',failed:'falhou',received:'recebido',delivered:'entregue'}[m.status]||m.status||'registrado');const stateColor=m.status==='failed'?'var(--red)':(m.status==='sending'?'var(--amber)':'var(--ink4)');return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(m.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b> <span style="color:${stateColor}">· ${direction} · ${esc(state)}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)}</div></div></div></div>`;}).join('');}
+function crmCommunicationMessageHtml(m){const when=m.sent_at||m.created_at;const direction=m.direction==='inbound'?'Recebido':'Enviado';const age=Date.now()-new Date(m.created_at).getTime();const state=m.status==='sending'&&age>120000?'em verificação':({sending:'enviando',sent:'enviado',failed:'falhou',received:'recebido',delivered:'entregue'}[m.status]||m.status||'registrado');const stateColor=m.status==='failed'?'var(--red)':(m.status==='sending'?'var(--amber)':'var(--ink4)');const address=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');return`<div style="padding:.42rem 0;border-top:1px solid var(--bdr)"><div style="display:flex;justify-content:space-between;gap:.5rem;font-size:.64rem"><span><b>${direction}</b>${address?` · ${esc(address)}`:''}</span><span style="color:${stateColor}">${esc(state)} · ${crmFmtDate(when)}</span></div><div style="font-size:.7rem;color:var(--ink2);margin-top:.18rem;white-space:pre-wrap;overflow-wrap:anywhere">${esc(m.excerpt||m.body||'(sem conteúdo)')}</div></div>`;}
+function crmCommunicationListHtml(items){
+  const groups=new Map();
+  items.forEach(m=>{const key=m.external_thread_id||`single:${m.id}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);});
+  return[...groups.values()].map(thread=>{thread.sort((a,b)=>new Date(a.sent_at||a.created_at)-new Date(b.sent_at||b.created_at));const last=thread[thread.length-1],when=last.sent_at||last.created_at,label=last.channel==='whatsapp'?'WhatsApp':'E-mail',summary=last.subject||last.excerpt||'(sem assunto)',inbound=thread.some(m=>m.direction==='inbound');return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(last.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b><span style="color:var(--ink4)"> · ${thread.length>1?`${thread.length} mensagens`:(inbound?'Recebido':'Enviado')}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem;overflow-wrap:anywhere">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)} · clique para ${thread.length>1?'ver conversa':'ver conteúdo'}</div><div class="crm-tl-detail" style="display:none;margin-top:.35rem">${thread.map(crmCommunicationMessageHtml).join('')}</div></div></div></div>`;}).join('');
+}
+async function crmSyncGmail(quiet=false){
+  const btn=document.getElementById('crm-gmail-sync-btn'),status=document.getElementById('crm-gmail-sync-status');if(!btn||btn.disabled)return;
+  btn.disabled=true;btn.textContent='Sincronizando…';status.textContent='Consultando Gmail';
+  try{const{data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{source:'crm'}});if(error)throw error;if(data?.status==='already_syncing'){status.textContent='Sincronização já em andamento';return;}status.textContent=`${data?.imported||0} nova(s) · ${data?.unmatched||0} sem vínculo`;await crmLoadAll();}
+  catch(e){console.error('crmSyncGmail',e);status.textContent=quiet?'E-mails aguardando configuração':'Falha ao sincronizar';}
+  finally{btn.disabled=false;btn.textContent='↻ E-mails';}
+}
 function crmRenderTimeline(){
   const cont=document.getElementById('crm-cust-timeline');
   if(!cont||!crmEditCtx.customerId)return;
@@ -4494,9 +4514,10 @@ function crmRenderTimeline(){
   const feitas=CRM_ACTIONS.filter(a=>a.customer_id===crmEditCtx.customerId&&a.status==='done'&&msfMatch('crm-acttype',CRM_TYPE_LBL[a.type])&&new Date(a.occurred_at)>=limite)
     .sort((a,b)=>new Date(b.occurred_at)-new Date(a.occurred_at));
   const comms=CRM_COMMUNICATIONS.filter(m=>m.customer_id===crmEditCtx.customerId&&new Date(m.sent_at||m.received_at||m.created_at)>=limite);
-  const mixed=[...feitas.map(a=>({kind:'action',date:a.occurred_at,item:a})),...comms.map(m=>({kind:'communication',date:m.sent_at||m.received_at||m.created_at,item:m}))].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const commGroups=new Map();comms.forEach(m=>{const key=m.external_thread_id||`single:${m.id}`;if(!commGroups.has(key))commGroups.set(key,[]);commGroups.get(key).push(m);});
+  const mixed=[...feitas.map(a=>({kind:'action',date:a.occurred_at,item:a})),...[...commGroups.values()].map(items=>({kind:'communication',date:items.reduce((latest,m)=>new Date(m.sent_at||m.created_at)>new Date(latest)?(m.sent_at||m.created_at):latest,items[0].sent_at||items[0].created_at),item:items}))].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(!mixed.length){cont.innerHTML='<p class="hint" style="margin-top:.4rem">Nenhuma atividade registrada nesse período.</p>';return;}
-  cont.innerHTML=mixed.map(x=>x.kind==='action'?crmActionListHtml([x.item]):crmCommunicationListHtml([x.item])).join('');
+  cont.innerHTML=mixed.map(x=>x.kind==='action'?crmActionListHtml([x.item]):crmCommunicationListHtml(x.item)).join('');
 }
 function crmRenderProjectTimeline(){
   const cont=document.getElementById('crm-proj-timeline');
