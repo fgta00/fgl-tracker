@@ -1386,6 +1386,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
           <div class="crm-cust-section-title" style="margin:0">Atividade</div>
           <div style="display:flex;align-items:center;gap:.4rem">
             <span id="crm-gmail-sync-status" style="font-size:.6rem;color:var(--ink4)"></span>
+            <button id="crm-gmail-history-btn" class="btn btn-s" style="display:none;font-size:.64rem;padding:.25rem .55rem" onclick="crmToggleGmailHistory()">↻ 10 anos</button>
             <button id="crm-gmail-sync-btn" class="btn btn-s" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmSyncGmail()">↻ E-mails</button>
             <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
           </div>
@@ -3475,6 +3476,7 @@ async function crmCheckAccess(){
   }
   document.getElementById('crm-noaccess').style.display='none';
   document.getElementById('crm-content').style.display='block';
+  const historyBtn=document.getElementById('crm-gmail-history-btn');if(historyBtn)historyBtn.style.display=CRM_ROLE==='admin'?'inline-flex':'none';
   crmShowSubTab(isMetaReviewer()?'clientes':'semana',true);
   crmLoadAll();
   crmStartAutoRefresh();
@@ -4502,6 +4504,21 @@ async function crmSyncGmail(quiet=false){
   try{const{data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{source:'crm'}});if(error)throw error;if(data?.status==='already_syncing'){status.textContent='Sincronização já em andamento';return;}status.textContent=`${data?.imported||0} nova(s) · ${data?.unmatched||0} sem vínculo`;await crmLoadAll();}
   catch(e){console.error('crmSyncGmail',e);status.textContent=quiet?'E-mails aguardando configuração':'Falha ao sincronizar';}
   finally{btn.disabled=false;btn.textContent='↻ E-mails';}
+}
+let crmGmailHistoryRunning=false;
+async function crmToggleGmailHistory(){
+  const btn=document.getElementById('crm-gmail-history-btn'),status=document.getElementById('crm-gmail-sync-status');
+  if(crmGmailHistoryRunning){crmGmailHistoryRunning=false;btn.textContent='Continuar 10 anos';status.textContent='Histórico pausado nesta tela';return;}
+  if(!confirm('Importar os e-mails dos últimos 10 anos em lotes retomáveis? O processo pode levar alguns minutos.'))return;
+  crmGmailHistoryRunning=true;btn.textContent='Pausar histórico';btn.classList.add('btn-p');
+  try{
+    while(crmGmailHistoryRunning){
+      const{data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{mode:'historical'}});if(error)throw error;
+      const total=data?.estimated_total||0,done=data?.scanned||0;status.textContent=total?`Histórico ${done}/${total} · ${data.imported||0} vinculados`:`Histórico ${done} processados · ${data?.imported||0} vinculados`;
+      if(data?.status==='completed'||!data?.has_more){crmGmailHistoryRunning=false;status.textContent=`Histórico concluído · ${data?.imported||0} vinculados`;await crmLoadAll();break;}
+    }
+  }catch(e){console.error('crmToggleGmailHistory',e);crmGmailHistoryRunning=false;status.textContent='Falha no histórico — pode continuar depois';}
+  finally{btn.classList.remove('btn-p');btn.textContent=crmGmailHistoryRunning?'Pausar histórico':'↻ 10 anos';}
 }
 function crmRenderTimeline(){
   const cont=document.getElementById('crm-cust-timeline');
