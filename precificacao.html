@@ -3784,11 +3784,11 @@ function crmRenderCustPeople(){
   const cont=document.getElementById('crm-cust-people');
   cont.innerHTML=crmEditCtx.people.length?crmEditCtx.people.map((p,i)=>{
     return`<div class="crm-person-row">
-      <input class="crm-person-name" type="text" value="${esc(p.name||'')}" placeholder="Nome" onchange="crmEditCtx.people[${i}].name=this.value" style="width:100%;border:none;background:none;font-size:.84rem;font-weight:600;color:var(--ink);padding:0;min-width:0">
-      <input class="crm-person-role" type="text" value="${esc(p.role||'')}" placeholder="Cargo" onchange="crmEditCtx.people[${i}].role=this.value" style="width:100%;border:none;background:none;font-size:.62rem;color:var(--ink4);padding:.05rem 0 0;min-width:0">
+      <input class="crm-person-name" type="text" value="${esc(p.name||'')}" placeholder="Nome" oninput="crmEditCtx.people[${i}].name=this.value" style="width:100%;border:none;background:none;font-size:.84rem;font-weight:600;color:var(--ink);padding:0;min-width:0">
+      <input class="crm-person-role" type="text" value="${esc(p.role||'')}" placeholder="Cargo" oninput="crmEditCtx.people[${i}].role=this.value" style="width:100%;border:none;background:none;font-size:.62rem;color:var(--ink4);padding:.05rem 0 0;min-width:0">
       <div class="crm-person-email crm-person-channel">
         ${p.email?`<button type="button" class="crm-person-channel-btn email" title="Preparar e-mail" aria-label="Preparar e-mail para ${esc(p.name||p.email)}" onclick="crmOpenEmailForPerson(${i})">${crmEmailIconSvg()}</button>`:''}
-        <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" onchange="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
+        <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" oninput="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       </div>
       <div class="crm-person-phone crm-person-channel">
         ${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp" aria-label="Abrir WhatsApp de ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppDirect(${i})">${crmWhatsAppIconSvg()}</button>`:''}
@@ -3986,6 +3986,8 @@ async function crmSaveCustomer(){
     const{data,error}=await _supa.from('crm_customers').insert(payload).select().single();
     if(error){toastSave('Erro ao criar: '+error.message);return;}
     customerId=data.id;
+    crmEditCtx.customerId=customerId;
+    document.getElementById('crm-cust-title').textContent='Editar Cliente';
   }
   // tags: garante que existem em crm_tags, depois sincroniza o vínculo customer↔tag
   for(const tn of crmEditCtx.tags){
@@ -4007,19 +4009,38 @@ async function crmSaveCustomer(){
   }
   // pessoas: upsert simples (quem tem id atualiza, quem não tem insere; quem sumiu da lista vira soft-delete)
   const idsPessoasMantidas=[];
-  for(const p of crmEditCtx.people){
-    if(!p.name)continue;
+  for(let i=0;i<crmEditCtx.people.length;i++){
+    const p=crmEditCtx.people[i];
+    p.name=String(p.name||'').trim();
+    p.role=String(p.role||'').trim();
+    p.email=String(p.email||'').trim();
+    p.phone=String(p.phone||'').trim();
+    const temAlgumDado=!!(p.name||p.role||p.email||p.phone);
+    if(!temAlgumDado)continue;
+    if(!p.name){
+      toastSave('Informe o nome da pessoa antes de salvar.');
+      document.querySelectorAll('#crm-cust-people .crm-person-name')[i]?.focus();
+      return;
+    }
     if(p.id){
-      await _supa.from('crm_people').update({name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null}).eq('id',p.id);
+      const{error}=await _supa.from('crm_people').update({name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null,deleted:false}).eq('id',p.id);
+      if(error){toastSave('Cliente salvo, mas a pessoa não foi atualizada: '+error.message);return;}
       idsPessoasMantidas.push(p.id);
     }else{
-      const{data}=await _supa.from('crm_people').insert({customer_id:customerId,name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null}).select().single();
-      if(data)idsPessoasMantidas.push(data.id);
+      const{data,error}=await _supa.from('crm_people').insert({customer_id:customerId,name:p.name,role:p.role||null,relationship_type:p.relationship_type||null,email:p.email||null,phone:p.phone||null}).select().single();
+      if(error){toastSave('Cliente salvo, mas a pessoa não foi cadastrada: '+error.message);return;}
+      if(!data?.id){toastSave('Cliente salvo, mas o banco não confirmou o cadastro da pessoa.');return;}
+      p.id=data.id;
+      p.customer_id=customerId;
+      idsPessoasMantidas.push(data.id);
     }
   }
   const pessoasOriginais=CRM_PEOPLE.filter(p=>p.customer_id===customerId);
   for(const p of pessoasOriginais){
-    if(!idsPessoasMantidas.includes(p.id))await _supa.from('crm_people').update({deleted:true}).eq('id',p.id);
+    if(!idsPessoasMantidas.includes(p.id)){
+      const{error}=await _supa.from('crm_people').update({deleted:true}).eq('id',p.id);
+      if(error){toastSave('Cliente salvo, mas não foi possível remover uma pessoa: '+error.message);return;}
+    }
   }
   // referências externas: insere as novas (sem id ainda) e desfaz (soft-delete) as removidas da lista.
   // Nunca é DELETE físico — dá pra desfazer um vínculo errado sem perder o rastro de auditoria.
