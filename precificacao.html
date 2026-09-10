@@ -521,17 +521,17 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-week-kpi .n{font-family:'IBM Plex Mono';font-size:1.05rem;font-weight:700;line-height:1}
 .crm-week-kpi .l{font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4);margin-top:.22rem}
 .crm-week-kpi.late .n{color:var(--red)} .crm-week-kpi.today .n{color:var(--blue)} .crm-week-kpi.next .n{color:var(--green)}
-.crm-week-section{margin-top:.75rem}
-.crm-week-head{display:flex;align-items:center;gap:.42rem;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:.2rem 0 .35rem}
+.crm-week-section{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem;margin-top:.75rem}
+.crm-week-head{grid-column:1/-1;display:flex;align-items:center;gap:.42rem;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:.2rem 0 -.1rem}
 .crm-week-head .count{font-family:'IBM Plex Mono';font-size:.55rem;background:var(--ltgry);border-radius:999px;padding:.07rem .35rem;color:var(--ink3)}
-.crm-week-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.6rem;align-items:center;border-top:1px solid var(--bdr);padding:.52rem .1rem}
-.crm-week-row:first-of-type{border-top:none}
+.crm-week-row{display:flex;flex-direction:column;justify-content:space-between;gap:.65rem;align-items:stretch;border:1px solid var(--bdr);border-radius:12px;padding:1rem .9rem;background:var(--card);min-width:0;cursor:default}
+.crm-week-row:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-week-main{min-width:0}
 .crm-week-title{display:flex;align-items:baseline;gap:.4rem;min-width:0}
-.crm-week-client{font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-week-client{font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-week-date{font-family:'IBM Plex Mono';font-size:.58rem;color:var(--ink4);white-space:nowrap}
-.crm-week-summary{font-size:.65rem;color:var(--ink3);margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crm-week-actions{display:flex;gap:.25rem;align-items:center}
+.crm-week-summary{font-size:.72rem;color:var(--ink3);margin-top:.22rem;white-space:normal;overflow:visible;line-height:1.35}
+.crm-week-actions{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;border-top:1px solid var(--bdr);padding-top:.55rem}
 .crm-week-actions .btn{font-size:.58rem;padding:.18rem .42rem}
 .crm-week-empty{padding:.9rem;text-align:center;color:var(--ink4);font-size:.68rem}
 
@@ -628,16 +628,16 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-project-stat b{font-family:'IBM Plex Mono';color:var(--ink)}
 .crm-project-stat:hover,.crm-project-stat.active{border-color:var(--blue);color:var(--blue);background:var(--ltblue)}
 .crm-project-stat.warn b{color:var(--amber)}.crm-project-stat.danger b{color:var(--red)}
-.crm-project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;background:transparent}
+.crm-project-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem;background:transparent}
 .crm-project-list-head{display:none}
-.crm-project-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main stage" "next next" "deadline deadline";gap:.48rem .65rem;align-items:start;padding:.7rem .75rem .65rem .86rem;border:1px solid var(--bdr);border-radius:9px;background:var(--card);cursor:pointer;overflow:hidden}
+.crm-project-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main stage" "next next" "deadline deadline";gap:.55rem .65rem;align-items:start;padding:1rem .9rem;border:1px solid var(--bdr);border-radius:12px;background:var(--card);cursor:pointer;overflow:hidden}
 .crm-project-row:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bdr)}
 .crm-project-row.overdue:before{background:var(--red)}.crm-project-row.no-action:before{background:var(--amber)}.crm-project-row.on-track:before{background:var(--green)}
 .crm-project-row:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-project-main{grid-area:main;min-width:0}
 .crm-project-row>div:nth-child(2){grid-area:stage;justify-self:end}
-.crm-project-name{font-size:.69rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crm-project-client{font-size:.59rem;color:var(--ink3);margin-top:.12rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-project-name{font-size:.92rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-project-client{font-size:.72rem;color:var(--ink4);margin-top:.14rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-stage{font-size:.58rem;font-weight:700;color:var(--blue);background:var(--ltblue);border-radius:999px;padding:.16rem .42rem;width:max-content;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-next{grid-area:next;font-size:.61rem;color:var(--ink2);min-width:0;min-height:1.2rem;padding:.08rem 0}
 .crm-project-next b{font-weight:600;color:var(--ink)}
@@ -963,7 +963,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
-          <div class="card" style="padding:.85rem 1rem">
+          <div class="card">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
               <div>
                 <div class="sh" style="margin:0">Minha Semana</div>
@@ -971,7 +971,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
               </div>
               <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.61rem;padding:.24rem .52rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
             </div>
-            <div id="crm-semana-container" style="padding:.65rem 0 0"><p class="hint">Carregando…</p></div>
+            <div id="crm-semana-container" style="padding:.9rem 0 0"><p class="hint">Carregando…</p></div>
           </div>
           <div class="card" id="crm-signal-card" style="display:none;margin-top:.65rem;padding:.85rem 1rem">
             <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;margin-bottom:.5rem">
@@ -1019,8 +1019,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
         </div>
 
         <div id="crmpane-projetos" class="rv-pane">
-          <div class="card" style="padding:.85rem 1rem">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem">
+          <div class="card">
+            <div class="collap-h open" style="cursor:default;display:flex;align-items:center;justify-content:space-between;gap:.7rem">
               <div>
                 <div class="sh" style="margin:0">Projetos</div>
                 <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Oportunidades de ciclo longo — foco na próxima ação, não em administrar cards</div>
