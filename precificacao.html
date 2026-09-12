@@ -490,7 +490,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-person-channel{display:flex;align-items:center;gap:.25rem;min-width:0}
 .crm-person-channel input{flex:1;min-width:0}
 .crm-person-channel-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink3);font-size:.62rem;font-weight:700;cursor:pointer;padding:0}
-.crm-person-channel-btn svg{width:14px;height:14px;display:block}.crm-person-channel-btn.email{color:var(--blue);background:var(--ltblue);border-color:transparent}.crm-person-channel-btn.wa{color:#128c4b;background:#e8f7ef;border-color:transparent}
+.crm-person-channel-btn svg{width:14px;height:14px;display:block}.crm-person-channel-btn.email{color:var(--blue);background:var(--ltblue);border-color:transparent}.crm-person-channel-btn.wa{color:#128c4b;background:#e8f7ef;border-color:transparent}.crm-person-channel-btn.wa-api{width:auto;flex-basis:auto;padding:0 .34rem;color:#5b49b8;background:#f0edff;border-color:transparent;font-size:.51rem;letter-spacing:.02em}
 .crm-person-channel-btn:hover{border-color:currentColor;filter:saturate(1.15)}
 .crm-proj-customer-label{display:flex;align-items:center;justify-content:space-between;gap:.4rem}.crm-proj-convert-link{border:0;background:none;color:var(--green);font:600 .56rem 'IBM Plex Sans';padding:0;cursor:pointer;white-space:nowrap}.crm-proj-convert-link:hover{text-decoration:underline}
 @media(max-width:700px){
@@ -3667,7 +3667,7 @@ function crmRenderCustomers(){
       const contato=principal?[principal.name,principal.role].filter(Boolean).join(' · '):`${people.length||0} contato${people.length===1?'':'s'}`;
       const contatoCanais=principal?`<div class="crm-client-contact-channels">
         ${principal.email?`<span class="crm-client-contact-channel"><button type="button" class="crm-person-channel-btn email" title="Preparar e-mail para ${esc(principal.name||principal.email)}" aria-label="Preparar e-mail para ${esc(principal.name||principal.email)}" onclick="event.stopPropagation();crmOpenCustomerListEmail('${principal.id}')">${crmEmailIconSvg()}</button><span class="crm-client-contact-value" title="${esc(principal.email)}">${esc(principal.email)}</span></span>`:''}
-        ${principal.phone?`<span class="crm-client-contact-channel"><button type="button" class="crm-person-channel-btn wa" title="Abrir WhatsApp de ${esc(principal.name||principal.phone)}" aria-label="Abrir WhatsApp de ${esc(principal.name||principal.phone)}" onclick="event.stopPropagation();crmOpenCustomerListWhatsApp('${principal.id}')">${crmWhatsAppIconSvg()}</button><span class="crm-client-contact-value">${esc(crmFormatPhone(principal.phone))}</span></span>`:''}
+        ${principal.phone?`<span class="crm-client-contact-channel"><button type="button" class="crm-person-channel-btn wa" title="Abrir WhatsApp manual de ${esc(principal.name||principal.phone)}" aria-label="Abrir WhatsApp manual de ${esc(principal.name||principal.phone)}" onclick="event.stopPropagation();crmOpenCustomerListWhatsApp('${principal.id}')">${crmWhatsAppIconSvg()}</button><button type="button" class="crm-person-channel-btn wa-api" title="WhatsApp oficial via API" aria-label="WhatsApp oficial via API para ${esc(principal.name||principal.phone)}" onclick="event.stopPropagation();crmOpenWhatsAppApiById('${principal.id}')">API</button><span class="crm-client-contact-value">${esc(crmFormatPhone(principal.phone))}</span></span>`:''}
       </div>`:'';
       return`<div class="crm-client-row" onclick="crmOpenCustomerEdit('${c.id}')">
         <div class="crm-client-primary">
@@ -3823,7 +3823,7 @@ function crmRenderCustPeople(){
         <input type="email" value="${esc(p.email||'')}" placeholder="e-mail" oninput="crmEditCtx.people[${i}].email=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       </div>
       <div class="crm-person-phone crm-person-channel">
-        ${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp" aria-label="Abrir WhatsApp de ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppDirect(${i})">${crmWhatsAppIconSvg()}</button>`:''}
+        ${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp manual" aria-label="Abrir WhatsApp manual de ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppDirect(${i})">${crmWhatsAppIconSvg()}</button><button type="button" class="crm-person-channel-btn wa-api" title="WhatsApp oficial via API" aria-label="WhatsApp oficial via API para ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppApiPerson(crmEditCtx.people[${i}])">API</button>`:''}
         <input type="text" value="${esc(crmFormatPhone(p.phone||''))}" placeholder="telefone" oninput="crmEditCtx.people[${i}].phone=this.value" onblur="this.value=crmFormatPhone(this.value);crmEditCtx.people[${i}].phone=this.value" style="width:100%;border:none;background:none;font-size:.74rem;color:var(--ink2);padding:0;min-width:0">
       </div>
       <span class="x crm-person-actions" style="flex-shrink:0" onclick="crmEditCtx.people.splice(${i},1);crmRenderCustPeople()">✕</span>
@@ -3847,47 +3847,41 @@ function crmOpenWhatsAppForPerson(p){
   window.open(`https://wa.me/${digits}`,'_blank','noopener');
 }
 
-let crmWaCtx={customerId:null,personId:null,personIndex:null};
+// Permanece falso até a Meta concluir o Coexistence e a função whatsapp-send V2.1 ser publicada.
+const CRM_WHATSAPP_API_ENABLED=false;
+let crmWaCtx={customerId:null,personId:null,phone:null};
 
-function crmOpenWhatsApp(personIndex){
-  const p=crmEditCtx.people[personIndex];
-  if(!crmEditCtx.customerId||!p?.id){
-    toastSave('Salve a Pessoa antes de enviar WhatsApp.');
-    return;
-  }
-  if(!p.phone){
-    toastSave('Esta Pessoa não tem telefone.');
-    return;
-  }
-
-  crmWaCtx={
-    customerId:crmEditCtx.customerId,
-    personId:p.id,
-    personIndex
-  };
-
+function crmOpenWhatsAppApiById(personId){crmOpenWhatsAppApiPerson(CRM_PEOPLE.find(x=>x.id===personId));}
+function crmOpenWhatsAppApiPerson(p){
+  if(!p?.id||!p?.customer_id){toastSave('Salve a Pessoa antes de usar o WhatsApp oficial.');return;}
+  if(!p.phone){toastSave('Esta Pessoa não tem telefone.');return;}
+  crmWaCtx={customerId:p.customer_id,personId:p.id,phone:p.phone};
   document.getElementById('crm-wa-person').textContent=p.name||'Pessoa';
   document.getElementById('crm-wa-phone').textContent=p.phone||'';
   document.getElementById('crm-wa-t-name').value=p.name||'Cliente';
   document.getElementById('crm-wa-t-order').value='123456';
-  document.getElementById('crm-wa-t-date').value=new Date().toLocaleDateString('en-US',{
-    month:'short',day:'numeric',year:'numeric'
-  });
+  document.getElementById('crm-wa-t-date').value=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   document.getElementById('crm-wa-body').value='';
   document.getElementById('crm-wa-result').style.display='none';
-
-  // Reviewer: fluxo determinístico para App Review — somente template aprovado.
   const modeSel=document.getElementById('crm-wa-mode');
   modeSel.value='template';
   document.getElementById('crm-wa-mode-wrap').style.display=isMetaReviewer()?'none':'flex';
   crmWaSetMode('template');
-
+  const sendBtn=document.getElementById('crm-wa-send-btn');
+  sendBtn.disabled=!CRM_WHATSAPP_API_ENABLED;
+  sendBtn.textContent=CRM_WHATSAPP_API_ENABLED?'Enviar WhatsApp':'Aguardando Coexistence';
+  sendBtn.title=CRM_WHATSAPP_API_ENABLED?'':'Envio oficial bloqueado até a Meta concluir o Coexistence.';
   document.getElementById('ovl-crm-wa').classList.add('open');
+}
+
+function crmOpenWhatsApp(personIndex){
+  const p=crmEditCtx.people[personIndex];
+  crmOpenWhatsAppApiPerson(p);
 }
 
 function crmCloseWhatsApp(){
   document.getElementById('ovl-crm-wa').classList.remove('open');
-  crmWaCtx={customerId:null,personId:null,personIndex:null};
+  crmWaCtx={customerId:null,personId:null,phone:null};
 }
 
 function crmWaSetMode(mode){
@@ -3898,8 +3892,8 @@ function crmWaSetMode(mode){
 }
 
 async function crmSendWhatsApp(){
-  const p=crmEditCtx.people[crmWaCtx.personIndex];
-  if(!p||!crmWaCtx.customerId||!crmWaCtx.personId)return;
+  if(!CRM_WHATSAPP_API_ENABLED){toastSave('O envio oficial aguarda a conclusão do Coexistence pela Meta.');return;}
+  if(!crmWaCtx.customerId||!crmWaCtx.personId||!crmWaCtx.phone)return;
 
   const mode=isMetaReviewer()?'template':document.getElementById('crm-wa-mode').value;
   const btn=document.getElementById('crm-wa-send-btn');
@@ -3908,7 +3902,7 @@ async function crmSendWhatsApp(){
   const payload={
     customer_id:crmWaCtx.customerId,
     person_id:crmWaCtx.personId,
-    to_phone:p.phone,
+    to_phone:crmWaCtx.phone,
     message_type:mode
   };
 
@@ -3922,7 +3916,14 @@ async function crmSendWhatsApp(){
       res.textContent='Preencha nome, pedido e data.';
       return;
     }
-    payload.template_params={customer_name,order_number,date};
+    payload.template_name='jaspers_market_order_confirmation_v1';
+    payload.language_code='en_US';
+    payload.components=[{type:'body',parameters:[
+      {type:'text',text:customer_name},
+      {type:'text',text:order_number},
+      {type:'text',text:date}
+    ]}];
+    payload.log_body=`Template Order Confirmation — ${customer_name} · Pedido ${order_number} · ${date}`;
   }else{
     const message_body=document.getElementById('crm-wa-body').value.trim();
     if(!message_body){
@@ -3954,7 +3955,6 @@ async function crmSendWhatsApp(){
       res.textContent='Mensagem aceita pela Meta e registrada no CRM.';
       toastSave('WhatsApp enviado');
       await crmLoadAll();
-      setTimeout(()=>crmCloseWhatsApp(),650);
       return;
     }
 
@@ -3974,8 +3974,8 @@ async function crmSendWhatsApp(){
     res.textContent='Erro inesperado ao enviar WhatsApp.';
     console.error(e);
   }finally{
-    btn.disabled=false;
-    btn.textContent='Enviar WhatsApp';
+    btn.disabled=!CRM_WHATSAPP_API_ENABLED;
+    btn.textContent=CRM_WHATSAPP_API_ENABLED?'Enviar WhatsApp':'Aguardando Coexistence';
   }
 }
 
@@ -4566,7 +4566,7 @@ function crmActionListHtml(acoes){
     </div>`;
   }).join('');
 }
-function crmCommunicationMessageHtml(m){const when=m.sent_at||m.created_at;const direction=m.direction==='inbound'?'Recebido':'Enviado';const age=Date.now()-new Date(m.created_at).getTime();const state=m.status==='sending'&&age>120000?'em verificação':({sending:'enviando',sent:'enviado',failed:'falhou',received:'recebido',delivered:'entregue'}[m.status]||m.status||'registrado');const stateColor=m.status==='failed'?'var(--red)':(m.status==='sending'?'var(--amber)':'var(--ink4)');const address=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');return`<div style="padding:.42rem 0;border-top:1px solid var(--bdr)"><div style="display:flex;justify-content:space-between;gap:.5rem;font-size:.64rem"><span><b>${direction}</b>${address?` · ${esc(address)}`:''}</span><span style="color:${stateColor}">${esc(state)} · ${crmFmtDate(when)}</span></div><div style="font-size:.7rem;color:var(--ink2);margin-top:.18rem;white-space:pre-wrap;overflow-wrap:anywhere">${esc(m.excerpt||m.body||'(sem conteúdo)')}</div></div>`;}
+function crmCommunicationMessageHtml(m){const when=m.read_at||m.delivered_at||m.sent_at||m.created_at;const direction=m.direction==='inbound'?'Recebido':'Enviado';const age=Date.now()-new Date(m.created_at).getTime();const state=m.status==='sending'&&age>120000?'em verificação':({sending:'enviando',sent:'enviado',failed:'falhou',received:'recebido',delivered:'entregue',read:'lido'}[m.status]||m.status||'registrado');const stateColor=m.status==='failed'?'var(--red)':(m.status==='sending'?'var(--amber)':'var(--ink4)');const address=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');return`<div style="padding:.42rem 0;border-top:1px solid var(--bdr)"><div style="display:flex;justify-content:space-between;gap:.5rem;font-size:.64rem"><span><b>${direction}</b>${address?` · ${esc(address)}`:''}</span><span style="color:${stateColor}">${esc(state)} · ${crmFmtDate(when)}</span></div><div style="font-size:.7rem;color:var(--ink2);margin-top:.18rem;white-space:pre-wrap;overflow-wrap:anywhere">${esc(m.excerpt||m.body||'(sem conteúdo)')}</div></div>`;}
 function crmCommunicationListHtml(items){
   const groups=new Map();
   items.forEach(m=>{const key=m.external_thread_id||`single:${m.id}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);});
@@ -5320,7 +5320,7 @@ function crmRenderProjectPeopleChips(){
     return`<div class="crm-proj-contact">
       <div class="crm-proj-contact-name">${esc(p.name||'Sem nome')}<span class="crm-proj-contact-role">${esc(p.role||'Cargo não informado')}</span></div>
       <div class="crm-proj-contact-email">${p.email?`<button type="button" class="crm-person-channel-btn email" title="Preparar e-mail" aria-label="Preparar e-mail para ${esc(p.name||p.email)}" onclick="crmOpenProjectPersonEmail('${p.id}')">${crmEmailIconSvg()}</button><span class="crm-proj-contact-value">${esc(p.email)}</span>`:'<span class="crm-empty">E-mail não informado</span>'}</div>
-      <div class="crm-proj-contact-phone">${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp" aria-label="Abrir WhatsApp de ${esc(p.name||p.phone)}" onclick="crmOpenProjectPersonWhatsApp('${p.id}')">${crmWhatsAppIconSvg()}</button><span class="crm-proj-contact-value">${esc(crmFormatPhone(p.phone))}</span>`:'<span class="crm-empty">Telefone não informado</span>'}</div>
+      <div class="crm-proj-contact-phone">${p.phone?`<button type="button" class="crm-person-channel-btn wa" title="Abrir no WhatsApp manual" aria-label="Abrir WhatsApp manual de ${esc(p.name||p.phone)}" onclick="crmOpenProjectPersonWhatsApp('${p.id}')">${crmWhatsAppIconSvg()}</button><button type="button" class="crm-person-channel-btn wa-api" title="WhatsApp oficial via API" aria-label="WhatsApp oficial via API para ${esc(p.name||p.phone)}" onclick="crmOpenWhatsAppApiById('${p.id}')">API</button><span class="crm-proj-contact-value">${esc(crmFormatPhone(p.phone))}</span>`:'<span class="crm-empty">Telefone não informado</span>'}</div>
       <button type="button" class="btn btn-s crm-proj-contact-link" ${disabled?'disabled title="Salve o projeto antes de vincular"':''} onclick="${linked?`crmRemovePersonFromProject('${p.id}')`:`crmAddPersonToProject('${p.id}')`}">${linked?'✓ Vinculada':'＋ Vincular'}</button>
     </div>`;
   }).join('');
@@ -7107,6 +7107,7 @@ initAuth().then(()=>{
       <button class="mcls" aria-label="Fechar" onclick="crmCloseWhatsApp()">✕</button>
     </div>
     <div class="modal-b">
+      <div style="background:#f0edff;border:1px solid #d9d1ff;border-radius:8px;padding:.65rem .75rem;margin-bottom:.8rem;font-size:.69rem;color:#49389c"><b>Integração preparada.</b> O envio oficial permanece bloqueado até a Meta concluir o Coexistence. O atalho verde continua abrindo o WhatsApp manual normalmente.</div>
       <div id="crm-wa-person" style="font-size:.78rem;font-weight:600;color:var(--ink2);margin-bottom:.15rem"></div>
       <div id="crm-wa-phone" class="mono" style="font-size:.68rem;color:var(--ink4);margin-bottom:.9rem"></div>
 
@@ -7142,7 +7143,7 @@ initAuth().then(()=>{
 
       <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem">
         <button class="btn btn-s" onclick="crmCloseWhatsApp()">Cancelar</button>
-        <button class="btn btn-p" id="crm-wa-send-btn" onclick="crmSendWhatsApp()">Enviar WhatsApp</button>
+        <button class="btn btn-p" id="crm-wa-send-btn" onclick="crmSendWhatsApp()" disabled title="Envio oficial bloqueado até a Meta concluir o Coexistence.">Aguardando Coexistence</button>
       </div>
     </div>
   </div>
