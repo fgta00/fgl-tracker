@@ -261,6 +261,10 @@ body.dark .modal-h{background:var(--card)}
 .crm-email-actions{display:flex;justify-content:flex-end;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}
 .crm-email-check{display:flex;align-items:center;gap:.4rem;margin-right:auto;font-size:.66rem;color:var(--ink3)}
 .crm-email-check input{width:auto}
+.crm-email-signature{border:1px solid var(--bdr);border-radius:8px;background:var(--ltblue);padding:.5rem .6rem}
+.crm-email-signature summary{cursor:pointer;font-size:.67rem;font-weight:700;color:var(--ink2)}
+.crm-email-signature textarea{min-height:86px;margin-top:.5rem;background:var(--card)}
+.crm-email-signature-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.45rem;flex-wrap:wrap}
 .crm-timeline{display:block}
 .crm-tl-card{max-width:none;min-width:0;border:0;border-bottom:1px solid var(--bdr);border-radius:0;padding:.38rem .15rem;max-height:54px;overflow:hidden;transition:max-height .2s,background .15s;cursor:pointer}
 .crm-tl-card:hover,.crm-tl-card.open{max-height:520px;background:var(--bg)}
@@ -1856,6 +1860,14 @@ body.dark .rv-tabs{background:var(--head-bg)}
         <div class="ff"><label>E-mail</label><input id="crm-email-to" type="email" readonly></div>
         <div class="ff"><label>Assunto</label><input id="crm-email-subject" type="text" maxlength="180"></div>
         <div class="ff"><label>Mensagem</label><textarea id="crm-email-body" maxlength="10000"></textarea></div>
+        <details class="crm-email-signature">
+          <summary>Assinatura automática</summary>
+          <textarea id="crm-email-signature" maxlength="2000" placeholder="Ex.: Fred Grota&#10;Ânima Verde Ecobags&#10;(21) 99231-6962"></textarea>
+          <div class="crm-email-signature-row">
+            <label class="crm-email-check" style="margin:0"><input id="crm-email-signature-enabled" type="checkbox" checked> Incluir automaticamente nos novos e-mails</label>
+            <button type="button" class="btn btn-s" onclick="crmSaveEmailSignature()">Salvar assinatura</button>
+          </div>
+        </details>
         <div class="ff"><label>Ação vinculada (opcional)</label><select id="crm-email-action" onchange="crmEmailActionChanged()"><option value="">Nenhuma ação</option></select></div>
         <div id="crm-email-state" class="crm-email-state"></div>
       </div>
@@ -3362,6 +3374,26 @@ function crmPrepareEmailFromAI(preferredPersonIndex){
   const preferred=Number.isInteger(preferredPersonIndex)?crmEditCtx.people[preferredPersonIndex]:null;
   crmPrepareEmailForContext(crmEditCtx.customerId,crmEditCtx.people,preferred?.id||null,draft,crmAiThread.lastConsultationId||crmAiLastResult?.meta?.consultation_id||null);
 }
+function crmEmailSignatureKey(){return'crm_email_signature_'+String(authUser?.email||'default').toLowerCase();}
+function crmEmailSignatureEnabledKey(){return crmEmailSignatureKey()+'_enabled';}
+function crmLoadEmailSignature(){
+  const signature=localStorage.getItem(crmEmailSignatureKey())||'';
+  const enabled=localStorage.getItem(crmEmailSignatureEnabledKey())!=='0';
+  const field=document.getElementById('crm-email-signature'),check=document.getElementById('crm-email-signature-enabled');
+  if(field)field.value=signature;if(check)check.checked=enabled;
+  return{signature,enabled};
+}
+function crmSaveEmailSignature(){
+  const signature=document.getElementById('crm-email-signature').value.trim();
+  const enabled=document.getElementById('crm-email-signature-enabled').checked;
+  localStorage.setItem(crmEmailSignatureKey(),signature);
+  localStorage.setItem(crmEmailSignatureEnabledKey(),enabled?'1':'0');
+  toastSave('Assinatura de e-mail salva ✓');
+}
+function crmEmailBodyWithSignature(body){
+  const{signature,enabled}=crmLoadEmailSignature();
+  return enabled&&signature?[String(body||'').trim(),signature].filter(Boolean).join('\n\n'):String(body||'');
+}
 function crmPrepareEmailForContext(customerId,contextPeople,preferredPersonId,draft='',sourceConsultationId=null){
   const people=(contextPeople||[]).filter(p=>String(p.email||'').trim());if(!people.length)return;
   const customer=CRM_CUSTOMERS.find(c=>c.id===customerId);
@@ -3372,7 +3404,7 @@ function crmPrepareEmailForContext(customerId,contextPeople,preferredPersonId,dr
   const planned=CRM_ACTIONS.filter(a=>a.customer_id===customerId&&a.status==='planned'&&!a.deleted);
   document.getElementById('crm-email-action').innerHTML='<option value="">Nenhuma ação</option>'+planned.map(a=>`<option value="${esc(a.id)}">${esc(a.summary)}${a.due_date?' — '+esc(a.due_date):''}</option>`).join('');
   document.getElementById('crm-email-subject').value=`Ânima Verde — ${customer?.trade_name||customer?.display_name||'contato'}`;
-  document.getElementById('crm-email-body').value=draft;
+  document.getElementById('crm-email-body').value=crmEmailBodyWithSignature(draft);
   document.getElementById('crm-email-draft-note').textContent=draft?'Rascunho sugerido pela IA — revise destinatário, assunto e texto antes de enviar.':'Escreva e revise a mensagem antes de enviar. Nenhum e-mail será enviado automaticamente.';
   document.getElementById('crm-email-state').className='crm-email-state';document.getElementById('crm-email-state').textContent='';
   document.getElementById('crm-email-send-btn').disabled=false;document.getElementById('crm-email-send-btn').textContent='Enviar e-mail';
@@ -3398,7 +3430,7 @@ async function crmSendEmail(){
   try{
     const{data,error}=await _supa.functions.invoke('crm-email-send',{body:{customer_id:crmEmailCtx.customerId,person_id:(crmEmailCtx.people||[])[Number(document.getElementById('crm-email-person').value||0)]?.id||null,to,subject,body,ai_draft:crmEmailCtx.aiDraft||null,source_consultation_id:crmEmailCtx.sourceConsultationId,action_id:actionId,complete_action:!!actionId&&document.getElementById('crm-email-complete-action').checked,idempotency_key:crmEmailCtx.idempotencyKey}});
     if(error)throw error;
-    if(data?.status==='sent'){crmEmailSetState('sent','E-mail enviado e registrado na Timeline.');btn.textContent='Enviado';await crmLoadAll();setTimeout(()=>closeM('crmemail'),1200);return;}
+    if(data?.status==='sent'){crmEmailSetState('sent','E-mail enviado e registrado na Timeline. A janela permanecerá aberta até você fechá-la.');btn.textContent='Enviado';await crmLoadAll();return;}
     if(data?.status==='sending'||data?.status==='verifying'){crmEmailSetState('verifying','Envio em verificação. Não tente novamente agora; o registro foi preservado contra duplicidade.');btn.textContent='Em verificação';await crmLoadAll();return;}
     throw new Error(data?.error||'Falha no envio');
   }catch(e){crmEmailSetState('failed','Não foi possível confirmar o envio. Verifique o estado na Timeline antes de tentar novamente.');btn.disabled=false;btn.textContent='Tentar novamente';}
@@ -4064,7 +4096,6 @@ async function crmSaveCustomer(){
     if(wixErr){toastSave('Cliente salvo, mas lead Wix não foi atualizado: '+wixErr.message);}
     crmPendingWixLeadId=null;
   }
-  closeM('crmcustomer');
   toastSave('Cliente salvo ✓');
   await crmLoadAll();
   if(document.getElementById('crmpane-descobrir')?.classList.contains('active'))await crmLoadWixLeads();
@@ -4371,7 +4402,6 @@ function crmOpenActionModal(customerId,action,projectId,prefill){
   document.getElementById('ovl-crmaction').classList.add('open');
 }
 async function crmEnsureActionProjectLink(rpcData,projectId,status,summary,dateField,dateValue,knownId){
-  if(!projectId)return;
   let actionId=knownId||null;
   if(!actionId){
     if(typeof rpcData==='string')actionId=rpcData;
@@ -4384,10 +4414,11 @@ async function crmEnsureActionProjectLink(rpcData,projectId,status,summary,dateF
     const{data}=await q.order('created_at',{ascending:false}).limit(1);
     actionId=data?.[0]?.id||null;
   }
-  if(actionId){
+  if(actionId&&projectId){
     const{error}=await _supa.from('crm_actions').update({project_id:projectId}).eq('id',actionId);
     if(error)console.error('crmEnsureActionProjectLink',error);
   }
+  return actionId;
 }
 async function crmSaveAction(){
   const hasDir=CRM_ACTION_TYPES.find(t=>t.v===crmActCtx.type)?.hasDir;
@@ -4407,13 +4438,14 @@ async function crmSaveAction(){
       p_responsible_user_id:authUser.id,
       p_next_summary:schedSummary,
       p_next_due_date:schedDate,
-      p_action_id:null,
+      p_action_id:crmActCtx.actionId,
       p_mode:'schedule',
       p_project_id:crmActCtx.projectId,
     });
     if(error){toastSave('Erro ao agendar: '+error.message);return;}
-    await crmEnsureActionProjectLink(data,crmActCtx.projectId,'planned',schedSummary,'due_date',schedDate,null);
-    closeM('crmaction');
+    crmActCtx.actionId=await crmEnsureActionProjectLink(data,crmActCtx.projectId,'planned',schedSummary,'due_date',schedDate,crmActCtx.actionId);
+    document.getElementById('crm-act-mode-toggle').style.display='none';
+    document.getElementById('crm-act-title').textContent='Editar Ação Agendada';
     toastSave('Ação agendada ✓');
     await crmLoadAll();
     return;
@@ -4442,8 +4474,9 @@ async function crmSaveAction(){
     p_project_id:crmActCtx.projectId,
   });
   if(error){toastSave('Erro ao salvar ação: '+error.message);return;}
-  await crmEnsureActionProjectLink(data,crmActCtx.projectId,'done',summary,'occurred_at',occurredISO,crmActCtx.actionId);
-  closeM('crmaction');
+  crmActCtx.actionId=await crmEnsureActionProjectLink(data,crmActCtx.projectId,'done',summary,'occurred_at',occurredISO,crmActCtx.actionId);
+  document.getElementById('crm-act-mode-toggle').style.display='none';
+  document.getElementById('crm-act-title').textContent='Editar Ação';
   toastSave('Ação salva ✓');
   await crmLoadAll();
 }
@@ -5413,13 +5446,18 @@ async function crmSaveProject(){
     notes:document.getElementById('crm-proj-notes').value.trim()||null,
     owner_user_id:authUser.id,
   };
-  let error;
+  let error,data;
   if(crmEditProjectId){
     ({error}=await _supa.from('crm_projects').update(payload).eq('id',crmEditProjectId));
   }else{
-    ({error}=await _supa.from('crm_projects').insert(payload));
+    ({data,error}=await _supa.from('crm_projects').insert(payload).select('id').single());
   }
   if(error){toastSave('Erro ao salvar projeto: '+error.message);return;}
+  if(!crmEditProjectId){
+    if(!data?.id){toastSave('O banco não confirmou a criação do projeto.');return;}
+    crmEditProjectId=data.id;
+    document.getElementById('crm-proj-title').textContent='Editar Projeto';
+  }
   // Ao converter Prospect em Cliente, as pessoas criadas sem cliente passam a integrar
   // o cadastro escolhido. Pessoas já pertencentes a outro cliente não são deslocadas.
   if(customerId&&crmEditProjectId&&CRM_PROJECT_PEOPLE.length){
@@ -5427,7 +5465,6 @@ async function crmSaveProject(){
     const{error:peopleError}=await _supa.from('crm_people').update({customer_id:customerId}).in('id',linkedIds).is('customer_id',null);
     if(peopleError){toastSave('Projeto salvo, mas revise o vínculo das pessoas: '+peopleError.message);}
   }
-  closeM('crmproject');
   toastSave('Projeto salvo ✓');
   await crmLoadProjects();
 }
@@ -6137,7 +6174,6 @@ function rv2SaveEdit(){
   else{rvSavePedidos(lista);rvRenderPedidos();rvRenderFin();}
   rvSyncPush();
   rv2RenderHist();
-  closeM('rvedit');
   toastSave('Alterações salvas ✓');
 }
 ['rvedit-comissao','rvedit-frete','rvedit-cliente'].forEach(id=>{
