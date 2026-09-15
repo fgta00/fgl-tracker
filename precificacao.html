@@ -67,6 +67,9 @@ body.dark .rv2-prodcard{background:#16202E}
 .rv2-prodcard-l1,.rv2-prodcard-l2{display:grid;gap:.45rem;align-items:end}
 .rv2-prodcard-l1{grid-template-columns:minmax(105px,.8fr) minmax(175px,1.7fr) minmax(138px,.9fr)}
 .rv2-prodcard-l2{grid-template-columns:minmax(62px,.58fr) minmax(72px,.62fr) minmax(72px,.62fr) minmax(142px,1.12fr) minmax(150px,1fr);margin-top:.5rem}
+.rv2-prod-note-wrap{margin-top:.48rem}
+.rv2-prod-note{width:100%;height:30px;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink);padding:.28rem .45rem;font-family:'IBM Plex Sans';font-size:.69rem;outline:none;box-sizing:border-box}
+.rv2-prod-note:focus{border-color:var(--blue)}
 .rv2-field{min-width:0}
 .rv2-field-label{display:block;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.045em;color:var(--ink4);margin:0 0 .18rem .05rem;white-space:nowrap}
 .rv2-field input,.rv2-field select{width:100%;height:31px;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);color:var(--ink);padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;box-sizing:border-box}
@@ -81,7 +84,7 @@ body.dark .rv2-prodcard{background:#16202E}
 .rv2-seg-toggle span.active{background:var(--green);color:#fff}
 .rv2-prod-logo-btn.active{background:var(--card);color:inherit;border-color:var(--bdr2)}
 .rv2-prod-remove{position:absolute;top:.45rem;right:.45rem;background:none;border:none;color:var(--red);cursor:pointer;padding:.1rem;display:flex;align-items:center;justify-content:center;z-index:2}
-body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
+body.dark .rv2-field input,body.dark .rv2-field select,body.dark .rv2-chip-select,body.dark .rv2-chip-addbtn,body.dark .rv2-prod-tipo-btn,body.dark .rv2-prod-logo-btn,body.dark .rv2-prod-note{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
 body.dark .rv2-seg-toggle span.active{background:var(--green);color:#fff}
 @media(max-width:900px){.rv2-order-head{grid-template-columns:1fr 1fr}.rv2-order-head>.rv2-client-field{grid-column:1/-1}.rv2-prodcard-l1{grid-template-columns:1fr 1.45fr 1fr}.rv2-prodcard-l2{grid-template-columns:repeat(3,1fr)}.rv2-prodcard{padding-right:2rem}}
 .ff .formula{font-size:.56rem;color:var(--ink4);font-family:'IBM Plex Mono'}
@@ -104,6 +107,13 @@ body.dark .prow input{background:var(--bg);border-color:var(--bdr2);color:var(--
 .prow .gear:hover{border-color:var(--blue);color:var(--blue)}
 .prow-h{display:grid;grid-template-columns:1.15fr .8fr .8fr 30px .65fr .75fr .85fr .5fr .5fr .5fr .45fr .6fr 24px;gap:.3rem;font-size:.5rem;line-height:1.25;font-weight:600;text-transform:uppercase;letter-spacing:.01em;color:var(--ink4);margin-bottom:.45rem;padding:0 .1rem;align-items:end}
 .prow-h span{overflow-wrap:break-word}
+.prod-import-block{margin-bottom:.48rem}
+.prod-import-block .prow{margin-bottom:.25rem}
+.import-prod-note{width:100%;height:29px;border:1px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;background:var(--card);color:var(--ink);font-family:'IBM Plex Sans';font-size:.68rem;outline:none;box-sizing:border-box}
+.import-prod-note:focus{border-color:var(--blue)}
+body.dark .import-prod-note{background:var(--bg);border-color:var(--bdr2);color:var(--ink)}
+.ship-suggestion{display:flex;align-items:center;gap:.42rem;min-height:31px;padding:.32rem .52rem;border:1px solid var(--bdr);border-radius:7px;background:var(--ltgrn);color:var(--ink2);font-size:.64rem;line-height:1.25}
+.ship-suggestion b{color:var(--green-dk);white-space:nowrap}
 .collap-h{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .collap-h .chev{transition:transform .15s;font-size:.7rem;color:var(--ink3)}
 .collap-h.open .chev{transform:rotate(90deg)}
@@ -823,7 +833,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
       <div class="ff"><label>Câmbio US$ DI</label><input class="mono" id="fx" type="number" step="0.0001" value="5.50" oninput="recalc()"><span class="formula">usado no CIF: FOB+Seguro+Frete</span></div>
       <div class="ff"><label>Câmbio frete (ref.)</label><input class="mono" id="fxFrete" type="number" step="0.0001" value="5.665" oninput="recalc()"><span class="formula">não entra no CIF/impostos</span></div>
       <div class="ff"><label>Frete intl US$</label><input class="mono" id="frete" type="number" step="1" value="3500" oninput="recalc()"><span class="formula">&nbsp;</span></div>
-      <div class="ff"><label>Modal</label><select id="modal" onchange="recalc()"><option value="FCL">FCL (cheio)</option><option value="LCL">LCL (fracionado)</option></select><span class="formula">&nbsp;</span></div>
+      <div class="ff"><label>Modal</label><select id="modal" onchange="recalc()"><option value="AUTO">Automático pelo volume</option><option value="FCL">FCL genérico (simulações antigas)</option><option value="LCL">LCL (até 15 m³)</option><option value="FCL20">FCL 20' (até 28 m³)</option><option value="FCL40">FCL 40' NOR (até 56 m³)</option><option value="FCL40HC">FCL 40' HC (até 69 m³)</option><option value="MANUAL">Manual / múltiplos contêineres</option></select><span class="formula">o valor do frete continua informado manualmente</span></div>
+      <div class="ff"><label>Sugestão operacional</label><div class="ship-suggestion" id="ship-suggestion"><b>—</b><span>preencha o empacotamento</span></div><span class="formula">pode ser sobrescrita no campo Modal</span></div>
       <div class="ff" style="justify-content:flex-end"><button class="btn btn-s" onclick="openExpenses()" style="white-space:nowrap">⚙ Despesas destino</button><span class="formula">&nbsp;</span></div>
     </div>
     <small class="hint" style="display:block;margin-top:.5rem">CIF = FOB + Seguro + Frete, todos convertidos pelo <b>câmbio US$ DI</b> (mesmo câmbio da mercadoria) — é a base de II/IPI/PIS/COFINS. O <b>câmbio de frete</b> fica só como referência (não afeta o CIF nem os impostos). Preencha <b>Margem-alvo</b> (custo→preço) ou <b>Preço de venda</b> (preço→margem). O último editado manda.</small>
@@ -1904,7 +1915,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
 let prods=[];
 const DEF_NCM={ii:35,ipi:6.5,pis:2.1,cofins:9.65};
 function addProd(d={}){
-  prods.push({desc:d.desc||'',sku:d.sku||'',ncm:d.ncm||'4202.92.00',qty:d.qty||0,fob:d.fob||0,oem:d.oem??d.arte??0,
+  prods.push({desc:d.desc||'',sku:d.sku||'',note:d.note||d.nota||'',ncm:d.ncm||'4202.92.00',qty:d.qty||0,fob:d.fob||0,oem:d.oem??d.arte??0,
     cxL:d.cxL||0,cxW:d.cxW||0,cxH:d.cxH||0,unCx:d.unCx||0,pesoCx:d.pesoCx??d.pesoUn??0,
     ii:d.ii??DEF_NCM.ii,ipi:d.ipi??DEF_NCM.ipi,pis:d.pis??DEF_NCM.pis,cofins:d.cofins??DEF_NCM.cofins});
   renderProds();
@@ -1912,7 +1923,7 @@ function addProd(d={}){
 function rmProd(i){prods.splice(i,1);renderProds();recalc();}
 function renderProds(){
   document.getElementById('prod-rows').innerHTML=prods.map((p,i)=>`
-    <div class="prow">
+    <div class="prod-import-block"><div class="prow">
       <input value="${esc(p.desc)}" placeholder="Sacola Ráfia G" oninput="upd(${i},'desc',this.value)">
       <input value="${esc(p.sku)}" class="mono" placeholder="SKU" oninput="upd(${i},'sku',this.value)">
       <input value="${esc(p.ncm)}" class="mono" oninput="upd(${i},'ncm',this.value)">
@@ -1926,9 +1937,9 @@ function renderProds(){
       <input value="${p.unCx||''}" class="mono" type="number" oninput="upd(${i},'unCx',this.value)">
       <input value="${p.pesoCx||''}" class="mono" type="number" step="0.001" oninput="upd(${i},'pesoCx',this.value)">
       <button class="rm" onclick="rmProd(${i})" aria-label="Remover produto">✕</button>
-    </div>`).join('');
+    </div><input class="import-prod-note" value="${esc(p.note||'')}" maxlength="240" placeholder="Notas da cotação deste produto (opcional)" oninput="upd(${i},'note',this.value)"></div>`).join('');
 }
-function upd(i,k,v){prods[i][k]=(k==='desc'||k==='ncm'||k==='sku')?v:(parseFloat(v)||0);recalc();}
+function upd(i,k,v){prods[i][k]=(['desc','ncm','sku','note'].includes(k))?v:(parseFloat(v)||0);recalc();}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 
@@ -2088,7 +2099,7 @@ function updateExpDisplay(){
   const thcEl=document.getElementById('e-thc');
   if(expCfg.thcManual==null) thcEl.value=d.thcCalc.toFixed(2);
   document.getElementById('e-total').textContent=fR(d.total);
-  document.getElementById('thc-fcl-row').style.display=document.getElementById('modal').value==='FCL'?'grid':'none';
+  document.getElementById('thc-fcl-row').style.display=selectedShipping().value==='LCL'?'none':'grid';
   // mostra conversão R$ ao lado de cada taxa fixa em US$
   fixedExp.forEach((e,i)=>{
     const span=document.getElementById('fx-conv-'+i);
@@ -2097,7 +2108,7 @@ function updateExpDisplay(){
 }
 function destBreakdown(){
   const fx=val('fx'),fxF=val('fxFrete'),freteUSD=val('frete');
-  const modal=document.getElementById('modal').value;
+  const modal=selectedShipping().value;
   const pk=packing();
   const freteBRL=freteUSD*fx; // dólar DI — mesmo câmbio do FOB, igual à planilha real (Encomenda!P = frete × ITJ!E24)
   let fobUSD=0;prods.forEach(p=>fobUSD+=p.qty*p.fob);
@@ -2143,6 +2154,28 @@ function packing(){
     caixas+=nCx;peso+=nCx*p.pesoCx;qtyTot+=p.qty;
   });
   return{cbm,caixas,peso,qtyTot};
+}
+
+/* Sugestão operacional definida pela experiência da Ânima Verde.
+   O valor do frete nunca é preenchido automaticamente: vem da cotação real. */
+function shippingRecommendation(cbm){
+  if(!(cbm>0))return{value:'',label:'—',detail:'preencha o empacotamento'};
+  if(cbm<=15)return{value:'LCL',label:'LCL',detail:'até 15 m³'};
+  if(cbm<=28)return{value:'FCL20',label:"FCL 20'",detail:'acima de 15 até 28 m³'};
+  if(cbm<=56)return{value:'FCL40',label:"FCL 40' NOR",detail:'acima de 28 até 56 m³'};
+  if(cbm<=69)return{value:'FCL40HC',label:"FCL 40' HC",detail:'acima de 56 até 69 m³'};
+  const n=Math.ceil(cbm/69);
+  return{value:'MANUAL',label:`${n} contêineres`,detail:'acima de 69 m³ — composição manual'};
+}
+function selectedShipping(){
+  const pk=packing(),choice=document.getElementById('modal').value;
+  return choice==='AUTO'?shippingRecommendation(pk.cbm):{value:choice,label:choice,detail:'seleção manual'};
+}
+function updateShippingSuggestion(){
+  const el=document.getElementById('ship-suggestion');if(!el)return;
+  const pk=packing(),rec=shippingRecommendation(pk.cbm),select=document.getElementById('modal'),choice=select.value;
+  const active=choice==='AUTO'?rec:{value:choice,label:select.selectedOptions[0]?.textContent||choice,detail:'seleção manual'};
+  el.innerHTML=`<b>${esc(active.label)}</b><span>${esc(active.detail)}${choice!=='AUTO'&&rec.value&&rec.value!==choice?` · automático sugeriria ${esc(rec.label)}`:''}</span>`;
 }
 
 /* ════════ MOTOR DE IMPOSTOS (unificado AV/Trading), item-a-item ════════ */
@@ -2255,12 +2288,13 @@ function priceMarginFY(c){const m=val('fyMarg')/100;return{preco:m<1?c/(1-m):c,m
 /* ════════ RECALC ════════ */
 function recalc(){
   const pk=packing();
+  updateShippingSuggestion();
   document.getElementById('un-tot').textContent=pk.qtyTot.toLocaleString('pt-BR');
   document.getElementById('cbm-tot').textContent=f3(pk.cbm);
   document.getElementById('cx-tot').textContent=pk.caixas.toLocaleString('pt-BR');
   document.getElementById('peso-tot').textContent=Math.round(pk.peso).toLocaleString('pt-BR');
   // três containers lado a lado
-  const conts=[{n:"20' DRY",cap:28},{n:"40' NOR",cap:58},{n:"40' HC",cap:69}];
+  const conts=[{n:"20' DRY",cap:28},{n:"40' NOR",cap:56},{n:"40' HC",cap:69}];
   document.getElementById('cont-occ').innerHTML=conts.map(c=>{
     const fill=c.cap>0?pk.cbm/c.cap*100:0;
     const col=fill>100?'var(--red)':fill>90?'var(--amber)':'var(--green)';
@@ -5633,7 +5667,7 @@ function rvSacachoRender(){
   }
 }
 
-function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,tipoProduto,comLogoProduto,clicheProduto){
+function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,tipoProduto,comLogoProduto,clicheProduto,noteProduto=''){
   containerId=containerId||'rv2-prod-rows';
   const cont=rvEl(containerId);
   const row=document.createElement('div');
@@ -5661,7 +5695,8 @@ function rv2AddProdRow(desc='',qtd='',preco='',pv='',containerId,fornecedorNome,
       <div class="rv2-field"><span class="rv2-field-label">PV unit. R$</span><input type="number" class="mono rv2-prod-pv" placeholder="8.65" value="${pv}" min="0" step="0.01" oninput="${onCalc}"></div>
       <div class="rv2-field rv2-cliche-field"><span class="rv2-field-label">Clichê / molde / logo R$ <span title="Vai pro fornecedor por padrão; vai pro beneficiador só se Logo estiver marcado">ⓘ</span></span><input type="number" class="mono rv2-prod-cliche" value="${clicheProduto||0}" min="0" step="0.01" oninput="${onCalc}"></div>
       <div class="rv2-field rv2-prod-logo-field"><span class="rv2-field-label">Logo</span><button type="button" class="rv2-seg-toggle rv2-prod-logo-btn${logoAtual?' active':''}" onclick="rv2ToggleProdLogo(this);${onCalc}" title="Clique para alternar"><span data-value="false" class="${!logoAtual?'active':''}">Sem logo</span><span data-value="true" class="${logoAtual?'active':''}">Com logo</span></button></div>
-    </div>`;
+    </div>
+    <div class="rv2-prod-note-wrap"><input type="text" class="rv2-prod-note" maxlength="240" placeholder="Notas da cotação deste produto (opcional)" value="${esc(noteProduto||'')}"></div>`;
   cont.appendChild(row);
   if(containerId==='rvedit-prod-rows')rv2EditPreview();else rv2Calc();
 }
@@ -5684,7 +5719,7 @@ function rv2ReadProdRows(containerId){
     const logoBtn=row.querySelector('.rv2-prod-logo-btn');
     const clicheInp=row.querySelector('.rv2-prod-cliche');
     const comLogo=logoBtn?logoBtn.classList.contains('active'):false;
-    return{desc:row.querySelector('.rv2-prod-desc').value.trim(),
+    return{desc:row.querySelector('.rv2-prod-desc').value.trim(),note:(row.querySelector('.rv2-prod-note')?.value||'').trim(),
       qtd:parseFloat(row.querySelector('.rv2-prod-qty').value)||0,
       preco:parseFloat(row.querySelector('.rv2-prod-preco').value)||0,
       pv:parseFloat(row.querySelector('.rv2-prod-pv').value)||0,
@@ -5692,7 +5727,7 @@ function rv2ReadProdRows(containerId){
       cliche:clicheInp?(parseFloat(clicheInp.value)||0):0};
   });
 }
-function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto);}
+function rv2AddProdRowEdit(desc='',qtd='',preco='',pv='',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto,noteProduto=''){rv2AddProdRow(desc,qtd,preco,pv,'rvedit-prod-rows',fornecedorNome,tipoProduto,comLogoProduto,clicheProduto,noteProduto);}
 function rvPricingMath(input){
   const produtos=input.produtos||[];
   const qtd=produtos.reduce((a,p)=>a+(Number(p.qtd)||0),0);
@@ -6157,7 +6192,7 @@ function rv2OpenEdit(kind,id){
       const custoBase=idxBase.reduce((a,i)=>a+(rec.produtos[i].qtd||0)*(rec.produtos[i].preco||0),0);
       if(custoBase>0)idxBase.forEach(i=>{clicheDistribuido[i]=rec.cliche*((rec.produtos[i].qtd*rec.produtos[i].preco)/custoBase);});
     }
-    rec.produtos.forEach((p,i)=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor,p.tipo||rec.tipo||'Nacional',p.comLogo!==undefined?p.comLogo:!!rec.comLogo,p.cliche!==undefined?p.cliche:clicheDistribuido[i]));
+    rec.produtos.forEach((p,i)=>rv2AddProdRowEdit(p.desc,p.qtd,p.preco,p.pv,p.fornecedor||rec.fornecedor,p.tipo||rec.tipo||'Nacional',p.comLogo!==undefined?p.comLogo:!!rec.comLogo,p.cliche!==undefined?p.cliche:clicheDistribuido[i],p.note||p.nota||''));
   }else{
     rv2AddProdRowEdit('',rec.qtd,rec.preco,rec.pv,rec.fornecedor,rec.tipo||'Nacional',!!rec.comLogo,rec.cliche||0); // registro salvo antes de existir múltiplos produtos
   }
