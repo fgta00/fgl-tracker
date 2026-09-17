@@ -6,6 +6,7 @@
 <title>FGL Precificação Unificada</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --ink:#0F1923;--ink2:#2D3A45;--ink3:#5A6A76;--ink4:#9AAAB8;
@@ -301,6 +302,41 @@ header .tab.active{color:#fff;border-bottom-color:var(--accent)}
 header .hbtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);border-radius:8px;padding:.42rem .8rem;font-family:'IBM Plex Sans';font-weight:600;font-size:.72rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
 header .hbtn:hover{border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.11)}
 #save-status{font-size:.66rem;color:var(--green-dk);font-weight:600;white-space:nowrap}
+
+/* ══════════════════════ IMPORTAÇÃO — SUB-ABAS / CUSTO COMPLETO ══════════════════════ */
+.imp-tabs{display:flex;gap:.35rem;margin-bottom:1rem;border-bottom:1px solid var(--bdr)}
+.imp-tab{border:0;background:transparent;color:var(--ink3);font:600 .76rem 'IBM Plex Sans';padding:.58rem .85rem;cursor:pointer;border-bottom:3px solid transparent}
+.imp-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.imp-pane{display:none}.imp-pane.active{display:block}
+.cf-hero{background:linear-gradient(110deg,#344C57,#638290);color:#fff;border-radius:14px 14px 0 0;padding:1.15rem 1.4rem;text-align:center}
+.cf-hero h2{font-size:1.25rem}.cf-hero p{font-size:.72rem;color:#D8E5EA;margin-top:.2rem}
+.cf-shell{background:var(--card);border:1px solid var(--bdr);border-radius:0 0 14px 14px;padding:1rem;margin-bottom:1rem}
+.cf-topline{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.7rem}.cf-topline h3{font-size:.95rem}
+.cf-count{width:30px;height:30px;border-radius:50%;background:var(--ltgry);display:grid;place-items:center;font-weight:700}
+.cf-product{border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;margin-bottom:.75rem;background:var(--card)}
+.cf-product-head{display:flex;justify-content:space-between;align-items:center;background:var(--ltgry);padding:.55rem .75rem;font-weight:700;color:var(--ink2)}
+.cf-product-body{padding:.75rem;display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:.6rem}
+.cf-span2{grid-column:span 2}.cf-field{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.cf-field label{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+.cf-field input,.cf-field select,.cf-field textarea{width:100%;border:1.5px solid var(--bdr2);border-radius:7px;background:var(--card);color:var(--ink);font:400 .76rem 'IBM Plex Sans';padding:.42rem .55rem;outline:none}
+.cf-field input:focus,.cf-field select:focus,.cf-field textarea:focus{border-color:var(--blue)}
+.cf-field textarea{resize:vertical;min-height:65px}.cf-note{font-size:.59rem;color:var(--ink4)}
+.cf-section{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:1rem}.cf-section h3{font-size:.92rem;margin-bottom:.7rem}
+.cf-grid{display:grid;grid-template-columns:repeat(4,minmax(125px,1fr));gap:.65rem}
+.cf-mode{padding:.55rem .7rem;border-radius:8px;background:var(--ltblue);color:var(--ink2);font-size:.69rem;border:1px solid var(--bdr)}.cf-mode b{color:var(--blue)}
+.cf-actions{display:flex;justify-content:center;gap:.55rem;flex-wrap:wrap;margin:.9rem 0}
+.cf-result{border:1px solid var(--bdr);border-radius:13px;background:var(--card);overflow:hidden}.cf-result-head{background:linear-gradient(110deg,#344C57,#638290);color:#fff;text-align:center;padding:.8rem;font-size:1.05rem;font-weight:700}
+.cf-result-body{padding:1rem}.cf-summary{display:grid;grid-template-columns:1.3fr .7fr;gap:.35rem .8rem;max-width:760px;margin:auto}
+.cf-summary>div{padding:.28rem 0;border-bottom:1px solid var(--bdr);font-size:.76rem}.cf-summary .cf-v{text-align:right;font-family:'IBM Plex Mono';font-weight:600}
+.cf-summary .cf-total{font-size:1rem;font-weight:700;border-top:2px solid var(--ink2);border-bottom:0;margin-top:.25rem;padding-top:.55rem}
+.cf-details{max-width:900px;margin:.9rem auto 0}.cf-details details{border:1px solid var(--bdr);border-radius:9px;margin:.5rem 0;background:var(--ltgry)}
+.cf-details summary{cursor:pointer;padding:.65rem .8rem;font-weight:700;font-size:.78rem}.cf-detail-body{padding:0 .8rem .75rem}
+.cf-line{display:flex;justify-content:space-between;gap:1rem;padding:.22rem 0;font-size:.71rem}.cf-line b:last-child{font-family:'IBM Plex Mono'}
+.cf-warn{background:var(--ltamb);border:1px solid #E8B96A;color:var(--amber);border-radius:8px;padding:.55rem .7rem;font-size:.66rem;margin:.65rem 0}
+.cf-rm{border:0;background:none;color:var(--red);cursor:pointer;font-weight:700}
+@media(max-width:850px){.cf-product-body,.cf-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}}
+@media(max-width:520px){.cf-product-body,.cf-grid{grid-template-columns:1fr}.cf-span2{grid-column:auto}.cf-summary{grid-template-columns:1fr auto}}
+@media print{.imp-tabs,.cf-actions,.cf-add,.cf-rm{display:none!important}.imp-pane{display:none!important}#impane-landed{display:block!important}.cf-details details>*{display:block!important}}
 
 /* ══════════════════════ REVENDA ══════════════════════ */
 .rv-tabs{display:flex;align-items:center;gap:0;background:var(--navy);margin:-1.2rem calc(-50vw + 50%) 1.1rem;padding:.4rem calc(50vw - 50% + 1.3rem)}
@@ -783,6 +819,12 @@ body.dark .rv-tabs{background:var(--head-bg)}
 <div id="view-import" class="view">
 <div class="wrap">
 
+  <div class="imp-tabs no-print">
+    <button class="imp-tab active" id="imptab-compare" onclick="impShowPane('compare')">AV x Trading</button>
+    <button class="imp-tab" id="imptab-landed" onclick="impShowPane('landed')">Calculadora completa</button>
+  </div>
+  <div id="impane-compare" class="imp-pane active">
+
   <div class="card" style="background:var(--navy);color:#fff;padding:.8rem 1.2rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
     <div>
       <div style="font-size:1rem;font-weight:700">Importação — Ásia → Brasil</div>
@@ -868,6 +910,60 @@ body.dark .rv-tabs{background:var(--head-bg)}
   <div class="sh">Comparação de rotas</div>
   <div class="cmp" id="cmp"></div>
   <div class="insight" id="insight"></div>
+  </div>
+
+  <div id="impane-landed" class="imp-pane">
+    <div class="cf-hero">
+      <h2>Calculadora de Custo de Importação</h2>
+      <p>Produtos, frete, tributos, créditos e despesas — da origem ao custo unitário no Brasil</p>
+    </div>
+    <div class="cf-shell">
+      <div class="cf-topline"><h3>Produtos da simulação</h3><span class="cf-count" id="cf-count">0</span></div>
+      <div id="cf-products"></div>
+      <button class="addrow cf-add" onclick="cfAddProduct()">＋ Adicionar produto</button>
+    </div>
+
+    <div class="cf-section"><h3>Configurações globais</h3><div class="cf-grid">
+      <div class="cf-field"><label>Câmbio USD / BRL</label><input id="cf-usd" type="number" step=".0001" value="5.50" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Câmbio CNY / BRL</label><input id="cf-cny" type="number" step=".0001" value="0.76" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Seguro sobre produto + frete %</label><input id="cf-ins" type="number" step=".1" value="0.5" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>ICMS importação %</label><input id="cf-icms" type="number" step=".1" value="4" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>PIS venda %</label><input id="cf-pis-sale" type="number" step=".01" value="1.65" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>COFINS venda %</label><input id="cf-cof-sale" type="number" step=".01" value="7.60" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>ICMS venda %</label><input id="cf-icms-sale" type="number" step=".1" value="4" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Taxa administrativa %</label><input id="cf-admin" type="number" step=".1" value="5" oninput="cfCalc()"></div>
+    </div></div>
+
+    <div class="cf-section"><h3>Frete internacional</h3><div class="cf-grid">
+      <div class="cf-field"><label>Modal</label><select id="cf-modal" onchange="cfCalc()"><option value="AUTO">Automático pelo volume</option><option value="LCL">LCL</option><option value="FCL20">FCL 20'</option><option value="FCL40">FCL 40' NOR</option><option value="FCL40HC">FCL 40' HC</option><option value="MANUAL">Manual / múltiplos</option></select></div>
+      <div class="cf-field"><label>Valor do frete</label><input id="cf-freight" type="number" step=".01" value="0" oninput="cfCalc()"><span class="cf-note">Informe sua cotação real</span></div>
+      <div class="cf-field"><label>Moeda do frete</label><select id="cf-freight-cur" onchange="cfCalc()"><option>USD</option><option>CNY</option><option>BRL</option></select></div>
+      <div class="cf-field"><label>Resumo operacional</label><div class="cf-mode" id="cf-mode">—</div></div>
+    </div></div>
+
+    <div class="cf-section"><h3>Despesas no Brasil</h3><div class="cf-grid">
+      <div class="cf-field"><label>Siscomex</label><input id="cf-sis" type="number" step=".01" value="154.23" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>BL / AWB</label><input id="cf-awb" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Armazenagem</label><input id="cf-storage" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Despachante</label><input id="cf-broker" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>SDA / anuências</label><input id="cf-sda" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Corretagem</label><input id="cf-brok" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Catálogo / produto</label><input id="cf-catalog" type="number" step=".01" value="50" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Outras despesas</label><input id="cf-other" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field"><label>Frete nacional</label><input id="cf-national" type="number" step=".01" value="0" oninput="cfCalc()"></div>
+      <div class="cf-field cf-span2"><label>Observação</label><textarea id="cf-note" placeholder="Notas da cotação, fornecedor, porto, validade..." oninput="cfSave()"></textarea></div>
+    </div></div>
+
+    <div class="cf-actions no-print">
+      <button class="btn btn-p" onclick="cfCalc()">▣ Calcular custos</button>
+      <button class="btn btn-s" onclick="cfPrint(false)">PDF resumido</button>
+      <button class="btn btn-s" onclick="cfPrint(true)">PDF detalhado</button>
+      <button class="btn btn-s" onclick="cfExportXlsx()">XLSX detalhado</button>
+      <button class="btn btn-s" onclick="cfReset()">↻ Limpar</button>
+    </div>
+
+    <div class="cf-result" id="cf-result"><div class="cf-result-head">Resultado do cálculo</div><div class="cf-result-body" id="cf-result-body"><div class="cf-warn">Adicione um produto e informe os dados para calcular.</div></div></div>
+  </div>
 </div>
 </div>
 <!-- /view-import -->
@@ -2423,6 +2519,90 @@ function loadExample(){
   document.getElementById('margAlvo').value='40';
   document.getElementById('precoVenda').value='';
   _mode='cost';recalc();
+}
+
+/* ════════ IMPORTAÇÃO — CALCULADORA COMPLETA (MOTOR INDEPENDENTE) ════════ */
+let cfProducts=[],cfLast=null,cfSeq=0;
+const CF_NCM={
+  '42029200':{name:'Com superfície exterior de plástico ou matéria têxtil',ii:35,ipi:6.5,pis:2.1,cofins:9.65}
+};
+function impShowPane(id){
+  ['compare','landed'].forEach(x=>{
+    document.getElementById('impane-'+x)?.classList.toggle('active',x===id);
+    document.getElementById('imptab-'+x)?.classList.toggle('active',x===id);
+  });
+  if(id==='landed')cfCalc();
+}
+function cfNum(id){const n=parseFloat(document.getElementById(id)?.value);return Number.isFinite(n)?n:0}
+function cfMoney(n){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0)}
+function cfNcm(v){return String(v||'').replace(/\D/g,'').slice(0,8)}
+function cfNcmFmt(v){const n=cfNcm(v);return n.replace(/^(\d{4})(\d{2})(\d{0,2}).*/,(_,a,b,c)=>a+'.'+b+(c?'.'+c:''))}
+function cfAddProduct(d={}){
+  const seed=CF_NCM[cfNcm(d.ncm)]||{};
+  cfProducts.push({id:++cfSeq,name:d.name||'',qty:d.qty??1,price:d.price??0,priceType:d.priceType||'UNIT',currency:d.currency||'USD',volume:d.volume??0,volumeType:d.volumeType||'TOTAL',weight:d.weight??0,weightType:d.weightType||'TOTAL',ncm:cfNcmFmt(d.ncm||''),ii:d.ii??seed.ii??0,ipi:d.ipi??seed.ipi??0,pis:d.pis??seed.pis??2.1,cofins:d.cofins??seed.cofins??9.65});
+  cfRenderProducts();cfCalc();
+}
+function cfRemoveProduct(id){cfProducts=cfProducts.filter(p=>p.id!==id);cfRenderProducts();cfCalc()}
+function cfSet(id,key,value){const p=cfProducts.find(x=>x.id===id);if(!p)return;p[key]=value;if(key==='ncm'){p.ncm=cfNcmFmt(value);const n=CF_NCM[cfNcm(value)];if(n){p.ii=n.ii;p.ipi=n.ipi;p.pis=n.pis;p.cofins=n.cofins;cfRenderProducts();}}cfCalc()}
+function cfRenderProducts(){
+  const root=document.getElementById('cf-products');if(!root)return;
+  root.innerHTML=cfProducts.map((p,i)=>`<div class="cf-product">
+    <div class="cf-product-head"><span>Produto ${i+1}</span><button class="cf-rm" onclick="cfRemoveProduct(${p.id})">Remover</button></div>
+    <div class="cf-product-body">
+      <div class="cf-field cf-span2"><label>Nome do produto</label><input value="${esc(p.name)}" oninput="cfSet(${p.id},'name',this.value)"></div>
+      <div class="cf-field"><label>Quantidade</label><input type="number" min="0" step="1" value="${p.qty}" oninput="cfSet(${p.id},'qty',+this.value)"></div>
+      <div class="cf-field"><label>Moeda</label><select onchange="cfSet(${p.id},'currency',this.value)">${['USD','CNY','BRL'].map(x=>`<option ${p.currency===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="cf-field"><label>Preço</label><input type="number" min="0" step=".0001" value="${p.price}" oninput="cfSet(${p.id},'price',+this.value)"></div>
+      <div class="cf-field"><label>Preço informado</label><select onchange="cfSet(${p.id},'priceType',this.value)"><option value="UNIT" ${p.priceType==='UNIT'?'selected':''}>Unitário</option><option value="TOTAL" ${p.priceType==='TOTAL'?'selected':''}>Total</option></select></div>
+      <div class="cf-field"><label>Volume (m³)</label><input type="number" min="0" step=".0001" value="${p.volume}" oninput="cfSet(${p.id},'volume',+this.value)"></div>
+      <div class="cf-field"><label>Volume informado</label><select onchange="cfSet(${p.id},'volumeType',this.value)"><option value="TOTAL" ${p.volumeType==='TOTAL'?'selected':''}>Total</option><option value="UNIT" ${p.volumeType==='UNIT'?'selected':''}>Unitário</option></select></div>
+      <div class="cf-field"><label>Peso (kg)</label><input type="number" min="0" step=".001" value="${p.weight}" oninput="cfSet(${p.id},'weight',+this.value)"></div>
+      <div class="cf-field"><label>Peso informado</label><select onchange="cfSet(${p.id},'weightType',this.value)"><option value="TOTAL" ${p.weightType==='TOTAL'?'selected':''}>Total</option><option value="UNIT" ${p.weightType==='UNIT'?'selected':''}>Unitário</option></select></div>
+      <div class="cf-field cf-span2"><label>NCM</label><input value="${esc(p.ncm)}" placeholder="0000.00.00" onblur="cfSet(${p.id},'ncm',this.value)"><span class="cf-note">4202.92.00 possui alíquotas confirmadas; demais NCMs são editáveis.</span></div>
+      ${[['ii','II %'],['ipi','IPI %'],['pis','PIS %'],['cofins','COFINS %']].map(([k,l])=>`<div class="cf-field"><label>${l}</label><input type="number" step=".01" value="${p[k]}" oninput="cfSet(${p.id},'${k}',+this.value)"></div>`).join('')}
+    </div></div>`).join('');
+  document.getElementById('cf-count').textContent=cfProducts.length;
+}
+function cfModal(volume){
+  const chosen=document.getElementById('cf-modal')?.value||'AUTO';if(chosen!=='AUTO')return chosen;
+  if(!(volume>0))return '—';if(volume<=15)return 'LCL';if(volume<=28)return "FCL 20'";if(volume<=56)return "FCL 40' NOR";if(volume<=69)return "FCL 40' HC";return Math.ceil(volume/69)+' contêineres / manual';
+}
+function cfCompute(){
+  const usd=cfNum('cf-usd'),cny=cfNum('cf-cny'),rate=c=>c==='BRL'?1:c==='CNY'?cny:usd;
+  const items=cfProducts.map(p=>{const qty=Math.max(0,+p.qty||0),product=(p.priceType==='TOTAL'?+p.price:(+p.price*qty))*rate(p.currency),volume=(+p.volume||0)*(p.volumeType==='UNIT'?qty:1),weight=(+p.weight||0)*(p.weightType==='UNIT'?qty:1);return{...p,qty,product,volume,weight}});
+  const product=items.reduce((s,p)=>s+p.product,0),qty=items.reduce((s,p)=>s+p.qty,0),volume=items.reduce((s,p)=>s+p.volume,0),weight=items.reduce((s,p)=>s+p.weight,0);
+  const fc=document.getElementById('cf-freight-cur')?.value||'USD',freight=cfNum('cf-freight')*rate(fc),insurance=(product+freight)*cfNum('cf-ins')/100,cif=product+freight+insurance;
+  let ii=0,ipi=0,pis=0,cofins=0;const detail=items.map(p=>{const share=product>0?p.product/product:(items.length?1/items.length:0),pcif=cif*share,pii=pcif*(p.ii/100),pipi=(pcif+pii)*(p.ipi/100),ppis=pcif*(p.pis/100),pcof=pcif*(p.cofins/100);ii+=pii;ipi+=pipi;pis+=ppis;cofins+=pcof;return{...p,share,cif:pcif,ii:pii,ipi:pipi,pis:ppis,cofins:pcof}});
+  const icmsRate=cfNum('cf-icms')/100,icmsBase=icmsRate<1?(cif+ii+ipi+pis+cofins)/(1-icmsRate):0,icms=icmsBase*icmsRate,taxes=ii+ipi+pis+cofins+icms;
+  const expenses=cfNum('cf-sis')+cfNum('cf-awb')+cfNum('cf-storage')+cfNum('cf-broker')+cfNum('cf-sda')+cfNum('cf-brok')+cfNum('cf-other')+cfNum('cf-national')+cfNum('cf-catalog')*items.length;
+  const imported=cif+taxes+expenses,credits=ipi+pis+cofins+icms,post=imported-credits;
+  const saleRate=(cfNum('cf-pis-sale')+cfNum('cf-cof-sale')+cfNum('cf-icms-sale')+cfNum('cf-admin'))/100,saleBase=saleRate<1?post/(1-saleRate):0;
+  const weightedIpi=(cif+ii)>0?ipi/(cif+ii):0,saleIpi=saleBase*weightedIpi,final=saleBase+saleIpi,unit=qty?final/qty:0;
+  return{items,detail,product,qty,volume,weight,freight,insurance,cif,ii,ipi,pis,cofins,icms,taxes,expenses,imported,credits,post,saleRate,saleBase,saleIpi,final,unit,modal:cfModal(volume)};
+}
+function cfCalc(){
+  if(!document.getElementById('cf-result-body'))return;const r=cfCompute();cfLast=r;
+  document.getElementById('cf-mode').innerHTML=`<b>${esc(r.modal)}</b><br>${f3(r.volume)} m³ · ${f3(r.weight)} kg`;
+  if(!r.items.length){document.getElementById('cf-result-body').innerHTML='<div class="cf-warn">Adicione um produto e informe os dados para calcular.</div>';cfSave();return}
+  const row=(a,b,c='')=>`<div class="${c}">${a}</div><div class="cf-v ${c}">${b}</div>`,line=(a,b)=>`<div class="cf-line"><span>${a}</span><b>${cfMoney(b)}</b></div>`;
+  document.getElementById('cf-result-body').innerHTML=`
+    <div class="cf-summary">${row('Produto(s)',esc(r.items.map(x=>x.name||'Sem nome').join(', ')))}${row('Volume / peso',f3(r.volume)+' m³ · '+f3(r.weight)+' kg')}${row('Preço total fornecedor',cfMoney(r.product))}${row('Frete internacional',cfMoney(r.freight))}${row('Seguro',cfMoney(r.insurance))}${row('Tributos de importação',cfMoney(r.taxes))}${row('Despesas no Brasil',cfMoney(r.expenses))}${row('Custo total final',cfMoney(r.final),'cf-total')}${row('Custo unitário',cfMoney(r.unit),'cf-total')}</div>
+    <div class="cf-details">
+      <details><summary>Cálculo detalhado — como chegamos ao valor final</summary><div class="cf-detail-body">${line('Produtos',r.product)}${line('+ Frete internacional',r.freight)}${line('+ Seguro',r.insurance)}${line('= CIF (valor aduaneiro)',r.cif)}${line('+ Tributos',r.taxes)}${line('+ Despesas no Brasil',r.expenses)}${line('= Custo importado',r.imported)}${line('− Créditos de importação',-r.credits)}${line('= Base pós-crédito',r.post)}${line('Base com tributos de venda',r.saleBase)}${line('+ IPI na venda',r.saleIpi)}${line('= Custo total final',r.final)}</div></details>
+      <details><summary>Detalhes dos tributos</summary><div class="cf-detail-body">${line('II',r.ii)}${line('IPI',r.ipi)}${line('PIS',r.pis)}${line('COFINS',r.cofins)}${line('ICMS por dentro',r.icms)}${line('Total tributos',r.taxes)}</div></details>
+      <details><summary>Produtos e rateio do CIF</summary><div class="cf-detail-body">${r.detail.map(p=>`<div class="cf-line"><span>${esc(p.name||'Produto')} · ${esc(p.ncm||'sem NCM')} · ${(p.share*100).toFixed(2)}%</span><b>${cfMoney(p.cif)}</b></div>`).join('')}</div></details>
+      <details><summary>Frete e cubagem</summary><div class="cf-detail-body"><div class="cf-line"><span>Modal indicado</span><b>${esc(r.modal)}</b></div><div class="cf-line"><span>Volume total</span><b>${f3(r.volume)} m³</b></div><div class="cf-line"><span>Peso total</span><b>${f3(r.weight)} kg</b></div>${line('Frete informado',r.freight)}</div></details>
+    </div>`;cfSave();
+}
+function cfSnapshot(){const ids=['cf-usd','cf-cny','cf-ins','cf-icms','cf-pis-sale','cf-cof-sale','cf-icms-sale','cf-admin','cf-modal','cf-freight','cf-freight-cur','cf-sis','cf-awb','cf-storage','cf-broker','cf-sda','cf-brok','cf-catalog','cf-other','cf-national','cf-note'],fields={};ids.forEach(id=>{const e=document.getElementById(id);if(e)fields[id]=e.value});return{products:cfProducts,fields}}
+function cfSave(){try{localStorage.setItem('fgl_cf_calc_v1',JSON.stringify(cfSnapshot()))}catch(e){}}
+function cfLoad(){try{const s=JSON.parse(localStorage.getItem('fgl_cf_calc_v1')||'null');if(!s)return false;cfProducts=(s.products||[]).map(p=>({...p,id:++cfSeq}));Object.entries(s.fields||{}).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});return true}catch(e){return false}}
+function cfReset(){if(!confirm('Limpar esta simulação completa?'))return;localStorage.removeItem('fgl_cf_calc_v1');cfProducts=[];cfAddProduct({ncm:'4202.92.00'});}
+function cfPrint(detail){document.querySelectorAll('#cf-result details').forEach(d=>d.open=!!detail);window.print()}
+function cfExportXlsx(){
+  const r=cfLast||cfCompute();if(!r.items.length)return alert('Adicione ao menos um produto.');
+  const rows=[['SIMULAÇÃO DE CUSTO DE IMPORTAÇÃO',''],['Modal',r.modal],['Volume m³',r.volume],['Peso kg',r.weight],[],['RESUMO','BRL'],['Produtos',r.product],['Frete internacional',r.freight],['Seguro',r.insurance],['CIF',r.cif],['II',r.ii],['IPI',r.ipi],['PIS',r.pis],['COFINS',r.cofins],['ICMS',r.icms],['Despesas Brasil',r.expenses],['Custo importado',r.imported],['Créditos',r.credits],['Base pós-crédito',r.post],['Custo total final',r.final],['Custo unitário',r.unit],[],['PRODUTOS','Qtd','NCM','Valor BRL','CIF rateado']];r.detail.forEach(p=>rows.push([p.name,p.qty,p.ncm,p.product,p.cif]));
+  if(window.XLSX){const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Custo Importação');XLSX.writeFile(wb,'simulacao-importacao.xlsx')}else{const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='simulacao-importacao.csv';a.click()}
 }
 
 /* ════════ CRIPTOGRAFIA (AES-256-GCM, chave derivada da senha por PBKDF2) ════════
@@ -7341,6 +7521,7 @@ function rvInit(){
 
 addProd({ncm:'4202.92.00'});
 recalc();
+if(!cfLoad())cfAddProduct({ncm:'4202.92.00'});else{cfRenderProducts();cfCalc();}
 rvInit();
 initAuth().then(()=>{
   updateRvSyncStatus();
