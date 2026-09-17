@@ -4165,6 +4165,7 @@ const META_WHATSAPP_APP_ID='1346176517412643';
 const META_WHATSAPP_CONFIG_ID='1015420251544011';
 let crmWaCtx={customerId:null,personId:null,phone:null};
 let crmMetaSdkPromise=null;
+let crmMetaSdkInitialized=false;
 let crmWaSignupSession=null;
 let crmWaSignupAuthCode=null;
 
@@ -4186,27 +4187,54 @@ function crmWaConfigureOnboardingUi(){
 }
 
 function crmLoadMetaSdk(){
-  if(window.FB)return Promise.resolve(window.FB);
+  const initialize=()=>{
+    if(!window.FB)return null;
+    if(!crmMetaSdkInitialized){
+      window.FB.init({appId:META_WHATSAPP_APP_ID,cookie:true,xfbml:false,version:'v26.0'});
+      crmMetaSdkInitialized=true;
+    }
+    return window.FB;
+  };
+  if(window.FB)return Promise.resolve(initialize());
   if(crmMetaSdkPromise)return crmMetaSdkPromise;
   crmMetaSdkPromise=new Promise((resolve,reject)=>{
+    let settled=false;
+    const finish=()=>{
+      if(settled||!window.FB)return false;
+      try{const fb=initialize();settled=true;clearInterval(poll);clearTimeout(timeout);resolve(fb);return true;}
+      catch(e){settled=true;clearInterval(poll);clearTimeout(timeout);crmMetaSdkPromise=null;reject(e);return true;}
+    };
+    const fail=message=>{
+      if(settled)return;settled=true;clearInterval(poll);clearTimeout(timeout);crmMetaSdkPromise=null;reject(new Error(message));
+    };
     const previousInit=window.fbAsyncInit;
     window.fbAsyncInit=function(){
       if(typeof previousInit==='function')previousInit();
-      window.FB.init({appId:META_WHATSAPP_APP_ID,cookie:true,xfbml:false,version:'v26.0'});
-      resolve(window.FB);
+      finish();
     };
+    const poll=setInterval(finish,200);
+    const timeout=setTimeout(()=>fail('O SDK da Meta não carregou. Libere popups e bloqueadores para fgta00.github.io e tente novamente.'),12000);
     const existing=document.getElementById('facebook-jssdk');
-    if(existing)return;
-    const script=document.createElement('script');
-    script.id='facebook-jssdk';
-    script.async=true;
-    script.defer=true;
-    script.crossOrigin='anonymous';
-    script.src='https://connect.facebook.net/pt_BR/sdk.js';
-    script.onerror=()=>{crmMetaSdkPromise=null;reject(new Error('Não foi possível carregar o SDK da Meta.'));};
-    document.head.appendChild(script);
+    if(!existing){
+      const script=document.createElement('script');
+      script.id='facebook-jssdk';
+      script.async=true;
+      script.defer=true;
+      script.crossOrigin='anonymous';
+      script.src='https://connect.facebook.net/pt_BR/sdk.js';
+      script.onload=finish;
+      script.onerror=()=>fail('Não foi possível carregar o SDK da Meta. Verifique bloqueadores de conteúdo e tente novamente.');
+      document.head.appendChild(script);
+    }
   });
   return crmMetaSdkPromise;
+}
+
+function crmPreloadMetaSdk(){
+  crmWaSetOnboardingStatus('Preparando o fluxo oficial da Meta…');
+  crmLoadMetaSdk()
+    .then(()=>crmWaSetOnboardingStatus('Fluxo da Meta pronto. Clique em “Conectar WhatsApp Business”.','green'))
+    .catch(e=>crmWaSetOnboardingStatus(e?.message||'Não foi possível preparar o fluxo da Meta.','red'));
 }
 
 function crmWaRenderSignupSession(data){
@@ -4244,7 +4272,14 @@ async function crmStartWhatsAppCoexistence(){
   crmWaSetOnboardingStatus('Carregando o fluxo oficial da Meta…');
   try{
     const FB=await crmLoadMetaSdk();
+    let answered=false;
+    const loginTimeout=setTimeout(()=>{
+      if(answered)return;
+      if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}
+      crmWaSetOnboardingStatus('A janela da Meta não abriu. Libere popups para fgta00.github.io e clique em “Tentar novamente”.','red');
+    },15000);
     FB.login(response=>{
+      answered=true;clearTimeout(loginTimeout);
       if(btn){btn.disabled=false;btn.textContent='Conectar WhatsApp Business';}
       if(response?.authResponse?.code){
         crmWaSignupAuthCode=response.authResponse.code;
@@ -4302,6 +4337,7 @@ function crmOpenWhatsAppApiPerson(p){
   sendBtn.title=CRM_WHATSAPP_API_ENABLED?'':'Envio oficial bloqueado até a Meta concluir o Coexistence.';
   crmWaConfigureOnboardingUi();
   document.getElementById('ovl-crm-wa').classList.add('open');
+  if(crmIsWhatsAppOnboardingAdmin()&&!CRM_WHATSAPP_API_ENABLED)crmPreloadMetaSdk();
 }
 
 function crmOpenWhatsApp(personIndex){
