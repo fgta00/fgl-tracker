@@ -429,6 +429,11 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .rv-data-table th{background:var(--navy);color:#fff;padding:.45rem .55rem;text-align:left;font-size:.62rem;font-weight:600;white-space:nowrap}
 .rv-data-table th.rv-num{text-align:right}
 .rv-data-table tr.rv-th-center th{text-align:center}
+.rv-data-table th.rv-sortable{cursor:pointer;user-select:none;transition:background .15s ease,color .15s ease}
+.rv-data-table th.rv-sortable:hover,.rv-data-table th.rv-sortable:focus-visible{background:#244a70;color:#fff;outline:none}
+.rv-sort-ind{display:inline-block;min-width:.7rem;margin-left:.18rem;font-size:.55rem;opacity:.55;vertical-align:.04rem}
+.rv-data-table th.rv-sortable[aria-sort="ascending"] .rv-sort-ind,
+.rv-data-table th.rv-sortable[aria-sort="descending"] .rv-sort-ind{opacity:1;color:#8ed8ff}
 .rv-data-table td{padding:.4rem .55rem;border-bottom:1px solid var(--bdr);vertical-align:middle}
 .rv-data-table tr:last-child td{border-bottom:none}
 .rv-data-table tr:hover td{background:var(--ltgry)}
@@ -6727,6 +6732,44 @@ function rv2SaveEdit(){
 });
 
 /* ── COTAÇÕES / PEDIDOS (listas) ── */
+// Ordenação é apenas de apresentação: não modifica a sequência salva no banco/localStorage.
+const rvListSort={cotacoes:{key:null,dir:'asc'},pedidos:{key:null,dir:'asc'}};
+function rvSortHeader(lista,key,label,extraClass=''){
+  const st=rvListSort[lista];
+  const ativo=st.key===key;
+  const aria=ativo?(st.dir==='asc'?'ascending':'descending'):'none';
+  const seta=ativo?(st.dir==='asc'?'▲':'▼'):'↕';
+  return `<th class="rv-sortable${extraClass?' '+extraClass:''}" tabindex="0" role="button" aria-sort="${aria}" title="Ordenar por ${esc(label)}" onclick="rvToggleListSort('${lista}','${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();rvToggleListSort('${lista}','${key}')}">${esc(label)}<span class="rv-sort-ind" aria-hidden="true">${seta}</span></th>`;
+}
+function rvToggleListSort(lista,key){
+  const st=rvListSort[lista];
+  if(st.key===key)st.dir=st.dir==='asc'?'desc':'asc';
+  else{st.key=key;st.dir='asc';}
+  if(lista==='cotacoes')rvRenderCotacoes();else rvRenderPedidos();
+}
+function rvSortDateValue(v){
+  const s=String(v||'').trim();
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(m){let y=Number(m[3]);if(y<100)y+=2000;return Date.UTC(y,Number(m[2])-1,Number(m[1]));}
+  const t=Date.parse(s);return Number.isNaN(t)?0:t;
+}
+function rvSortedList(lista,tipo,getters){
+  const st=rvListSort[tipo];
+  if(!st.key||!getters[st.key])return lista;
+  const cfg=getters[st.key];
+  const getter=typeof cfg==='function'?cfg:cfg.get;
+  const mode=typeof cfg==='function'?'text':(cfg.mode||'text');
+  const dir=st.dir==='asc'?1:-1;
+  return lista.map((item,index)=>({item,index})).sort((a,b)=>{
+    let av=getter(a.item),bv=getter(b.item),cmp=0;
+    if(mode==='number'||mode==='date'){
+      av=mode==='date'?rvSortDateValue(av):(Number(av)||0);
+      bv=mode==='date'?rvSortDateValue(bv):(Number(bv)||0);
+      cmp=av-bv;
+    }else cmp=String(av??'').localeCompare(String(bv??''),'pt-BR',{sensitivity:'base',numeric:true});
+    return cmp?cmp*dir:a.index-b.index;
+  }).map(x=>x.item);
+}
 // Reconcilia cotações já convertidas ANTES dessa marcação existir — casa pelo vínculo
 // cotId (que o pedido sempre teve desde a conversão) e preenche pedidoId retroativamente.
 function rvReconciliarConversoes(){
@@ -6755,14 +6798,18 @@ function rvRenderCotacoes(){
   if(wrapTipo&&!wrapTipo.innerHTML)wrapTipo.innerHTML=msfHtml('cot-tipo','Todos Tipos');
   msfPopulate('cot-tipo',[...new Set(todas.map(c=>c.tipo))].sort(),'Todos Tipos',rvRenderCotacoes);
   const q=norm(document.getElementById('cot-q')?.value);
-  const lista=todas.filter(c=>{
+  let lista=todas.filter(c=>{
     const t=norm(`${c.cliente} ${c.fornecedor}`);
     return(!q||t.includes(q))&&msfMatch('cot-cl',c.cliente)&&msfMatch('cot-forn',c.fornecedor)&&msfMatch('cot-tipo',c.tipo);
   });
   if(!todas.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação encontrada com esses filtros.</div>';return;}
+  lista=rvSortedList(lista,'cotacoes',{
+    data:{get:c=>c.data,mode:'date'},cliente:c=>c.cliente,fornecedor:c=>c.fornecedor,tipo:c=>c.tipo,
+    qtd:{get:c=>c.qtd,mode:'number'},pv:{get:c=>c.pv,mode:'number'},margem:{get:c=>c.margem,mode:'number'},lucro:{get:c=>c.lucroTotal,mode:'number'}
+  });
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th>Tipo</th><th class="rv-num">Qtd</th><th class="rv-num">Preço venda</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th>Ações</th>
+    ${rvSortHeader('cotacoes','data','Data')}${rvSortHeader('cotacoes','cliente','Cliente')}${rvSortHeader('cotacoes','fornecedor','Fornecedor')}${rvSortHeader('cotacoes','tipo','Tipo')}${rvSortHeader('cotacoes','qtd','Qtd','rv-num')}${rvSortHeader('cotacoes','pv','Preço venda','rv-num')}${rvSortHeader('cotacoes','margem','Margem Final','rv-num')}${rvSortHeader('cotacoes','lucro','Lucro','rv-num')}<th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
     const jaConvertida=!!c.pedidoId;
@@ -7074,15 +7121,20 @@ function rvRenderPedidos(){
   if(wrapSt&&!wrapSt.innerHTML)wrapSt.innerHTML=msfHtml('ped-st','Todos Marcos');
   msfPopulate('ped-st',[...new Set(todos.map(statusLabel))].sort(),'Todos Marcos',rvRenderPedidos);
   const q=norm(document.getElementById('ped-q')?.value);
-  const lista=todos.filter(p=>{
+  let lista=todos.filter(p=>{
     const t=norm(`${p.cliente} ${p.fornecedor}`);
     return(!q||t.includes(q))&&msfMatch('ped-cl',p.cliente)&&msfMatch('ped-forn',p.fornecedor)&&msfMatch('ped-st',statusLabel(p));
   });
   if(!todos.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido ainda.<br>Converta uma cotação ou clique "Criar Pedido".</div>';return;}
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhum pedido encontrado com esses filtros.</div>';return;}
+  lista=rvSortedList(lista,'pedidos',{
+    data:{get:p=>p.data,mode:'date'},cliente:p=>p.cliente,fornecedor:p=>p.fornecedor,
+    qtd:{get:p=>p.qtd,mode:'number'},venda:{get:p=>p.vendaTotal,mode:'number'},margem:{get:p=>p.margem,mode:'number'},lucro:{get:p=>p.lucroTotal,mode:'number'},
+    marcos:p=>statusLabel(p),obs:p=>p.obs||''
+  });
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
-    <th>Data</th><th>Cliente</th><th>Fornecedor</th><th class="rv-num">Qtd</th>
-    <th class="rv-num">Venda total</th><th class="rv-num">Margem Final</th><th class="rv-num">Lucro</th><th style="text-align:center">Marcos de Produção</th><th>Obs</th><th></th>
+    ${rvSortHeader('pedidos','data','Data')}${rvSortHeader('pedidos','cliente','Cliente')}${rvSortHeader('pedidos','fornecedor','Fornecedor')}${rvSortHeader('pedidos','qtd','Qtd','rv-num')}
+    ${rvSortHeader('pedidos','venda','Venda total','rv-num')}${rvSortHeader('pedidos','margem','Margem Final','rv-num')}${rvSortHeader('pedidos','lucro','Lucro','rv-num')}${rvSortHeader('pedidos','marcos','Marcos de Produção')}${rvSortHeader('pedidos','obs','Obs')}<th></th>
   </tr></thead><tbody>`;
   lista.forEach(p=>{
     html+=`<tr onclick="rv2OpenEdit('pedido',${p.id})" style="cursor:pointer" title="Clique pra editar">
