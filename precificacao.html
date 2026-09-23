@@ -597,7 +597,8 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-signal-item{border:1px solid var(--bdr);border-radius:9px;padding:.6rem .7rem;min-width:0;background:var(--card);cursor:pointer}
 .crm-signal-item:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-signal-item .sig-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
-.crm-signal-item .sig-name{font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-signal-item .sig-name{font-size:.7rem;font-weight:700;white-space:normal;overflow-wrap:anywhere;line-height:1.25}
+.crm-signal-item .sig-doc{font-family:'IBM Plex Mono';font-size:.54rem;font-weight:500;color:var(--ink4);white-space:nowrap}
 .crm-signal-item .sig-kind{font-size:.51rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink4);white-space:nowrap}
 .crm-signal-item .sig-reason{font-size:.61rem;color:var(--ink3);line-height:1.35;margin:.25rem 0 .42rem;min-height:1.65em}
 .crm-signal-item .sig-actions{display:flex;gap:.25rem;flex-wrap:wrap}
@@ -3978,6 +3979,17 @@ function crmPopulateCustomerFilters(){
     if(vals.includes(cur))el.value=cur;
   });
 }
+function crmCustomerIdentity(customerId,fallbackName){
+  const c=CRM_CUSTOMERS.find(x=>x.id===customerId)||null;
+  const razao=(c?.display_name||fallbackName||'').trim();
+  const fantasia=(c?.trade_name||'').trim();
+  const nomeFantasia=fantasia&&norm(fantasia)!==norm(razao)?fantasia:'';
+  return{customer:c,razao,nomeFantasia,operationalName:nomeFantasia||razao||'?',document:(c?.document||'').trim()};
+}
+function crmSignalIdentityHtml(customerId,fallbackName){
+  const id=crmCustomerIdentity(customerId,fallbackName);
+  return`${esc(id.operationalName)}${id.document?` <span class="sig-doc">· ${esc(id.document)}</span>`:''}`;
+}
 function crmRenderCustomers(){
   const cont=document.getElementById('crm-customers-container');
   if(!cont)return;
@@ -4015,8 +4027,9 @@ function crmRenderCustomers(){
   cont.innerHTML=`<div class="crm-client-list">
     <div class="crm-client-head"><div>Cliente</div><div>Perfil / segmento</div><div>Rede / grupo</div><div>Contato</div></div>
     ${lista.map(c=>{
-      const nome=c.trade_name||c.display_name;
-      const sub=[c.trade_name&&c.display_name!==c.trade_name?c.display_name:'',c.document||''].filter(Boolean).join(' · ');
+      const identidade=crmCustomerIdentity(c.id,c.display_name);
+      const nome=[identidade.razao,identidade.nomeFantasia].filter(Boolean).join(' · ');
+      const sub=c.document||'';
       const perfis=(c.perfil_comercial||[]);
       const segmentos=(c.segmento||[]);
       const grupoNome=groupName(c);
@@ -5168,10 +5181,12 @@ function crmRenderMinhaSemana(){
     let contexto;
     if(a.project_id){
       const proj=CRM_PROJECTS.find(x=>x.id===a.project_id);
-      contexto=proj?`${esc(crmProjectClienteLabel(proj))} · ${esc(proj.project_name)}`:'(projeto)';
+      const ident=crmCustomerIdentity(proj?.customer_id||a.customer_id,proj?crmProjectClienteLabel(proj):'');
+      const cliente=[ident.operationalName,ident.document].filter(Boolean).join(' · ');
+      contexto=proj?`${esc(cliente)} · ${esc(proj.project_name)}`:'(projeto)';
     }else{
-      const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
-      contexto=esc(c?.trade_name||c?.display_name||'?');
+      const ident=crmCustomerIdentity(a.customer_id,'?');
+      contexto=esc([ident.operationalName,ident.document].filter(Boolean).join(' · '));
     }
     return`<div class="crm-week-row" role="button" tabindex="0" title="Clique para abrir" onclick="crmOpenOperationalCard('${a.customer_id||''}','${a.project_id||''}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();crmOpenOperationalCard('${a.customer_id||''}','${a.project_id||''}')}">
       <div class="crm-week-main">
@@ -5332,13 +5347,13 @@ async function crmLoadSignalRecompra(){
 function crmSignalCardHtml(s,i,total){
   const borda=i<total-1?'border-bottom:1px solid var(--bdr)':'';
   if(s.kind==='retomada_sm_asia'){
-    const nome=s.trade_name||s.display_name||'?';
+    const nomeHtml=crmSignalIdentityHtml(s.customer_id,s.trade_name||s.display_name||'?');
     const tempo=s.days_inactive==null?'sem compra comercial rastreada':`última compra há ${crmFmtCadenciaHumana(s.days_inactive)}`;
     const hist=s.order_count?`${s.order_count} operaç${s.order_count===1?'ão':'ões'} · ${Number(s.qty_total||0).toLocaleString('pt-BR')} un.`:'';
     const contexto=[s.active_projects?`${s.active_projects} projeto${s.active_projects===1?'':'s'} ativo${s.active_projects===1?'':'s'}`:'',s.planned_actions?`${s.planned_actions} ação${s.planned_actions===1?'':'ões'} planejada${s.planned_actions===1?'':'s'}`:''].filter(Boolean).join(' · ');
     return`<div class="crm-signal-item" id="crm-signal-retomada-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
-      <span class="sig-name">${esc(nome)}</span>
+      <span class="sig-name">${nomeHtml}</span>
       <span class="sig-kind">Retomada SM Asia</span>
     </div>
     <div class="sig-reason">Histórico SM Asia · ${esc(tempo)}${hist?' · '+esc(hist):''}</div>
@@ -5353,7 +5368,7 @@ function crmSignalCardHtml(s,i,total){
   if(s.kind==='target_sm_asia'){
     return`<div class="crm-signal-item" id="crm-signal-sma-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
-      <span class="sig-name">${esc(s.cliente)}</span>
+      <span class="sig-name">${crmSignalIdentityHtml(s.customer_id,s.cliente)}</span>
       <span class="sig-kind">SM Asia</span>
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
@@ -5367,7 +5382,7 @@ function crmSignalCardHtml(s,i,total){
     const tagline={relacao_consolidada:'Relação recorrente anteriormente ativa.',grande_relacao:'Conta historicamente relevante.',relacao_relevante:'Relação relevante no passado.'}[s.signal_variant]||'';
     return`<div class="crm-signal-item" id="crm-signal-react-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
-      <span class="sig-name">${esc(s.cliente)}</span>
+      <span class="sig-name">${crmSignalIdentityHtml(s.customer_id,s.cliente)}</span>
       <span class="sig-kind">Reativação</span>
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
@@ -5384,7 +5399,7 @@ function crmSignalCardHtml(s,i,total){
     const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
     return`<div class="crm-signal-item" id="crm-signal-proj-${s.project_id}" role="button" tabindex="0" title="Clique para abrir o projeto" onclick="crmOpenProjectEdit('${s.project_id}')">
     <div class="sig-top">
-      <span class="sig-name">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
+      <span class="sig-name">${crmSignalIdentityHtml(s.customer_id,nomeCliente)} · ${esc(s.project_name)}</span>
       <span class="sig-kind">Projeto</span>
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
@@ -5403,7 +5418,7 @@ function crmSignalCardHtml(s,i,total){
     :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
   return`<div class="crm-signal-item" id="crm-signal-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente · ${esc(tooltip)}" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
-      <span class="sig-name">${esc(s.trade_name||s.display_name)}</span>
+      <span class="sig-name">${crmSignalIdentityHtml(s.customer_id,s.trade_name||s.display_name)}</span>
       <span class="sig-kind">Recompra</span>
     </div>
     <div class="sig-reason">${linhaCadencia}</div>
