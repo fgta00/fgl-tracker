@@ -575,7 +575,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-week-section{display:contents}
 .crm-week-head{display:none}
 .crm-week-head .count{font-family:'IBM Plex Mono';font-size:.55rem;background:var(--ltgry);border-radius:999px;padding:.07rem .35rem;color:var(--ink3)}
-.crm-week-row{display:flex;flex-direction:column;justify-content:space-between;gap:.65rem;align-items:stretch;border:1px solid var(--bdr);border-radius:12px;padding:1rem .9rem;background:var(--card);min-width:0;cursor:default}
+.crm-week-row{display:flex;flex-direction:column;justify-content:space-between;gap:.65rem;align-items:stretch;border:1px solid var(--bdr);border-radius:12px;padding:1rem .9rem;background:var(--card);min-width:0;cursor:pointer}
 .crm-week-row:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-week-main{min-width:0}
 .crm-week-title{display:flex;align-items:baseline;gap:.4rem;min-width:0}
@@ -594,7 +594,7 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-signal-chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
 .crm-signal-chip .n{font-family:'IBM Plex Mono';opacity:.72;margin-left:.18rem}
 .crm-signal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
-.crm-signal-item{border:1px solid var(--bdr);border-radius:9px;padding:.6rem .7rem;min-width:0;background:var(--card)}
+.crm-signal-item{border:1px solid var(--bdr);border-radius:9px;padding:.6rem .7rem;min-width:0;background:var(--card);cursor:pointer}
 .crm-signal-item:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-signal-item .sig-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
 .crm-signal-item .sig-name{font-size:.7rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -602,6 +602,13 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .crm-signal-item .sig-reason{font-size:.61rem;color:var(--ink3);line-height:1.35;margin:.25rem 0 .42rem;min-height:1.65em}
 .crm-signal-item .sig-actions{display:flex;gap:.25rem;flex-wrap:wrap}
 .crm-signal-item .sig-actions .btn{font-size:.56rem;padding:.18rem .4rem}
+
+/* Retorno visual imediato: evita a impressão de que Salvar/Cancelar não recebeu o clique. */
+button.ui-press-feedback{animation:uiButtonPop .34s ease-out}
+@keyframes uiButtonPop{0%{transform:scale(1)}38%{transform:scale(.92)}72%{transform:scale(1.045)}100%{transform:scale(1)}}
+button:active{filter:brightness(.94)}
+#ui-global-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);z-index:10000;background:var(--navy);color:#fff;border-radius:9px;padding:.55rem .85rem;font:600 .68rem 'IBM Plex Sans';box-shadow:0 8px 28px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}
+#ui-global-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .crm-client-tools{display:grid;grid-template-columns:minmax(220px,1.8fr) repeat(4,minmax(125px,.7fr));gap:.45rem;align-items:center;margin:.65rem 0 .45rem}
 .crm-client-tools input,.crm-client-tools select{height:34px;border:1px solid var(--bdr2);border-radius:8px;background:var(--card);color:var(--ink);padding:.32rem .55rem;font-family:'IBM Plex Sans';font-size:.68rem;outline:none;min-width:0}
@@ -2959,11 +2966,50 @@ async function loadState(silent){
   }
 }
 function toastSave(msg){
-  const el=document.getElementById('save-status');
-  if(!el)return;
+  const status=document.getElementById('save-status');
+  if(status)status.textContent=msg;
+  let el=document.getElementById('ui-global-toast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='ui-global-toast';
+    el.setAttribute('role','status');
+    el.setAttribute('aria-live','polite');
+    document.body.appendChild(el);
+  }
   el.textContent=msg;
-  setTimeout(()=>{if(el.textContent===msg)el.textContent='';},2600);
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(toastSave._timer);
+  toastSave._timer=setTimeout(()=>{
+    el.classList.remove('show');
+    if(status&&status.textContent===msg)status.textContent='';
+  },2600);
 }
+
+// Feedback tátil/visual para todos os botões do app, inclusive PROD ASIA, PROD BR e CRM.
+// Não interfere no onclick original; apenas confirma imediatamente que o clique foi recebido.
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('button');
+  if(!btn||btn.disabled)return;
+  const label=(btn.textContent||'').trim().toLowerCase();
+  const isCommit=/salvar|criar pedido/.test(label);
+  const isCancel=/cancelar/.test(label);
+  if((isCommit||isCancel)&&btn.dataset.uiClickLock==='1'){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return;
+  }
+  if(isCommit||isCancel){
+    btn.dataset.uiClickLock='1';
+    setTimeout(()=>delete btn.dataset.uiClickLock,900);
+    toastSave(isCommit?'Comando de salvar recebido…':'Cancelado');
+  }
+  btn.classList.remove('ui-press-feedback');
+  void btn.offsetWidth;
+  btn.classList.add('ui-press-feedback');
+  setTimeout(()=>btn.classList.remove('ui-press-feedback'),380);
+},true);
 
 /* ════════ SIMULAÇÕES SALVAS (Importação) ════════
    Vivem dentro do mesmo blob cifrado do cofre — reaproveita save/load/sync
@@ -4190,7 +4236,9 @@ function crmLoadMetaSdk(){
   const initialize=()=>{
     if(!window.FB)return null;
     if(!crmMetaSdkInitialized){
-      window.FB.init({appId:META_WHATSAPP_APP_ID,cookie:true,xfbml:false,version:'v26.0'});
+      // O cookie do Facebook Login pode acionar o fluxo FedCM/OpenID do navegador
+      // (scope=openid) antes do Embedded Signup. Esse fluxo não recebe o config_id.
+      window.FB.init({appId:META_WHATSAPP_APP_ID,cookie:false,status:false,xfbml:false,version:'v26.0'});
       crmMetaSdkInitialized=true;
     }
     return window.FB;
@@ -4289,6 +4337,9 @@ async function crmStartWhatsAppCoexistence(){
       }
     },{
       config_id:META_WHATSAPP_CONFIG_ID,
+      // Também declaramos os escopos da configuração explicitamente. Assim, mesmo
+      // em navegadores que tentem intermediar o login, a Meta não recebe só openid.
+      scope:'whatsapp_business_management,whatsapp_business_messaging',
       response_type:'code',
       override_default_response_type:true,
       extras:{
@@ -5094,6 +5145,10 @@ function crmToggleHorizonte30(){
   document.getElementById('crm-semana-horizonte-btn').textContent=crmSemanaHorizonte===7?'Ver próximos 30 dias':'Ver só 7 dias';
   crmRenderMinhaSemana();
 }
+function crmOpenOperationalCard(customerId,projectId){
+  if(projectId){crmOpenProjectEdit(projectId);return;}
+  if(customerId)crmOpenCustomerEdit(customerId);
+}
 function crmRenderMinhaSemana(){
   const cont=document.getElementById('crm-semana-container');
   if(!cont)return;
@@ -5118,16 +5173,16 @@ function crmRenderMinhaSemana(){
       const c=CRM_CUSTOMERS.find(x=>x.id===a.customer_id);
       contexto=esc(c?.trade_name||c?.display_name||'?');
     }
-    return`<div class="crm-week-row">
+    return`<div class="crm-week-row" role="button" tabindex="0" title="Clique para abrir" onclick="crmOpenOperationalCard('${a.customer_id||''}','${a.project_id||''}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();crmOpenOperationalCard('${a.customer_id||''}','${a.project_id||''}')}">
       <div class="crm-week-main">
         <div class="crm-week-kind ${kind}">${label}</div>
         <div class="crm-week-title"><span class="crm-week-client">${contexto}</span><span class="crm-week-date">${crmFmtDate2(a.due_date)}</span></div>
         <div class="crm-week-summary">${CRM_TYPE_ICON[a.type]||'•'} ${esc(a.summary)}</div>
       </div>
       <div class="crm-week-actions">
-        <button class="btn btn-p" onclick="crmOpenActionModalById('${a.customer_id}','${a.id}')">Concluir</button>
-        <button class="btn btn-s" onclick="crmRescheduleAction('${a.id}')">Reagendar</button>
-        <button class="btn btn-s" style="color:var(--red)" onclick="crmDismissAction('${a.id}')">Dispensar</button>
+        <button class="btn btn-p" onclick="event.stopPropagation();crmOpenActionModalById('${a.customer_id}','${a.id}')">Concluir</button>
+        <button class="btn btn-s" onclick="event.stopPropagation();crmRescheduleAction('${a.id}')">Reagendar</button>
+        <button class="btn btn-s" style="color:var(--red)" onclick="event.stopPropagation();crmDismissAction('${a.id}')">Dispensar</button>
       </div>
     </div>`;
   };
@@ -5195,6 +5250,16 @@ function crmSetSignalFilter(kind){
   CRM_SIGNAL_FILTER=kind;
   crmRenderSignals();
 }
+function crmSignalHasPlannedAction(s){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const limite=new Date(hoje);limite.setDate(limite.getDate()+30);
+  const limiteIso=`${limite.getFullYear()}-${String(limite.getMonth()+1).padStart(2,'0')}-${String(limite.getDate()).padStart(2,'0')}`;
+  return CRM_ACTIONS.some(a=>{
+    if(a.status!=='planned'||!a.due_date||a.due_date>limiteIso)return false;
+    if(s.kind==='projeto_parado'&&s.project_id)return a.project_id===s.project_id;
+    return !!s.customer_id&&a.customer_id===s.customer_id;
+  });
+}
 function crmAnalyzeSignal(customerId,kind){
   if(!customerId){toastSave('Vincule o projeto a um cliente antes de analisar com a IA.');return;}
   const label={
@@ -5215,18 +5280,21 @@ function crmRenderSignals(){
   const cont=document.getElementById('crm-signal-container');
   const filters=document.getElementById('crm-signal-filters');
   if(!card||!cont)return;
-  if(!CRM_SIGNAL_ITEMS.length){card.style.display='none';return;}
+  // Se já há ação na agenda (atrasada, nesta semana ou nos próximos 30 dias), o sinal
+  // já foi tratado operacionalmente e não deve continuar duplicado em "Vale sua atenção".
+  const activeSignals=CRM_SIGNAL_ITEMS.filter(s=>!crmSignalHasPlannedAction(s));
+  if(!activeSignals.length){card.style.display='none';return;}
   card.style.display='block';
   const counts={
-    all:CRM_SIGNAL_ITEMS.length,
-    recompra:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='recompra').length,
-    reativacao:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='reativacao').length,
-    sm_asia:CRM_SIGNAL_ITEMS.filter(s=>crmSignalBucket(s)==='sm_asia').length,
-    projeto_parado:CRM_SIGNAL_ITEMS.filter(s=>s.kind==='projeto_parado').length,
+    all:activeSignals.length,
+    recompra:activeSignals.filter(s=>s.kind==='recompra').length,
+    reativacao:activeSignals.filter(s=>s.kind==='reativacao').length,
+    sm_asia:activeSignals.filter(s=>crmSignalBucket(s)==='sm_asia').length,
+    projeto_parado:activeSignals.filter(s=>s.kind==='projeto_parado').length,
   };
   const labels=[['all','Todos'],['recompra','Recompra'],['reativacao','Reativação'],['sm_asia','SM Asia'],['projeto_parado','Projetos']];
   if(filters)filters.innerHTML=`<div class="crm-signal-toolbar">${labels.filter(([k])=>counts[k]>0||k==='all').map(([k,l])=>`<button class="crm-signal-chip ${CRM_SIGNAL_FILTER===k?'active':''}" onclick="crmSetSignalFilter('${k}')">${l}<span class="n">${counts[k]}</span></button>`).join('')}</div>`;
-  const itens=CRM_SIGNAL_FILTER==='all'?CRM_SIGNAL_ITEMS:CRM_SIGNAL_ITEMS.filter(s=>crmSignalBucket(s)===CRM_SIGNAL_FILTER);
+  const itens=CRM_SIGNAL_FILTER==='all'?activeSignals:activeSignals.filter(s=>crmSignalBucket(s)===CRM_SIGNAL_FILTER);
   cont.innerHTML=itens.length?`<div class="crm-signal-grid">${itens.map((item,i)=>crmSignalCardHtml(item,i,itens.length)).join('')}</div>`:'<div class="crm-week-empty">Nada neste filtro.</div>';
 }
 async function crmLoadSignalRecompra(){
@@ -5268,7 +5336,7 @@ function crmSignalCardHtml(s,i,total){
     const tempo=s.days_inactive==null?'sem compra comercial rastreada':`última compra há ${crmFmtCadenciaHumana(s.days_inactive)}`;
     const hist=s.order_count?`${s.order_count} operaç${s.order_count===1?'ão':'ões'} · ${Number(s.qty_total||0).toLocaleString('pt-BR')} un.`:'';
     const contexto=[s.active_projects?`${s.active_projects} projeto${s.active_projects===1?'':'s'} ativo${s.active_projects===1?'':'s'}`:'',s.planned_actions?`${s.planned_actions} ação${s.planned_actions===1?'':'ões'} planejada${s.planned_actions===1?'':'s'}`:''].filter(Boolean).join(' · ');
-    return`<div class="crm-signal-item" id="crm-signal-retomada-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
+    return`<div class="crm-signal-item" id="crm-signal-retomada-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
       <span class="sig-name">${esc(nome)}</span>
       <span class="sig-kind">Retomada SM Asia</span>
@@ -5276,30 +5344,28 @@ function crmSignalCardHtml(s,i,total){
     <div class="sig-reason">Histórico SM Asia · ${esc(tempo)}${hist?' · '+esc(hist):''}</div>
     ${contexto?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem">${esc(contexto)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
     <div class="sig-actions">
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','retomada_sm_asia')">✦ Analisar</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
-      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissRetomadaSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
+      <button class="btn btn-s" title="A IA avalia o sinal, as evidências e sugere o próximo passo; nada é salvo automaticamente" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="event.stopPropagation();crmAnalyzeSignal('${s.customer_id}','retomada_sm_asia')">✦ Analisar com IA</button>
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="event.stopPropagation();crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="event.stopPropagation();crmDismissRetomadaSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
     </div>
   </div>`;
   }
   if(s.kind==='target_sm_asia'){
-    return`<div class="crm-signal-item" id="crm-signal-sma-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
+    return`<div class="crm-signal-item" id="crm-signal-sma-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
       <span class="sig-name">${esc(s.cliente)}</span>
       <span class="sig-kind">SM Asia</span>
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
     <div class="sig-actions">
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','target_sm_asia')">✦ Analisar</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissTargetSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
+      <button class="btn btn-s" title="A IA avalia o sinal, as evidências e sugere o próximo passo; nada é salvo automaticamente" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="event.stopPropagation();crmAnalyzeSignal('${s.customer_id}','target_sm_asia')">✦ Analisar com IA</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="event.stopPropagation();crmDismissTargetSmAsiaSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
   </div>`;
   }
   if(s.kind==='reativacao'){
     const tagline={relacao_consolidada:'Relação recorrente anteriormente ativa.',grande_relacao:'Conta historicamente relevante.',relacao_relevante:'Relação relevante no passado.'}[s.signal_variant]||'';
-    return`<div class="crm-signal-item" id="crm-signal-react-${s.customer_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.signal_anchor_date)}">
+    return`<div class="crm-signal-item" id="crm-signal-react-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
       <span class="sig-name">${esc(s.cliente)}</span>
       <span class="sig-kind">Reativação</span>
@@ -5308,26 +5374,24 @@ function crmSignalCardHtml(s,i,total){
     ${s.comportamento_observado?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.1rem">${esc(s.comportamento_observado)}</div>`:''}
     ${tagline?`<div style="font-size:.6rem;color:var(--ink4);margin-bottom:.35rem;font-style:italic">${esc(tagline)}</div>`:'<div style="margin-bottom:.35rem"></div>'}
     <div class="sig-actions">
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','reativacao')">✦ Analisar</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir cliente</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissReativacaoSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
+      <button class="btn btn-s" title="A IA avalia o sinal, as evidências e sugere o próximo passo; nada é salvo automaticamente" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="event.stopPropagation();crmAnalyzeSignal('${s.customer_id}','reativacao')">✦ Analisar com IA</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="event.stopPropagation();crmDismissReativacaoSignal('${s.customer_id}','${s.signal_variant}','${s.signal_anchor_date}')">Descartar</button>
     </div>
   </div>`;
   }
   if(s.kind==='projeto_parado'){
     const nomeCliente=s.trade_name||s.display_name||s.prospect_name||'?';
     const customerArg=s.customer_id?`'${s.customer_id}'`:'null';
-    return`<div class="crm-signal-item" id="crm-signal-proj-${s.project_id}" title="signal_type=${esc(s.signal_type)} · variant=${esc(s.signal_variant)} · anchor=${esc(s.anchor_date)}">
+    return`<div class="crm-signal-item" id="crm-signal-proj-${s.project_id}" role="button" tabindex="0" title="Clique para abrir o projeto" onclick="crmOpenProjectEdit('${s.project_id}')">
     <div class="sig-top">
       <span class="sig-name">${esc(nomeCliente)} · ${esc(s.project_name)}</span>
       <span class="sig-kind">Projeto</span>
     </div>
     <div class="sig-reason">${esc(s.reason)}</div>
     <div class="sig-actions">
-      ${s.customer_id?`<button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','projeto_parado')">✦ Analisar</button>`:''}
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenProjectEdit('${s.project_id}')">Abrir projeto</button>
-      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissProjectSignal('${s.project_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
+      ${s.customer_id?`<button class="btn btn-s" title="A IA avalia o sinal, as evidências e sugere o próximo passo; nada é salvo automaticamente" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="event.stopPropagation();crmAnalyzeSignal('${s.customer_id}','projeto_parado')">✦ Analisar com IA</button>`:''}
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="event.stopPropagation();crmOpenActionModal(${customerArg},null,'${s.project_id}')">Criar ação</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="event.stopPropagation();crmDismissProjectSignal('${s.project_id}','${s.signal_variant}','${s.anchor_date}')">Agora não</button>
     </div>
   </div>`;
   }
@@ -5337,17 +5401,16 @@ function crmSignalCardHtml(s,i,total){
   const linhaCadencia=s.order_count>=6
     ?`Costuma comprar a cada ${crmFmtCadenciaHumana(s.median_interval_days)} · última há ${crmFmtCadenciaHumana(diasParado)}`
     :`${s.order_count} pedidos no histórico · última compra há ${crmFmtCadenciaHumana(diasParado)}`;
-  return`<div class="crm-signal-item" id="crm-signal-${s.customer_id}" title="${esc(tooltip)}">
+  return`<div class="crm-signal-item" id="crm-signal-${s.customer_id}" role="button" tabindex="0" title="Clique para abrir o cliente · ${esc(tooltip)}" onclick="crmOpenCustomerEdit('${s.customer_id}')">
     <div class="sig-top">
       <span class="sig-name">${esc(s.trade_name||s.display_name)}</span>
       <span class="sig-kind">Recompra</span>
     </div>
     <div class="sig-reason">${linhaCadencia}</div>
     <div class="sig-actions">
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="crmAnalyzeSignal('${s.customer_id}','recompra')">✦ Analisar</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenCustomerEdit('${s.customer_id}')">Abrir</button>
-      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
-      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
+      <button class="btn btn-s" title="A IA avalia o sinal, as evidências e sugere o próximo passo; nada é salvo automaticamente" style="font-size:.6rem;padding:.2rem .45rem;color:var(--blue)" onclick="event.stopPropagation();crmAnalyzeSignal('${s.customer_id}','recompra')">✦ Analisar com IA</button>
+      <button class="btn btn-p" style="font-size:.6rem;padding:.2rem .45rem" onclick="event.stopPropagation();crmOpenActionModal('${s.customer_id}',null)">Criar ação</button>
+      <button class="btn btn-s" style="font-size:.6rem;padding:.2rem .45rem;color:var(--ink4)" onclick="event.stopPropagation();crmDismissSignal('${s.customer_id}','${s.last_purchase_date}')">Agora não</button>
     </div>
   </div>`;
 }
