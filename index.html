@@ -305,13 +305,12 @@ header{height:46px;padding:0 1rem;gap:.65rem;box-shadow:0 1px 5px rgba(0,0,0,.25
 .tab{padding:0 .78rem;font-size:.7rem}.stab{padding:.48rem .8rem;font-size:.69rem}
 .hdr-r{gap:.42rem}.hdr-r .btn-bkp{padding:.26rem .55rem;font-size:.66rem}
 main{padding:.8rem 1rem}
-#view-internal .sbar,#view-client .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
-#view-internal .sc,#view-client .sc{min-width:118px;flex:0 1 138px;justify-content:flex-start;padding:.44rem .58rem;border-color:var(--bdr);box-shadow:none}
-#view-internal .sc:nth-child(n+6),#view-client .sc:nth-child(n+6){flex-basis:172px}
-#view-internal .slbl,#view-client .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view-internal .sbar{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.7rem}
+#view-internal .sc{min-width:118px;flex:0 1 138px;justify-content:flex-start;padding:.44rem .58rem;border-color:var(--bdr);box-shadow:none}
+#view-internal .sc:nth-child(n+6){flex-basis:172px}
+#view-internal .slbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
-#cli-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
 #int-tbl{table-layout:fixed;min-width:1450px}
 #int-tbl col.milestone-col{width:5%}
@@ -352,67 +351,7 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-node .mc.pending{width:12px!important;height:12px!important;background:var(--card)}
 body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{background:var(--card)}
 body.dark #int-tbl .ms-node .mc.done{background:transparent}
-#view-client>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
-#view-client .tw table{font-size:12px}
-#view-client thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
-#view-client thead .grp th:nth-child(2){border-top-color:var(--blue)}
-#view-client thead .grp th:nth-child(3){border-top-color:var(--amber)}
-#view-client thead .ch th{background:#FAFBFC!important;color:var(--ink2)!important;border-right:1px solid var(--bdr)!important;border-bottom:1px solid var(--bdr2)!important}
-#view-client tbody td{padding:.48rem .5rem}
-#view-client tbody tr.alt{background:#F7FAFD}
-#view-client tbody tr:hover,#view-client tbody tr.alt:hover{background:var(--ltblue)}
-#view-client .ms{width:100%;justify-content:center;align-items:flex-start}
-#view-client .mst{min-width:34px;position:relative}
-#view-client .ml2{flex:1;min-width:8px;max-width:24px;height:3px;margin-top:10px}
-#view-client .ml2.late{background:var(--red)}
-#view-client .mc{width:18px!important;height:18px!important;font-size:.68rem!important;border-width:2px!important;background:var(--card)}
-#view-client tr.alt .mc{background:#F7FAFD}
-#view-client .mc.done{border:0!important;background:transparent;color:var(--green);font-size:.9rem!important}
-#view-client .mc.est{background:var(--card);color:var(--amber)}
-#view-client .mc.late{background:var(--card);color:var(--red)}
-#view-client .mc.pending{width:12px!important;height:12px!important;background:var(--card);margin-top:3px}
-#view-client .mlbl{font-size:.52rem!important;color:var(--ink4)}
-body.dark #view-client>.tb{box-shadow:none}
-body.dark #view-client tbody tr.alt{background:#111B2B}
-body.dark #view-client thead .grp th{background:#172235!important;color:var(--ink3)!important}
-body.dark #view-client thead .ch th{background:#101A2A!important;color:var(--ink2)!important}
-body.dark #view-client .mc,body.dark #view-client tr.alt .mc{background:var(--card)}
-body.dark #view-client .mc.done{background:transparent}
 @media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:125px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
-</style>
-<style id="fgl-window-design-system-v1">
-/* Padrão visual das janelas — derivado do PROD ASIA final. */
-:root{--ui-modal-radius:12px;--ui-control-radius:7px;--ui-control-h:34px;--ui-modal-pad:1rem;--ui-section-gap:.85rem}
-.ovl{background:rgba(8,15,25,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);padding:14px}
-.ovl .modal{border-radius:var(--ui-modal-radius);border:1px solid rgba(160,181,202,.28);box-shadow:0 22px 64px rgba(8,21,36,.3)}
-.ovl .mhdr{min-height:52px;padding:.68rem var(--ui-modal-pad);background:var(--card);border-bottom:1px solid var(--bdr);border-radius:var(--ui-modal-radius) var(--ui-modal-radius) 0 0;color:var(--ink);z-index:20}
-.ovl .mhdr h2{font-family:'IBM Plex Sans',sans-serif;font-size:.86rem;font-weight:700;line-height:1.25;color:var(--ink);letter-spacing:0}
-.ovl .mhdr-actions{gap:.4rem}
-.ovl .mhdr-actions .btns{background:var(--card);color:var(--ink2);border:1px solid var(--bdr2)}
-.ovl .mhdr-actions .btns:hover{background:var(--ltblue);border-color:var(--blue);color:var(--blue)}
-.ovl .mcls{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;color:var(--ink3);font-size:1rem;line-height:1}
-.ovl .mcls:hover{background:var(--ltgry);color:var(--ink)}
-.ovl .mbody{padding:var(--ui-modal-pad)}
-.ovl .ff{gap:.25rem}
-.ovl .ff label{font-family:'IBM Plex Sans',sans-serif;font-size:.61rem;font-weight:700;line-height:1.25;letter-spacing:.055em;text-transform:uppercase;color:var(--ink3)}
-.ovl .ff input,.ovl .ff select,.ovl .ff textarea,.ovl .epop input,.ovl .epop select,.ovl .epop textarea{min-height:var(--ui-control-h);border:1px solid var(--bdr2);border-radius:var(--ui-control-radius);background:var(--card);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:.76rem;padding:.4rem .55rem;box-shadow:none}
-.ovl .ff textarea{min-height:68px;line-height:1.45;resize:vertical}
-.ovl .ff input:focus,.ovl .ff select:focus,.ovl .ff textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(22,104,190,.1);outline:none;background:var(--card)}
-.ovl .hint,.ovl .hint-sm{font-size:.57rem;line-height:1.4;color:var(--ink4)}
-.ovl .fsep{margin:var(--ui-section-gap) 0 .45rem;padding:0 0 .3rem;background:transparent;border-radius:0;border-bottom:1px solid var(--bdr);color:var(--ink3);font-size:.61rem;font-weight:700;line-height:1.3;letter-spacing:.065em;text-transform:uppercase}
-.ovl .fsep:first-child{margin-top:0}
-.ovl .btn{min-height:31px;border-radius:var(--ui-control-radius);font-family:'IBM Plex Sans',sans-serif;font-size:.68rem;font-weight:700;padding:.32rem .65rem}
-.ovl .btnp{background:var(--green);color:#fff;border:1px solid var(--green)}
-.ovl .btns{background:var(--card);color:var(--ink2);border:1px solid var(--bdr2)}
-.ovl .brow{display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-top:.85rem;padding-top:.7rem;border-top:1px solid var(--bdr)}
-.ovl .brow .btn{min-width:84px}
-.ovl table{font-family:'IBM Plex Sans',sans-serif}
-.epop,.msf-panel{border:1px solid var(--bdr2);border-radius:9px;background:var(--card);box-shadow:0 10px 28px rgba(8,21,36,.18)}
-.epop{padding:.75rem}.epop label{font-size:.61rem;font-weight:700;letter-spacing:.055em;text-transform:uppercase;color:var(--ink3)}
-.epop input,.epop select,.epop textarea,.msf-search{min-height:32px;border:1px solid var(--bdr2);border-radius:7px;background:var(--card);font-family:'IBM Plex Sans',sans-serif;font-size:.72rem}
-.epop-btns button{min-height:31px;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:.68rem;font-weight:700}
-body.dark .ovl .mhdr{background:var(--card);color:var(--ink)}
-@media(max-width:720px){.ovl{padding:8px}.ovl .mhdr{padding:.58rem .7rem}.ovl .mbody{padding:.75rem}.ovl .fg,.ovl .grid-av{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -523,30 +462,22 @@ body.dark .ovl .mhdr{background:var(--card);color:var(--ink)}
 
 <!-- ═══ VISÃO CLIENTE (agora uma opção dentro de Controle Interno) ═══ -->
 <div id="view-client" style="display:none">
-  <div class="sbar" id="cli-sum"></div>
   <div class="tb">
     <input id="cli-q" placeholder="🔍 Buscar PO, produto…" oninput="renderClient()">
     <span id="msf-cli-st-wrap"></span>
     <span id="msf-cli-cl-wrap"></span>
     <span class="finfo" id="cli-cnt"></span>
-    <div class="prod-asia-toolbar-actions">
-      <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
-      <button class="bsm" onclick="openStatusModal()">🏷 Tags</button>
-      <button class="bsm" onclick="exportClientCSV()">⬇ CSV</button>
+    <div class="ml" style="display:flex;gap:.5rem;align-items:center">
       <div class="toggle-grp ci-subview-toggle">
         <button data-mode="interno" onclick="setInternalSubview('interno')">Interno</button>
         <button class="active" data-mode="cliente" onclick="setInternalSubview('cliente')">Cliente</button>
       </div>
+      <button class="bsm" onclick="exportClientCSV()">⬇ CSV</button>
     </div>
   </div>
   <div class="tw">
     <table>
       <thead>
-        <tr class="grp">
-          <th colspan="6">PEDIDO</th>
-          <th>PROGRESSO</th>
-          <th colspan="2">ENTREGA</th>
-        </tr>
         <tr class="ch">
           <th class="L" style="min-width:28px">#</th>
           <th class="L" style="min-width:72px">PO#</th>
@@ -1142,7 +1073,10 @@ function normDate(v){
   if(MO.includes(mc))return`${p[0].padStart(2,'0')}/${mc}/${p[2].slice(-2)}`;
   return null;
 }
-function mkD(v,est=false){return{v:normDate(typeof v==='string'?v:null),est:!!est}}
+// `manual` diferencia uma previsão digitada pelo usuário de uma previsão
+// calculada pela cascata. Assim, um recálculo automático nunca apaga um
+// ajuste manual feito em ETA ou Entrada no CD.
+function mkD(v,est=false,manual=false){return{v:normDate(typeof v==='string'?v:null),est:!!est,manual:!!manual}}
 function todayDisp(){const d=new Date();return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`}
 function dispToISO(s){if(!s)return'';const p=s.split('/');if(p.length!==3)return'';const mi=MO.indexOf(p[1]);if(mi<0)return'';return`20${p[2]}-${String(mi+1).padStart(2,'0')}-${p[0].padStart(2,'0')}`;}
 function isoToDisp(iso){if(!iso||!iso.includes('-'))return'';const d=new Date(iso+'T00:00');if(isNaN(d))return'';return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;}
@@ -1258,20 +1192,41 @@ function addDaysToDisp(disp,days){
 }
 // Auto-fill: a partir do milestone index `fromIdx`, preenche os seguintes como estimados
 function autoCascade(o,fromIdx){
-  if(!o||!o.dates||fromIdx<0||fromIdx>=8)return;
+  if(!o||!o.dates||fromIdx<0||fromIdx>=8)return false;
   const base=o.dates[fromIdx];
-  if(!base||!base.v)return;
+  if(!base||!base.v)return false;
+  let changed=false;
   let cur=base.v;
   for(let i=fromIdx;i<8;i++){
     const next=addDaysToDisp(cur,MS_GAPS[i]);
     if(!next)break;
     const existing=o.dates[i+1];
-    // Só preenche se vazio ou estimado (nunca toca confirmado)
-    if(!existing||!existing.v||existing.est){
-      o.dates[i+1]=mkD(next,true);
+    // Recalcula somente campo vazio ou previsão automática.
+    // Data confirmada e previsão ajustada manualmente são preservadas.
+    if(!existing||!existing.v||(existing.est&&!existing.manual)){
+      if(!existing||existing.v!==next||!existing.est||existing.manual){
+        o.dates[i+1]=mkD(next,true);
+        changed=true;
+      }
     }
     cur=o.dates[i+1].v||next;
   }
+  return changed;
+}
+
+// Completa previsões ausentes em pedidos antigos ou sincronizados pelo
+// Financeiro. O caso principal é ETA preenchida com Entrada no CD vazia.
+function backfillEstimatedMilestones(o){
+  if(!o)return false;
+  if(!Array.isArray(o.dates))o.dates=[];
+  let changed=false;
+  while(o.dates.length<9){o.dates.push(mkD(null,true));changed=true;}
+  for(let i=0;i<8;i++){
+    if(o.dates[i]?.v&&(!o.dates[i+1]?.v||(o.dates[i+1]?.est&&!o.dates[i+1]?.manual))){
+      if(autoCascade(o,i))changed=true;
+    }
+  }
+  return changed;
 }
 // Auto-status: determina status baseado nos milestones
 // Índices: 0 Arte, 1 Pedido, 2 Amostras, 3 Produção Lançada, 4 Prontidão, 5 Booking Feito, 6 Embarque, 7 ETA, 8 No CD
@@ -1768,11 +1723,14 @@ function syncLinked(){
     else if(pEtd&&pEtd!==oEtd){o.dates[6]=mkD(pEtd,o.dates[6]?.est??true);changed=true;}
     const oEta=o.dates[7]?.v, pEta=normDate(p.eta);
     if(oEta&&oEta!==pEta){p.eta=oEta;changed=true;}
-    else if(pEta&&pEta!==oEta){o.dates[7]=mkD(pEta,o.dates[7]?.est??true);changed=true;}
+    else if(pEta&&pEta!==oEta){o.dates[7]=mkD(pEta,o.dates[7]?.est??true,true);changed=true;}
     if(o.client&&p.client!==o.client){p.client=o.client;changed=true;}
     else if(p.client&&!o.client){o.client=p.client;changed=true;}
     if(o.po&&o.po!=='—'&&p.po!==o.po){p.po=o.po;changed=true;}
+    if(backfillEstimatedMilestones(o))changed=true;
   });
+  // Também corrige pedidos sem registro financeiro vinculado.
+  orders.forEach(o=>{if(backfillEstimatedMilestones(o))changed=true;});
   if(changed)saveAll();
 }
 
@@ -1980,7 +1938,7 @@ function renderSummary(){
   const fin=orders.filter(o=>o.status==='FINALIZADO').length;
   const totPagar=payments.reduce((a,p)=>a+Math.max(0,pTotalForn(p)-piPaid(p.pi)),0);
   const totReceber=payments.reduce((a,p)=>a+Math.max(0,pTotalVenda(p)-piReceived(p.pi)),0);
-  const summaryHtml=[
+  document.getElementById('int-sum').innerHTML=[
     {l:'Pré-Produção',v:pre,d:'var(--amber)',c:'var(--amber)'},
     {l:'Em Produção',v:prod,d:'var(--purple)',c:'var(--purple)'},
     {l:'Pré-Embarque',v:preemb,d:'var(--preemb)',c:'var(--preemb)'},
@@ -1989,8 +1947,6 @@ function renderSummary(){
     {l:'A Pagar Forn.',v:fUSD(totPagar),d:'var(--red)',c:'var(--red)'},
     {l:'A Receber Cli.',v:fUSD(totReceber),d:'var(--blue)',c:'var(--blue)'},
   ].map(x=>`<div class="sc"><span class="sdot" style="background:${x.d}"></span><div><div class="slbl">${x.l}</div><div class="sval" style="color:${x.c};font-size:${String(x.v).length>8?'.85rem':'1.18rem'}">${x.v}</div></div></div>`).join('');
-  document.getElementById('int-sum').innerHTML=summaryHtml;
-  const clientSummary=document.getElementById('cli-sum');if(clientSummary)clientSummary.innerHTML=summaryHtml;
 }
 
 /* ══════════════════════════════════════
@@ -2129,7 +2085,10 @@ function renderClient(){
   const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&msfMatch('cli-st',o.status)&&msfMatch('cli-cl',o.client);});
   document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
-    return`<tr${i%2?'':' class="alt"'}>
+    let rowStyle='';
+    if(o.status==='FINALIZADO')rowStyle=' style="background:var(--ltgrn)"';
+    else if(o.status==='SUSPENSO')rowStyle=' style="background:var(--ltred)"';
+    return`<tr${rowStyle||(i%2?'':' class="alt"')}>
       <td class="L"><b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b></td>
       <td class="L"><span style="font-family:'IBM Plex Mono';font-size:.7rem;color:var(--blue)">${esc(o.po)}</span></td>
       <td class="L"><b>${esc(o.client)}</b></td>
@@ -2839,19 +2798,24 @@ function submitOrder(){
         // clientInv/status/eta não têm mais campo no modal — preserva o que já estava salvo
         p.po=po;p.inv=inv;p.client=client;p.supplier=supplier||p.supplier;p.etd=etd;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
       }
+      if(etd&&etd!=='—'){
+        while(o.dates.length<9)o.dates.push(mkD(null,true));
+        o.dates[6]=mkD(etd,true,true);
+        autoCascade(o,6);
+      }
     }
     saveAll();renderAll();renderFinanceiro();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
   }
 
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-  if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true);
+  if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true,true);
   const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
   // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
   if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
   // Restaurar ETD se usuário informou explicitamente (não sobrescrever)
-  if(etd&&etd!=='—')newOrder.dates[6]=mkD(etd,true);
+  if(etd&&etd!=='—')newOrder.dates[6]=mkD(etd,true,true);
   autoStatus(newOrder);
   orders.unshift(newOrder);
   if(pi&&prodRows.length>0){
@@ -2963,10 +2927,11 @@ function editMS(num,di,e){
   const MSFULL=['Arte Aprovada','Pedido Lançado','Amostras Recebidas','Prod. Lançada','Prontidão Ásia','Booking Feito','Embarque ETD','ETA Brasil','Entrada CD'];
   document.getElementById('ep-ttl').textContent=MSFULL[di];
   document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
-    <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off" oninput="document.getElementById('ep-est').checked=false">
-    <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value);document.getElementById('ep-est').checked=false">
+    <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
+    <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value)">
     <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
-    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i style="font-size:.85em;font-weight:400;color:var(--ink3)">desmarque para confirmar a data</i></label>`;
+    <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i style="font-size:.85em;font-weight:400;color:var(--ink3)">desmarque para confirmar a data</i></label>
+    <div style="font-size:.62rem;color:var(--ink3);margin-top:.35rem">Datas alteradas aqui são preservadas nos próximos recálculos.</div>`;
   positionEp(e);
 }
 function editLed(n,field,e){
@@ -3013,7 +2978,7 @@ function epSave(){
   if(_epCtx.type==='ms'){
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     const est=document.getElementById('ep-est')?.checked||false;
-    o.dates[_epCtx.di]=mkD(val||null,est);
+    o.dates[_epCtx.di]=mkD(val||null,est,!!val);
     // Auto-fill cascata: preenche datas seguintes como estimadas
     if(val) autoCascade(o,_epCtx.di);
     // Auto-status baseado nos milestones
@@ -3057,8 +3022,8 @@ function epSave(){
         if(_epCtx.field==='client')o.client=val;
         if(_epCtx.field==='supplier')o.supplier=val;
         const nd=normDate(val);
-        if(_epCtx.field==='etd'&&nd) o.dates[6]=mkD(nd,o.dates[6]?.est??true);
-        if(_epCtx.field==='eta'&&nd) o.dates[7]=mkD(nd,o.dates[7]?.est??true);
+        if(_epCtx.field==='etd'&&nd){o.dates[6]=mkD(nd,o.dates[6]?.est??true,true);autoCascade(o,6);}
+        if(_epCtx.field==='eta'&&nd){o.dates[7]=mkD(nd,o.dates[7]?.est??true,true);autoCascade(o,7);}
       }
     }
   } else if(_epCtx.type==='led'){
@@ -3085,10 +3050,6 @@ function showTab(id){
   _activeTab=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
-  // A visão Cliente é uma subvisão do Controle Interno e não usa a classe .view.
-  // Ao navegar para outro módulo, ela precisa ser ocultada explicitamente.
-  const clientView=document.getElementById('view-client');
-  if(clientView&&id!=='internal')clientView.style.display='none';
   document.getElementById('view-'+id).classList.add('active');
   const tabs={internal:0,financeiro:1};
   document.querySelectorAll('.stab')[tabs[id]]?.classList.add('active');
