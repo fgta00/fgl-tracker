@@ -312,7 +312,7 @@ main{padding:.8rem 1rem}
 #view-internal>.tb,#ci-content-interno>.tb{background:var(--card);border:1px solid var(--bdr);border-radius:9px;padding:.48rem .55rem;margin-bottom:.55rem;box-shadow:0 1px 3px rgba(0,0,0,.035)}
 #int-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
-#int-tbl{table-layout:fixed;min-width:1450px}
+#int-tbl{table-layout:fixed;min-width:1600px}
 #int-tbl col.milestone-col{width:5%}
 #int-tbl th:nth-child(5){min-width:280px!important}
 #int-tbl td{padding:.48rem .42rem}
@@ -329,6 +329,8 @@ main{padding:.8rem 1rem}
 #int-tbl .mc{width:24px;height:24px;font-size:.7rem}
 #int-tbl .ml2{margin-top:10px}
 #int-tbl .mlbl{font-size:.52rem}
+#int-tbl .progress-substeps{flex-wrap:nowrap!important;overflow-x:auto;overflow-y:hidden}
+#int-tbl .progress-substeps>span{white-space:nowrap;flex-shrink:0}
 body.dark #int-tbl tbody tr.alt{background:#111B2B}
 body.dark #int-tbl thead .grp th,body.dark #int-sticky-clone thead .grp th{background:#172235!important;color:var(--ink3)!important}
 body.dark #int-tbl thead .ch th,body.dark #int-sticky-clone thead .ch th{background:#101A2A!important;color:var(--ink2)!important}
@@ -423,7 +425,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
   <div class="tw">
     <table id="int-tbl">
       <colgroup>
-        <col style="width:2.5%"><col style="width:15%"><col style="width:11%"><col style="width:5%"><col style="width:19%">
+        <col style="width:2.5%"><col style="width:14%"><col style="width:10%"><col style="width:4%"><col style="width:22%">
         <col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col">
         <col style="width:2.5%">
       </colgroup>
@@ -441,7 +443,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
           <th class="L" style="min-width:150px">AV/FY · Cliente · Fornecedor · Coleção</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
-          <th style="min-width:320px">Situação</th>
+          <th style="min-width:350px">Situação</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Arte<br>Recebida</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Pedido<br>Confirmado<br>(sinal)</th>
           <th style="min-width:68px;font-size:.64rem;line-height:1.2">Amostras<br>Em Mãos</th>
@@ -520,7 +522,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <div class="date-wrap">
               <input type="text" id="l-date" placeholder="15/01/26" autocomplete="off">
               <input type="date" id="l-date-cal" onchange="datePickerSync('l-date',this.value)">
-              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('l-date-cal')" tabindex="-1">📅</button>
+              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('l-date-cal',event)" tabindex="-1">📅</button>
             </div>
           </div>
           <div class="ff"><label id="l-amt-lbl">Valor USD</label><input type="number" id="l-amt" placeholder="0.00" step="0.01"></div>
@@ -571,7 +573,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <div class="date-wrap">
               <input type="text" id="r-date" placeholder="15/01/26" autocomplete="off">
               <input type="date" id="r-date-cal" onchange="datePickerSync('r-date',this.value)">
-              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('r-date-cal')" tabindex="-1">📅</button>
+              <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('r-date-cal',event)" tabindex="-1">📅</button>
             </div>
           </div>
           <div class="ff"><label id="r-amt-lbl">Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
@@ -636,7 +638,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
             <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
-            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal')" tabindex="-1">📅</button>
+            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal',event)" tabindex="-1">📅</button>
           </div>
         </div>
         <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
@@ -666,7 +668,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
           <div class="date-wrap">
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
             <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
-            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-etd-cal')" tabindex="-1">📅</button>
+            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-etd-cal',event)" tabindex="-1">📅</button>
           </div>
         </div>
         <div class="ff"><label>Amostras</label>
@@ -1350,7 +1352,7 @@ function docEventsChecklistHTML(o){
         </span>`;
       }
     }).join('');
-    return`<div style="display:flex;align-items:center;gap:10px;border:1px solid var(--bdr);border-radius:6px;padding:.25rem .5rem;margin-top:3px;flex-wrap:wrap">
+    return`<div class="progress-substeps" style="display:flex;align-items:center;gap:10px;border:1px solid var(--bdr);border-radius:6px;padding:.25rem .5rem;margin-top:3px;flex-wrap:nowrap;overflow-x:auto">
       <span style="font-size:.5rem;font-weight:700;color:var(--teal);flex-shrink:0">${FASE_LBL[fase]} ${feitos}/${list.length}</span>
       ${itemHtml}
       <span onclick="docEventTogglePhase(${o.num},'${fase}',event)" title="Fechar" style="margin-left:auto;cursor:pointer;color:var(--ink4);font-size:.65rem;flex-shrink:0">✕</span>
@@ -2929,7 +2931,7 @@ function editMS(num,di,e){
   document.getElementById('ep-body').innerHTML=`<label>Data (DD/MM/AA)</label>
     <div class="date-wrap" style="margin-bottom:.5rem"><input type="text" id="ep-val" placeholder="15/03/26" value="${d.v||''}" autocomplete="off">
     <input type="date" id="ep-val-cal" onchange="datePickerSync('ep-val',this.value)">
-    <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('ep-val-cal')" tabindex="-1">📅</button></div>
+    <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('ep-val-cal',event)" tabindex="-1">📅</button></div>
     <label class="chkrow"><input type="checkbox" id="ep-est"${d.est?' checked':''}> Previsão (laranja) — <i style="font-size:.85em;font-weight:400;color:var(--ink3)">desmarque para confirmar a data</i></label>
     <div style="font-size:.62rem;color:var(--ink3);margin-top:.35rem">Datas alteradas aqui são preservadas nos próximos recálculos.</div>`;
   positionEp(e);
@@ -3592,13 +3594,14 @@ document.getElementById('login-pw').focus();
    MINI CALENDAR
 ══════════════════════════════════════ */
 let _calTarget=null,_calY=new Date().getFullYear(),_calM=new Date().getMonth();
-function openCal(calId){
+function openCal(calId,e){
+  if(e){e.preventDefault();e.stopPropagation();}
   _calTarget=calId.replace(/-cal$/,'');
   const cur=document.getElementById(_calTarget)?.value||'';const iso=dispToISO(cur);
   if(iso){const d=new Date(iso+'T00:00');if(!isNaN(d)){_calY=d.getFullYear();_calM=d.getMonth();}}
   else{_calY=new Date().getFullYear();_calM=new Date().getMonth();}
   renderMcal();
-  const btn=event.currentTarget||event.target;const r=btn.getBoundingClientRect();
+  const btn=e?.currentTarget||e?.target||document.getElementById(calId);const r=btn.getBoundingClientRect();
   const cal=document.getElementById('mcal');cal.style.display='block';
   let top=r.bottom+4,left=r.left;
   if(top+240>window.innerHeight)top=r.top-244;if(left+224>window.innerWidth)left=window.innerWidth-228;
@@ -3614,13 +3617,13 @@ function renderMcal(){
   for(let d=1;d<=lastDay;d++){
     const iso=`${_calY}-${String(_calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday=today.getFullYear()===_calY&&today.getMonth()===_calM&&today.getDate()===d;
-    days+=`<div class="mc-day${isToday?' today':''}${curISO===iso?' selected':''}" onclick="pickDay(${d})">${d}</div>`;
+    days+=`<div class="mc-day${isToday?' today':''}${curISO===iso?' selected':''}" onclick="pickDay(${d},event)">${d}</div>`;
   }
-  cal.innerHTML=`<div class="mc-hdr"><button class="mc-nav" onclick="mcalNav(-1);event.stopPropagation()" aria-label="Mês anterior">‹</button><span class="mc-title">${MO[_calM]} ${_calY}</span><button class="mc-nav" onclick="mcalNav(1);event.stopPropagation()" aria-label="Próximo mês">›</button></div>
+  cal.innerHTML=`<div class="mc-hdr"><button class="mc-nav" onclick="mcalNav(-1,event)" aria-label="Mês anterior">‹</button><span class="mc-title">${MO[_calM]} ${_calY}</span><button class="mc-nav" onclick="mcalNav(1,event)" aria-label="Próximo mês">›</button></div>
     <div class="mc-grid"><div class="mc-dow">Seg</div><div class="mc-dow">Ter</div><div class="mc-dow">Qua</div><div class="mc-dow">Qui</div><div class="mc-dow">Sex</div><div class="mc-dow">Sáb</div><div class="mc-dow">Dom</div>${days}</div>`;
 }
-function mcalNav(dir){_calM+=dir;if(_calM<0){_calM=11;_calY--;}if(_calM>11){_calM=0;_calY++;}renderMcal();event.stopPropagation();}
-function pickDay(d){datePickerSync(_calTarget,`${_calY}-${String(_calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);document.getElementById('mcal').style.display='none';}
+function mcalNav(dir,e){if(e){e.preventDefault();e.stopPropagation();}_calM+=dir;if(_calM<0){_calM=11;_calY--;}if(_calM>11){_calM=0;_calY++;}renderMcal();}
+function pickDay(d,e){if(e){e.preventDefault();e.stopPropagation();}datePickerSync(_calTarget,`${_calY}-${String(_calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);document.getElementById('mcal').style.display='none';}
 function datePickerSync(targetId,isoVal){
   if(!isoVal)return;const[y,m,d]=isoVal.split('-');
   const el=document.getElementById(targetId);if(el){el.value=`${d}/${MO[parseInt(m)-1]}/${y.slice(2)}`;el.dispatchEvent(new Event('input'));}
