@@ -1768,7 +1768,20 @@ function setSyncStatus(state){
 /* ══════════════════════════════════════
    FINANCE CALCS
 ══════════════════════════════════════ */
-function pTotalForn(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceForn||0)+(r.plates||0)+(r.sample||0),0)+(p.plates||0)+(p.sample||0);}
+function pSupplierBreakdown(p){
+  const rows=p?.unitPrices||[];
+  const goods=rows.reduce((a,r)=>a+(Number(r.qty)||0)*(Number(r.priceForn)||0),0);
+  const rowPlates=rows.reduce((a,r)=>a+(Number(r.plates)||0),0);
+  const rowSamples=rows.reduce((a,r)=>a+(Number(r.sample)||0),0);
+  const legacyPlates=Number(p?.plates)||0,legacySamples=Number(p?.sample)||0;
+  // Registros antigos podiam manter o mesmo extra no produto e também no
+  // cabeçalho. Usa a fonte nova quando ela existe; a antiga fica só como fallback.
+  const plates=rowPlates>0?rowPlates:legacyPlates;
+  const samples=rowSamples>0?rowSamples:legacySamples;
+  return{goods,plates,samples,total:goods+plates+samples,
+    duplicateLegacy:(rowPlates>0&&legacyPlates>0)||(rowSamples>0&&legacySamples>0)};
+}
+function pTotalForn(p){return pSupplierBreakdown(p).total;}
 function pTotalVenda(p){return(p.unitPrices||[]).reduce((a,r)=>a+(r.qty||0)*(r.priceCli||0),0);}
 /* ── CAMADAS AV — custo de importação (RF) + trading, convertidos de R$ pro US$ interno ── */
 function isIpC(pi){return /c$/i.test((pi||'').trim());}
@@ -2263,6 +2276,17 @@ function renderFinanceCard(vm){
       <div style="margin-bottom:.55rem">
         <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--ink3);margin-bottom:1px"><span>📥 Recebido ${vm.pctReceb}%${vm.overReceb?' ⚠':''}</span><span style="color:${vm.overReceb?'var(--red)':vm.aReceber>0?'var(--red)':'var(--green)'}">${vm.overReceb?'⚠ conferir (recebido a mais)':vm.totV>0?(vm.aReceber>0?'falta '+fUSD(vm.aReceber):'✓ quitado'):'—'}</span></div>
         <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,vm.pctReceb)}%;background:${vm.bcR}"></div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:.15rem 0 .55rem">
+        <div style="background:var(--ltred);border:1px solid #F7B8BE;border-radius:7px;padding:.38rem .45rem">
+          <div style="font-size:.52rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em">A pagar</div>
+          <div style="font-family:'IBM Plex Mono';font-size:.74rem;font-weight:700;color:var(--red);white-space:nowrap">${fUSD(vm.aPagar)}</div>
+        </div>
+        <div style="background:var(--ltgrn);border:1px solid #A8DFC2;border-radius:7px;padding:.38rem .45rem">
+          <div style="font-size:.52rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em">A receber</div>
+          <div style="font-family:'IBM Plex Mono';font-size:.74rem;font-weight:700;color:var(--green);white-space:nowrap">${fUSD(vm.aReceber)}</div>
+        </div>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:.5rem;border-top:1px solid var(--bdr)">
@@ -3079,6 +3103,7 @@ function openFinPopup(pi){
   const p=payments.find(x=>x.pi===pi);if(!p)return;
   const o=orders.find(x=>x.pi===pi);
   const isC=isIpC(pi);
+  const supplierBreakdown=pSupplierBreakdown(p);
   const tF=pTotalFornAV(p),tV=pTotalVenda(p),paid=piPaid(pi),recv=piReceived(pi);
   const aPagar=tF-paid,aReceber=tV-recv;
   const mg=tV-tF,pM=tV>0?Math.round(mg/tV*100):0;
@@ -3104,6 +3129,28 @@ function openFinPopup(pi){
       <div style="font-size:.58rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em">Margem</div>
       <div style="font-size:1rem;font-weight:700;color:${mg>=0?'var(--green)':'var(--red)'};font-family:'IBM Plex Mono'">${fUSD(mg)} <span style="font-size:.7rem">(${pM}%)</span></div>
     </div>
+  </div>`;
+
+  // Saldos operacionais em destaque — são os números de ação do financeiro.
+  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:-.35rem 0 1rem">
+    <div style="background:var(--ltred);border:2px solid var(--red);border-radius:9px;padding:.7rem .8rem;box-shadow:0 2px 7px rgba(190,24,43,.08)">
+      <div style="font-size:.62rem;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.06em">A pagar ao fornecedor</div>
+      <div style="font-family:'IBM Plex Mono';font-size:1.2rem;font-weight:800;color:var(--red);margin-top:.15rem">${fUSD(Math.max(0,aPagar))}</div>
+      <div style="font-size:.56rem;color:var(--ink3);margin-top:.12rem">${fUSD(tF)} devido − ${fUSD(paid)} pago</div>
+    </div>
+    <div style="background:var(--ltgrn);border:2px solid var(--green);border-radius:9px;padding:.7rem .8rem;box-shadow:0 2px 7px rgba(20,125,74,.08)">
+      <div style="font-size:.62rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.06em">A receber do cliente</div>
+      <div style="font-family:'IBM Plex Mono';font-size:1.2rem;font-weight:800;color:var(--green);margin-top:.15rem">${fUSD(Math.max(0,aReceber))}</div>
+      <div style="font-size:.56rem;color:var(--ink3);margin-top:.12rem">${fUSD(tV)} faturado − ${fUSD(recv)} recebido</div>
+    </div>
+  </div>`;
+
+  h+=`<div style="font-size:.6rem;color:var(--ink3);background:var(--ltgry);border:1px solid var(--bdr);border-radius:6px;padding:.4rem .6rem;margin-bottom:.8rem">
+    <b>Composição do fornecedor:</b> mercadoria ${fUSD(supplierBreakdown.goods)}
+    ${supplierBreakdown.plates?` · cilindros ${fUSD(supplierBreakdown.plates)}`:''}
+    ${supplierBreakdown.samples?` · amostras ${fUSD(supplierBreakdown.samples)}`:''}
+    ${isC?` · camadas AV ${fUSD(tF-supplierBreakdown.total)}`:''}
+    = <b>${fUSD(tF)}</b>${supplierBreakdown.duplicateLegacy?' <span style="color:var(--amber);font-weight:700">· duplicidade antiga ignorada</span>':''}
   </div>`;
 
   // Detalhe por produto (qtd/PU/total — forn. e cliente), colapsado por padrão
