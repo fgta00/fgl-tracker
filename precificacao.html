@@ -707,8 +707,8 @@ button:active{filter:brightness(.94)}
 .crm-project-row:hover{border-color:var(--bdr2);box-shadow:0 2px 8px rgba(0,0,0,.04)}
 .crm-project-main{grid-area:main;min-width:0}
 .crm-project-row>div:nth-child(2){grid-area:stage;justify-self:end}
-.crm-project-name{font-size:.92rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crm-project-client{font-size:.72rem;color:var(--ink4);margin-top:.14rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-project-client{font-size:.92rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-project-name{font-size:.72rem;font-weight:500;color:var(--ink4);margin-top:.14rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-stage{font-size:.58rem;font-weight:700;color:var(--blue);background:var(--ltblue);border-radius:999px;padding:.16rem .42rem;width:max-content;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crm-project-next{grid-area:next;font-size:.61rem;color:var(--ink2);min-width:0;min-height:1.2rem;padding:.08rem 0}
 .crm-project-next b{font-weight:600;color:var(--ink)}
@@ -5715,8 +5715,8 @@ function crmRenderProjects(){
     const quick=prox?`<div class="crm-project-quick"><button class="btn btn-s" onclick="event.stopPropagation();crmOpenActionModalById(null,'${prox.id}')">✓ Concluir</button><button class="btn btn-s" onclick="event.stopPropagation();crmRescheduleAction('${prox.id}')">Reagendar</button></div>`:`<div class="crm-project-quick"><button class="btn btn-p" onclick="event.stopPropagation();crmCreateActionForProjectId('${p.id}')">＋ Agendar ação</button></div>`;
     return`<div class="crm-project-row ${health.kind}${p.status!=='active'?' crm-project-closed':''}" role="button" tabindex="0" aria-label="Abrir projeto ${esc(p.project_name||'Projeto')}" onclick="crmOpenProjectEdit('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();crmOpenProjectEdit('${p.id}')}">
       <div class="crm-project-main">
-        <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
         <div class="crm-project-client">${esc(cliente)}${p.potential_value?` · ${crmFmtBRL(Number(p.potential_value))}`:''}</div>
+        <div class="crm-project-name">${esc(p.project_name||'Projeto')}</div>
       </div>
       <div><span class="crm-project-stage">${esc(p.stage||'Sem etapa')}</span>${p.status!=='active'?`<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${esc(CRM_PROJECT_STATUS_LBL[p.status]||p.status)}</div>`:''}</div>
       ${nextHtml}
