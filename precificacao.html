@@ -1109,6 +1109,7 @@ button:active{filter:brightness(.94)}
       <div id="crm-content" style="display:none">
         <div class="rv-tabs no-print" style="display:flex;align-items:center;margin-bottom:.9rem;border-bottom:1px solid var(--bdr)">
           <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
+          <button class="rv-tab" id="crmtab-caixa" onclick="crmShowSubTab('caixa')">Caixa <span id="crm-inbox-badge" style="display:none;margin-left:.2rem;padding:.02rem .28rem;border-radius:999px;background:var(--red);color:white;font-size:.52rem">0</span></button>
           <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
           <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos</button>
           <button class="rv-tab" id="crmtab-descobrir" onclick="crmShowSubTab('descobrir')">Descobrir</button>
@@ -1134,6 +1135,30 @@ button:active{filter:brightness(.94)}
             </div>
             <div id="crm-signal-filters"></div>
             <div id="crm-signal-container"></div>
+          </div>
+        </div>
+
+        <div id="crmpane-caixa" class="rv-pane">
+          <div class="card" style="padding:.85rem 1rem">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
+              <div>
+                <div class="sh" style="margin:0">Caixa compartilhada</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">WhatsApp e e-mail organizados por conversa, cliente e próximo responsável</div>
+              </div>
+              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+                <button class="btn btn-s" id="crm-inbox-diagnostic-btn" onclick="crmInboxRunDiagnostic()">Diagnóstico</button>
+                <button class="btn btn-s" onclick="crmLoadAll()">↻ Atualizar</button>
+              </div>
+            </div>
+            <div id="crm-inbox-diagnostic" style="display:none;margin-top:.65rem;padding:.65rem .75rem;border:1px solid var(--bdr);border-radius:.55rem;background:var(--bg)"></div>
+            <div style="display:grid;grid-template-columns:minmax(180px,1.35fr) repeat(3,minmax(130px,.7fr));gap:.45rem;margin-top:.75rem">
+              <input id="crm-inbox-q" placeholder="Buscar cliente, pessoa ou mensagem…" oninput="crmRenderInbox()">
+              <select id="crm-inbox-channel" onchange="crmRenderInbox()"><option value="">WhatsApp + e-mail</option><option value="whatsapp">WhatsApp</option><option value="email">E-mail</option></select>
+              <select id="crm-inbox-state" onchange="crmRenderInbox()"><option value="">Todos os estados</option><option value="new">Nova</option><option value="in_progress">Em atendimento</option><option value="waiting_customer">Aguardando cliente</option><option value="waiting_team">Aguardando equipe</option><option value="done">Concluída</option></select>
+              <select id="crm-inbox-owner" onchange="crmRenderInbox()"><option value="">Toda a equipe</option><option value="me">Minhas conversas</option><option value="unassigned">Sem responsável</option></select>
+            </div>
+            <div id="crm-inbox-summary" style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.65rem"></div>
+            <div id="crm-inbox-container" style="margin-top:.55rem"><p class="hint">Carregando conversas…</p></div>
           </div>
         </div>
 
@@ -3602,7 +3627,7 @@ let rvSacachoEditing=false;
    admin via SQL (sem auto-cadastro) — ver crmCheckAccess().
 ══════════════════════════════════════ */
 let CRM_ROLE=null; // null=ainda não checou; false=sem acesso; 'admin'|'crm_user'=liberado
-let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[],CRM_COMMUNICATIONS=[];
+let CRM_CUSTOMERS=[],CRM_TAGS=[],CRM_CUSTOMER_TAGS=[],CRM_PEOPLE=[],CRM_EXTERNAL_REFS=[],CRM_ACTIONS=[],CRM_GROUPS=[],CRM_COMMUNICATIONS=[],CRM_CONVERSATION_STATES=[];
 let CRM_WIX_LEADS=[];
 let crmPendingWixLeadId=null;
 let crmWixResolvedOpen=false;
@@ -3916,6 +3941,9 @@ function crmShowSubTab(id,skipReclick){
     crmLoadSignalRecompra();
     crmLoadProjects().then(crmRenderMinhaSemana);
     crmLoadAll();
+  }else if(id==='caixa'){
+    crmRenderInbox();
+    crmLoadAll();
   }else if(id==='projetos'){
     crmRenderProjects();
     Promise.all([
@@ -3926,6 +3954,14 @@ function crmShowSubTab(id,skipReclick){
     crmLoadAll();
     crmLoadWixLeads();
   }
+}
+async function crmFetchOptional(table,selectStr){
+  const{data,error}=await _supa.from(table).select(selectStr);
+  if(error){
+    if(error.code!=='42P01'&&error.code!=='PGRST205')console.warn('Tabela opcional indisponível',table,error);
+    return[];
+  }
+  return data||[];
 }
 // Busca TODAS as linhas de uma tabela, paginando — nunca confia no limite default de
 // 1000 linhas do PostgREST. Mesmo bug que achamos e corrigimos no script Python de
@@ -3946,7 +3982,7 @@ async function crmFetchAll(table, selectStr, eqFilters){
   return all;
 }
 async function crmLoadAll(){
-  const[cust,tags,ctags,people,refs,actions,groups,communications]=await Promise.all([
+  const[cust,tags,ctags,people,refs,actions,groups,communications,conversationStates]=await Promise.all([
     crmFetchAll('crm_customers','*',{deleted:false}),
     crmFetchAll('crm_tags','*'),
     crmFetchAll('crm_customer_tags','*'),
@@ -3955,6 +3991,7 @@ async function crmLoadAll(){
     crmFetchAll('crm_actions','*',{deleted:false}),
     crmFetchAll('crm_groups','*',{deleted:false}),
     crmFetchAll('crm_communications','*'),
+    crmFetchOptional('crm_conversation_states','*'),
   ]);
   CRM_CUSTOMERS=cust;
   CRM_TAGS=tags;
@@ -3964,7 +4001,9 @@ async function crmLoadAll(){
   CRM_ACTIONS=actions;
   CRM_GROUPS=groups;
   CRM_COMMUNICATIONS=communications;
+  CRM_CONVERSATION_STATES=conversationStates;
   crmRenderCustomers();
+  crmRenderInbox();
   if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
   if(document.getElementById('ovl-crmcustomer')?.classList.contains('open')&&crmEditCtx.customerId)crmRenderTimeline();
   if(document.getElementById('ovl-crmproject')?.classList.contains('open')&&crmEditProjectId){crmRenderProjectTimeline();crmRenderProjectNextAction();}
@@ -5171,6 +5210,97 @@ function crmCommunicationListHtml(items){
   const groups=new Map();
   items.forEach(m=>{const key=m.external_thread_id||`single:${m.id}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);});
   return[...groups.values()].map(thread=>{thread.sort((a,b)=>new Date(a.sent_at||a.created_at)-new Date(b.sent_at||b.created_at));const last=thread[thread.length-1],when=last.sent_at||last.created_at,label=last.channel==='whatsapp'?'WhatsApp':'E-mail',summary=last.subject||last.excerpt||'(sem assunto)',inbound=thread.some(m=>m.direction==='inbound');return`<div class="crm-tl-card" onclick="this.classList.toggle('open')"><div style="display:flex;gap:.5rem;align-items:flex-start">${crmTypeIconBadge(last.channel==='whatsapp'?'whatsapp':'email')}<div style="flex:1;min-width:0"><div style="font-size:.7rem"><b>${label}</b><span style="color:var(--ink4)"> · ${thread.length>1?`${thread.length} mensagens`:(inbound?'Recebido':'Enviado')}</span></div><div style="font-size:.72rem;color:var(--ink2);margin-top:.12rem;overflow-wrap:anywhere">${esc(summary)}</div><div style="font-size:.6rem;color:var(--ink4);margin-top:.25rem">${crmFmtDate(when)} · clique para ${thread.length>1?'ver conversa':'ver conteúdo'}</div><div class="crm-tl-detail" style="display:none;margin-top:.35rem">${thread.map(crmCommunicationMessageHtml).join('')}</div></div></div></div>`;}).join('');
+}
+
+const CRM_INBOX_STATE_LABEL={new:'Nova',in_progress:'Em atendimento',waiting_customer:'Aguardando cliente',waiting_team:'Aguardando equipe',done:'Concluída'};
+const CRM_INBOX_STATE_COLOR={new:'red',in_progress:'blue',waiting_customer:'amber',waiting_team:'purple',done:'green'};
+function crmInboxThreadKey(m){
+  if(m.channel==='email')return`email:${m.external_thread_id||m.customer_id||m.sender_address||m.id}`;
+  const party=m.person_id||m.customer_id||m.sender_address||(m.recipient_addresses||[])[0]||m.id;
+  return`whatsapp:${party}`;
+}
+function crmInboxThreads(){
+  const groups=new Map();
+  CRM_COMMUNICATIONS.filter(m=>m.channel==='whatsapp'||m.channel==='email').forEach(m=>{
+    const key=crmInboxThreadKey(m);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);
+  });
+  return[...groups.entries()].map(([key,messages])=>{
+    messages.sort((a,b)=>new Date(a.sent_at||a.received_at||a.created_at)-new Date(b.sent_at||b.received_at||b.created_at));
+    const last=messages[messages.length-1];
+    const stateRow=CRM_CONVERSATION_STATES.find(s=>s.thread_key===key);
+    const customer=CRM_CUSTOMERS.find(c=>c.id===last.customer_id)||null;
+    const person=CRM_PEOPLE.find(p=>p.id===last.person_id)||CRM_PEOPLE.find(p=>p.customer_id===last.customer_id&&(p.email===last.sender_address||p.phone_normalized===String(last.sender_address||'').replace(/\D/g,'')))||null;
+    const inferred=last.direction==='inbound'?'new':'waiting_customer';
+    return{key,messages,last,customer,person,state:stateRow?.state||inferred,owner_id:stateRow?.owner_id||null,stateRow};
+  }).sort((a,b)=>new Date(b.last.sent_at||b.last.received_at||b.last.created_at)-new Date(a.last.sent_at||a.last.received_at||a.last.created_at));
+}
+function crmInboxStatePill(state){const color=CRM_INBOX_STATE_COLOR[state]||'grey';return`<span style="display:inline-flex;align-items:center;padding:.12rem .42rem;border-radius:999px;background:color-mix(in srgb,var(--${color}) 13%,transparent);color:var(--${color});font-size:.58rem;font-weight:700">${esc(CRM_INBOX_STATE_LABEL[state]||state)}</span>`;}
+function crmRenderInbox(){
+  const cont=document.getElementById('crm-inbox-container');if(!cont)return;
+  const q=(document.getElementById('crm-inbox-q')?.value||'').trim().toLowerCase();
+  const channel=document.getElementById('crm-inbox-channel')?.value||'';
+  const state=document.getElementById('crm-inbox-state')?.value||'';
+  const owner=document.getElementById('crm-inbox-owner')?.value||'';
+  const all=crmInboxThreads();
+  const actionable=all.filter(t=>t.state==='new'||t.state==='waiting_team').length;
+  const badge=document.getElementById('crm-inbox-badge');if(badge){badge.textContent=actionable;badge.style.display=actionable?'inline-flex':'none';}
+  const summary=document.getElementById('crm-inbox-summary');
+  if(summary)summary.innerHTML=['new','in_progress','waiting_customer','waiting_team'].map(s=>`<button class="btn btn-s" style="font-size:.58rem;padding:.2rem .42rem" onclick="document.getElementById('crm-inbox-state').value='${s}';crmRenderInbox()">${CRM_INBOX_STATE_LABEL[s]} · ${all.filter(t=>t.state===s).length}</button>`).join('');
+  const rows=all.filter(t=>{
+    if(channel&&t.last.channel!==channel)return false;
+    if(state&&t.state!==state)return false;
+    if(owner==='me'&&t.owner_id!==authUser?.id)return false;
+    if(owner==='unassigned'&&t.owner_id)return false;
+    if(q){const hay=[t.customer?.display_name,t.customer?.trade_name,t.person?.name,t.last.subject,t.last.excerpt,t.last.body].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false;}
+    return true;
+  });
+  if(!rows.length){cont.innerHTML='<p class="hint" style="padding:.8rem 0">Nenhuma conversa neste filtro.</p>';return;}
+  cont.innerHTML=rows.map(t=>{
+    const when=t.last.sent_at||t.last.received_at||t.last.created_at;
+    const title=t.customer?.trade_name||t.customer?.display_name||t.person?.name||t.last.sender_address||(t.last.recipient_addresses||[])[0]||'Contato não identificado';
+    const secondary=[t.person?.name,t.last.channel==='whatsapp'?'WhatsApp':'E-mail',t.messages.length+' msg.'].filter(Boolean).join(' · ');
+    const excerpt=t.last.subject||t.last.excerpt||t.last.body||'(sem conteúdo)';
+    return`<div style="border:1px solid var(--bdr);border-radius:.6rem;padding:.65rem .75rem;margin-bottom:.45rem;background:white">
+      <div style="display:flex;gap:.6rem;align-items:flex-start">
+        ${crmTypeIconBadge(t.last.channel==='whatsapp'?'whatsapp':'email',30)}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start"><div><div style="font-size:.76rem;font-weight:750;color:var(--ink)">${esc(title)}</div><div style="font-size:.59rem;color:var(--ink4);margin-top:.08rem">${esc(secondary)}</div></div><div style="text-align:right;white-space:nowrap">${crmInboxStatePill(t.state)}<div style="font-size:.55rem;color:var(--ink4);margin-top:.18rem">${crmFmtDate(when)}</div></div></div>
+          <div style="font-size:.68rem;color:var(--ink2);margin-top:.32rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(excerpt)}</div>
+          <div style="display:flex;align-items:center;gap:.35rem;margin-top:.45rem;flex-wrap:wrap">
+            <select style="font-size:.58rem;padding:.18rem .35rem;width:auto" onchange="crmInboxSetState('${esc(t.key)}',this.value)">${Object.entries(CRM_INBOX_STATE_LABEL).map(([v,l])=>`<option value="${v}" ${v===t.state?'selected':''}>${l}</option>`).join('')}</select>
+            ${t.customer?`<button class="btn btn-s" style="font-size:.58rem;padding:.2rem .4rem" onclick="crmOpenCustomerEdit('${t.customer.id}')">Abrir cliente</button>`:''}
+            ${t.last.channel==='whatsapp'&&t.person?`<button class="btn btn-p" style="font-size:.58rem;padding:.2rem .4rem" onclick="crmOpenWhatsAppApiById('${t.person.id}')">Responder</button>`:''}
+            <button class="btn btn-s" style="font-size:.58rem;padding:.2rem .4rem" onclick="this.closest('div[style*=border-radius]').querySelector('.crm-inbox-detail').style.display=this.closest('div[style*=border-radius]').querySelector('.crm-inbox-detail').style.display==='none'?'block':'none'">Ver conversa</button>
+          </div>
+          <div class="crm-inbox-detail" style="display:none;margin-top:.45rem;border-top:1px solid var(--bdr)">${t.messages.map(crmCommunicationMessageHtml).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function crmInboxSetState(threadKey,state){
+  if(!authUser)return;
+  const payload={thread_key:threadKey,state,owner_id:state==='in_progress'?authUser.id:(CRM_CONVERSATION_STATES.find(s=>s.thread_key===threadKey)?.owner_id||null),updated_by:authUser.id,updated_at:new Date().toISOString()};
+  const{error}=await _supa.from('crm_conversation_states').upsert(payload,{onConflict:'thread_key'});
+  if(error){toastSave('Execute a migração da Caixa antes de alterar estados.');console.error(error);return;}
+  const current=CRM_CONVERSATION_STATES.find(s=>s.thread_key===threadKey);if(current)Object.assign(current,payload);else CRM_CONVERSATION_STATES.push(payload);
+  crmRenderInbox();
+}
+async function crmInboxRunDiagnostic(){
+  const box=document.getElementById('crm-inbox-diagnostic'),btn=document.getElementById('crm-inbox-diagnostic-btn');if(!box||!btn)return;
+  box.style.display='block';box.innerHTML='<span style="font-size:.65rem;color:var(--ink4)">Verificando configuração sem alterar a conta…</span>';btn.disabled=true;
+  let connection={connected:false};let connectionError='';
+  try{const{data,error}=await _supa.functions.invoke('whatsapp-onboarding-complete',{body:{action:'status'}});if(error)throw error;connection=data||connection;}catch(e){connectionError=e?.message||'função indisponível';}
+  const waCount=CRM_COMMUNICATIONS.filter(m=>m.channel==='whatsapp').length,emailCount=CRM_COMMUNICATIONS.filter(m=>m.channel==='email').length,unmatched=CRM_COMMUNICATIONS.filter(m=>(m.channel==='whatsapp'||m.channel==='email')&&!m.customer_id).length;
+  const checks=[
+    ['Banco da Caixa',CRM_CONVERSATION_STATES.length||!connection.connected?'Pronto para migração':'Ativo',CRM_CONVERSATION_STATES.length?'green':'amber'],
+    ['Coexistência',connection.connected?'Conectada':'Ainda não conectada',connection.connected?'green':'amber'],
+    ['WABA',connection?.integration?.waba_id||META_EXPECTED_WABA_ID,connection?.integration?.waba_id&&connection.integration.waba_id!==META_EXPECTED_WABA_ID?'red':'green'],
+    ['Histórico',`${waCount} WhatsApp · ${emailCount} e-mails`,'blue'],
+    ['Sem vínculo',`${unmatched} mensagem(ns)` ,unmatched?'amber':'green']
+  ];
+  box.innerHTML=`<div style="font-size:.68rem;font-weight:750;margin-bottom:.42rem">Diagnóstico operacional</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.35rem">${checks.map(([a,b,c])=>`<div style="padding:.42rem .5rem;border:1px solid var(--bdr);border-radius:.45rem"><div style="font-size:.55rem;color:var(--ink4);text-transform:uppercase">${a}</div><div style="font-size:.66rem;font-weight:700;color:var(--${c});margin-top:.08rem">${esc(b)}</div></div>`).join('')}</div>${connectionError?`<div style="font-size:.58rem;color:var(--amber);margin-top:.4rem">Status do servidor: ${esc(connectionError)}. Isso é esperado antes da publicação das funções.</div>`:''}<div style="font-size:.56rem;color:var(--ink4);margin-top:.4rem">Este diagnóstico é somente leitura: não abre o onboarding, não remove o número e não altera a WABA.</div>`;
+  btn.disabled=false;
 }
 async function crmSyncGmail(quiet=false){
   const btn=document.getElementById('crm-gmail-sync-btn'),status=document.getElementById('crm-gmail-sync-status');if(!btn||btn.disabled)return;
