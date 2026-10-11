@@ -4223,15 +4223,18 @@ function crmOpenWhatsAppForPerson(p){
   window.open(`https://wa.me/${digits}`,'_blank','noopener');
 }
 
-// Permanece falso até a Meta concluir o Coexistence e a função whatsapp-send V2.1 ser publicada.
-const CRM_WHATSAPP_API_ENABLED=false;
+// Ativado dinamicamente somente quando o servidor confirma a integração Coexistence.
+let CRM_WHATSAPP_API_ENABLED=false;
 const META_WHATSAPP_APP_ID='1346176517412643';
 const META_WHATSAPP_CONFIG_ID='1015420251544011';
+const META_EXPECTED_BUSINESS_ID='1641611699316923';
+const META_EXPECTED_WABA_ID='167221385468781';
 let crmWaCtx={customerId:null,personId:null,phone:null};
 let crmMetaSdkPromise=null;
 let crmMetaSdkInitialized=false;
 let crmWaSignupSession=null;
 let crmWaSignupAuthCode=null;
+let crmWaFinalizing=false;
 
 function crmIsWhatsAppOnboardingAdmin(){
   return !!(authUser?.email&&authUser.email.toLowerCase()===FRED_EMAIL);
@@ -4247,7 +4250,35 @@ function crmWaSetOnboardingStatus(message,tone='ink3'){
 
 function crmWaConfigureOnboardingUi(){
   const controls=document.getElementById('crm-wa-onboarding-controls');
-  if(controls)controls.style.display=crmIsWhatsAppOnboardingAdmin()&&!CRM_WHATSAPP_API_ENABLED?'block':'none';
+  if(controls)controls.style.display=crmIsWhatsAppOnboardingAdmin()?'block':'none';
+  const connectBtn=document.getElementById('crm-wa-onboarding-btn');
+  if(connectBtn)connectBtn.style.display=CRM_WHATSAPP_API_ENABLED?'none':'inline-flex';
+  const sendBtn=document.getElementById('crm-wa-send-btn');
+  if(sendBtn){
+    sendBtn.disabled=!CRM_WHATSAPP_API_ENABLED;
+    sendBtn.textContent=CRM_WHATSAPP_API_ENABLED?'Enviar WhatsApp':'Aguardando Coexistence';
+    sendBtn.title=CRM_WHATSAPP_API_ENABLED?'':'Envio oficial bloqueado até o servidor confirmar o Coexistence.';
+  }
+}
+
+async function crmWaRefreshConnectionStatus(){
+  if(!_supaOK||!authUser)return false;
+  try{
+    const{data,error}=await _supa.functions.invoke('whatsapp-onboarding-complete',{body:{action:'status'}});
+    if(error)throw error;
+    CRM_WHATSAPP_API_ENABLED=!!data?.connected;
+    crmWaConfigureOnboardingUi();
+    if(CRM_WHATSAPP_API_ENABLED){
+      const integration=data?.integration||{};
+      crmWaSetOnboardingStatus(`WhatsApp conectado: ${integration.display_phone_number||'+55 21 99231-6962'} · WABA ${integration.waba_id||META_EXPECTED_WABA_ID}`,'green');
+    }
+    return CRM_WHATSAPP_API_ENABLED;
+  }catch(e){
+    CRM_WHATSAPP_API_ENABLED=false;
+    crmWaConfigureOnboardingUi();
+    console.warn('Não foi possível confirmar o estado do WhatsApp',e);
+    return false;
+  }
 }
 
 function crmLoadMetaSdk(){
@@ -4315,7 +4346,42 @@ function crmWaRenderSignupSession(data){
   const copyBtn=document.getElementById('crm-wa-copy-session');
   if(result){result.style.display='block';result.textContent=JSON.stringify(safeInfo,null,2);}
   if(copyBtn)copyBtn.style.display='inline-flex';
-  crmWaSetOnboardingStatus('Coexistence concluído na Meta. Copie os dados abaixo e envie ao suporte antes de fechar esta página.','green');
+  crmWaSetOnboardingStatus('A Meta confirmou a seleção. Finalizando a conexão segura no CRM…');
+  crmTryFinalizeWhatsAppOnboarding();
+}
+
+async function crmTryFinalizeWhatsAppOnboarding(){
+  if(crmWaFinalizing||!crmWaSignupSession||!crmWaSignupAuthCode)return;
+  const wabaId=String(crmWaSignupSession.waba_id||'');
+  const businessId=String(crmWaSignupSession.business_id||META_EXPECTED_BUSINESS_ID);
+  if(wabaId!==META_EXPECTED_WABA_ID||businessId!==META_EXPECTED_BUSINESS_ID){
+    crmWaSetOnboardingStatus('A Meta retornou outra WABA ou outro portfólio. Nada foi salvo. Tire um print e não prossiga.','red');
+    return;
+  }
+  crmWaFinalizing=true;
+  const btn=document.getElementById('crm-wa-onboarding-btn');
+  if(btn){btn.disabled=true;btn.textContent='Finalizando…';}
+  crmWaSetOnboardingStatus('Trocando a autorização e assinando a WABA no servidor…');
+  try{
+    const{data,error}=await _supa.functions.invoke('whatsapp-onboarding-complete',{
+      body:{action:'complete',code:crmWaSignupAuthCode,session:crmWaSignupSession}
+    });
+    if(error)throw error;
+    if(!data?.ok)throw new Error(data?.error||'A conexão não foi confirmada pelo servidor.');
+    CRM_WHATSAPP_API_ENABLED=true;
+    crmWaSignupAuthCode=null;
+    crmWaConfigureOnboardingUi();
+    const result=document.getElementById('crm-wa-onboarding-result');
+    if(result)result.textContent=JSON.stringify(data.integration||{},null,2);
+    crmWaSetOnboardingStatus('Coexistence conectado e validado. O WhatsApp oficial está pronto para os testes controlados.','green');
+    toastSave('WhatsApp Business conectado');
+  }catch(e){
+    const message=e?.context?.body?.error||e?.message||'Falha ao finalizar o Coexistence.';
+    crmWaSetOnboardingStatus(`${message} Nada será removido do WhatsApp Business App.`,'red');
+    if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}
+  }finally{
+    crmWaFinalizing=false;
+  }
 }
 
 function crmHandleWhatsAppSignupMessage(event){
@@ -4350,6 +4416,7 @@ async function crmStartWhatsAppCoexistence(){
       if(response?.authResponse?.code){
         crmWaSignupAuthCode=response.authResponse.code;
         if(!crmWaSignupSession)crmWaSetOnboardingStatus('Autorização recebida. Aguarde a confirmação final da sessão de Coexistence…');
+        crmTryFinalizeWhatsAppOnboarding();
       }else{
         crmWaSetOnboardingStatus('A autorização não foi concluída. Você pode tentar novamente sem alterar o WhatsApp atual.','amber');
       }
@@ -4400,13 +4467,11 @@ function crmOpenWhatsAppApiPerson(p){
   modeSel.value='template';
   document.getElementById('crm-wa-mode-wrap').style.display=isMetaReviewer()?'none':'flex';
   crmWaSetMode('template');
-  const sendBtn=document.getElementById('crm-wa-send-btn');
-  sendBtn.disabled=!CRM_WHATSAPP_API_ENABLED;
-  sendBtn.textContent=CRM_WHATSAPP_API_ENABLED?'Enviar WhatsApp':'Aguardando Coexistence';
-  sendBtn.title=CRM_WHATSAPP_API_ENABLED?'':'Envio oficial bloqueado até a Meta concluir o Coexistence.';
   crmWaConfigureOnboardingUi();
   document.getElementById('ovl-crm-wa').classList.add('open');
-  if(crmIsWhatsAppOnboardingAdmin()&&!CRM_WHATSAPP_API_ENABLED)crmPreloadMetaSdk();
+  crmWaRefreshConnectionStatus().then(connected=>{
+    if(crmIsWhatsAppOnboardingAdmin()&&!connected)crmPreloadMetaSdk();
+  });
 }
 
 function crmOpenWhatsApp(personIndex){
@@ -7706,13 +7771,13 @@ initAuth().then(()=>{
     </div>
     <div class="modal-b">
       <div style="background:#f0edff;border:1px solid #d9d1ff;border-radius:8px;padding:.65rem .75rem;margin-bottom:.8rem;font-size:.69rem;color:#49389c">
-        <b>Integração preparada.</b> O envio oficial permanece bloqueado até concluir o Coexistence. O atalho verde continua abrindo o WhatsApp manual normalmente.
+        <b>Integração WhatsApp.</b> O envio oficial só é liberado depois que o servidor validar o Coexistence. O atalho verde continua abrindo o WhatsApp manual normalmente.
         <div id="crm-wa-onboarding-controls" style="display:none;margin-top:.65rem;padding-top:.65rem;border-top:1px solid #d9d1ff">
-          <div style="margin-bottom:.5rem;color:#49389c">Conecte o WhatsApp Business atual pelo fluxo oficial da Meta. Quando solicitado, informe <b>+55 21 99231-6962</b> e escaneie o QR Code no aplicativo.</div>
+          <div style="margin-bottom:.5rem;color:#49389c">Conecte o WhatsApp Business atual pelo fluxo oficial da Meta. Selecione somente <b>Anima Verde - Ecobags (1641611699316923)</b>, WABA <b>167221385468781</b> e o número <b>+55 21 99231-6962</b>.</div>
           <button type="button" class="btn btn-p" id="crm-wa-onboarding-btn" onclick="crmStartWhatsAppCoexistence()">Conectar WhatsApp Business</button>
           <div id="crm-wa-onboarding-status" style="display:none;margin-top:.55rem;font-weight:600"></div>
           <pre id="crm-wa-onboarding-result" style="display:none;margin-top:.55rem;padding:.55rem;border:1px solid #d9d1ff;border-radius:7px;background:var(--card);color:var(--ink2);font:600 .61rem/1.45 'IBM Plex Mono',monospace;white-space:pre-wrap;overflow-wrap:anywhere"></pre>
-          <button type="button" class="btn btn-s" id="crm-wa-copy-session" onclick="crmCopyWhatsAppSignupInfo()" style="display:none;margin-top:.45rem">Copiar dados da sessão</button>
+          <button type="button" class="btn btn-s" id="crm-wa-copy-session" onclick="crmCopyWhatsAppSignupInfo()" style="display:none;margin-top:.45rem">Copiar diagnóstico</button>
         </div>
       </div>
       <div id="crm-wa-person" style="font-size:.78rem;font-weight:600;color:var(--ink2);margin-bottom:.15rem"></div>
