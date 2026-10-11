@@ -1108,21 +1108,22 @@ button:active{filter:brightness(.94)}
       </div>
       <div id="crm-content" style="display:none">
         <div class="rv-tabs no-print" style="display:flex;align-items:center;margin-bottom:.9rem;border-bottom:1px solid var(--bdr)">
-          <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Minha Semana</button>
-          <button class="rv-tab" id="crmtab-caixa" onclick="crmShowSubTab('caixa')">Caixa <span id="crm-inbox-badge" style="display:none;margin-left:.2rem;padding:.02rem .28rem;border-radius:999px;background:var(--red);color:white;font-size:.52rem">0</span></button>
+          <button class="rv-tab active" id="crmtab-semana" onclick="crmShowSubTab('semana')">Trabalho <span id="crm-inbox-badge" style="display:none;margin-left:.2rem;padding:.02rem .28rem;border-radius:999px;background:var(--red);color:white;font-size:.52rem">0</span></button>
           <button class="rv-tab" id="crmtab-clientes" onclick="crmShowSubTab('clientes')">Clientes</button>
           <button class="rv-tab" id="crmtab-projetos" onclick="crmShowSubTab('projetos')">Projetos</button>
-          <button class="rv-tab" id="crmtab-descobrir" onclick="crmShowSubTab('descobrir')">Descobrir</button>
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
           <div class="card">
             <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
               <div>
-                <div class="sh" style="margin:0">Minha Semana</div>
-                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Ações comprometidas — o que precisa acontecer agora</div>
+                <div class="sh" style="margin:0">Trabalho</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Prioridades, retornos e conversas — o que precisa acontecer agora</div>
               </div>
-              <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.61rem;padding:.24rem .52rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
+              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+                <button class="btn btn-s" style="font-size:.61rem;padding:.24rem .52rem" onclick="document.getElementById('crm-inbox-card')?.scrollIntoView({behavior:'smooth',block:'start'})">Conversas</button>
+                <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.61rem;padding:.24rem .52rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
+              </div>
             </div>
             <div id="crm-semana-container" style="padding:.9rem 0 0"><p class="hint">Carregando…</p></div>
           </div>
@@ -1136,14 +1137,11 @@ button:active{filter:brightness(.94)}
             <div id="crm-signal-filters"></div>
             <div id="crm-signal-container"></div>
           </div>
-        </div>
-
-        <div id="crmpane-caixa" class="rv-pane">
-          <div class="card" style="padding:.85rem 1rem">
+          <div class="card" id="crm-inbox-card" style="padding:.85rem 1rem;margin-top:.65rem;scroll-margin-top:1rem">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
               <div>
-                <div class="sh" style="margin:0">Caixa compartilhada</div>
-                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">WhatsApp e e-mail organizados por conversa, cliente e próximo responsável</div>
+                <div class="sh" style="margin:0">Conversas</div>
+                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">WhatsApp e e-mail no mesmo fluxo de trabalho, por cliente e próximo responsável</div>
               </div>
               <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
                 <button class="btn btn-s" id="crm-inbox-diagnostic-btn" onclick="crmInboxRunDiagnostic()">Diagnóstico</button>
@@ -1169,7 +1167,10 @@ button:active{filter:brightness(.94)}
                 <div class="sh" style="margin:0">Clientes</div>
                 <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Base comercial — encontre rápido, abra só o que precisa</div>
               </div>
-              <button class="btn btn-p" style="font-size:.64rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
+                <button class="btn btn-s" style="font-size:.64rem;padding:.3rem .6rem" onclick="crmShowSubTab('descobrir')">Leads em triagem</button>
+                <button class="btn btn-p" style="font-size:.64rem;padding:.3rem .6rem" onclick="crmOpenCustomerEdit(null)">＋ Novo Cliente</button>
+              </div>
             </div>
 
             <div class="crm-client-tools">
@@ -3930,19 +3931,18 @@ function crmShowSubTab(id,skipReclick){
   if(!skipReclick){
     document.querySelectorAll('#crm-content .rv-pane').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('#crm-content > .rv-tabs .rv-tab').forEach(b=>b.classList.remove('active'));
-    document.getElementById('crmpane-'+id).classList.add('active');
-    document.getElementById('crmtab-'+id).classList.add('active');
+    document.getElementById('crmpane-'+id)?.classList.add('active');
+    const navId=id==='descobrir'?'clientes':id;
+    document.getElementById('crmtab-'+navId)?.classList.add('active');
   }
   if(id==='clientes'){
     crmRenderCustomers(); // mostra já com o que tem local, sem esperar a rede
     crmLoadAll();         // busca fresco e re-renderiza quando chegar
   }else if(id==='semana'){
     crmRenderMinhaSemana();
+    crmRenderInbox();
     crmLoadSignalRecompra();
     crmLoadProjects().then(crmRenderMinhaSemana);
-    crmLoadAll();
-  }else if(id==='caixa'){
-    crmRenderInbox();
     crmLoadAll();
   }else if(id==='projetos'){
     crmRenderProjects();
