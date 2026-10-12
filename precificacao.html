@@ -452,6 +452,293 @@ body.dark .rv-tabs{background:var(--head-bg)}
 .s-recebido{background:var(--ltgrn);color:var(--green)}
 .s-pendente{background:var(--ltgry);color:var(--ink3)}
 @media print{.no-print{display:none!important}}
+/* crm-v18.css — componentes da área Trabalho (V18)
+   Convenções:
+   - escala tipográfica: 16 (título do painel) / 15 (cliente) / 13 (conteúdo) / 12 (meta, chip, tempo) / 11 (rótulo em caixa alta). Mínimo: 11 px.
+   - grade de 4 px; linha: padding 14/16, ícone 36 px; controles 34 px no desktop e 44 px no mobile.
+   - painel docado: 460 px, só quando a viewport for >= 1180 px; abaixo disso vira folha sobreposta; < 720 px é tela cheia.
+   - urgência nunca só por cor: o tempo aparece sempre em texto. */
+
+.v18-app *{box-sizing:border-box}
+.v18-app button{font-family:inherit;cursor:pointer}
+.v18-app :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.v18-hdr{background:var(--navy);height:52px;display:flex;align-items:center;gap:14px;padding:0 22px;color:#fff;position:relative;z-index:3}
+.v18-hdr .v18-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;letter-spacing:.03em}
+.v18-hdr .v18-lf{width:26px;height:26px;border-radius:7px;background:#1E8A54}
+.v18-hdr .v18-htab{height:52px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.6)}
+.v18-hdr .v18-htab.v18-on{color:#fff;box-shadow:inset 0 -3px 0 var(--accent)}
+.v18-hdr .v18-sp{flex:1}
+.v18-hdr .v18-hb{font-size:12px;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:4px 10px;background:none}
+.v18-nav{background:var(--navy);height:47px;display:flex;align-items:center;padding:0 max(20.8px,calc(50% - 620px + 20.8px))}
+.v18-nav.v18-sub{height:48px;border-top:1px solid rgba(255,255,255,.08)}
+.v18-nav .v18-nt{height:41px;padding:0 16px;display:inline-flex;align-items:center;gap:6px;border:0;background:none;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.58);box-shadow:inset 0 -3px 0 transparent}
+.v18-nav .v18-nt.v18-on{color:#fff;box-shadow:inset 0 -3px 0 var(--accent)}
+.v18-badge{display:inline-block;min-width:18px;padding:0 6px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;line-height:18px;text-align:center;font-weight:700;letter-spacing:0}
+.v18-wrap{width:100%;max-width:1240px;margin:0 auto;padding:14px 20.8px 12px}
+.v18-ws{display:flex;gap:16px;align-items:stretch;height:100%}
+.v18-list{flex:1;min-width:0;height:100%;overflow:hidden;display:flex;flex-direction:column}
+.v18-side{width:460px;flex:none;height:100%;min-width:0}
+.v18-bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex:none}
+.v18-seg{display:inline-flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden;background:#fff}
+.v18-seg button{border:0;background:none;padding:0 14px;height:34px;font-size:13px;font-weight:600;color:var(--ink2)}
+.v18-seg button.v18-on{background:var(--ltblue);color:var(--blue)}
+.v18-search{flex:1 1 220px;min-width:160px;height:36px;border:1.5px solid var(--bdr2);border-radius:8px;padding:0 12px;font:13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:#fff}
+.v18-sbox{position:relative;flex:1 1 220px;min-width:160px;display:flex}
+.v18-sbox .v18-search{flex:1;padding-right:34px}
+.v18-sbox button{position:absolute;right:4px;top:4px;width:28px;height:28px;border:0;background:none;color:var(--ink3);display:flex;align-items:center;justify-content:center;padding:0}
+.v18-ico{flex:none;width:34px;height:34px;border-radius:8px;border:1.5px solid var(--bdr2);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);padding:0}
+.v18-btn{height:34px;padding:0 14px;border-radius:8px;border:1.5px solid var(--bdr2);background:#fff;color:var(--ink2);font-size:13px;font-weight:600;white-space:nowrap}
+.v18-btn.v18-p{background:var(--blue);border-color:var(--blue);color:#fff}
+.v18-btn.v18-q{border-color:transparent;color:var(--blue);padding:0 8px}
+.v18-btn[disabled]{opacity:.45;cursor:not-allowed}
+.v18-tall{height:44px}.v18-ico.v18-tall{width:44px;height:44px}
+.v18-feed{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;flex:none}
+.v18-fh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}
+.v18-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.v18-cnt{display:inline-block;margin-left:8px;padding:0 8px;border-radius:999px;background:var(--ltgry);color:var(--ink2);font-size:12px;font-weight:700;line-height:20px;letter-spacing:0}
+.v18-sum{font-size:12px;color:var(--ink3)}.v18-sum b{color:var(--red);font-weight:700}
+.v18-row{display:flex;gap:12px;padding:14px 16px;border-top:1px solid var(--bdr);align-items:flex-start;background:#fff;position:relative}
+.v18-row.v18-sel{background:var(--ltblue)}
+.v18-row.v18-unk{background:#FFF8EC}
+.v18-tile{flex:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.v18-t-wa{background:var(--ltgrn);color:var(--v18-green-tx)}.v18-t-mail{background:var(--ltblue);color:var(--blue)}
+.v18-t-task{background:var(--ltgry);color:var(--ink2)}.v18-t-sig{background:var(--ltteal);color:var(--teal)}.v18-t-un{background:var(--ltamb);color:var(--v18-amber-tx)}
+.v18-mid{flex:1;min-width:0}
+.v18-l1{display:flex;align-items:baseline;gap:8px;min-width:0}
+.v18-nm{font-size:15px;font-weight:600;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+.v18-pp{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 100 auto;min-width:0}
+.v18-tm{margin-left:auto;padding-left:8px;font-size:12px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;flex:none}
+.v18-tm.v18-a{color:var(--red)}.v18-tm.v18-b{color:var(--v18-amber-tx)}.v18-tm.v18-c{color:var(--ink3);font-weight:500}
+.v18-org{flex:none;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--bdr2);border-radius:6px;padding:0 6px;line-height:18px;color:var(--ink2);background:#fff}
+.v18-ct{font-size:13px;line-height:19px;color:var(--ink2);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.v18-chip{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top;font-size:12px;font-weight:600;line-height:18px;padding:1px 8px;border-radius:999px;background:var(--ltgry);color:var(--ink2);margin-top:8px}
+.v18-ch-red{background:var(--ltred);color:var(--red)}.v18-ch-amb{background:var(--ltamb);color:var(--v18-amber-tx)}.v18-ch-blu{background:var(--ltblue);color:var(--blue)}
+.v18-ch-teal{background:var(--ltteal);color:var(--teal)}.v18-ch-grn{background:var(--ltgrn);color:var(--v18-green-tx)}
+.v18-ai{display:flex;gap:6px;align-items:flex-start;font-size:12px;line-height:17px;color:var(--purple);margin-top:6px}
+.v18-ai svg{flex:none;margin-top:1px}
+.v18-acts{flex:none;display:flex;gap:6px;align-items:center;align-self:center;width:184px;justify-content:flex-end}
+.v18-sec{display:flex;align-items:center;gap:10px;width:100%;padding:0 16px;height:46px;border:0;border-top:1px solid var(--bdr);background:#fff;text-align:left;color:var(--ink)}
+.v18-sec .v18-t{font-size:13px;font-weight:600}
+.v18-sec .v18-n{font-size:12px;font-weight:700;background:var(--ltgry);border-radius:999px;padding:0 8px;line-height:20px;color:var(--ink2)}
+.v18-sec .v18-h{margin-left:auto;font-size:12px;color:var(--ink3);white-space:nowrap}
+.v18-sec.v18-more{color:var(--teal);height:42px}
+.v18-subh{padding:10px 16px 6px;background:var(--bg);border-top:1px solid var(--bdr)}
+.v18-note{margin:0;padding:12px 16px;font-size:12px;line-height:18px;color:var(--ink3);background:var(--ltgry);border-top:1px solid var(--bdr)}
+.v18-empty{border:1.5px dashed var(--bdr2);border-radius:12px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;color:var(--ink3);font-size:13px;line-height:19px}
+.v18-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px}
+.v18-fchip{height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--bdr2);background:#fff;font-size:12px;font-weight:600;color:var(--ink2)}
+.v18-fchip.v18-on{background:var(--ltblue);border-color:var(--blue);color:var(--blue)}
+.v18-menu{position:absolute;right:16px;top:58px;width:292px;background:#fff;border:1px solid var(--bdr2);border-radius:10px;box-shadow:0 10px 28px rgba(15,25,35,.18);padding:6px;z-index:6}
+.v18-menu button{display:block;width:100%;text-align:left;border:0;background:none;border-radius:6px;padding:7px 10px;font-size:13px;font-weight:600;color:var(--ink);min-height:36px}
+.v18-menu button small{display:block;font-size:12px;font-weight:400;color:var(--ink3);line-height:16px}
+.v18-menu button:first-child{background:var(--ltgry)}
+.v18-menu hr{border:0;border-top:1px solid var(--bdr);margin:4px 0}
+.v18-panel{background:#fff;border:1px solid var(--bdr);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;height:100%}
+.v18-ph{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bdr);flex:none}
+.v18-ph .v18-nm{font-size:16px}
+.v18-stat{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--bdr);flex:none}
+.v18-sel2{height:30px;border:1.5px solid var(--bdr2);border-radius:8px;background:#fff;padding:0 10px;font-size:12px;font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.v18-why2{margin-left:auto;font-size:12px;color:var(--ink3)}
+.v18-pscroll{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:inset 0 14px 10px -14px rgba(15,25,35,.28)}
+.v18-pscroll.v18-top{justify-content:flex-start;box-shadow:none}
+.v18-wait{padding:8px 16px;font-size:12px;color:var(--ink3);background:var(--ltgry);flex:none}
+.v18-wait b{color:var(--v18-amber-tx)}
+.v18-wait small{display:block;margin-top:2px;font-size:12px}
+.v18-aibox{margin:12px 16px 0;padding:10px 12px;border-radius:10px;background:var(--ltpur);color:#3F1690;font-size:13px;line-height:19px;flex:none}
+.v18-aibox .v18-k{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;color:var(--purple)}
+.v18-aibox .v18-f{margin-top:6px;font-size:12px;color:var(--purple)}
+.v18-aibar{display:flex;align-items:center;gap:8px;width:100%;height:40px;padding:0 16px;border:0;border-bottom:1px solid var(--bdr);background:var(--ltpur);color:var(--purple);font-size:12px;text-align:left;flex:none}
+.v18-aibar b{font-weight:700;flex:none}
+.v18-aibar span{color:#3F1690;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.v18-aibox.v18-pin{margin:0;border-radius:0;border-bottom:1px solid var(--bdr)}
+.v18-app mark{background:var(--ltamb);color:inherit;border-radius:3px;padding:0 1px}
+.v18-thread{display:flex;flex-direction:column;gap:6px;padding:12px 16px;flex:none}
+.v18-day{align-self:center;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:4px 0}
+.v18-msg{max-width:86%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:19px;overflow-wrap:anywhere}
+.v18-msg.v18-in{background:var(--ltgry);align-self:flex-start;border-top-left-radius:4px}
+.v18-msg.v18-out{background:var(--ltblue);align-self:flex-end;border-top-right-radius:4px}
+.v18-msg.v18-sending{opacity:.7}
+.v18-msg.v18-fail{background:var(--ltred);border:1px solid var(--red)}
+.v18-msg.v18-unc{background:var(--ltamb);border:1px dashed var(--v18-amber-tx)}
+.v18-mt{display:block;font-size:11px;color:var(--ink3);margin-top:2px;font-variant-numeric:tabular-nums}
+.v18-st{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-top:4px;line-height:16px}
+.v18-st.v18-err{color:var(--red)}.v18-st.v18-wrn{color:var(--v18-amber-tx)}.v18-st.v18-mut{color:var(--ink3)}
+.v18-st .v18-btn{height:28px;font-size:12px;padding:0 10px}
+.v18-spin{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--bdr2);border-top-color:var(--blue);animation:v18spin 1s linear infinite}
+@keyframes v18spin{to{transform:rotate(360deg)}}
+.v18-comp{padding:10px 16px;border-top:1px solid var(--bdr);background:#fff;flex:none}
+.v18-ta{width:100%;min-height:56px;border:1.5px solid var(--bdr2);border-radius:10px;padding:8px 12px;font:13px/19px 'IBM Plex Sans',system-ui,sans-serif;resize:none;color:var(--ink);background:#fff;display:block}
+.v18-hint{font-size:12px;color:var(--ink3);line-height:16px}
+.v18-crow{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:8px}
+.v18-gate{display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:12px;line-height:17px;color:var(--ink3)}
+.v18-gate b{font-size:13px;color:var(--ink)}
+.v18-foot{display:flex;gap:8px;align-items:center;padding:10px 16px;border-top:1px solid var(--bdr);background:#fff;flex:none}
+.v18-form{margin:12px 16px 0;padding:12px;border:1.5px solid var(--blue);border-radius:10px;background:#fff;flex:none}
+.v18-form.v18-warn{border-color:var(--v18-amber-tx)}
+.v18-form h4{margin:0 0 6px;font-size:13px;font-weight:700}
+.v18-form p{margin:0 0 6px;font-size:12px;line-height:17px;color:var(--ink3)}
+.v18-fld{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.v18-fld label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.v18-fld input{height:34px;border:1.5px solid var(--bdr2);border-radius:8px;padding:0 10px;font:13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:#fff;min-width:0}
+.v18-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.v18-opt{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:19px;margin:6px 0}
+.v18-opt input{margin-top:3px;flex:none}
+.v18-opt small{display:block;color:var(--ink3);font-size:12px;line-height:16px}
+.v18-mail{margin:12px 16px 0;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;flex:none}
+.v18-mail .v18-mh{padding:10px 12px;background:var(--ltgry);font-size:12px;color:var(--ink3);line-height:18px;overflow-wrap:anywhere}
+.v18-mail .v18-mh b{color:var(--ink);font-size:13px;display:block}
+.v18-mail .v18-mb{padding:12px;font-size:13px;line-height:20px;overflow-wrap:anywhere}
+.v18-mail .v18-mf{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--bdr);font-size:12px;color:var(--ink2);font-weight:600}
+.v18-aud{display:flex;align-items:center;gap:12px;margin:12px 16px 0;padding:10px 12px;border-radius:12px;background:var(--ltgry);flex:none}
+.v18-aud .v18-tile{width:36px;height:36px;background:#fff;color:var(--ink2)}
+.v18-aud small{display:block;font-size:12px;color:var(--ink3);line-height:16px}
+.v18-who{margin:12px 16px 0;padding:12px;border:1px solid var(--bdr);border-radius:10px;background:#fff;flex:none}
+.v18-who h4{margin:0 0 4px;font-size:13px;font-weight:700}
+.v18-who p{margin:0 0 8px;font-size:12px;color:var(--ink3);line-height:18px}
+.v18-ban{display:flex;gap:10px;align-items:flex-start;margin:12px 16px 0;padding:10px 12px;border-radius:10px;background:var(--ltamb);color:var(--v18-amber-tx);font-size:13px;line-height:19px;flex:none}
+.v18-ban svg{flex:none;margin-top:2px}
+.v18-tpl{display:block;border:1.5px solid var(--bdr2);border-radius:10px;padding:8px 12px;margin:0 16px 8px;background:#fff;font-size:13px;line-height:18px}
+.v18-tpl.v18-on{border-color:var(--blue);background:var(--ltblue)}
+.v18-tpl b{display:block}.v18-tpl span{color:var(--ink3);font-size:12px}
+.v18-prev{margin:0 16px;flex:none}
+.v18-snack{display:inline-flex;gap:16px;align-items:center;background:var(--navy);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(15,25,35,.25)}
+.v18-snack button{background:none;border:0;color:#9FD6FF;font-weight:700;font-size:13px;padding:0}
+.v18-sk{display:block;background:linear-gradient(90deg,#E4EBF2 25%,#F3F6F9 50%,#E4EBF2 75%);background-size:200% 100%;animation:v18sh 1.3s linear infinite;border-radius:6px}
+@keyframes v18sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.v18-sk,.v18-spin{animation:none}}
+.v18-banner{display:flex;gap:10px;align-items:center;padding:10px 16px;background:var(--ltamb);color:var(--v18-amber-tx);font-size:13px;line-height:19px;border-top:1px solid var(--bdr)}
+.v18-banner .v18-btn{margin-left:auto}
+.v18-banner svg{flex:none}
+.v18-scrim{position:absolute;left:0;right:0;bottom:0;top:52px;background:rgba(13,43,69,.45);z-index:4}
+.v18-sheet{position:absolute;right:0;top:52px;bottom:0;width:460px;max-width:100%;background:var(--bg);padding:12px;z-index:5;box-shadow:-10px 0 28px rgba(15,25,35,.2)}
+.v18-phone{width:390px;height:844px;border-radius:28px;border:1px solid var(--bdr2);overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.v18-pbar{height:52px;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;font-weight:700;font-size:14px;flex:none}
+.v18-pbody{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.v18-mrow{padding:14px;border-top:1px solid var(--bdr);background:#fff}
+.v18-mrow.v18-unk{background:#FFF8EC}
+.v18-mtop{display:flex;gap:10px;align-items:center}
+.v18-macts{display:flex;gap:8px;margin-top:10px}
+.v18-macts .v18-btn{flex:1}
+
+.v18-app{--ink3:#5A6A76;--v18-green-tx:#166A3A;--v18-amber-tx:#9A4A00;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.4;color:var(--ink);position:relative}
+.v18-app button,.v18-app select,.v18-app input,.v18-app textarea{font-family:inherit}
+.v18-app a.v18-btn{display:inline-flex;align-items:center;text-decoration:none}
+.v18-app [hidden]{display:none!important}
+.v18-app .v18-list{overflow:visible;height:auto}
+.v18-app .v18-row{cursor:pointer}
+.v18-app .v18-row:before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--bdr)}
+.v18-app .v18-row:has(.v18-tm.v18-a):before{background:var(--red)}
+.v18-app .v18-row:has(.v18-tm.v18-b):before{background:var(--amber)}
+.v18-app .v18-row:has(.v18-t-sig):before{background:var(--teal)}
+.v18-app .v18-side{display:none}
+.v18-app.v18-panel-open .v18-side{display:block}
+.v18-app.v18-panel-open{height:calc(100dvh - 180px);min-height:400px}
+.v18-app.v18-panel-open .v18-list{height:100%;overflow:auto;padding-right:2px}
+.v18-app .v18-thread-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.v18-app .v18-panel{min-height:0;position:relative}
+.v18-app .v18-search,.v18-app .v18-ta{font-size:13px}
+.v18-app .v18-menu{top:54px;right:12px;max-height:calc(100% - 80px);overflow:auto}
+.v18-app .v18-send-notice{font-size:12px;padding:8px 16px;border-top:1px solid var(--bdr);flex:none}
+.v18-app .v18-panel-state{display:flex;justify-content:space-between;gap:8px;padding:8px 16px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--ink3);flex:none}
+.v18-app .v18-panel-state span:first-child{font-weight:600;color:var(--ink2)}
+.v18-app .v18-history-tabs{display:flex;border-bottom:1px solid var(--bdr);flex:none;padding:0 12px;background:var(--card)}
+.v18-app .v18-history-tabs button{flex:1;min-height:40px;padding:8px 4px;border:0;background:none;font-size:13px;color:var(--ink3);border-bottom:2px solid transparent}
+.v18-app .v18-history-tabs button.v18-on{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.v18-app .v18-history-tabs button[disabled]{opacity:.5;cursor:not-allowed}
+.v18-app .v18-message-channel{font-size:11px;line-height:16px;color:var(--ink3);margin-bottom:4px;overflow-wrap:anywhere}
+.v18-app .v18-history-reply{font-size:11px;color:var(--blue);display:block;margin-top:4px}
+.v18-app .v18-history-hint{padding:8px 16px;font-size:12px;line-height:17px;color:var(--ink3);margin:0;background:var(--bg)}
+.v18-app .v18-msg[data-v18-reply-message]{cursor:pointer}
+.v18-app .v18-msg.v18-reply-selected{box-shadow:0 0 0 1.5px var(--blue)}
+.v18-app .v18-reply-destination{font-size:12px;line-height:17px;margin-bottom:6px;overflow-wrap:anywhere;color:var(--ink2)}
+.v18-app .v18-reply-subject{font-size:12px;margin-bottom:6px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18-app .v18-foot-simple{justify-content:flex-end;padding:8px 16px}
+.v18-app .v18-foot-simple .v18-btn{border-color:transparent;color:var(--ink3);font-size:12px}
+.v18-app .v18-menu-link{display:block;padding:8px 10px;font-size:13px;color:var(--ink);text-decoration:none;font-weight:600;border-radius:6px;min-height:36px}
+.v18-app .v18-menu-link:hover{background:var(--ltgry)}
+.v18-app .v18-link-option{display:block;width:100%;height:auto;min-height:34px;margin:4px 0;white-space:normal;text-align:left}
+.v18-app #v18-snack{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:300;max-width:90vw}
+.v18-app #crm-v18-scrim{display:none}
+@media(max-width:1179px){
+ .v18-app.v18-panel-open{height:auto;min-height:0}
+ .v18-app.v18-panel-open .v18-list{height:auto;overflow:visible}
+ .v18-app.v18-panel-open .v18-side{position:fixed;top:52px;bottom:0;right:0;height:auto;width:min(460px,100vw);padding:10px;background:var(--bg);z-index:190}
+ .v18-app.v18-panel-open #crm-v18-scrim{display:block;position:fixed;inset:52px 0 0;background:rgba(13,43,69,.45);z-index:189}
+}
+@media(max-width:719px){
+ .v18-app .v18-bar{flex-wrap:wrap}
+ .v18-app .v18-sbox{flex-basis:100%}
+ .v18-app .v18-seg{flex:1}
+ .v18-app .v18-seg button{flex:1;padding:0 10px;height:44px;font-size:12px}
+ .v18-app .v18-row{flex-wrap:wrap;padding:14px;gap:10px}
+ .v18-app .v18-mid{width:calc(100% - 46px)}
+ .v18-app .v18-l1{flex-wrap:wrap;gap:2px 6px}
+ .v18-app .v18-nm{max-width:100%}
+ .v18-app .v18-pp{flex-basis:100%}
+ .v18-app .v18-tm{padding:0;margin:0;flex-basis:100%}
+ .v18-app .v18-acts{width:100%;padding-left:46px}
+ .v18-app .v18-acts .v18-btn{flex:1}
+ .v18-app .v18-btn,.v18-app .v18-ico{min-height:44px}
+ .v18-app .v18-ico{width:44px}
+ .v18-app.v18-panel-open .v18-side{top:0;width:100%;padding:0}
+ .v18-app .v18-panel{border-radius:0}
+ .v18-app .v18-foot{flex-wrap:wrap}
+ .v18-app .v18-sec .v18-h{display:none}
+ .v18-app .v18-search{height:44px}
+ .v18-app .v18-form input{height:44px}
+}
+body.dark .v18-app{--ink3:#B5C5D4;--v18-green-tx:#8AD7AE;--v18-amber-tx:#FFCB89}
+body.dark .v18-app :is(.v18-row,.v18-panel,.v18-comp,.v18-foot,.v18-btn,.v18-ico,.v18-sec,.v18-seg,.v18-menu,.v18-form,.v18-who,.v18-search,.v18-ta,.v18-sel2){background:var(--card);color:var(--ink)}
+body.dark .v18-app .v18-row.v18-unk{background:#3B3020}
+body.dark .v18-app .v18-row.v18-sel{background:var(--ltblue)}
+body.dark .v18-app .v18-btn.v18-p{background:var(--blue);color:#fff}
+.v18-app .v18-client-link{padding:0;border:0;background:none;color:var(--ink);font-size:16px;font-weight:600;text-align:left;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.v18-app .v18-client-link:hover{text-decoration:underline;color:var(--blue)}
+.v18-app .v18-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--bdr);flex:none}
+.v18-app .v18-topic{display:flex;align-items:center;gap:8px;padding:6px 16px;font-size:12px;flex:none;border-bottom:1px solid var(--bdr)}
+.v18-app .v18-topic select{min-width:0;flex:1;height:30px;border:1px solid var(--bdr);border-radius:6px;color:var(--ink);background:var(--card);font-size:12px}
+.v18-app .v18-context{padding:8px 16px;font-size:12px;background:var(--bg);border-bottom:1px solid var(--bdr);flex:none}
+.v18-app .v18-context .v18-btn{float:right}
+.v18-app .v18-ai-tools{position:relative;color:#6C428F;font-size:13px}
+.v18-app .v18-ai-tools summary{cursor:pointer;list-style:none;padding:6px 10px;min-height:34px}
+.v18-app .v18-ai-tools div{position:absolute;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px;width:170px;box-shadow:0 6px 20px #0002}
+.v18-app .v18-ai-tools button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 6px;color:var(--ink);font-size:12px}
+.v18-app .v18-ai-result{padding:10px 16px;background:var(--bg);font-size:13px;border-left:3px solid #8E6AB0;margin:8px 12px;overflow-wrap:anywhere}
+.v18-app .v18-ai-result b{font-size:12px;color:#6C428F}.v18-app .v18-ai-result p{margin:4px 0}
+@media(max-width:719px){.v18-app .v18-topic select{height:38px}.v18-app .v18-client-link{min-height:30px}.v18-app .v18-tools{padding:6px 12px}}
+/* Claude review A1: compact controls + measured workspace offset. */
+.v18-app.v18-panel-open{height:calc(100dvh - var(--v18-top,180px) - 16px);min-height:0}
+.v18-app .v18-ph{padding:8px 12px;gap:8px;min-height:50px}
+.v18-app .v18-history-tabs button{min-height:36px;padding:6px 4px}
+.v18-app .v18-tools{padding:4px 12px;min-height:38px}
+.v18-app .v18-topic{padding:3px 12px;min-height:36px}
+.v18-app .v18-comp{padding:6px 12px;position:relative}
+.v18-app .v18-comp .v18-reply-destination{font-size:11px;margin-bottom:3px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:0}
+.v18-app .v18-comp .v18-reply-subject{display:none}
+.v18-app .v18-comp:has(.v18-reply-subject) .v18-reply-destination{max-width:55%}
+.v18-app .v18-comp .v18-reply-subject{display:block;position:absolute;top:6px;right:12px;max-width:40%;font-size:11px}
+.v18-app .v18-ta{min-height:44px;height:44px;padding:5px 8px}
+.v18-app .v18-crow{margin-top:4px}.v18-app .v18-context{padding:5px 12px;font-size:11px;min-height:28px}
+.v18-app .v18-thread-scroll{min-height:140px}
+.v18-app .v18-ai-result{max-height:180px;overflow:auto}.v18-app .v18-ai-draft{border-top:1px solid var(--bdr);padding-top:8px;white-space:pre-wrap}
+.v18-app .v18-quickdates{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}.v18-app .v18-quickdates button{border:1px solid var(--bdr);border-radius:6px;padding:6px 8px;background:var(--card);color:var(--ink);font-size:12px}
+.v18-app .v18-form > .v18-btn{margin-right:8px;margin-top:6px}
+@media(max-height:650px){.v18-app .v18-panel{overflow-y:auto;overscroll-behavior:contain}.v18-app .v18-thread-scroll{flex:none;max-height:220px;min-height:140px}.v18-app .v18-panel>*{flex-shrink:0}}
+@media(max-width:719px){.v18-app .v18-history-tabs button,.v18-app .v18-ai-tools summary,.v18-app .v18-ai-tools button,.v18-app .v18-client-link{min-height:44px}.v18-app .v18-topic select{height:44px}.v18-app .v18-tools{min-height:52px}.v18-app .v18-comp .v18-reply-subject{position:static;max-width:100%;margin-bottom:3px}.v18-app .v18-comp:has(.v18-reply-subject) .v18-reply-destination{max-width:100%}}
+/* Claude R1–R5: visible state/action, sound task row, AI focus, sticky reply, full subject. */
+.v18-app .v18-ph .v18-mid{flex:1;min-width:0}
+.v18-app .v18-ph .v18-pp{font-size:11px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v18-app .v18-resolve{color:var(--v18-green-tx);flex:none}
+.v18-app .v18-context{display:flex;align-items:center;gap:8px}
+.v18-app .v18-context>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.v18-app .v18-context .v18-btn{float:none;flex:none;min-height:28px;margin:0}
+.v18-app .v18-comp{padding:4px 12px}
+.v18-app .v18-comp .v18-reply-subject{position:static;display:block;max-width:100%;font-size:11px;line-height:16px;margin-bottom:4px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;color:var(--ink2)}
+.v18-app .v18-comp:has(.v18-reply-subject) .v18-reply-destination{max-width:100%;white-space:normal;overflow:visible;overflow-wrap:anywhere}
+@media(max-height:650px){.v18-app .v18-comp{position:sticky;bottom:0;z-index:6;box-shadow:0 -5px 14px #0001;max-height:65%;overflow-y:auto;background:var(--card)}}
+@media(max-width:719px){.v18-app .v18-context .v18-btn{min-height:44px}.v18-app .v18-ph{gap:6px;padding-left:10px;padding-right:10px}}
+.v18-app .v18-ph .v18-pp{font-size:12px}
+
 </style>
 
 <style>
@@ -1114,50 +1401,17 @@ button:active{filter:brightness(.94)}
         </div>
 
         <div id="crmpane-semana" class="rv-pane active">
-          <div class="card">
-            <div class="collap-h open" style="cursor:default;display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="sh" style="margin:0">Trabalho</div>
-                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Prioridades, retornos e conversas — o que precisa acontecer agora</div>
-              </div>
-              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
-                <button class="btn btn-s" style="font-size:.61rem;padding:.24rem .52rem" onclick="document.getElementById('crm-inbox-card')?.scrollIntoView({behavior:'smooth',block:'start'})">Conversas</button>
-                <button class="btn btn-s" id="crm-semana-horizonte-btn" style="font-size:.61rem;padding:.24rem .52rem" onclick="crmToggleHorizonte30()">Ver próximos 30 dias</button>
-              </div>
-            </div>
-            <div id="crm-semana-container" style="padding:.9rem 0 0"><p class="hint">Carregando…</p></div>
+          <div class="v18-app" id="crm-v18-workspace">
+            <div class="v18-ws"><div class="v18-list">
+              <div class="v18-bar"><div class="v18-sbox"><input class="v18-search" id="v18-search" type="search" aria-label="Buscar em todas as conversas" placeholder="Buscar cliente, pessoa ou conversa…"></div>
+                <div class="v18-seg" role="group" aria-label="Responsável"><button data-v18-owner="" class="v18-on" aria-pressed="true">Tudo</button><button data-v18-owner="me" aria-pressed="false">Meus</button><button data-v18-owner="unassigned" aria-pressed="false">Sem responsável</button></div><button class="v18-ico" data-v18-refresh aria-label="Atualizar feed">↻</button>
+              </div><div class="v18-feed" id="crm-v18-feed"><p class="v18-note" role="status">Carregando seu trabalho…</p></div>
+            </div><aside class="v18-side" id="crm-v18-panel" aria-label="Detalhes do item" hidden></aside></div>
+            <button id="crm-v18-scrim" data-v18-close aria-label="Fechar painel" hidden></button>
+            <div class="v18-snack" id="v18-snack" role="status" hidden></div>
           </div>
-          <div class="card" id="crm-signal-card" style="display:none;margin-top:.65rem;padding:.85rem 1rem">
-            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;margin-bottom:.5rem">
-              <div>
-                <div class="sh" style="margin:0">Vale sua atenção</div>
-                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">Oportunidades e exceções — só viram ação quando você decidir</div>
-              </div>
-            </div>
-            <div id="crm-signal-filters"></div>
-            <div id="crm-signal-container"></div>
-          </div>
-          <div class="card" id="crm-inbox-card" style="padding:.85rem 1rem;margin-top:.65rem;scroll-margin-top:1rem">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
-              <div>
-                <div class="sh" style="margin:0">Conversas</div>
-                <div style="font-size:.62rem;color:var(--ink4);margin-top:.08rem">WhatsApp e e-mail no mesmo fluxo de trabalho, por cliente e próximo responsável</div>
-              </div>
-              <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">
-                <button class="btn btn-s" id="crm-inbox-diagnostic-btn" onclick="crmInboxRunDiagnostic()">Diagnóstico</button>
-                <button class="btn btn-s" onclick="crmLoadAll()">↻ Atualizar</button>
-              </div>
-            </div>
-            <div id="crm-inbox-diagnostic" style="display:none;margin-top:.65rem;padding:.65rem .75rem;border:1px solid var(--bdr);border-radius:.55rem;background:var(--bg)"></div>
-            <div style="display:grid;grid-template-columns:minmax(180px,1.35fr) repeat(3,minmax(130px,.7fr));gap:.45rem;margin-top:.75rem">
-              <input id="crm-inbox-q" placeholder="Buscar cliente, pessoa ou mensagem…" oninput="crmRenderInbox()">
-              <select id="crm-inbox-channel" onchange="crmRenderInbox()"><option value="">WhatsApp + e-mail</option><option value="whatsapp">WhatsApp</option><option value="email">E-mail</option></select>
-              <select id="crm-inbox-state" onchange="crmRenderInbox()"><option value="">Todos os estados</option><option value="new">Nova</option><option value="in_progress">Em atendimento</option><option value="waiting_customer">Aguardando cliente</option><option value="waiting_team">Aguardando equipe</option><option value="done">Concluída</option></select>
-              <select id="crm-inbox-owner" onchange="crmRenderInbox()"><option value="">Toda a equipe</option><option value="me">Minhas conversas</option><option value="unassigned">Sem responsável</option></select>
-            </div>
-            <div id="crm-inbox-summary" style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.65rem"></div>
-            <div id="crm-inbox-container" style="margin-top:.55rem"><p class="hint">Carregando conversas…</p></div>
-          </div>
+          <!-- Compatibility anchors for existing signal detectors; no duplicate UI. -->
+          <div hidden id="crm-signal-card"><div id="crm-signal-filters"></div><div id="crm-signal-container"></div></div>
         </div>
 
         <div id="crmpane-clientes" class="rv-pane">
@@ -1253,7 +1507,7 @@ button:active{filter:brightness(.94)}
 <div class="ovl" id="ovl-crmproject" onclick="if(event.target===this)closeM('crmproject')">
   <div class="modal crm-modal">
     <div class="modal-h">
-      <span id="crm-proj-title">Projeto</span>
+      <span id="crm-proj-title">Projeto</span><button class="btn btn-s" onclick="v18OpenCustomerWorkspace(document.getElementById('crm-proj-customer').value,crmEditProjectId)">Conversas</button>
       <div style="display:flex;align-items:center;gap:.5rem">
         <button id="crm-proj-add-action-btn" class="btn btn-p" style="font-size:.62rem;padding:.2rem .55rem;height:30px;display:none;align-items:center;justify-content:center;line-height:1" onclick="crmCreateActionForProject()">＋ Ação</button>
         <button class="btn btn-s" style="font-size:.62rem;padding:.2rem .55rem;opacity:.8" onclick="crmSaveProject()">Salvar</button>
@@ -1378,7 +1632,7 @@ button:active{filter:brightness(.94)}
 <div class="ovl" id="ovl-crmcustomer" onclick="if(event.target===this)closeM('crmcustomer')">
   <div class="modal crm-modal">
     <div class="modal-h">
-      <span id="crm-cust-title">Cliente</span>
+      <span id="crm-cust-title">Cliente</span><button class="btn btn-s" onclick="v18OpenCustomerWorkspace(crmEditCtx.customerId)">Conversas</button>
       <div style="display:flex;align-items:center;gap:.5rem">
         <select id="crm-cust-status" title="Status do cliente" style="width:auto;min-width:82px;border:1px solid var(--bdr2);border-radius:999px;background:var(--bg);padding:.18rem .55rem;font-size:.62rem;font-weight:600;color:var(--ink3)">
           <option value="active">Ativo</option>
@@ -3990,7 +4244,7 @@ async function crmLoadAll(){
     crmFetchAll('crm_customer_external_refs','*',{deleted:false}),
     crmFetchAll('crm_actions','*',{deleted:false}),
     crmFetchAll('crm_groups','*',{deleted:false}),
-    crmFetchAll('crm_communications','*'),
+    v18LoadCommunicationPreviews(),
     crmFetchOptional('crm_conversation_states','*'),
   ]);
   CRM_CUSTOMERS=cust;
@@ -4001,7 +4255,9 @@ async function crmLoadAll(){
   CRM_ACTIONS=actions;
   CRM_GROUPS=groups;
   CRM_COMMUNICATIONS=communications;
+  V18_TIMELINE_READY.clear();
   CRM_CONVERSATION_STATES=conversationStates;
+  await v18LoadThreads();
   crmRenderCustomers();
   crmRenderInbox();
   if(document.getElementById('crmpane-semana')?.classList.contains('active')){crmRenderMinhaSemana();crmLoadSignalRecompra();}
@@ -4136,7 +4392,7 @@ function crmOpenCustomerEdit(id,prefill){
     if(pf){
       const contato=[pf.person?.name,pf.person?.email,pf.person?.phone].filter(Boolean).join(' · ');
       pfBox.classList.add('show');
-      pfBox.innerHTML=`<b>Origem Wix</b>${contato?` · ${esc(contato)}`:''}<span style="color:var(--ink4)"> — revise os dados e classifique antes de salvar.</span>`;
+      pfBox.innerHTML=`<b>${pf.source==='communication'?'Origem da conversa':'Origem Wix'}</b>${contato?` · ${esc(contato)}`:''}<span style="color:var(--ink4)"> — revise os dados e classifique antes de salvar.</span>`;
     }else{pfBox.classList.remove('show');pfBox.innerHTML='';}
   }
   crmRenderCustTags();crmRenderCustPeople();crmRenderCustRefs();crmRenderCustSegmento();crmRenderPerfilToggle();
@@ -5325,6 +5581,7 @@ async function crmToggleGmailHistory(){
   finally{btn.classList.remove('btn-p');btn.textContent=crmGmailHistoryRunning?'Pausar histórico':'↻ 10 anos';}
 }
 function crmRenderTimeline(){
+  if(crmEditCtx.customerId&&!V18_TIMELINE_READY.has(crmEditCtx.customerId)){v18LoadCustomerTimeline(crmEditCtx.customerId);}
   const cont=document.getElementById('crm-cust-timeline');
   if(!cont||!crmEditCtx.customerId)return;
   const wrap=document.getElementById('msf-crm-acttype-wrap');
@@ -7890,6 +8147,437 @@ initAuth().then(()=>{
 });
 // obs: os dados da Importação ficam cifrados no localStorage; só são carregados
 // quando o usuário desbloqueia a aba com a senha certa (dentro de tryUnlock)
+
+/* V18 integration. Claude's visual system; live data and existing CRM operations. */
+let V18_THREADS=[],V18_QUERY='',V18_OWNER='',V18_SEARCH_ORIGIN='',V18_ERROR='',V18_READY=false;
+let V18_SEQUENCE=0,V18_TIMER=null,V18_PANEL=null,V18_ITEMS=[],V18_LAST_FOCUS=null,V18_DRAFTS=new Map(),V18_SENDS=new Map();
+let V18_ORIGIN_ROW=null,V18_SNACK_TIMER=null;
+let V18_TIMELINE_LOADING=new Set(),V18_TIMELINE_READY=new Set();
+const V18_OPEN=new Set();
+const V18_REASON={default_action:'Mensagem para avaliar',team_outbound:'Enviada pela equipe',active_work:'Cliente com trabalho ativo',
+  media_or_attachment:'Mídia ou anexo recebido',unidentified_contact:'Contato não identificado',automation_header:'Cabeçalho de automação',
+  automated_sender:'Remetente automático',provider_label:'Spam, lixeira ou rascunho',manual_restore:'Restaurada pela equipe'};
+const V18_ORIGIN={attention:'Precisa de você',waiting:'Aguardando cliente',future:'Próximas tarefas',informative:'Informativas',ignored:'Ocultas',done:'Resolvidas',signal:'Oportunidade'};
+function v18Date(m){return m?.occurred_at||m?.sent_at||m?.received_at||m?.created_at||null;}
+function v18Ms(v){const n=new Date(v).getTime();return Number.isFinite(n)?n:0;}
+function v18Age(v){const minutes=Math.max(0,Math.floor((Date.now()-v18Ms(v))/60000));return minutes<1?'agora':minutes<60?`${minutes} min`:minutes<1440?`${Math.floor(minutes/60)} h`:`${Math.floor(minutes/1440)} d`;}
+function v18Stamp(v){return v?new Date(v).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—';}
+function v18Highlight(text){text=String(text||'');const q=V18_QUERY.toLowerCase();if(q.length<2)return esc(text);let out='',start=0,index;while((index=text.toLowerCase().indexOf(q,start))>=0){out+=esc(text.slice(start,index))+'<mark>'+esc(text.slice(index,index+q.length))+'</mark>';start=index+q.length;}return out+esc(text.slice(start));}
+function v18Customer(id){return CRM_CUSTOMERS.find(c=>c.id===id);}
+function v18Decorate(t){
+  const customer=v18Customer(t.customer_id),person=CRM_PEOPLE.find(p=>p.id===t.person_id),state=t.state||'new';
+  const classification=t.classification||'action';
+  const origin=classification==='ignored'?'ignored':classification==='informative'?'informative':state==='done'?'done':state==='waiting_customer'?'waiting':'attention';
+  return {...t,customer,person,owner_id:t.state_row?.owner_id||null,origin,
+    title:customer?.trade_name||customer?.display_name||person?.name||'Não identificado',
+    subtitle:person?.name||t.last.sender_address||(t.last.recipient_addresses||[])[0]||'',
+    last:{...t.last,sent_at:v18Date(t.last)}};
+}
+function v18FallbackThreads(){
+  const groups=new Map();for(const m of CRM_COMMUNICATIONS){const party=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[])[0];
+    const key=m.thread_key||(m.channel==='email'?`email:${m.external_thread_id||'single:'+m.id}`:`whatsapp:${String(m.external_thread_id||party||m.id).replace(/\D/g,'')}`);
+    if(!groups.has(key))groups.set(key,[]);groups.get(key).push(m);}
+  return [...groups].map(([key,messages])=>{messages.sort((a,b)=>v18Ms(v18Date(a))-v18Ms(v18Date(b)));const last=messages.at(-1);
+    const inbound=messages.filter(m=>m.direction==='inbound'),outbound=messages.filter(m=>m.direction==='outbound'&&['sent','delivered','read'].includes(m.status));
+    const s=CRM_CONVERSATION_STATES.find(x=>x.thread_key===key),li=inbound.at(-1),lo=outbound.at(-1);
+    const after=Math.max(v18Ms(v18Date(lo)),v18Ms(s?.resolved_at));const unanswered=inbound.filter(m=>v18Ms(v18Date(m))>after);
+    let state=s?.state||(last.direction==='inbound'?'new':'waiting_customer');
+    if(v18Ms(v18Date(li))>Math.max(v18Ms(s?.updated_at),v18Ms(v18Date(lo))))state='new';
+    else if(v18Ms(v18Date(lo))>Math.max(v18Ms(s?.updated_at),v18Ms(v18Date(li))))state='waiting_customer';
+    // Conservative fallback: no content-based suppression before the migration.
+    return {key,last,customer_id:last.customer_id,person_id:last.person_id,state,state_row:s,
+      classification:li?.class_category||'action',message_count:messages.length,needs_reply_since:v18Date(unanswered[0]),
+      last_inbound_at:v18Date(li),last_outbound_at:v18Date(lo),unanswered_count:unanswered.length,classification_message_id:li?.id};});
+}
+async function v18LoadThreads(query=V18_QUERY){
+  if(!_supa)return;const seq=++V18_SEQUENCE;
+  try{const{data,error}=await _supa.rpc('crm_v18_threads',{p_query:query,p_limit:500});if(error)throw error;
+    if(seq!==V18_SEQUENCE)return;V18_THREADS=(data||[]).map(v18Decorate);V18_READY=true;V18_ERROR='';
+    if(V18_PANEL?.thread){const fresh=V18_THREADS.find(t=>t.key===V18_PANEL.thread.key);if(fresh){
+      const changed=fresh.last.id!==V18_PANEL.thread.last.id||fresh.last.status!==V18_PANEL.thread.last.status;
+      v18RememberDraft();V18_PANEL.thread=fresh;V18_PANEL.customer_id=fresh.customer_id;V18_PANEL.title=fresh.title;V18_PANEL.subtitle=fresh.subtitle;
+      if(!v18FormEditing()){v18RenderPanel();if(changed&&V18_PANEL.loaded)v18LoadPanelMessages();}}}}
+  catch(e){if(seq!==V18_SEQUENCE)return;V18_READY=false;V18_ERROR='Não conseguimos atualizar as conversas agora. Você pode continuar com suas tarefas e tentar novamente.';V18_THREADS=v18FallbackThreads().map(v18Decorate);console.error('v18LoadThreads',e);}
+  crmRenderFeed();
+}
+function v18Search(value){V18_QUERY=value.trim();V18_SEARCH_ORIGIN='';clearTimeout(V18_TIMER);V18_TIMER=setTimeout(()=>v18LoadThreads(V18_QUERY),200);}
+function v18SetOwner(value){V18_OWNER=value;crmRenderFeed();}
+function v18Owns(owner){return !V18_OWNER||(V18_OWNER==='me'?owner===authUser?.id:!owner);}
+function crmBuildFeedItems(){
+  const today=new Date();today.setHours(0,0,0,0);const horizon=new Date(today);horizon.setDate(horizon.getDate()+crmSemanaHorizonte);
+  const conversations=V18_THREADS.filter(t=>v18Owns(t.owner_id)).map(t=>({id:'thread:'+t.key,kind:'thread',thread:t,customer_id:t.customer_id,
+    title:t.title,subtitle:t.subtitle,text:t.last.subject||t.last.excerpt||'(sem texto)',origin:t.origin,
+    rank:v18Ms(t.needs_reply_since)&&Date.now()-v18Ms(t.needs_reply_since)>86400000?0:1,
+    wait:Math.max(0,Date.now()-v18Ms(t.needs_reply_since||t.last.sent_at)),why:!t.customer_id?'Contato não identificado':
+      t.state==='waiting_team'?'Aguarda equipe':t.origin==='waiting'?'Aguardando cliente':t.origin==='done'?'Conversa resolvida':
+      ['informative','ignored'].includes(t.origin)?V18_REASON[t.class_reason]||t.class_reason||'Classificada pela equipe':
+      t.class_reason==='media_or_attachment'?'Mídia ou anexo recebido':v18Age(t.needs_reply_since||t.last.sent_at)==='agora'?'Cliente respondeu agora':'Cliente respondeu há '+v18Age(t.needs_reply_since||t.last.sent_at)}));
+  const tasks=CRM_ACTIONS.filter(a=>a.status==='planned'&&a.due_date&&v18Owns(a.responsible_user_id)).map(a=>{
+    const due=new Date(a.due_date+'T00:00:00'),c=v18Customer(a.customer_id),p=CRM_PROJECTS.find(p=>p.id===a.project_id);
+    return{id:'task:'+a.id,kind:'task',task:a,customer_id:a.customer_id,title:c?.trade_name||c?.display_name||p?.prospect_name||'Projeto',
+      subtitle:p?.project_name||'Tarefa',text:a.summary,origin:due<=today?'attention':'future',rank:due<today?0:1,
+      wait:Math.max(0,Date.now()-due.getTime()),why:due<today?'Atrasada há '+v18Age(due):due.getTime()===today.getTime()?'Hoje':crmFmtDate2(a.due_date),within:due<=horizon};});
+  const workingCustomers=new Set([...conversations.filter(i=>i.origin==='attention'),...tasks.filter(i=>i.origin==='attention')].map(i=>i.customer_id).filter(Boolean));
+  const seen=new Set(),signals=[];const kinds=[...new Set(CRM_SIGNAL_ITEMS.map(s=>s.kind))],queues=kinds.map(kind=>CRM_SIGNAL_ITEMS.filter(s=>s.kind===kind&&!crmSignalHasPlannedAction(s)));
+  while(queues.some(q=>q.length)){for(const q of queues){const s=q.shift();if(!s)continue;const c=v18Customer(s.customer_id);if(seen.has(s.customer_id||s.project_id))continue;seen.add(s.customer_id||s.project_id);
+    const label={recompra:'Recompra',reativacao:'Reativação',projeto_parado:'Projeto parado',target_sm_asia:'Oportunidade SM Asia',retomada_sm_asia:'Retomada SM Asia'}[s.kind]||'Oportunidade';
+    const item={id:'signal:'+(s.project_id||s.customer_id)+':'+s.kind,kind:'signal',signal:s,customer_id:s.customer_id,title:c?.trade_name||c?.display_name||s.cliente||s.prospect_name||'Projeto',subtitle:label,
+      text:s.reason||'Histórico indica uma oportunidade comercial',origin:'signal',rank:2,wait:0,why:label};
+    if(workingCustomers.has(s.customer_id)){for(const i of [...conversations,...tasks])if(i.customer_id===s.customer_id&&i.origin==='attention')i.context=label;}
+    else if(v18Owns(c?.owner_user_id))signals.push(item);}}
+  const all=[...conversations,...tasks,...signals];
+  return all.sort((a,b)=>a.rank-b.rank||b.wait-a.wait||(a.kind==='thread'?-1:b.kind==='thread'?1:0));
+}
+function crmFeedItemHtml(i){
+ const t=i.thread,kind=i.kind,channel=t?.last.channel,unknown=kind==='thread'&&!t.customer_id;
+ const color=kind==='signal'?'v18-t-sig':kind==='task'?'v18-t-task':unknown?'v18-t-un':channel==='whatsapp'?'v18-t-wa':'v18-t-mail';
+ const primary=i.origin==='informative'||i.origin==='ignored'?'Restaurar':kind==='task'?'Concluir':kind==='signal'?'Criar tarefa':unknown?'Vincular cliente':channel==='whatsapp'&&i.origin==='attention'?'Responder':'Abrir conversa';
+ const age=t?v18Age(t.needs_reply_since||t.last.sent_at):'';
+ const time=kind==='signal'?'Oportunidade':kind==='task'?i.why:age==='agora'?'agora':(i.origin==='attention'?'aguarda há ':'há ')+age;
+ return `<div class="v18-row ${unknown?'v18-unk':''} ${V18_PANEL?.id===i.id?'v18-sel':''}" tabindex="0" role="button" data-v18-open="${esc(i.id)}" aria-label="${esc(i.title+' · '+i.text)}">
+  <div class="v18-tile ${color}" aria-hidden="true">${kind==='task'?'✓':kind==='signal'?'↗':channel==='whatsapp'?'◌':'✉'}</div>
+  <div class="v18-mid"><div class="v18-l1"><span class="v18-nm" title="${esc(i.title)}">${v18Highlight(i.title)}</span><span class="v18-pp" title="${esc(i.subtitle)}">${v18Highlight(i.subtitle)}</span><span class="v18-tm ${!['attention','future'].includes(i.origin)?'v18-c':i.rank===0?'v18-a':'v18-b'}">${esc(time)}</span></div>
+  <div class="v18-ct" title="${esc(i.text)}">${v18Highlight(i.text)}</div><span class="v18-chip ${unknown?'v18-ch-blu':kind==='signal'?'v18-ch-teal':i.rank===0?'v18-ch-red':'v18-ch-amb'}">${esc(i.why)}</span>${i.context?` <span class="v18-chip v18-ch-teal">${esc(i.context)}</span>`:''}
+  ${V18_QUERY.length>=2?` <span class="v18-org">${V18_ORIGIN[i.origin]}</span>`:''}</div>
+  <div class="v18-acts"><button class="v18-btn ${['attention','signal'].includes(i.origin)?'v18-p':''}" data-v18-primary="${esc(i.id)}">${primary}</button><button class="v18-ico" data-v18-menu="${esc(i.id)}" aria-label="Mais ações de ${esc(i.title)}" aria-expanded="false">⋯</button></div></div>`;
+}
+function crmRenderFeed(){
+ const content=document.getElementById('crm-v18-feed');if(!content)return;
+ V18_ITEMS=crmBuildFeedItems();
+ const main=V18_ITEMS.filter(i=>i.origin==='attention'),sig=V18_ITEMS.filter(i=>i.origin==='signal');
+ const badge=document.getElementById('crm-inbox-badge');if(badge){badge.textContent=main.length;badge.style.display=main.length?'inline-flex':'none';}
+ for(const b of document.querySelectorAll('[data-v18-owner]')){b.classList.toggle('v18-on',b.dataset.v18Owner===V18_OWNER);b.setAttribute('aria-pressed',String(b.dataset.v18Owner===V18_OWNER));}
+ const banner=V18_ERROR?`<div class="v18-banner" role="alert">${esc(V18_ERROR)}<button class="v18-btn" data-v18-refresh>Tentar novamente</button></div>`:'';
+ if(V18_QUERY.length>=2){
+  const matching=V18_ITEMS.filter(i=>i.kind==='thread'||[i.title,i.subtitle,i.text].join(' ').toLowerCase().includes(V18_QUERY.toLowerCase()));
+  const origins=[...new Set(matching.map(i=>i.origin))];const shown=matching.filter(i=>!V18_SEARCH_ORIGIN||i.origin===V18_SEARCH_ORIGIN);
+  content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Resultados de busca <span class="v18-cnt">${matching.length}</span></span><span class="v18-sum">Inclui resolvidas e ocultas</span></div><div class="v18-chips"><button class="v18-fchip ${!V18_SEARCH_ORIGIN?'v18-on':''}" data-v18-origin="">Tudo</button>${origins.map(o=>`<button class="v18-fchip ${V18_SEARCH_ORIGIN===o?'v18-on':''}" data-v18-origin="${o}">${V18_ORIGIN[o]} · ${matching.filter(i=>i.origin===o).length}</button>`).join('')}</div>${shown.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nenhum resultado neste filtro.</p>'}${V18_THREADS.length>=500?'<p class="v18-note">Até 500 conversas por busca. Refine o termo para encontrar outras.</p>':''}`;return;
+ }
+ const late=main.filter(i=>i.kind==='task'&&i.rank===0).length,now=main.filter(i=>i.kind==='task'&&i.rank===1).length,reply=main.filter(i=>i.kind==='thread').length;
+ const section=(o,label,rows,note='')=>`<button class="v18-sec" data-v18-section="${o}" aria-expanded="${V18_OPEN.has(o)}" aria-controls="v18-section-${o}"><span aria-hidden="true">${V18_OPEN.has(o)?'⌄':'›'}</span><span class="v18-t">${label}</span><span class="v18-n">${rows.length}</span>${o==='future'?`<span class="v18-h">${crmSemanaHorizonte} dias</span>`:''}</button><div id="v18-section-${o}" ${V18_OPEN.has(o)?'':'hidden'}>${o==='future'?'<div class="v18-subh"><button class="v18-btn" data-v18-horizon>Alternar 7 / 30 dias</button></div>':''}${rows.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nada nesta seção.</p>'}${note?`<p class="v18-note">${note}</p>`:''}</div>`;
+ content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Precisa de você <span class="v18-cnt">${main.length+Math.min(3,sig.length)}</span></span><span class="v18-sum"><b>${late} ${late===1?'atrasada':'atrasadas'}</b> · ${now} hoje · ${reply} ${reply===1?'conversa':'conversas'}</span></div>${[...main,...sig.slice(0,3)].map(crmFeedItemHtml).join('')||'<p class="v18-note">Tudo em dia. Nenhum item pede ação agora.</p>'}
+ ${sig.length>3?section('signal','Mais oportunidades',sig.slice(3)):''}
+ ${section('waiting','Aguardando cliente',V18_ITEMS.filter(i=>i.origin==='waiting'))}
+ ${section('future',`Próximos ${crmSemanaHorizonte} dias`,V18_ITEMS.filter(i=>i.origin==='future'&&i.within))}
+ ${section('informative','Informativas',V18_ITEMS.filter(i=>i.origin==='informative'))}
+ ${section('ignored','Ocultas',V18_ITEMS.filter(i=>i.origin==='ignored'),'Somente mensagens já registradas no CRM podem ser restauradas. Spam e lixeira anteriores à sincronização podem nunca ter sido importados; rascunhos não entram no feed.')}
+ <p class="v18-note">Conversas dos últimos 90 dias e pendências salvas. A busca também encontra conversas anteriores e resolvidas.${V18_THREADS.length>=500?' Limite de 500 conversas atingido; use a busca.':''}</p>`;
+}
+function crmRenderMinhaSemana(){crmRenderFeed();}
+function crmRenderInbox(){crmRenderFeed();}
+function crmRenderSignals(){crmRenderFeed();}
+function v18GmailUrl(t){const thread=String(t.last.external_thread_id||'');return /^([0-9a-f]+)$/i.test(thread)?`https://mail.google.com/mail/u/?authuser=comercial%40animaverde.com.br#all/${thread}`:'https://mail.google.com/mail/u/?authuser=comercial%40animaverde.com.br#search/'+encodeURIComponent(t.last.subject||t.subtitle);}
+function v18FormEditing(){return !!(document.getElementById('v18-task-form')||document.getElementById('v18-class-form'));}
+function v18RememberDraft(){if(V18_PANEL){const el=document.getElementById('v18-reply');if(el)V18_DRAFTS.set(V18_PANEL.id,el.value);}}
+function v18ClearDraft(id){V18_DRAFTS.delete(id);if(V18_PANEL?.id===id){const el=document.getElementById('v18-reply');if(el)el.value='';}}
+function v18CanLeave(){v18RememberDraft();return !V18_PANEL||!String(V18_DRAFTS.get(V18_PANEL.id)||'').trim()||confirm('O rascunho ficará guardado nesta sessão. Deseja sair desta conversa?');}
+async function crmOpenThreadPanel(id){
+ if(V18_PANEL?.id!==id&&!v18CanLeave())return;const item=V18_ITEMS.find(i=>i.id===id);if(!item)return;
+ V18_LAST_FOCUS=document.activeElement;V18_ORIGIN_ROW=id;V18_PANEL={...item,replyChoiceRequired:item.kind==='task',messages:[],hasMore:false,historyMode:'customer',channel:item.thread?.last.channel||'email',filterKey:'',ai:null,replyTarget:null,emailContext:null};v18SetPanelOpen(true);v18RenderPanel();crmRenderFeed();
+ if(!V18_PANEL.thread&&item.customer_id){V18_PANEL.thread=V18_THREADS.find(t=>t.customer_id===item.customer_id&&t.last.channel==='email')||V18_THREADS.find(t=>t.customer_id===item.customer_id);if(V18_PANEL.thread)V18_PANEL.channel=V18_PANEL.thread.last.channel;}
+ if(item.customer_id||item.kind==='thread')await v18LoadPanelMessages();
+ document.querySelector('#crm-v18-panel button')?.focus();
+}
+function v18SetPanelOpen(open){const ws=document.getElementById('crm-v18-workspace');ws?.classList.toggle('v18-panel-open',open);document.getElementById('crm-v18-panel').hidden=!open;document.getElementById('crm-v18-scrim').hidden=!open;}
+function v18ReturnFocus(){const origin=[...document.querySelectorAll('[data-v18-open]')].find(x=>x.dataset.v18Open===V18_ORIGIN_ROW);if(origin)origin.focus();else if(V18_LAST_FOCUS?.isConnected)V18_LAST_FOCUS.focus();else document.getElementById('v18-search')?.focus();}
+function v18ClosePanel(){if(!v18CanLeave())return;V18_PANEL=null;v18SetPanelOpen(false);document.getElementById('crm-v18-panel').replaceChildren();crmRenderFeed();v18ReturnFocus();}
+async function v18LoadPanelMessages(more=false){
+ const panel=V18_PANEL;if(!panel)return;const key=panel.thread?.key;const before=more?v18Date(panel.messages[0]):null;
+ const oldScroll=document.querySelector('#crm-v18-panel .v18-thread-scroll'),oldHeight=oldScroll?.scrollHeight||0,oldTop=oldScroll?.scrollTop||0;
+ const history=!!panel.customer_id,seq=(panel.messagesSequence||0)+1;panel.messagesSequence=seq;
+ try{const{data,error}=await _supa.rpc(history?'crm_v18_channel_messages':'crm_v18_thread_messages',{
+    ...(history?{p_customer:panel.customer_id,p_channel:panel.channel,p_key:panel.filterKey||null}:{p_key:key}),p_before:before,p_before_id:more?panel.messages[0]?.id:null,p_limit:20});if(error)throw error;
+   if(V18_PANEL!==panel||panel.messagesSequence!==seq)return;const messages=(data||[]).reverse();panel.messages=more?[...messages,...panel.messages]:messages;panel.hasMore=messages.length===20;panel.loaded=true;panel.error='';
+   if(!panel.replyTarget&&!panel.replyChoiceRequired){panel.replyTarget=[...messages].reverse().find(m=>m.direction==='inbound'&&m.thread_key===key)
+      ||[...messages].reverse().find(m=>m.thread_key===key&&['sent','delivered','read'].includes(m.status))||(history?null:panel.thread?.last);}}
+ catch(e){if(V18_PANEL!==panel||panel.messagesSequence!==seq)return;panel.error='Não foi possível carregar a conversa. Tente novamente.';console.error(e);}
+ v18RememberDraft();if(!v18FormEditing()){v18RenderPanel();const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll)scroll.scrollTop=more?scroll.scrollHeight-oldHeight+oldTop:scroll.scrollHeight;}
+ if(!panel.replyChoiceRequired&&panel.customer_id&&panel.messages.length&&(!panel.replyTarget||panel.replyTarget.channel!==panel.channel||panel.id!=='thread:'+panel.thread?.key)){await v18SelectReply(panel.messages.at(-1).id);}
+ if(!panel.replyChoiceRequired&&panel.thread?.last.channel==='email'&&!panel.emailContext&&!panel.contextLoading)await v18LoadEmailContext();
+ if(V18_PANEL===panel&&!more){const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll)scroll.scrollTop=scroll.scrollHeight;}
+}
+async function v18Channel(channel){const p=V18_PANEL;if(!p||channel===p.channel||V18_SENDS.get(p.id)?.pending)return;
+ v18RememberDraft();p.channel=channel;p.filterKey='';p.replyTarget=null;p.thread=null;p.emailContext=null;p.contextLoading=false;p.contextSequence=(p.contextSequence||0)+1;p.ai=null;
+ p.loaded=false;p.messages=[];p.hasMore=false;v18RenderPanel();await v18LoadPanelMessages();}
+async function v18Filter(key){const p=V18_PANEL;if(!p||V18_SENDS.get(p.id)?.pending)return;v18RememberDraft();p.filterKey=key;if(key)p.replyChoiceRequired=false;p.replyTarget=null;p.emailContext=null;p.ai=null;p.loaded=false;p.messages=[];await v18LoadPanelMessages();}
+async function v18SelectReply(id){
+ const p=V18_PANEL;if(!p||V18_SENDS.get(p.id)?.pending)return;const message=p.messages.find(m=>m.id===id);if(!message)return;
+ if(message.status==='sending'||message.status==='failed'){p.error='Selecione uma mensagem recebida ou enviada com sucesso.';v18RenderPanel();return;}
+ v18RememberDraft();const currentKey=p.thread?.key;
+ let thread=V18_THREADS.find(t=>t.key===message.thread_key);
+ if(!thread){const{data,error}=await _supa.rpc('crm_v18_threads',{p_query:'',p_limit:1,p_key:message.thread_key});if(error){p.error='Não foi possível abrir esta conversa.';v18RenderPanel();return;}thread=(data||[]).map(v18Decorate)[0];}
+ if(V18_PANEL!==p||!thread||thread.customer_id!==p.customer_id)return;
+ p.replyChoiceRequired=false;p.thread=thread;p.id='thread:'+thread.key;p.replyTarget=message;p.emailContext=null;p.contextError='';p.contextLoading=false;p.contextSequence=(p.contextSequence||0)+1;p.subtitle=thread.subtitle;p.ai=null;
+ p.text=message.subject||message.excerpt||message.body;p.error='';
+ if(currentKey!==thread.key&&p.historyMode==='thread')await v18LoadPanelMessages();
+ v18RenderPanel();crmRenderFeed();if(message.channel==='email')await v18LoadEmailContext();
+ document.getElementById('v18-reply')?.focus();
+}
+async function v18LoadEmailContext(){
+ const p=V18_PANEL;if(!p?.thread||p.replyChoiceRequired||p.thread.last.channel!=='email'||!p.replyTarget||!p.customer_id)return;
+ const targetId=p.replyTarget.id,seq=(p.contextSequence||0)+1;p.contextSequence=seq;p.contextLoading=true;p.contextError='';v18RenderPanel();
+ try{const{data,error}=await _supa.functions.invoke('crm-email-send',{body:{action:'reply_context',customer_id:p.customer_id,reply_to_message_id:targetId}});
+   if(error)throw error;if(!data||data.status!=='ready')throw new Error(data?.error||'Resposta indisponível');
+   if(V18_PANEL!==p||p.contextSequence!==seq||p.replyTarget?.id!==targetId)return;p.emailContext=data;
+ }catch(e){if(V18_PANEL!==p||p.contextSequence!==seq)return;p.contextError='Não foi possível confirmar o destinatário deste e-mail. Tente novamente ou abra no Gmail.';console.error(e);}
+ finally{if(V18_PANEL===p&&p.contextSequence===seq){p.contextLoading=false;v18RememberDraft();if(!v18FormEditing())v18RenderPanel();}}
+}
+function v18MessageHtml(m){
+ const media=m.message_type,attachments=m.attachments_meta||[],label={audio:'Áudio',image:'Imagem',video:'Vídeo',document:'Documento',sticker:'Figurinha'}[media];
+ const content=m.body||m.excerpt||(label?label+' recebido':'(sem conteúdo)');const age=Date.now()-v18Ms(m.created_at||v18Date(m));
+ const state=m.status==='sending'&&age>120000?'Envio não confirmado':{sent:'Enviado',delivered:'Entregue',read:'Lido',sending:'Enviando',failed:'Falhou',received:'Recebido'}[m.status]||m.status;
+ const channel=m.channel||V18_PANEL?.thread?.last.channel,history=V18_PANEL?.historyMode==='customer',selected=V18_PANEL?.replyTarget?.id===m.id;
+ const party=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');
+ return `<div class="v18-msg ${m.direction==='inbound'?'v18-in':'v18-out'} ${m.status==='failed'?'v18-fail':m.status==='sending'&&age>120000?'v18-unc':''} ${selected&&history?'v18-reply-selected':''}" ${history?`tabindex="0" role="button" data-v18-reply-message="${esc(m.id)}" aria-label="Responder por ${channel==='email'?'e-mail':'WhatsApp'} nesta conversa"`:''}>
+ <div class="v18-message-channel">${channel==='email'?'✉ E-mail':'◌ WhatsApp'}${party?' · '+esc(party):''}</div>
+ ${m.subject?`<b>${esc(m.subject)}</b><br>`:''}<div style="white-space:pre-wrap">${esc(content)}</div>${attachments.length?`<div class="v18-hint">${attachments.map(a=>esc(a.filename||a.type||a.mime_type||'Anexo')).join(' · ')}</div>`:''}${label?'<div class="v18-hint">Abra a mídia no WhatsApp Business.</div>':''}
+ <span class="v18-mt">${v18Stamp(v18Date(m))} · ${esc(state||'Registrado')}</span>${history&&selected?'<span class="v18-history-reply">Respondendo a esta troca</span>':''}${m.status==='sending'&&age>120000?'<div class="v18-st v18-wrn">Confira o status antes de reenviar.</div>':''}</div>`;
+}
+function v18WhatsAppContactLabel(key,number){
+ const phone=String(number||'').replace(/\D/g,'');const thread=V18_THREADS.find(t=>t.key===key),person=thread?.person||CRM_PEOPLE.find(x=>x.customer_id===V18_PANEL?.customer_id&&String(x.phone_normalized||x.phone||'').replace(/\D/g,'')===phone);
+ return person?.name?person.name+' · '+number:String(number||key);
+}
+function v18RenderPanel(){
+ const previous=document.querySelector('#crm-v18-panel .v18-thread-scroll'),previousTop=previous?.scrollTop;const active=document.activeElement,isPanelFocus=!!active?.closest?.('#crm-v18-panel');const focusId=active?.id;const focusData=active?.dataset?Object.entries(active.dataset).find(([k])=>k.startsWith('v18')):null;const caret=active?.tagName==='TEXTAREA'?[active.selectionStart,active.selectionEnd]:null;
+ const restore=()=>{const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll&&previousTop!=null)scroll.scrollTop=previousTop;if(isPanelFocus){let replacement=focusId?document.getElementById(focusId):focusData?[...document.querySelectorAll('#crm-v18-panel button')].find(x=>x.dataset[focusData[0]]===focusData[1]):null;if(replacement?.closest('.v18-ai-tools')&&!replacement.closest('details').open)replacement=null;(replacement||document.querySelector('.v18-ai-tools summary'))?.focus({preventScroll:true});if(caret&&replacement?.setSelectionRange)replacement.setSelectionRange(...caret);}};
+ const p=V18_PANEL,el=document.getElementById('crm-v18-panel');if(!p||!el)return;const t=p.thread;
+ const headingMeta=p.task?'Tarefa: '+(p.task.summary||p.text):p.replyChoiceRequired?'Escolha com quem responder':t?[t.state==='done'?'Resolvido':t.state==='waiting_customer'?'Aguardando cliente':'Precisa de resposta',t.needs_reply_since?'aguarda há '+v18Age(t.needs_reply_since):'',t.owner_id===authUser?.id?'Com você':t.owner_id?'Outro responsável':'Sem responsável'].filter(Boolean).join(' · '):p.subtitle;
+ const heading=`<div class="v18-ph"><div class="v18-mid"><button class="v18-client-link" data-v18-customer title="Abrir ficha de ${esc(p.title)}">${esc(p.title)}</button><div class="v18-pp" title="${esc(headingMeta)}">${esc(headingMeta)}</div></div>${t&&!p.replyChoiceRequired?`<button class="v18-ico v18-resolve" data-v18-resolve aria-label="${t.state==='done'?'Reabrir conversa':'Resolver conversa'}" title="${t.state==='done'?'Reabrir conversa':'Resolver conversa'}" ${V18_SENDS.get(p.id)?.pending||V18_SENDS.get(p.id)?.uncertain?'disabled':''}>${t.state==='done'?'↺':'✓'}</button>`:''}<button class="v18-ico" data-v18-menu="${esc(p.id)}" aria-label="Mais ações">⋯</button><button class="v18-ico" data-v18-close aria-label="Fechar painel">×</button></div>`;
+ const channelTabs=`<div class="v18-history-tabs" role="tablist" aria-label="Canal"><button role="tab" class="${p.channel==='email'?'v18-on':''}" data-v18-channel="email" aria-selected="${p.channel==='email'}" ${!p.customer_id&&p.channel!=='email'?'disabled':''}>✉ E-mail</button><button role="tab" class="${p.channel==='whatsapp'?'v18-on':''}" data-v18-channel="whatsapp" aria-selected="${p.channel==='whatsapp'}" ${!p.customer_id&&p.channel!=='whatsapp'?'disabled':''}>◌ WhatsApp</button></div>`;
+ const taskContext=p.task?`<div class="v18-context"><span><b>Tarefa</b> · ${esc(p.task.summary||p.text)}</span><button class="v18-btn v18-q" data-v18-primary="${esc('task:'+p.task.id)}">Concluir</button></div>`:p.signal?`<div class="v18-context">${esc(p.text)}</div>`:'';
+ const toolbar=`<div class="v18-tools"><button class="v18-btn" data-v18-taskform ${!p.customer_id?'disabled':''}>+ Agendar tarefa</button><details class="v18-ai-tools"><summary>✦ IA</summary><div><button data-v18-ai="summary">Resumir</button><button data-v18-ai="reply" ${!t?'disabled':''}>Preparar resposta</button><button data-v18-ai="action">Sugerir ação</button></div></details></div>`;
+ if(!t){el.innerHTML=`<div class="v18-panel">${heading}${channelTabs}${toolbar}<div class="v18-thread-scroll">${taskContext}<div id="v18-panel-form"></div><div class="v18-thread">${p.error?`<p role="alert">${esc(p.error)} <button data-v18-loadmessages class="v18-btn">Tentar novamente</button></p>`:!p.loaded?'<p role="status">Carregando histórico…</p>':`<p>Nenhuma troca de ${p.channel==='email'?'e-mail':'WhatsApp'} registrada neste canal.</p><button class="v18-btn" data-v18-startchannel>Iniciar conversa</button>`}</div></div></div>`;restore();return;}
+ const status=t.state==='done'?'Resolvido':t.state==='waiting_customer'?'Aguardando cliente':'Precisa de resposta';
+ const closed=Date.now()-v18Ms(t.last_inbound_at)>=86400000,send=V18_SENDS.get(p.id),draft=V18_DRAFTS.get(p.id)||'',gmail=t.last.channel==='email';
+ const recipient=gmail?p.emailContext?.to:(t.person?.phone_normalized||t.person?.phone||(p.replyTarget?.direction==='inbound'?p.replyTarget?.sender_address:(p.replyTarget?.recipient_addresses||[])[0])||t.last.sender_address);
+ const triage=!t.customer_id?`<div class="v18-who"><h4>Quem é?</h4><p>Vincule esta conversa a uma pessoa para consultar o histórico do cliente e responder.</p><input class="v18-search" id="v18-link-search" placeholder="Buscar cliente ou pessoa…" aria-label="Buscar pessoa para vincular"><div id="v18-link-options"></div><button class="v18-btn" data-v18-newcustomer>Cadastrar cliente</button></div>`:'';
+ const disabled=send?.pending||send?.uncertain||(gmail&&!p.emailContext);
+ let composer=p.replyChoiceRequired?'<div class="v18-comp v18-hint">Escolha um assunto ou uma mensagem para definir com quem responder. Nenhum destinatário foi escolhido.</div>':!t.customer_id?'<div class="v18-comp v18-hint">Vincule o contato acima para responder.</div>':
+   !gmail&&closed?`<div class="v18-comp"><div class="v18-reply-destination"><b>${esc((t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Contato')}</div><p class="v18-hint">Janela de texto livre encerrada. Escolha um modelo aprovado.</p><button class="v18-btn v18-p" data-v18-template>Escolher modelo</button></div>`:
+   `<div class="v18-comp"><div class="v18-reply-destination"><b>${esc(gmail?(t.person?.name?t.person.name+' · E-mail':'E-mail'):(t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Confirmando destinatário…')}</div>${gmail&&p.emailContext?`<div class="v18-reply-subject" title="${esc(p.emailContext.subject||'(sem assunto)')}">${esc(p.emailContext.subject||'(sem assunto)')}</div>`:''}
+    ${p.contextLoading?'<p class="v18-hint" role="status">Confirmando o e-mail original…</p>':''}${p.contextError?`<div class="v18-hint" role="alert">${esc(p.contextError)} <button class="v18-btn v18-q" data-v18-email-context>Tentar novamente</button></div>`:''}
+    <textarea class="v18-ta" id="v18-reply" maxlength="${gmail?9500:20000}" aria-label="Resposta" placeholder="Escrever resposta…">${esc(draft)}</textarea><div class="v18-crow"><span class="v18-hint">${gmail?'':'Texto livre disponível.'}</span><button class="v18-btn v18-p" data-v18-send ${disabled?'disabled':''}>${send?.pending?'Enviando…':'Enviar'}</button></div></div>`;
+ const sendNotice=send?.notice?`<div class="v18-send-notice ${send.error?'v18-ban':''}" role="status">${esc(send.notice)}${send.uncertain?'<button class="v18-btn" data-v18-checksend>Verificar agora</button>':''}${send.retry?'<button class="v18-btn" data-v18-send>Tentar novamente</button>':''}</div>`:'';
+ const wait=t.needs_reply_since?'Aguarda há '+v18Age(t.needs_reply_since):'';
+ const historyButtons=channelTabs;
+ const options=new Map();V18_THREADS.filter(x=>x.customer_id===p.customer_id&&x.last.channel===p.channel).forEach(x=>options.set(x.key,p.channel==='email'?x.last.subject||'(sem assunto)':v18WhatsAppContactLabel(x.key,x.person?.phone_normalized||x.person?.phone||x.subtitle||x.key)));p.messages.forEach(m=>options.set(m.thread_key,p.channel==='email'?m.subject||options.get(m.thread_key)||'(sem assunto)':v18WhatsAppContactLabel(m.thread_key,(m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[])[0])||m.thread_key)));
+ const picker=p.customer_id?`<div class="v18-topic"><label for="v18-topic">${p.replyChoiceRequired?'Responder a':'Ver'}</label><select id="v18-topic" aria-label="${p.channel==='email'?'Assunto do e-mail':'Contato do WhatsApp'}"><option value="">${p.replyChoiceRequired?'Escolha uma troca…':p.channel==='email'?'Todos os assuntos':'Todos os contatos'}</option>${[...options].map(([key,label])=>`<option value="${esc(key)}" ${p.filterKey===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div>`:'';
+ const ai=p.ai?`<div class="v18-ai-result" id="v18-ai-result" tabindex="-1" role="status"><b>✦ ${p.ai.loading?'Consultando…':'Sugestão da IA'}</b><p>${esc(p.ai.text||'')}</p>${p.ai.draft?`<p class="v18-ai-draft">${esc(p.ai.draft)}</p>`:''}${p.ai.draft?'<button class="v18-btn v18-q" data-v18-ai-use>Usar rascunho</button>':''}${p.ai.action?'<button class="v18-btn v18-q" data-v18-ai-task>Agendar esta ação</button>':''}</div>`:'';
+ el.innerHTML=`<div class="v18-panel">${heading}${historyButtons}${toolbar}${picker}
+ <div class="v18-thread-scroll">${taskContext}<div id="v18-panel-form"></div>${triage}${ai}${p.error?`<div class="v18-ban" role="alert">${esc(p.error)}<button class="v18-btn" data-v18-loadmessages>Tentar novamente</button></div>`:''}
+ ${p.hasMore?'<button class="v18-btn" data-v18-more>Ver mensagens anteriores</button>':''}<div class="v18-thread">${p.loaded?p.messages.map(v18MessageHtml).join(''):'<p role="status">Carregando histórico…</p>'}</div></div>
+ ${sendNotice}${composer}</div>`;restore();
+}
+async function v18ThreadAction(action,reason=null){
+ const p=V18_PANEL;if(!p?.thread)return false;
+ const key=p.thread.key,expected=p.thread.last.id,priorState=p.thread.state||'new',priorOwner=p.thread.owner_id,draft=V18_DRAFTS.get(p.id)||'',contact=p.thread.person?.name||p.subtitle||p.thread.last.sender_address||'este contato';
+ const{error}=await _supa.rpc('crm_v18_thread_action',{p_key:p.thread.key,p_action:action,p_reason:reason,p_expected:p.thread.last.id});
+ if(error){p.error=error.message;v18RenderPanel();return false;}
+ await v18LoadThreads();const updated=V18_THREADS.find(t=>t.key===p.thread.key);if(updated)p.thread=updated;
+ if(action==='done'){
+  V18_DRAFTS.delete(p.id);if(V18_PANEL===p){V18_PANEL=null;v18SetPanelOpen(false);document.getElementById('crm-v18-panel').replaceChildren();crmRenderFeed();v18ReturnFocus();}
+  v18Snack('Conversa com '+contact+' resolvida.',async()=>{
+   const {error}=await _supa.rpc('crm_v18_thread_action',{p_key:key,p_action:priorState==='done'?'new':priorState==='in_progress'&&priorOwner!==authUser?.id?'waiting_team':priorState,p_reason:'Desfazer resolução',p_expected:expected});
+   if(error){toastSave('Não foi possível desfazer. Uma nova mensagem ou alteração pode ter ocorrido. Atualize as conversas.');await v18LoadThreads();return;}
+   if(draft)V18_DRAFTS.set('thread:'+key,draft);await v18LoadThreads();
+   const restored=V18_ITEMS.find(i=>i.id==='thread:'+key);if(restored&&!V18_PANEL)await crmOpenThreadPanel(restored.id);
+  });
+ }
+ else{v18RememberDraft();v18RenderPanel();}return true;
+}
+function v18TaskForm(){
+ const p=V18_PANEL;if(!p)return;const target=document.getElementById('v18-panel-form')||document.querySelector('#crm-v18-panel .v18-thread-scroll');
+ target.innerHTML=`<form class="v18-form" id="v18-task-form"><h4>Criar tarefa</h4><div class="v18-fld"><label for="v18-task-text">O que precisa acontecer</label><input id="v18-task-text" maxlength="500" value="" placeholder="Descreva o próximo passo…" required></div><div class="v18-fld"><label for="v18-task-date">Prazo</label><input type="date" id="v18-task-date" required></div><div class="v18-quickdates"><button type="button" data-v18-date="0">Hoje</button><button type="button" data-v18-date="1">Amanhã</button><button type="button" data-v18-date="3">3 dias</button><button type="button" data-v18-date="7">1 semana</button></div><p class="v18-hint">Responsável: você</p>${p.kind==='thread'?'<label class="v18-opt"><input type="checkbox" id="v18-task-resolve"> Resolver a conversa depois de salvar</label>':''}<button class="v18-btn v18-p" type="submit">Salvar tarefa</button><button class="v18-btn" type="button" data-v18-cancel-form>Cancelar</button><div id="v18-task-result" role="status"></div></form>`;
+ target.scrollIntoView({block:'nearest'});document.getElementById('v18-task-text').focus();
+}
+async function v18SaveTask(event){event.preventDefault();const p=V18_PANEL;if(!p)return;const result=document.getElementById('v18-task-result'),button=event.target.querySelector('[type=submit]');button.disabled=true;
+ const summary=document.getElementById('v18-task-text').value.trim(),due=document.getElementById('v18-task-date').value,resolve=!!document.getElementById('v18-task-resolve')?.checked;
+ const{error}=await _supa.rpc('crm_save_action',{p_customer_id:p.customer_id,p_type:p.thread?.last.channel==='email'?'email':'followup',p_direction:null,p_occurred_at:null,p_summary:null,p_details:null,
+   p_responsible_user_id:authUser.id,p_next_summary:summary,p_next_due_date:due,p_action_id:null,p_mode:'schedule',p_project_id:p.task?.project_id||p.signal?.project_id||p.project_id||null});
+ if(error){result.textContent=error.message;button.disabled=false;return;}
+ // Disable the submitted form before refresh to prevent accidental duplicates.
+ event.target.innerHTML='<p role="status">Tarefa salva.</p>';
+ if(resolve)await v18ThreadAction('done');await crmLoadAll();
+}
+function v18ClassForm(category='informative'){
+ const target=document.getElementById('v18-panel-form');if(!target)return;
+ target.innerHTML=`<form class="v18-form v18-warn" id="v18-class-form" data-category="${category}"><h4>${category==='ignored'?'Ocultar conversa':'Mover para Informativas'}</h4><p>Escolha o motivo. A conversa continuará recuperável.</p><select class="v18-sel2" id="v18-class-reason" required aria-label="Motivo"><option value="">Selecione…</option><option>Propaganda ou spam</option><option>Fornecedor ou serviço</option><option>Contato pessoal</option><option>Outro</option></select><button class="v18-btn" type="submit">Confirmar</button><button class="v18-btn" type="button" data-v18-cancel-form>Cancelar</button></form>`;
+}
+async function v18SaveClass(event){event.preventDefault();const p=V18_PANEL;if(!p)return;const category=event.target.dataset.category,reason=document.getElementById('v18-class-reason').value;
+ const previous=p.thread.classification||'action',key=p.thread.key,expected=p.thread.last.id;event.target.querySelector('[type=submit]').disabled=true;
+ if(await v18ThreadAction(category,reason))v18Snack('Conversa movida. Você pode restaurá-la depois.',async()=>{const{error}=await _supa.rpc('crm_v18_thread_action',{p_key:key,p_action:previous,p_reason:'Desfazer correção',p_expected:expected});if(error)toastSave(error.message);else await v18LoadThreads();});
+}
+function v18Snack(message,undo){
+ const el=document.getElementById('v18-snack');clearTimeout(V18_SNACK_TIMER);el.innerHTML=`<span>${esc(message)}</span><button type="button">Desfazer</button>`;el.hidden=false;
+ const button=el.querySelector('button');let remaining=15000,started=0,hover=false;
+ const current=()=>el.querySelector('button')===button&&!el.hidden;
+ const dismiss=(returnFocus=false)=>{clearTimeout(V18_SNACK_TIMER);el.hidden=true;if(returnFocus){if(!V18_PANEL)v18ReturnFocus();else document.querySelector('.v18-ph [data-v18-menu]')?.focus();}};
+ const pause=()=>{clearTimeout(V18_SNACK_TIMER);if(started){remaining=Math.max(0,remaining-(Date.now()-started));started=0;}};
+ const resume=()=>{if(!current()||hover||el.contains(document.activeElement))return;pause();started=Date.now();V18_SNACK_TIMER=setTimeout(()=>dismiss(),remaining);};
+ el.onmouseenter=()=>{hover=true;pause();};el.onmouseleave=()=>{hover=false;resume();};
+ el._v18SnackAbort?.abort();const events=new AbortController();el._v18SnackAbort=events;el.addEventListener('focusin',pause,{signal:events.signal});el.addEventListener('focusout',()=>setTimeout(resume,0),{signal:events.signal});
+ el.onkeydown=e=>{if(e.key==='Escape'||e.key==='Tab'){e.preventDefault();e.stopPropagation();dismiss(true);}};
+ button.onclick=async()=>{button.disabled=true;dismiss();try{await undo();}catch{toastSave('Não foi possível desfazer agora. Atualize as conversas.');if(!V18_PANEL)v18ReturnFocus();}};
+ if(!V18_PANEL)button.focus({preventScroll:true});resume();
+}
+async function v18LinkSearch(query){const el=document.getElementById('v18-link-options');if(!el)return;const q=query.toLowerCase();
+ el.innerHTML=q.length<2?'<p class="v18-hint">Digite pelo menos 2 caracteres.</p>':CRM_PEOPLE.filter(p=>[p.name,p.email,p.phone,v18Customer(p.customer_id)?.display_name,v18Customer(p.customer_id)?.trade_name].join(' ').toLowerCase().includes(q)).slice(0,8).map(p=>`<button class="v18-btn v18-link-option" data-v18-link="${p.id}">${esc(p.name)} · ${esc(v18Customer(p.customer_id)?.trade_name||v18Customer(p.customer_id)?.display_name||'')}</button>`).join('')||'<p class="v18-hint">Nenhuma pessoa encontrada. Cadastre o cliente e a pessoa, depois vincule aqui.</p>';
+}
+async function v18LinkPerson(id){const p=V18_PANEL;if(!p?.thread)return;const person=CRM_PEOPLE.find(x=>x.id===id);if(!person)return;
+ if(!confirm(`Vincular esta conversa a ${person.name}, de ${v18Customer(person.customer_id)?.display_name}?`))return;
+ const{error}=await _supa.rpc('crm_v18_link_contact',{p_key:p.thread.key,p_person:id});if(error){p.error=error.message;v18RenderPanel();return;}
+ await v18LoadThreads();const t=V18_THREADS.find(x=>x.key===p.thread.key);if(t){p.thread=t;p.customer_id=t.customer_id;p.title=t.title;p.subtitle=t.subtitle;await v18LoadPanelMessages();}
+}
+function v18Template(){const p=V18_PANEL;if(!p?.thread?.person){toastSave('Cadastre um telefone para a pessoa deste cliente.');return;}crmOpenWhatsAppApiById(p.thread.person.id);}
+async function v18Send(){
+ const p=V18_PANEL;if(!p?.thread||!p.customer_id||p.replyChoiceRequired)return;v18RememberDraft();let sending=V18_SENDS.get(p.id);
+ const gmail=p.thread.last.channel==='email';
+ if(sending?.pending||sending?.uncertain)return;
+ if(!gmail&&!CRM_WHATSAPP_API_ENABLED){toastSave('Conecte o WhatsApp antes de enviar.');return;}
+ if(!gmail&&Date.now()-v18Ms(p.thread.last_inbound_at)>=86400000){v18Template();return;}
+ if(gmail&&!p.emailContext){await v18LoadEmailContext();return;}
+ const text=(V18_DRAFTS.get(p.id)||'').trim();if(!text)return;
+ const body=gmail&&typeof crmEmailBodyWithSignature==='function'?crmEmailBodyWithSignature(text):text;
+ const person=p.thread.person,phone=person?.phone_normalized||person?.phone||p.replyTarget?.sender_address||p.thread.subtitle;
+ const target=gmail?p.emailContext.reply_to_message_id:phone;
+ const recipient=gmail?p.emailContext.to:phone;
+ const same=sending?.body===body&&sending?.target===target&&sending?.recipient===recipient&&sending?.retry;
+ sending={key:same?sending.key:crypto.randomUUID(),body,target,recipient,pending:true,notice:'Enviando…',retry:false,channel:gmail?'email':'whatsapp'};V18_SENDS.set(p.id,sending);v18RenderPanel();
+ const payload=gmail?{customer_id:p.customer_id,person_id:person?.id||null,to:p.emailContext.to,subject:p.emailContext.subject,
+   body,reply_to_message_id:target,expected_thread_id:p.emailContext.thread_id,idempotency_key:sending.key}:
+   {customer_id:p.thread.customer_id,person_id:person?.id||null,to_phone:phone,message_type:'text',message_body:body,idempotency_key:sending.key};
+ try{const{data,error}=await _supa.functions.invoke(gmail?'crm-email-send':'whatsapp-send',{body:payload});
+   if(error){
+     const code=error.context?.status;
+     let detail=null;try{detail=await error.context?.json();}catch{}
+     if([400,401,403,404,409].includes(code)||detail?.status==='failed'){
+       console.error('Send rejected',detail?.error||error);
+       sending.notice=code===409?'Os dados da conversa mudaram. Confirme novamente o destinatário.':'Envio não realizado. Confira o destinatário e a conexão.';
+       if(code===409&&gmail){p.emailContext=null;p.contextError='Confirme novamente o e-mail original antes de enviar.';}
+       sending.error=true;sending.retry=true;return;
+     }throw error;
+   }
+   const success=gmail?data?.status==='sent':data?.ok&&data?.communication?.status!=='sending';
+   if(success){sending.notice=gmail?'E-mail enviado nesta conversa.':'Mensagem aceita pela Meta.';v18ClearDraft(p.id);await v18LoadThreads();await v18LoadPanelMessages();}
+   else if(data?.communication?.status==='failed'){sending.notice=data.error||'Envio recusado. Você pode tentar novamente.';sending.error=true;sending.retry=true;}
+   else{sending.notice=data?.error||'Envio ainda não confirmado. Verifique antes de reenviar.';sending.uncertain=true;}
+ }catch(e){sending.notice='Não foi possível confirmar o envio. Verifique o status antes de reenviar.';sending.uncertain=true;sending.error=true;console.error(e);}
+ finally{sending.pending=false;if(V18_PANEL===p)v18RenderPanel();}
+}
+async function v18CheckSend(){const p=V18_PANEL,s=p&&V18_SENDS.get(p.id);if(!s)return;
+ const{data,error}=await _supa.from('crm_communications').select('status,error_detail').eq('idempotency_key',s.key).maybeSingle();
+ if(error){s.notice='Falha ao consultar o status. Tente verificar novamente.';}
+ else if(data&&['sent','delivered','read'].includes(data.status)){s.uncertain=false;s.error=false;s.notice='Envio confirmado.';v18ClearDraft(p.id);await v18LoadThreads();await v18LoadPanelMessages();}
+ else if(data?.status==='failed'){s.uncertain=false;s.retry=true;s.error=true;s.notice='Envio recusado: '+(data.error_detail||'tente novamente');}
+ else s.notice='Envio ainda não confirmado. Confira o WhatsApp antes de reenviar.';
+ v18RenderPanel();
+}
+function v18Menu(id,button){const old=document.getElementById('v18-menu');if(old){old.remove();return;}const i=V18_PANEL?.id===id?V18_PANEL:V18_ITEMS.find(x=>x.id===id);if(!i)return;
+ const menu=document.createElement('div');menu.id='v18-menu';menu.className='v18-menu';menu.setAttribute('aria-label','Ações da conversa');
+ menu.innerHTML=i.thread?`<button data-v18-resolve ${V18_SENDS.get(i.id)?.pending||V18_SENDS.get(i.id)?.uncertain?'disabled':''}>${i.thread.state==='done'?'Reabrir conversa':'Resolver conversa'}</button><button data-v18-assume>Assumir atendimento</button><button data-v18-wait>Marcar como aguardando cliente</button><hr><button data-v18-classform>Mover para Informativas</button><button data-v18-hide>Ocultar</button><button data-v18-info>Por que esta conversa aparece?</button>${i.thread.last.channel==='email'?`<a class="v18-menu-link" href="${esc(v18GmailUrl(i.thread))}" target="_blank" rel="noopener">Abrir no Gmail</a>`:''}`:
+ i.kind==='task'?`<button data-v18-reschedule="${i.task.id}">Reagendar</button><button data-v18-dismiss="${i.task.id}">Dispensar</button><button data-v18-customer>Abrir cliente / projeto</button>`:'<button data-v18-customer>Abrir cliente / projeto</button><button data-v18-signal-dismiss>Dispensar oportunidade</button>';
+ const show=()=>{document.getElementById('crm-v18-panel').appendChild(menu);menu.querySelector('button:not([disabled])')?.focus();};
+ if(V18_PANEL?.id!==id)crmOpenThreadPanel(id).then(show);else show();
+}
+async function v18Primary(id){const i=V18_ITEMS.find(x=>x.id===id);if(!i)return;
+ if(i.kind==='task'){crmOpenActionModalById(i.task.customer_id,i.task.id);return;}
+ await crmOpenThreadPanel(id);if(i.kind==='signal')v18TaskForm();else if(['ignored','informative'].includes(i.origin))await v18ThreadAction('action','manual_restore');
+}
+async function v18DismissOpportunity(){const s=V18_PANEL?.signal;if(!s)return;if(!confirm('Dispensar esta oportunidade? Ela não será transformada em tarefa.'))return;
+ if(s.kind==='recompra')await crmDismissSignal(s.customer_id,s.last_purchase_date);
+ else if(s.kind==='reativacao')await crmDismissReativacaoSignal(s.customer_id,s.signal_variant,s.signal_anchor_date);
+ else if(s.kind==='target_sm_asia')await crmDismissTargetSmAsiaSignal(s.customer_id,s.signal_variant,s.signal_anchor_date);
+ else if(s.kind==='retomada_sm_asia')await crmDismissRetomadaSmAsiaSignal(s.customer_id,s.signal_variant,s.anchor_date);
+ else if(s.kind==='projeto_parado')await crmDismissProjectSignal(s.project_id,s.signal_variant,s.anchor_date);
+ V18_PANEL=null;v18SetPanelOpen(false);crmRenderFeed();
+}
+function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root||root.dataset.bound)return;root.dataset.bound='1';
+ root.addEventListener('click',async e=>{const control=e.target.closest('button,a,[data-v18-open],[data-v18-reply-message]');if(!control)return;const d=control.dataset;
+   if(control.closest('#v18-menu')&&!('v18Menu' in d))document.getElementById('v18-menu')?.remove();
+   if('v18Owner' in d)v18SetOwner(d.v18Owner);
+   else if('v18Origin' in d){V18_SEARCH_ORIGIN=d.v18Origin;crmRenderFeed();}
+   else if('v18Refresh' in d)await crmLoadAll();
+   else if('v18Section' in d){V18_OPEN.has(d.v18Section)?V18_OPEN.delete(d.v18Section):V18_OPEN.add(d.v18Section);crmRenderFeed();}
+   else if('v18Horizon' in d){crmSemanaHorizonte=crmSemanaHorizonte===7?30:7;crmRenderFeed();}
+   else if('v18Menu' in d){e.stopPropagation();v18Menu(d.v18Menu,control);}
+   else if('v18Primary' in d){e.stopPropagation();await v18Primary(d.v18Primary);}
+   else if('v18Close' in d)v18ClosePanel();
+   else if('v18Taskform' in d)v18TaskForm();
+   else if('v18Date' in d){const date=new Date();date.setDate(date.getDate()+Number(d.v18Date));document.getElementById('v18-task-date').value=[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');document.getElementById('v18-task-date').focus();}
+   else if('v18CancelForm' in d){v18RememberDraft();v18RenderPanel();}
+   else if('v18Classform' in d)v18ClassForm();
+   else if('v18Hide' in d)v18ClassForm('ignored');
+   else if('v18Resolve' in d){if(V18_PANEL?.thread?.state==='done'){await v18ThreadAction('new');return;}if(String(V18_DRAFTS.get(V18_PANEL?.id)||'').trim()&&!confirm('Resolver sem enviar o rascunho?'))return;await v18ThreadAction('done');}
+   else if('v18Channel' in d)await v18Channel(d.v18Channel);
+   else if('v18Ai' in d)await v18Assist(d.v18Ai);
+   else if('v18AiUse' in d){const p=V18_PANEL;if(p?.ai?.draft){v18RememberDraft();if((V18_DRAFTS.get(p.id)||'').trim()&&!confirm('Substituir o rascunho pela sugestão?'))return;V18_DRAFTS.set(p.id,p.ai.draft);v18RenderPanel();document.getElementById('v18-reply')?.focus();}}
+   else if('v18AiTask' in d){v18TaskForm();document.getElementById('v18-task-text').value=V18_PANEL.ai.action;}
+   else if('v18Startchannel' in d)v18StartChannel();
+   else if('v18ReplyMessage' in d)await v18SelectReply(d.v18ReplyMessage);
+   else if('v18EmailContext' in d)await v18LoadEmailContext();
+   else if('v18Wait' in d)await v18ThreadAction('waiting_customer');
+   else if('v18Assume' in d)await v18ThreadAction('in_progress');
+   else if('v18More' in d)await v18LoadPanelMessages(true);
+   else if('v18Loadmessages' in d)await v18LoadPanelMessages();
+   else if('v18Send' in d)await v18Send();
+   else if('v18Checksend' in d)await v18CheckSend();
+   else if('v18Template' in d)v18Template();
+   else if('v18Link' in d)await v18LinkPerson(d.v18Link);
+   else if('v18Newcustomer' in d){const t=V18_PANEL?.thread,from=t?.last.sender_address||'';crmOpenCustomerEdit(null,{person:{name:'',email:t?.last.channel==='email'?from:'',phone:t?.last.channel==='whatsapp'?from:''},source:'communication'});}
+   else if('v18Reschedule' in d)crmRescheduleAction(d.v18Reschedule);
+   else if('v18Dismiss' in d)await crmDismissAction(d.v18Dismiss);
+   else if('v18SignalDismiss' in d)await v18DismissOpportunity();
+   else if('v18Reminder' in d){const p=V18_PANEL;if(Date.now()-v18Ms(p.thread.last_inbound_at)>=86400000){v18Template();return;}V18_DRAFTS.set(p.id,'Olá! Podemos retomar este assunto? Fico à disposição.');v18RenderPanel();document.getElementById('v18-reply')?.focus();}
+   else if('v18Customer' in d){v18RememberDraft();const p=V18_PANEL;if(p?.customer_id)crmOpenCustomerEdit(p.customer_id);else document.getElementById('v18-link-search')?.focus();}
+   else if('v18Info' in d){const t=V18_PANEL.thread;const target=document.getElementById('v18-panel-form');target.innerHTML=`<div class="v18-note">${esc(t.classification)} · ${esc(V18_REASON[t.class_reason]||t.class_reason||'Padrão conservador')} · confiança ${esc(t.class_confidence||'não informada')} · ${esc(t.class_version||'fallback')}<button class="v18-btn" data-v18-cancel-form>Fechar</button></div>`;}
+   else if('v18Open' in d)await crmOpenThreadPanel(d.v18Open);
+ });
+ root.addEventListener('input',e=>{if(e.target.id==='v18-search')v18Search(e.target.value);if(e.target.id==='v18-link-search')v18LinkSearch(e.target.value);if(e.target.id==='v18-reply')v18RememberDraft();});
+ root.addEventListener('change',e=>{if(e.target.id==='v18-topic')v18Filter(e.target.value);if(e.target.hasAttribute('data-v18-state'))v18ThreadAction(e.target.value);});
+ root.addEventListener('submit',e=>{if(e.target.id==='v18-task-form')v18SaveTask(e);if(e.target.id==='v18-class-form')v18SaveClass(e);});
+ root.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){
+   if(e.target.matches('[data-v18-open]')&&e.target===e.target.closest('[data-v18-open]')){e.preventDefault();crmOpenThreadPanel(e.target.dataset.v18Open);}
+   if(e.target.matches('[data-v18-reply-message]')){e.preventDefault();v18SelectReply(e.target.dataset.v18ReplyMessage);}
+ }});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&V18_PANEL&&!document.querySelector('.ovl.open')){e.preventDefault();const menu=document.getElementById('v18-menu');if(menu){menu.remove();document.querySelector('.v18-ph [data-v18-menu]')?.focus();return;}const ai=document.querySelector('.v18-ai-tools[open]');if(ai){ai.open=false;ai.querySelector('summary')?.focus();return;}if(v18FormEditing()){v18RememberDraft();v18RenderPanel();document.querySelector('[data-v18-taskform]')?.focus();return;}v18ClosePanel();}
+   if(e.key==='Tab'&&V18_PANEL&&matchMedia('(max-width:1179px)').matches){const controls=[...document.querySelectorAll('#crm-v18-panel button,#crm-v18-panel input,#crm-v18-panel textarea,#crm-v18-panel select,#crm-v18-panel a')].filter(x=>!x.disabled&&x.offsetParent!==null);if(controls.length){const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}
+ });
+ window.addEventListener('beforeunload',e=>{v18RememberDraft();if([...V18_DRAFTS.values()].some(v=>v.trim())){e.preventDefault();e.returnValue='';}});
+}
+v18Bind();
+
+async function v18OpenCustomerWorkspace(customerId,projectId=null){
+ if(!v18CanLeave())return;const c=v18Customer(customerId);if(!c)return;
+ closeM('crmcustomer');closeM('crmproject');crmShowSubTab('semana');
+ V18_LAST_FOCUS=document.activeElement;V18_PANEL={id:'customer:'+customerId,kind:'customer',customer_id:customerId,project_id:projectId,title:c.trade_name||c.display_name,subtitle:projectId?CRM_PROJECTS.find(x=>x.id===projectId)?.project_name||'Projeto':'Conversas do cliente',channel:'email',historyMode:'customer',filterKey:'',messages:[],hasMore:false,replyTarget:null};
+ v18SetPanelOpen(true);v18RenderPanel();await v18LoadPanelMessages();
+}
+function v18StartChannel(){const p=V18_PANEL;if(!p?.customer_id)return;const people=CRM_PEOPLE.filter(x=>x.customer_id===p.customer_id);
+ if(p.channel==='email'){crmOpenCustomerEdit(p.customer_id);crmPrepareEmailForContext(p.customer_id,people,null,'',null);}
+ else{const person=people.find(x=>x.phone_normalized||x.phone);if(person)crmOpenWhatsAppApiById(person.id);else{toastSave('Cadastre um contato com telefone na ficha do cliente.');crmOpenCustomerEdit(p.customer_id);}}
+}
+async function v18Assist(mode){const p=V18_PANEL;if(!p?.customer_id||p.ai?.loading)return;v18RememberDraft();const key=p.thread?.key,channel=p.channel;p.ai={loading:true};v18RenderPanel();
+ try{const{data,error}=await _supa.functions.invoke('crm-conversation-assist',{body:{customer_id:p.customer_id,thread_key:key||null,channel:p.channel,mode}});if(error||data?.error)throw error||new Error(data.error);
+ if(V18_PANEL!==p||p.thread?.key!==key||p.channel!==channel)return;p.ai={text:data.summary||data.action||'Sem sugestão agora.',draft:mode==='reply'?data.reply:null,action:mode==='action'?data.action:null};
+ }catch(e){if(V18_PANEL===p&&p.channel===channel&&p.thread?.key===key)p.ai={text:'IA indisponível agora. Você pode continuar trabalhando normalmente.'};console.error('conversation assist',e);}
+ finally{if(V18_PANEL===p){v18RememberDraft();const typing=document.activeElement?.id==='v18-reply';if(!v18FormEditing()){v18RenderPanel();if(!typing&&p.channel===channel&&p.thread?.key===key)document.getElementById('v18-ai-result')?.focus({preventScroll:false});}}}
+}
+function v18MeasureWorkspace(){const ws=document.getElementById('crm-v18-workspace');if(ws&&matchMedia('(min-width:1180px)').matches)ws.style.setProperty('--v18-top',Math.max(0,ws.getBoundingClientRect().top)+'px');}
+window.addEventListener('resize',v18MeasureWorkspace);
+if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(()=>v18MeasureWorkspace());const ws=document.getElementById('crm-v18-workspace');if(ws)observer.observe(ws);}
+
+async function v18LoadCommunicationPreviews(){
+ const {data,error}=await _supa.from('crm_communications').select('id,customer_id,person_id,channel,provider,direction,status,subject,excerpt,external_id,external_thread_id,sender_address,recipient_addresses,created_at,sent_at,read_at,delivered_at,message_type,attachments_meta,provider_metadata').order('sent_at',{ascending:false,nullsFirst:false}).limit(2000);
+ if(error){console.error(error);return [];}return data||[];
+}
+async function v18LoadCustomerTimeline(id){
+ if(V18_TIMELINE_LOADING.has(id))return;V18_TIMELINE_LOADING.add(id);
+ try{const rows=await crmFetchAll('crm_communications','*',{customer_id:id});
+  const map=new Map(CRM_COMMUNICATIONS.map(m=>[m.id,m]));rows.forEach(m=>map.set(m.id,m));CRM_COMMUNICATIONS=[...map.values()];
+  V18_TIMELINE_READY.add(id);if(crmEditCtx.customerId===id)crmRenderTimeline();
+ }finally{V18_TIMELINE_LOADING.delete(id);}
+}
+
 </script>
 
 <!-- ═══ CRM — WHATSAPP ═══ -->
