@@ -738,6 +738,18 @@ body.dark .v18-app .v18-btn.v18-p{background:var(--blue);color:#fff}
 @media(max-height:650px){.v18-app .v18-comp{position:sticky;bottom:0;z-index:6;box-shadow:0 -5px 14px #0001;max-height:65%;overflow-y:auto;background:var(--card)}}
 @media(max-width:719px){.v18-app .v18-context .v18-btn{min-height:44px}.v18-app .v18-ph{gap:6px;padding-left:10px;padding-right:10px}}
 .v18-app .v18-ph .v18-pp{font-size:12px}
+/* Real-use feedback: readable drafts and collapsed email history. */
+.v18-app .v18-email{max-width:100%;width:100%;padding:0;border:1px solid var(--bdr);border-radius:8px;background:var(--card);margin:0 0 8px;overflow:hidden}
+.v18-app .v18-email-summary{display:block;width:100%;background:none;border:0;text-align:left;padding:10px 12px;color:var(--ink);cursor:pointer;min-height:44px}
+.v18-app .v18-email-meta{display:flex;gap:8px;color:var(--ink3);font-size:11px;margin-bottom:4px}
+.v18-app .v18-email-meta time{flex:none}.v18-app .v18-email-meta span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v18-app .v18-email-subject{font-size:13px;font-weight:600;display:block;overflow-wrap:anywhere}.v18-app .v18-email-body{padding:12px;border-top:1px solid var(--bdr);overflow-wrap:anywhere;font-size:13px}
+.v18-app .v18-ta{min-height:110px;height:110px;max-height:280px;resize:vertical;overflow-y:auto;line-height:20px}
+.v18-app .v18-expand-reply{font-size:12px;color:var(--ink3)}
+.v18-app .v18-comp.v18-comp-expanded{position:absolute;inset:0;bottom:0;z-index:30;display:flex;flex-direction:column;max-height:none;overflow:hidden;padding:16px;background:var(--card);border-radius:inherit}
+.v18-app .v18-comp-expanded .v18-ta{flex:1;min-height:60px;height:auto;max-height:none;resize:none}
+.v18-app .v18-loadmore-feed{margin:10px 16px}
+@media(max-width:719px){.v18-app .v18-ta{min-height:100px;height:100px}.v18-app .v18-comp.v18-comp-expanded{padding:12px;border-radius:0}}
 
 </style>
 
@@ -8153,11 +8165,11 @@ let V18_THREADS=[],V18_QUERY='',V18_OWNER='',V18_SEARCH_ORIGIN='',V18_ERROR='',V
 let V18_SEQUENCE=0,V18_TIMER=null,V18_PANEL=null,V18_ITEMS=[],V18_LAST_FOCUS=null,V18_DRAFTS=new Map(),V18_SENDS=new Map();
 let V18_ORIGIN_ROW=null,V18_SNACK_TIMER=null;
 let V18_TIMELINE_LOADING=new Set(),V18_TIMELINE_READY=new Set();
-const V18_OPEN=new Set();
+const V18_OPEN=new Set(),V18_LIMITS=new Map();
 const V18_REASON={default_action:'Mensagem para avaliar',team_outbound:'Enviada pela equipe',active_work:'Cliente com trabalho ativo',
   media_or_attachment:'Mídia ou anexo recebido',unidentified_contact:'Contato não identificado',automation_header:'Cabeçalho de automação',
   automated_sender:'Remetente automático',provider_label:'Spam, lixeira ou rascunho',manual_restore:'Restaurada pela equipe'};
-const V18_ORIGIN={attention:'Precisa de você',waiting:'Aguardando cliente',future:'Próximas tarefas',informative:'Informativas',ignored:'Ocultas',done:'Resolvidas',signal:'Oportunidade'};
+const V18_ORIGIN={triage:'E-mails não identificados',attention:'Precisa de você',waiting:'Aguardando cliente',future:'Próximas tarefas',informative:'Informativas',ignored:'Ocultas',done:'Resolvidas',signal:'Oportunidade'};
 function v18Date(m){return m?.occurred_at||m?.sent_at||m?.received_at||m?.created_at||null;}
 function v18Ms(v){const n=new Date(v).getTime();return Number.isFinite(n)?n:0;}
 function v18Age(v){const minutes=Math.max(0,Math.floor((Date.now()-v18Ms(v))/60000));return minutes<1?'agora':minutes<60?`${minutes} min`:minutes<1440?`${Math.floor(minutes/60)} h`:`${Math.floor(minutes/1440)} d`;}
@@ -8206,7 +8218,7 @@ function v18Owns(owner){return !V18_OWNER||(V18_OWNER==='me'?owner===authUser?.i
 function crmBuildFeedItems(){
   const today=new Date();today.setHours(0,0,0,0);const horizon=new Date(today);horizon.setDate(horizon.getDate()+crmSemanaHorizonte);
   const conversations=V18_THREADS.filter(t=>v18Owns(t.owner_id)).map(t=>({id:'thread:'+t.key,kind:'thread',thread:t,customer_id:t.customer_id,
-    title:t.title,subtitle:t.subtitle,text:t.last.subject||t.last.excerpt||'(sem texto)',origin:t.origin,
+    title:t.title,subtitle:t.subtitle,text:t.last.subject||t.last.excerpt||'(sem texto)',origin:t.origin==='attention'&&!t.customer_id&&t.last.channel==='email'?'triage':t.origin,
     rank:v18Ms(t.needs_reply_since)&&Date.now()-v18Ms(t.needs_reply_since)>86400000?0:1,
     wait:Math.max(0,Date.now()-v18Ms(t.needs_reply_since||t.last.sent_at)),why:!t.customer_id?'Contato não identificado':
       t.state==='waiting_team'?'Aguarda equipe':t.origin==='waiting'?'Aguardando cliente':t.origin==='done'?'Conversa resolvida':
@@ -8254,9 +8266,10 @@ function crmRenderFeed(){
   content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Resultados de busca <span class="v18-cnt">${matching.length}</span></span><span class="v18-sum">Inclui resolvidas e ocultas</span></div><div class="v18-chips"><button class="v18-fchip ${!V18_SEARCH_ORIGIN?'v18-on':''}" data-v18-origin="">Tudo</button>${origins.map(o=>`<button class="v18-fchip ${V18_SEARCH_ORIGIN===o?'v18-on':''}" data-v18-origin="${o}">${V18_ORIGIN[o]} · ${matching.filter(i=>i.origin===o).length}</button>`).join('')}</div>${shown.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nenhum resultado neste filtro.</p>'}${V18_THREADS.length>=500?'<p class="v18-note">Até 500 conversas por busca. Refine o termo para encontrar outras.</p>':''}`;return;
  }
  const late=main.filter(i=>i.kind==='task'&&i.rank===0).length,now=main.filter(i=>i.kind==='task'&&i.rank===1).length,reply=main.filter(i=>i.kind==='thread').length;
- const section=(o,label,rows,note='')=>`<button class="v18-sec" data-v18-section="${o}" aria-expanded="${V18_OPEN.has(o)}" aria-controls="v18-section-${o}"><span aria-hidden="true">${V18_OPEN.has(o)?'⌄':'›'}</span><span class="v18-t">${label}</span><span class="v18-n">${rows.length}</span>${o==='future'?`<span class="v18-h">${crmSemanaHorizonte} dias</span>`:''}</button><div id="v18-section-${o}" ${V18_OPEN.has(o)?'':'hidden'}>${o==='future'?'<div class="v18-subh"><button class="v18-btn" data-v18-horizon>Alternar 7 / 30 dias</button></div>':''}${rows.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nada nesta seção.</p>'}${note?`<p class="v18-note">${note}</p>`:''}</div>`;
- content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Precisa de você <span class="v18-cnt">${main.length+Math.min(3,sig.length)}</span></span><span class="v18-sum"><b>${late} ${late===1?'atrasada':'atrasadas'}</b> · ${now} hoje · ${reply} ${reply===1?'conversa':'conversas'}</span></div>${[...main,...sig.slice(0,3)].map(crmFeedItemHtml).join('')||'<p class="v18-note">Tudo em dia. Nenhum item pede ação agora.</p>'}
+ const section=(o,label,rows,note='')=>`<button class="v18-sec" data-v18-section="${o}" aria-expanded="${V18_OPEN.has(o)}" aria-controls="v18-section-${o}"><span aria-hidden="true">${V18_OPEN.has(o)?'⌄':'›'}</span><span class="v18-t">${label}</span><span class="v18-n">${rows.length}</span>${o==='future'?`<span class="v18-h">${crmSemanaHorizonte} dias</span>`:''}</button><div id="v18-section-${o}" ${V18_OPEN.has(o)?'':'hidden'}>${o==='future'?'<div class="v18-subh"><button class="v18-btn" data-v18-horizon>Alternar 7 / 30 dias</button></div>':''}${rows.slice(0,V18_LIMITS.get(o)||25).map(crmFeedItemHtml).join('')||'<p class="v18-note">Nada nesta seção.</p>'}${rows.length>(V18_LIMITS.get(o)||25)?`<button class="v18-btn v18-loadmore-feed" data-v18-section-more="${o}">Mostrar mais 25</button>`:''}${note?`<p class="v18-note">${note}</p>`:''}</div>`;
+ content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Precisa de você <span class="v18-cnt">${main.length+Math.min(3,sig.length)}</span></span><span class="v18-sum"><b>${late} ${late===1?'atrasada':'atrasadas'}</b> · ${now} hoje · ${reply} ${reply===1?'conversa':'conversas'}${V18_ITEMS.some(i=>i.origin==='triage')?` · ${V18_ITEMS.filter(i=>i.origin==='triage').length} para identificar`:''}</span></div>${[...main,...sig.slice(0,3)].map(crmFeedItemHtml).join('')||'<p class="v18-note">Tudo em dia. Nenhum item pede ação agora.</p>'}
  ${sig.length>3?section('signal','Mais oportunidades',sig.slice(3)):''}
+ ${section('triage','E-mails não identificados — revisar',V18_ITEMS.filter(i=>i.origin==='triage').sort((a,b)=>v18Ms(b.thread.last.sent_at)-v18Ms(a.thread.last.sent_at)),'Sem vínculo com um cliente cadastrado. Revise possíveis novos contatos; mensagens sem interesse podem ir para Informativas ou Ocultas.')}
  ${section('waiting','Aguardando cliente',V18_ITEMS.filter(i=>i.origin==='waiting'))}
  ${section('future',`Próximos ${crmSemanaHorizonte} dias`,V18_ITEMS.filter(i=>i.origin==='future'&&i.within))}
  ${section('informative','Informativas',V18_ITEMS.filter(i=>i.origin==='informative'))}
@@ -8328,6 +8341,11 @@ function v18MessageHtml(m){
  const state=m.status==='sending'&&age>120000?'Envio não confirmado':{sent:'Enviado',delivered:'Entregue',read:'Lido',sending:'Enviando',failed:'Falhou',received:'Recebido'}[m.status]||m.status;
  const channel=m.channel||V18_PANEL?.thread?.last.channel,history=V18_PANEL?.historyMode==='customer',selected=V18_PANEL?.replyTarget?.id===m.id;
  const party=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');
+ if(channel==='email'){
+  const open=V18_PANEL?.openEmails?.has(m.id),bodyId='v18-email-body-'+m.id;
+  return `<article class="v18-msg v18-email ${selected?'v18-reply-selected':''}"><button class="v18-email-summary" data-v18-email-toggle="${esc(m.id)}" ${history?`data-v18-reply-message="${esc(m.id)}"`:''} aria-expanded="${!!open}" aria-controls="${esc(bodyId)}"><span class="v18-email-meta"><time>${esc(v18Stamp(v18Date(m)))}</time><span title="${esc(party||'')}">${esc(party||'E-mail')}</span><span aria-hidden="true">${open?'⌄':'›'}</span></span><span class="v18-email-subject">${esc(m.subject||'(sem assunto)')}</span>${selected?'<span class="v18-history-reply">Respondendo a esta troca</span>':''}</button><div class="v18-email-body" id="${esc(bodyId)}" ${open?'':'hidden'}><div style="white-space:pre-wrap">${esc(content)}</div>${attachments.length?`<div class="v18-hint">${attachments.map(a=>esc(a.filename||a.type||'Anexo')).join(' · ')}</div>`:''}<span class="v18-mt">${esc(state||'Registrado')}</span></div></article>`;
+ }
+
  return `<div class="v18-msg ${m.direction==='inbound'?'v18-in':'v18-out'} ${m.status==='failed'?'v18-fail':m.status==='sending'&&age>120000?'v18-unc':''} ${selected&&history?'v18-reply-selected':''}" ${history?`tabindex="0" role="button" data-v18-reply-message="${esc(m.id)}" aria-label="Responder por ${channel==='email'?'e-mail':'WhatsApp'} nesta conversa"`:''}>
  <div class="v18-message-channel">${channel==='email'?'✉ E-mail':'◌ WhatsApp'}${party?' · '+esc(party):''}</div>
  ${m.subject?`<b>${esc(m.subject)}</b><br>`:''}<div style="white-space:pre-wrap">${esc(content)}</div>${attachments.length?`<div class="v18-hint">${attachments.map(a=>esc(a.filename||a.type||a.mime_type||'Anexo')).join(' · ')}</div>`:''}${label?'<div class="v18-hint">Abra a mídia no WhatsApp Business.</div>':''}
@@ -8350,13 +8368,13 @@ function v18RenderPanel(){
  const status=t.state==='done'?'Resolvido':t.state==='waiting_customer'?'Aguardando cliente':'Precisa de resposta';
  const closed=Date.now()-v18Ms(t.last_inbound_at)>=86400000,send=V18_SENDS.get(p.id),draft=V18_DRAFTS.get(p.id)||'',gmail=t.last.channel==='email';
  const recipient=gmail?p.emailContext?.to:(t.person?.phone_normalized||t.person?.phone||(p.replyTarget?.direction==='inbound'?p.replyTarget?.sender_address:(p.replyTarget?.recipient_addresses||[])[0])||t.last.sender_address);
- const triage=!t.customer_id?`<div class="v18-who"><h4>Quem é?</h4><p>Vincule esta conversa a uma pessoa para consultar o histórico do cliente e responder.</p><input class="v18-search" id="v18-link-search" placeholder="Buscar cliente ou pessoa…" aria-label="Buscar pessoa para vincular"><div id="v18-link-options"></div><button class="v18-btn" data-v18-newcustomer>Cadastrar cliente</button></div>`:'';
+ const triage=!t.customer_id?`<div class="v18-who"><h4>Quem é?</h4><p>Vincule esta conversa a uma pessoa para consultar o histórico do cliente e responder.</p><input class="v18-search" id="v18-link-search" placeholder="Buscar cliente ou pessoa…" aria-label="Buscar pessoa para vincular"><div id="v18-link-options"></div><button class="v18-btn" data-v18-newcustomer>Cadastrar cliente</button><button class="v18-btn" data-v18-classform>Não é comercial</button></div>`:'';
  const disabled=send?.pending||send?.uncertain||(gmail&&!p.emailContext);
  let composer=p.replyChoiceRequired?'<div class="v18-comp v18-hint">Escolha um assunto ou uma mensagem para definir com quem responder. Nenhum destinatário foi escolhido.</div>':!t.customer_id?'<div class="v18-comp v18-hint">Vincule o contato acima para responder.</div>':
    !gmail&&closed?`<div class="v18-comp"><div class="v18-reply-destination"><b>${esc((t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Contato')}</div><p class="v18-hint">Janela de texto livre encerrada. Escolha um modelo aprovado.</p><button class="v18-btn v18-p" data-v18-template>Escolher modelo</button></div>`:
-   `<div class="v18-comp"><div class="v18-reply-destination"><b>${esc(gmail?(t.person?.name?t.person.name+' · E-mail':'E-mail'):(t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Confirmando destinatário…')}</div>${gmail&&p.emailContext?`<div class="v18-reply-subject" title="${esc(p.emailContext.subject||'(sem assunto)')}">${esc(p.emailContext.subject||'(sem assunto)')}</div>`:''}
+   `<div class="v18-comp ${p.expandedReply?'v18-comp-expanded':''}" ${p.expandedReply?'role="dialog" aria-modal="true" aria-label="Escrever resposta"':''}><div class="v18-reply-destination"><b>${esc(gmail?(t.person?.name?t.person.name+' · E-mail':'E-mail'):(t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Confirmando destinatário…')}</div>${gmail&&p.emailContext?`<div class="v18-reply-subject" title="${esc(p.emailContext.subject||'(sem assunto)')}">${esc(p.emailContext.subject||'(sem assunto)')}</div>`:''}
     ${p.contextLoading?'<p class="v18-hint" role="status">Confirmando o e-mail original…</p>':''}${p.contextError?`<div class="v18-hint" role="alert">${esc(p.contextError)} <button class="v18-btn v18-q" data-v18-email-context>Tentar novamente</button></div>`:''}
-    <textarea class="v18-ta" id="v18-reply" maxlength="${gmail?9500:20000}" aria-label="Resposta" placeholder="Escrever resposta…">${esc(draft)}</textarea><div class="v18-crow"><span class="v18-hint">${gmail?'':'Texto livre disponível.'}</span><button class="v18-btn v18-p" data-v18-send ${disabled?'disabled':''}>${send?.pending?'Enviando…':'Enviar'}</button></div></div>`;
+    <textarea class="v18-ta" id="v18-reply" maxlength="${gmail?9500:20000}" aria-label="Resposta" placeholder="Escrever resposta…">${esc(draft)}</textarea><div class="v18-crow"><button class="v18-btn v18-q v18-expand-reply" data-v18-expandreply>${p.expandedReply?'Voltar à conversa':'Ampliar resposta'}</button><button class="v18-btn v18-p" data-v18-send ${disabled?'disabled':''}>${send?.pending?'Enviando…':'Enviar'}</button></div></div>`;
  const sendNotice=send?.notice?`<div class="v18-send-notice ${send.error?'v18-ban':''}" role="status">${esc(send.notice)}${send.uncertain?'<button class="v18-btn" data-v18-checksend>Verificar agora</button>':''}${send.retry?'<button class="v18-btn" data-v18-send>Tentar novamente</button>':''}</div>`:'';
  const wait=t.needs_reply_since?'Aguarda há '+v18Age(t.needs_reply_since):'';
  const historyButtons=channelTabs;
@@ -8366,7 +8384,7 @@ function v18RenderPanel(){
  el.innerHTML=`<div class="v18-panel">${heading}${historyButtons}${toolbar}${picker}
  <div class="v18-thread-scroll">${taskContext}<div id="v18-panel-form"></div>${triage}${ai}${p.error?`<div class="v18-ban" role="alert">${esc(p.error)}<button class="v18-btn" data-v18-loadmessages>Tentar novamente</button></div>`:''}
  ${p.hasMore?'<button class="v18-btn" data-v18-more>Ver mensagens anteriores</button>':''}<div class="v18-thread">${p.loaded?p.messages.map(v18MessageHtml).join(''):'<p role="status">Carregando histórico…</p>'}</div></div>
- ${sendNotice}${composer}</div>`;restore();
+ ${sendNotice}${composer}</div>`;if(p.expandedReply)for(const child of el.querySelector('.v18-panel').children)if(!child.classList.contains('v18-comp'))child.inert=true;restore();
 }
 async function v18ThreadAction(action,reason=null){
  const p=V18_PANEL;if(!p?.thread)return false;
@@ -8497,6 +8515,7 @@ function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root
    if('v18Owner' in d)v18SetOwner(d.v18Owner);
    else if('v18Origin' in d){V18_SEARCH_ORIGIN=d.v18Origin;crmRenderFeed();}
    else if('v18Refresh' in d)await crmLoadAll();
+   else if('v18SectionMore' in d){V18_LIMITS.set(d.v18SectionMore,(V18_LIMITS.get(d.v18SectionMore)||25)+25);crmRenderFeed();}
    else if('v18Section' in d){V18_OPEN.has(d.v18Section)?V18_OPEN.delete(d.v18Section):V18_OPEN.add(d.v18Section);crmRenderFeed();}
    else if('v18Horizon' in d){crmSemanaHorizonte=crmSemanaHorizonte===7?30:7;crmRenderFeed();}
    else if('v18Menu' in d){e.stopPropagation();v18Menu(d.v18Menu,control);}
@@ -8513,6 +8532,8 @@ function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root
    else if('v18AiUse' in d){const p=V18_PANEL;if(p?.ai?.draft){v18RememberDraft();if((V18_DRAFTS.get(p.id)||'').trim()&&!confirm('Substituir o rascunho pela sugestão?'))return;V18_DRAFTS.set(p.id,p.ai.draft);v18RenderPanel();document.getElementById('v18-reply')?.focus();}}
    else if('v18AiTask' in d){v18TaskForm();document.getElementById('v18-task-text').value=V18_PANEL.ai.action;}
    else if('v18Startchannel' in d)v18StartChannel();
+   else if('v18EmailToggle' in d){const p=V18_PANEL;if(!p)return;p.openEmails??=new Set();if(p.openEmails.has(d.v18EmailToggle)){p.openEmails.delete(d.v18EmailToggle);v18RememberDraft();v18RenderPanel();}else{p.openEmails.add(d.v18EmailToggle);await v18SelectReply(d.v18EmailToggle);}}
+   else if('v18Expandreply' in d){v18RememberDraft();V18_PANEL.expandedReply=!V18_PANEL.expandedReply;v18RenderPanel();document.getElementById('v18-reply')?.focus();}
    else if('v18ReplyMessage' in d)await v18SelectReply(d.v18ReplyMessage);
    else if('v18EmailContext' in d)await v18LoadEmailContext();
    else if('v18Wait' in d)await v18ThreadAction('waiting_customer');
@@ -8537,10 +8558,10 @@ function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root
  root.addEventListener('submit',e=>{if(e.target.id==='v18-task-form')v18SaveTask(e);if(e.target.id==='v18-class-form')v18SaveClass(e);});
  root.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){
    if(e.target.matches('[data-v18-open]')&&e.target===e.target.closest('[data-v18-open]')){e.preventDefault();crmOpenThreadPanel(e.target.dataset.v18Open);}
-   if(e.target.matches('[data-v18-reply-message]')){e.preventDefault();v18SelectReply(e.target.dataset.v18ReplyMessage);}
+   if(e.target.matches('[data-v18-reply-message]:not([data-v18-email-toggle])')){e.preventDefault();v18SelectReply(e.target.dataset.v18ReplyMessage);}
  }});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'&&V18_PANEL&&!document.querySelector('.ovl.open')){e.preventDefault();const menu=document.getElementById('v18-menu');if(menu){menu.remove();document.querySelector('.v18-ph [data-v18-menu]')?.focus();return;}const ai=document.querySelector('.v18-ai-tools[open]');if(ai){ai.open=false;ai.querySelector('summary')?.focus();return;}if(v18FormEditing()){v18RememberDraft();v18RenderPanel();document.querySelector('[data-v18-taskform]')?.focus();return;}v18ClosePanel();}
-   if(e.key==='Tab'&&V18_PANEL&&matchMedia('(max-width:1179px)').matches){const controls=[...document.querySelectorAll('#crm-v18-panel button,#crm-v18-panel input,#crm-v18-panel textarea,#crm-v18-panel select,#crm-v18-panel a')].filter(x=>!x.disabled&&x.offsetParent!==null);if(controls.length){const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&V18_PANEL&&!document.querySelector('.ovl.open')){e.preventDefault();if(V18_PANEL.expandedReply){v18RememberDraft();V18_PANEL.expandedReply=false;v18RenderPanel();document.getElementById('v18-reply')?.focus();return;}const menu=document.getElementById('v18-menu');if(menu){menu.remove();document.querySelector('.v18-ph [data-v18-menu]')?.focus();return;}const ai=document.querySelector('.v18-ai-tools[open]');if(ai){ai.open=false;ai.querySelector('summary')?.focus();return;}if(v18FormEditing()){v18RememberDraft();v18RenderPanel();document.querySelector('[data-v18-taskform]')?.focus();return;}v18ClosePanel();}
+   if(e.key==='Tab'&&V18_PANEL&&(V18_PANEL.expandedReply||matchMedia('(max-width:1179px)').matches)){const controls=[...document.querySelectorAll('#crm-v18-panel button,#crm-v18-panel input,#crm-v18-panel textarea,#crm-v18-panel select,#crm-v18-panel a')].filter(x=>!x.disabled&&!x.closest('[inert]')&&x.offsetParent!==null);if(controls.length){const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}
  });
  window.addEventListener('beforeunload',e=>{v18RememberDraft();if([...V18_DRAFTS.values()].some(v=>v.trim())){e.preventDefault();e.returnValue='';}});
 }
