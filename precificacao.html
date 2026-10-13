@@ -750,6 +750,22 @@ body.dark .v18-app .v18-btn.v18-p{background:var(--blue);color:#fff}
 .v18-app .v18-comp-expanded .v18-ta{flex:1;min-height:60px;height:auto;max-height:none;resize:none}
 .v18-app .v18-loadmore-feed{margin:10px 16px}
 @media(max-width:719px){.v18-app .v18-ta{min-height:100px;height:100px}.v18-app .v18-comp.v18-comp-expanded{padding:12px;border-radius:0}}
+/* V20: one keyboard target per customer, independent and explicit pending actions. */
+.v18-app button.v20-row{width:100%;text-align:left;font-family:inherit;background:var(--card);color:var(--ink);cursor:pointer;border:0;border-bottom:1px solid var(--bdr)}
+.v18-app .v20-row .v18-mid{display:block;flex:1;min-width:0}.v18-app .v20-row .v18-ct{display:block}.v18-app .v20-open{flex:none;font-size:12px;color:var(--blue)}
+.v18-app .v20-counts{display:block;margin-top:6px}.v18-app .v20-pending{margin:0 12px 8px;border-bottom:1px solid var(--bdr);font-size:12px}
+.v18-app .v20-pending summary{cursor:pointer;padding:8px 0;font-weight:600;color:var(--ink)}
+.v18-app .v20-pending>div{max-height:136px;overflow-y:auto;overscroll-behavior:contain}
+.v18-app .v20-pending-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)}
+.v18-app .v20-pending-row>span{flex:1;min-width:0}.v18-app .v20-pending-row span span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18-app .v20-pending-row small{display:block;color:var(--ink3)}
+.v18-app .v20-history{margin:6px 12px 10px;padding:8px;border-radius:6px;background:var(--bg);font-size:12px;color:var(--ink2);overflow-wrap:anywhere}
+.v18-app .v20-history .v18-btn{margin-left:4px}.v18-app .v20-history-error{border-left:3px solid var(--v18-amber-tx)}
+.v18-app .v20-compose-context{margin-bottom:8px;font-size:14px}.v18-app .v20-compose-context p{font-size:12px;color:var(--ink3);margin:4px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.v18-app .v18-email-body>.v18-btn{display:block;margin-top:10px}.v18-app .v18-ph .v18-pp{white-space:normal;overflow:visible}
+.v18-app .v18-ta{height:100px;min-height:100px}
+.v18-app .v18-comp .v18-reply-destination{font-size:12px;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:719px){.v18-app .v20-row{flex-wrap:nowrap;padding:12px;min-height:110px}.v18-app .v20-row .v18-mid{width:auto}.v18-app .v20-open{font-size:0}.v18-app .v20-open::after{content:'›';font-size:20px}.v18-app .v20-pending summary{min-height:44px}.v18-app .v20-pending>div{max-height:140px}}
+body.dark .v18-app button.v20-row{background:var(--card);color:var(--ink)}
 
 </style>
 
@@ -1830,7 +1846,7 @@ button:active{filter:brightness(.94)}
           <div class="crm-cust-section-title" style="margin:0">Atividade</div>
           <div style="display:flex;align-items:center;gap:.4rem">
             <span id="crm-gmail-sync-status" style="font-size:.6rem;color:var(--ink4)"></span>
-            <button id="crm-gmail-history-btn" class="btn btn-s" style="display:none;font-size:.64rem;padding:.25rem .55rem" onclick="crmToggleGmailHistory()">↻ 10 anos</button>
+            <button id="crm-gmail-history-btn" class="btn btn-s" style="display:none;font-size:.64rem;padding:.25rem .55rem" onclick="v19SyncCustomerHistory(crmEditCtx.customerId)">↻ Histórico do cliente</button>
             <button id="crm-gmail-sync-btn" class="btn btn-s" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmSyncGmail()">↻ E-mails</button>
             <button class="btn btn-p" style="font-size:.64rem;padding:.25rem .55rem" onclick="crmOpenActionModal(crmEditCtx.customerId,null)">＋ Ação</button>
           </div>
@@ -4173,7 +4189,7 @@ async function crmCheckAccess(){
   }
   document.getElementById('crm-noaccess').style.display='none';
   document.getElementById('crm-content').style.display='block';
-  const historyBtn=document.getElementById('crm-gmail-history-btn');if(historyBtn)historyBtn.style.display=CRM_ROLE==='admin'?'inline-flex':'none';
+  const historyBtn=document.getElementById('crm-gmail-history-btn');if(historyBtn)historyBtn.style.display=['admin','crm_user'].includes(CRM_ROLE)?'inline-flex':'none';
   crmShowSubTab(isMetaReviewer()?'clientes':'semana',true);
   crmLoadAll();
   crmStartAutoRefresh();
@@ -4263,6 +4279,7 @@ async function crmLoadAll(){
   CRM_TAGS=tags;
   CRM_CUSTOMER_TAGS=ctags;
   CRM_PEOPLE=people;
+  v19ObserveRegisteredEmails();
   CRM_EXTERNAL_REFS=refs;
   CRM_ACTIONS=actions;
   CRM_GROUPS=groups;
@@ -5573,7 +5590,7 @@ async function crmInboxRunDiagnostic(){
 async function crmSyncGmail(quiet=false){
   const btn=document.getElementById('crm-gmail-sync-btn'),status=document.getElementById('crm-gmail-sync-status');if(!btn||btn.disabled)return;
   btn.disabled=true;btn.textContent='Sincronizando…';status.textContent='Consultando Gmail';
-  try{const{data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{source:'crm'}});if(error)throw error;if(data?.status==='already_syncing'){status.textContent='Sincronização já em andamento';return;}status.textContent=`${data?.imported||0} nova(s) · ${data?.unmatched||0} sem vínculo`;await crmLoadAll();}
+  try{const{data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{source:'crm'}});if(error)throw error;if(data?.status==='already_syncing'){status.textContent='Sincronização já em andamento';return;}status.textContent=`${data?.imported||0} nova(s) · somente contatos cadastrados`;await crmLoadAll();}
   catch(e){console.error('crmSyncGmail',e);status.textContent=quiet?'E-mails aguardando configuração':'Falha ao sincronizar';}
   finally{btn.disabled=false;btn.textContent='↻ E-mails';}
 }
@@ -8163,13 +8180,14 @@ initAuth().then(()=>{
 /* V18 integration. Claude's visual system; live data and existing CRM operations. */
 let V18_THREADS=[],V18_QUERY='',V18_OWNER='',V18_SEARCH_ORIGIN='',V18_ERROR='',V18_READY=false;
 let V18_SEQUENCE=0,V18_TIMER=null,V18_PANEL=null,V18_ITEMS=[],V18_LAST_FOCUS=null,V18_DRAFTS=new Map(),V18_SENDS=new Map();
+let V20_GROUPS=new Map(),V20_HISTORY=new Map();
 let V18_ORIGIN_ROW=null,V18_SNACK_TIMER=null;
 let V18_TIMELINE_LOADING=new Set(),V18_TIMELINE_READY=new Set();
 const V18_OPEN=new Set(),V18_LIMITS=new Map();
 const V18_REASON={default_action:'Mensagem para avaliar',team_outbound:'Enviada pela equipe',active_work:'Cliente com trabalho ativo',
   media_or_attachment:'Mídia ou anexo recebido',unidentified_contact:'Contato não identificado',automation_header:'Cabeçalho de automação',
   automated_sender:'Remetente automático',provider_label:'Spam, lixeira ou rascunho',manual_restore:'Restaurada pela equipe'};
-const V18_ORIGIN={triage:'E-mails não identificados',attention:'Precisa de você',waiting:'Aguardando cliente',future:'Próximas tarefas',informative:'Informativas',ignored:'Ocultas',done:'Resolvidas',signal:'Oportunidade'};
+const V18_ORIGIN={attention:'Precisa de você',waiting:'Aguardando cliente',future:'Próximas tarefas',informative:'Informativas',ignored:'Ocultas',done:'Resolvidas',signal:'Oportunidade'};
 function v18Date(m){return m?.occurred_at||m?.sent_at||m?.received_at||m?.created_at||null;}
 function v18Ms(v){const n=new Date(v).getTime();return Number.isFinite(n)?n:0;}
 function v18Age(v){const minutes=Math.max(0,Math.floor((Date.now()-v18Ms(v))/60000));return minutes<1?'agora':minutes<60?`${minutes} min`:minutes<1440?`${Math.floor(minutes/60)} h`:`${Math.floor(minutes/1440)} d`;}
@@ -8204,21 +8222,21 @@ function v18FallbackThreads(){
 async function v18LoadThreads(query=V18_QUERY){
   if(!_supa)return;const seq=++V18_SEQUENCE;
   try{const{data,error}=await _supa.rpc('crm_v18_threads',{p_query:query,p_limit:500});if(error)throw error;
-    if(seq!==V18_SEQUENCE)return;V18_THREADS=(data||[]).map(v18Decorate);V18_READY=true;V18_ERROR='';
+    if(seq!==V18_SEQUENCE)return;V18_THREADS=(data||[]).filter(t=>t.last?.channel!=='email'||!!t.customer_id).map(v18Decorate);V18_READY=true;V18_ERROR='';
     if(V18_PANEL?.thread){const fresh=V18_THREADS.find(t=>t.key===V18_PANEL.thread.key);if(fresh){
       const changed=fresh.last.id!==V18_PANEL.thread.last.id||fresh.last.status!==V18_PANEL.thread.last.status;
       v18RememberDraft();V18_PANEL.thread=fresh;V18_PANEL.customer_id=fresh.customer_id;V18_PANEL.title=fresh.title;V18_PANEL.subtitle=fresh.subtitle;
       if(!v18FormEditing()){v18RenderPanel();if(changed&&V18_PANEL.loaded)v18LoadPanelMessages();}}}}
   catch(e){if(seq!==V18_SEQUENCE)return;V18_READY=false;V18_ERROR='Não conseguimos atualizar as conversas agora. Você pode continuar com suas tarefas e tentar novamente.';V18_THREADS=v18FallbackThreads().map(v18Decorate);console.error('v18LoadThreads',e);}
-  crmRenderFeed();
+  crmRenderFeed();if(V18_PANEL&&!v18FormEditing()){v18RememberDraft();v18RenderPanel();if(V18_PANEL.customer_id)v20RefreshHistory(V18_PANEL.customer_id);}
 }
 function v18Search(value){V18_QUERY=value.trim();V18_SEARCH_ORIGIN='';clearTimeout(V18_TIMER);V18_TIMER=setTimeout(()=>v18LoadThreads(V18_QUERY),200);}
 function v18SetOwner(value){V18_OWNER=value;crmRenderFeed();}
 function v18Owns(owner){return !V18_OWNER||(V18_OWNER==='me'?owner===authUser?.id:!owner);}
 function crmBuildFeedItems(){
   const today=new Date();today.setHours(0,0,0,0);const horizon=new Date(today);horizon.setDate(horizon.getDate()+crmSemanaHorizonte);
-  const conversations=V18_THREADS.filter(t=>v18Owns(t.owner_id)).map(t=>({id:'thread:'+t.key,kind:'thread',thread:t,customer_id:t.customer_id,
-    title:t.title,subtitle:t.subtitle,text:t.last.subject||t.last.excerpt||'(sem texto)',origin:t.origin==='attention'&&!t.customer_id&&t.last.channel==='email'?'triage':t.origin,
+  const conversations=V18_THREADS.filter(t=>(t.last.channel!=='email'||!!t.customer_id)&&v18Owns(t.owner_id)).map(t=>({id:'thread:'+t.key,kind:'thread',thread:t,customer_id:t.customer_id,
+    title:t.title,subtitle:t.subtitle,text:t.last.subject||t.last.excerpt||'(sem texto)',origin:t.origin,
     rank:v18Ms(t.needs_reply_since)&&Date.now()-v18Ms(t.needs_reply_since)>86400000?0:1,
     wait:Math.max(0,Date.now()-v18Ms(t.needs_reply_since||t.last.sent_at)),why:!t.customer_id?'Contato não identificado':
       t.state==='waiting_team'?'Aguarda equipe':t.origin==='waiting'?'Aguardando cliente':t.origin==='done'?'Conversa resolvida':
@@ -8236,40 +8254,36 @@ function crmBuildFeedItems(){
     const item={id:'signal:'+(s.project_id||s.customer_id)+':'+s.kind,kind:'signal',signal:s,customer_id:s.customer_id,title:c?.trade_name||c?.display_name||s.cliente||s.prospect_name||'Projeto',subtitle:label,
       text:s.reason||'Histórico indica uma oportunidade comercial',origin:'signal',rank:2,wait:0,why:label};
     if(workingCustomers.has(s.customer_id)){for(const i of [...conversations,...tasks])if(i.customer_id===s.customer_id&&i.origin==='attention')i.context=label;}
-    else if(v18Owns(c?.owner_user_id))signals.push(item);}}
+    if(v18Owns(c?.owner_user_id))signals.push(item);}}
   const all=[...conversations,...tasks,...signals];
   return all.sort((a,b)=>a.rank-b.rank||b.wait-a.wait||(a.kind==='thread'?-1:b.kind==='thread'?1:0));
 }
 function crmFeedItemHtml(i){
+ if(i.kind==='customer-group')return v20GroupHtml(i);
  const t=i.thread,kind=i.kind,channel=t?.last.channel,unknown=kind==='thread'&&!t.customer_id;
  const color=kind==='signal'?'v18-t-sig':kind==='task'?'v18-t-task':unknown?'v18-t-un':channel==='whatsapp'?'v18-t-wa':'v18-t-mail';
  const primary=i.origin==='informative'||i.origin==='ignored'?'Restaurar':kind==='task'?'Concluir':kind==='signal'?'Criar tarefa':unknown?'Vincular cliente':channel==='whatsapp'&&i.origin==='attention'?'Responder':'Abrir conversa';
  const age=t?v18Age(t.needs_reply_since||t.last.sent_at):'';
  const time=kind==='signal'?'Oportunidade':kind==='task'?i.why:age==='agora'?'agora':(i.origin==='attention'?'aguarda há ':'há ')+age;
- return `<div class="v18-row ${unknown?'v18-unk':''} ${V18_PANEL?.id===i.id?'v18-sel':''}" tabindex="0" role="button" data-v18-open="${esc(i.id)}" aria-label="${esc(i.title+' · '+i.text)}">
-  <div class="v18-tile ${color}" aria-hidden="true">${kind==='task'?'✓':kind==='signal'?'↗':channel==='whatsapp'?'◌':'✉'}</div>
-  <div class="v18-mid"><div class="v18-l1"><span class="v18-nm" title="${esc(i.title)}">${v18Highlight(i.title)}</span><span class="v18-pp" title="${esc(i.subtitle)}">${v18Highlight(i.subtitle)}</span><span class="v18-tm ${!['attention','future'].includes(i.origin)?'v18-c':i.rank===0?'v18-a':'v18-b'}">${esc(time)}</span></div>
-  <div class="v18-ct" title="${esc(i.text)}">${v18Highlight(i.text)}</div><span class="v18-chip ${unknown?'v18-ch-blu':kind==='signal'?'v18-ch-teal':i.rank===0?'v18-ch-red':'v18-ch-amb'}">${esc(i.why)}</span>${i.context?` <span class="v18-chip v18-ch-teal">${esc(i.context)}</span>`:''}
-  ${V18_QUERY.length>=2?` <span class="v18-org">${V18_ORIGIN[i.origin]}</span>`:''}</div>
-  <div class="v18-acts"><button class="v18-btn ${['attention','signal'].includes(i.origin)?'v18-p':''}" data-v18-primary="${esc(i.id)}">${primary}</button><button class="v18-ico" data-v18-menu="${esc(i.id)}" aria-label="Mais ações de ${esc(i.title)}" aria-expanded="false">⋯</button></div></div>`;
+ return `<button type="button" class="v18-row v20-row ${unknown?'v18-unk':''} ${V18_PANEL?.id===i.id?'v18-sel':''}" data-v18-open="${esc(i.id)}" aria-label="${esc('Abrir '+i.title+' · '+i.text)}">
+ <span class="v18-tile ${color}" aria-hidden="true">${kind==='task'?'✓':kind==='signal'?'↗':channel==='whatsapp'?'◌':'✉'}</span><span class="v18-mid"><span class="v18-l1"><span class="v18-nm" title="${esc(i.title)}">${v18Highlight(i.title)}</span><span class="v18-tm ${i.rank===0?'v18-a':'v18-b'}">${esc(time)}</span></span><span class="v18-ct">${v18Highlight(i.text)}</span><span class="v18-chip">${esc(i.why)}</span></span><span class="v20-open" aria-hidden="true">Abrir ›</span></button>`;
 }
 function crmRenderFeed(){
  const content=document.getElementById('crm-v18-feed');if(!content)return;
  V18_ITEMS=crmBuildFeedItems();
- const main=V18_ITEMS.filter(i=>i.origin==='attention'),sig=V18_ITEMS.filter(i=>i.origin==='signal');
+ const main=v20GroupItems(V18_ITEMS.filter(i=>i.origin==='attention')),sig=V18_ITEMS.filter(i=>i.origin==='signal');
  const badge=document.getElementById('crm-inbox-badge');if(badge){badge.textContent=main.length;badge.style.display=main.length?'inline-flex':'none';}
  for(const b of document.querySelectorAll('[data-v18-owner]')){b.classList.toggle('v18-on',b.dataset.v18Owner===V18_OWNER);b.setAttribute('aria-pressed',String(b.dataset.v18Owner===V18_OWNER));}
  const banner=V18_ERROR?`<div class="v18-banner" role="alert">${esc(V18_ERROR)}<button class="v18-btn" data-v18-refresh>Tentar novamente</button></div>`:'';
  if(V18_QUERY.length>=2){
   const matching=V18_ITEMS.filter(i=>i.kind==='thread'||[i.title,i.subtitle,i.text].join(' ').toLowerCase().includes(V18_QUERY.toLowerCase()));
-  const origins=[...new Set(matching.map(i=>i.origin))];const shown=matching.filter(i=>!V18_SEARCH_ORIGIN||i.origin===V18_SEARCH_ORIGIN);
-  content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Resultados de busca <span class="v18-cnt">${matching.length}</span></span><span class="v18-sum">Inclui resolvidas e ocultas</span></div><div class="v18-chips"><button class="v18-fchip ${!V18_SEARCH_ORIGIN?'v18-on':''}" data-v18-origin="">Tudo</button>${origins.map(o=>`<button class="v18-fchip ${V18_SEARCH_ORIGIN===o?'v18-on':''}" data-v18-origin="${o}">${V18_ORIGIN[o]} · ${matching.filter(i=>i.origin===o).length}</button>`).join('')}</div>${shown.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nenhum resultado neste filtro.</p>'}${V18_THREADS.length>=500?'<p class="v18-note">Até 500 conversas por busca. Refine o termo para encontrar outras.</p>':''}`;return;
+  const origins=[...new Set(matching.map(i=>i.origin))];const shown=v20GroupItems(matching.filter(i=>!V18_SEARCH_ORIGIN||i.origin===V18_SEARCH_ORIGIN));
+  content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Resultados de busca <span class="v18-cnt">${v20GroupItems(matching).length}</span></span><span class="v18-sum">Inclui resolvidas e ocultas</span></div><div class="v18-chips"><button class="v18-fchip ${!V18_SEARCH_ORIGIN?'v18-on':''}" data-v18-origin="">Tudo</button>${origins.map(o=>`<button class="v18-fchip ${V18_SEARCH_ORIGIN===o?'v18-on':''}" data-v18-origin="${o}">${V18_ORIGIN[o]} · ${matching.filter(i=>i.origin===o).length}</button>`).join('')}</div>${shown.map(crmFeedItemHtml).join('')||'<p class="v18-note">Nenhum resultado neste filtro.</p>'}${V18_THREADS.length>=500?'<p class="v18-note">Até 500 conversas por busca. Refine o termo para encontrar outras.</p>':''}`;return;
  }
  const late=main.filter(i=>i.kind==='task'&&i.rank===0).length,now=main.filter(i=>i.kind==='task'&&i.rank===1).length,reply=main.filter(i=>i.kind==='thread').length;
- const section=(o,label,rows,note='')=>`<button class="v18-sec" data-v18-section="${o}" aria-expanded="${V18_OPEN.has(o)}" aria-controls="v18-section-${o}"><span aria-hidden="true">${V18_OPEN.has(o)?'⌄':'›'}</span><span class="v18-t">${label}</span><span class="v18-n">${rows.length}</span>${o==='future'?`<span class="v18-h">${crmSemanaHorizonte} dias</span>`:''}</button><div id="v18-section-${o}" ${V18_OPEN.has(o)?'':'hidden'}>${o==='future'?'<div class="v18-subh"><button class="v18-btn" data-v18-horizon>Alternar 7 / 30 dias</button></div>':''}${rows.slice(0,V18_LIMITS.get(o)||25).map(crmFeedItemHtml).join('')||'<p class="v18-note">Nada nesta seção.</p>'}${rows.length>(V18_LIMITS.get(o)||25)?`<button class="v18-btn v18-loadmore-feed" data-v18-section-more="${o}">Mostrar mais 25</button>`:''}${note?`<p class="v18-note">${note}</p>`:''}</div>`;
- content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Precisa de você <span class="v18-cnt">${main.length+Math.min(3,sig.length)}</span></span><span class="v18-sum"><b>${late} ${late===1?'atrasada':'atrasadas'}</b> · ${now} hoje · ${reply} ${reply===1?'conversa':'conversas'}${V18_ITEMS.some(i=>i.origin==='triage')?` · ${V18_ITEMS.filter(i=>i.origin==='triage').length} para identificar`:''}</span></div>${[...main,...sig.slice(0,3)].map(crmFeedItemHtml).join('')||'<p class="v18-note">Tudo em dia. Nenhum item pede ação agora.</p>'}
- ${sig.length>3?section('signal','Mais oportunidades',sig.slice(3)):''}
- ${section('triage','E-mails não identificados — revisar',V18_ITEMS.filter(i=>i.origin==='triage').sort((a,b)=>v18Ms(b.thread.last.sent_at)-v18Ms(a.thread.last.sent_at)),'Sem vínculo com um cliente cadastrado. Revise possíveis novos contatos; mensagens sem interesse podem ir para Informativas ou Ocultas.')}
+ const section=(o,label,items,note='')=>{const rows=o==='signal'?items:v20GroupItems(items);return `<button class="v18-sec" data-v18-section="${o}" aria-expanded="${V18_OPEN.has(o)}" aria-controls="v18-section-${o}"><span aria-hidden="true">${V18_OPEN.has(o)?'⌄':'›'}</span><span class="v18-t">${label}</span><span class="v18-n">${rows.length}</span>${o==='future'?`<span class="v18-h">${crmSemanaHorizonte} dias</span>`:''}</button><div id="v18-section-${o}" ${V18_OPEN.has(o)?'':'hidden'}>${o==='future'?'<div class="v18-subh"><button class="v18-btn" data-v18-horizon>Alternar 7 / 30 dias</button></div>':''}${rows.slice(0,V18_LIMITS.get(o)||25).map(crmFeedItemHtml).join('')||'<p class="v18-note">Nada nesta seção.</p>'}${rows.length>(V18_LIMITS.get(o)||25)?`<button class="v18-btn v18-loadmore-feed" data-v18-section-more="${o}">Mostrar mais 25</button>`:''}${note?`<p class="v18-note">${note}</p>`:''}</div>`;};
+ content.innerHTML=`${banner}<div class="v18-fh"><span class="v18-lbl">Precisa de você <span class="v18-cnt">${main.length}</span></span><span class="v18-sum"><b>${main.filter(i=>i.customer_id).length} clientes</b>${main.some(i=>!i.customer_id)?' · '+main.filter(i=>!i.customer_id).length+' contatos não identificados':''}</span></div>${main.map(crmFeedItemHtml).join('')||'<p class="v18-note">Tudo em dia. Nenhum item pede ação agora.</p>'}
+ ${section('signal','Oportunidades',sig)}
  ${section('waiting','Aguardando cliente',V18_ITEMS.filter(i=>i.origin==='waiting'))}
  ${section('future',`Próximos ${crmSemanaHorizonte} dias`,V18_ITEMS.filter(i=>i.origin==='future'&&i.within))}
  ${section('informative','Informativas',V18_ITEMS.filter(i=>i.origin==='informative'))}
@@ -8285,9 +8299,9 @@ function v18RememberDraft(){if(V18_PANEL){const el=document.getElementById('v18-
 function v18ClearDraft(id){V18_DRAFTS.delete(id);if(V18_PANEL?.id===id){const el=document.getElementById('v18-reply');if(el)el.value='';}}
 function v18CanLeave(){v18RememberDraft();return !V18_PANEL||!String(V18_DRAFTS.get(V18_PANEL.id)||'').trim()||confirm('O rascunho ficará guardado nesta sessão. Deseja sair desta conversa?');}
 async function crmOpenThreadPanel(id){
- if(V18_PANEL?.id!==id&&!v18CanLeave())return;const item=V18_ITEMS.find(i=>i.id===id);if(!item)return;
- V18_LAST_FOCUS=document.activeElement;V18_ORIGIN_ROW=id;V18_PANEL={...item,replyChoiceRequired:item.kind==='task',messages:[],hasMore:false,historyMode:'customer',channel:item.thread?.last.channel||'email',filterKey:'',ai:null,replyTarget:null,emailContext:null};v18SetPanelOpen(true);v18RenderPanel();crmRenderFeed();
- if(!V18_PANEL.thread&&item.customer_id){V18_PANEL.thread=V18_THREADS.find(t=>t.customer_id===item.customer_id&&t.last.channel==='email')||V18_THREADS.find(t=>t.customer_id===item.customer_id);if(V18_PANEL.thread)V18_PANEL.channel=V18_PANEL.thread.last.channel;}
+ if(V18_PANEL?.id!==id&&!v18CanLeave())return;const item=V20_GROUPS.get(id)||V18_ITEMS.find(i=>i.id===id);if(!item)return;
+ V18_LAST_FOCUS=document.activeElement;V18_ORIGIN_ROW=id;V18_PANEL={...item,replyChoiceRequired:item.kind==='task'||item.kind==='customer-group',messages:[],hasMore:false,historyMode:'customer',channel:item.thread?.last.channel||item.members?.find(i=>i.thread)?.thread.last.channel||'email',filterKey:'',ai:null,replyTarget:null,emailContext:null};v18SetPanelOpen(true);v18RenderPanel();crmRenderFeed();
+ if(!V18_PANEL.thread&&item.customer_id){V18_PANEL.thread=V18_THREADS.find(t=>t.customer_id===item.customer_id&&t.last.channel==='email')||V18_THREADS.find(t=>t.customer_id===item.customer_id);if(V18_PANEL.thread&&item.kind!=='customer-group')V18_PANEL.channel=V18_PANEL.thread.last.channel;}
  if(item.customer_id||item.kind==='thread')await v18LoadPanelMessages();
  document.querySelector('#crm-v18-panel button')?.focus();
 }
@@ -8301,18 +8315,20 @@ async function v18LoadPanelMessages(more=false){
  try{const{data,error}=await _supa.rpc(history?'crm_v18_channel_messages':'crm_v18_thread_messages',{
     ...(history?{p_customer:panel.customer_id,p_channel:panel.channel,p_key:panel.filterKey||null}:{p_key:key}),p_before:before,p_before_id:more?panel.messages[0]?.id:null,p_limit:20});if(error)throw error;
    if(V18_PANEL!==panel||panel.messagesSequence!==seq)return;const messages=(data||[]).reverse();panel.messages=more?[...messages,...panel.messages]:messages;panel.hasMore=messages.length===20;panel.loaded=true;panel.error='';
+   panel.openEmails??=new Set();if(!more&&!panel.initialEmailOpened){const first=V18_ITEMS.filter(i=>i.customer_id===panel.customer_id&&i.origin==='attention'&&i.thread?.last.channel==='email').sort((a,b)=>b.wait-a.wait).find(i=>messages.some(m=>m.id===i.thread.last.id));if(first)panel.openEmails.add(first.thread.last.id);panel.initialEmailOpened=true;}
    if(!panel.replyTarget&&!panel.replyChoiceRequired){panel.replyTarget=[...messages].reverse().find(m=>m.direction==='inbound'&&m.thread_key===key)
       ||[...messages].reverse().find(m=>m.thread_key===key&&['sent','delivered','read'].includes(m.status))||(history?null:panel.thread?.last);}}
  catch(e){if(V18_PANEL!==panel||panel.messagesSequence!==seq)return;panel.error='Não foi possível carregar a conversa. Tente novamente.';console.error(e);}
  v18RememberDraft();if(!v18FormEditing()){v18RenderPanel();const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll)scroll.scrollTop=more?scroll.scrollHeight-oldHeight+oldTop:scroll.scrollHeight;}
  if(!panel.replyChoiceRequired&&panel.customer_id&&panel.messages.length&&(!panel.replyTarget||panel.replyTarget.channel!==panel.channel||panel.id!=='thread:'+panel.thread?.key)){await v18SelectReply(panel.messages.at(-1).id);}
  if(!panel.replyChoiceRequired&&panel.thread?.last.channel==='email'&&!panel.emailContext&&!panel.contextLoading)await v18LoadEmailContext();
+ if(panel.customer_id)v20RefreshHistory(panel.customer_id);
  if(V18_PANEL===panel&&!more){const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll)scroll.scrollTop=scroll.scrollHeight;}
 }
 async function v18Channel(channel){const p=V18_PANEL;if(!p||channel===p.channel||V18_SENDS.get(p.id)?.pending)return;
- v18RememberDraft();p.channel=channel;p.filterKey='';p.replyTarget=null;p.thread=null;p.emailContext=null;p.contextLoading=false;p.contextSequence=(p.contextSequence||0)+1;p.ai=null;
+ v18RememberDraft();p.channel=channel;p.replyChoiceRequired=true;p.initialEmailOpened=false;p.filterKey='';p.replyTarget=null;p.thread=null;p.emailContext=null;p.contextLoading=false;p.contextSequence=(p.contextSequence||0)+1;p.ai=null;
  p.loaded=false;p.messages=[];p.hasMore=false;v18RenderPanel();await v18LoadPanelMessages();}
-async function v18Filter(key){const p=V18_PANEL;if(!p||V18_SENDS.get(p.id)?.pending)return;v18RememberDraft();p.filterKey=key;if(key)p.replyChoiceRequired=false;p.replyTarget=null;p.emailContext=null;p.ai=null;p.loaded=false;p.messages=[];await v18LoadPanelMessages();}
+async function v18Filter(key){const p=V18_PANEL;if(!p||V18_SENDS.get(p.id)?.pending)return;v18RememberDraft();p.filterKey=key;p.replyChoiceRequired=true;p.thread=null;p.replyTarget=null;p.emailContext=null;p.ai=null;p.loaded=false;p.messages=[];await v18LoadPanelMessages();}
 async function v18SelectReply(id){
  const p=V18_PANEL;if(!p||V18_SENDS.get(p.id)?.pending)return;const message=p.messages.find(m=>m.id===id);if(!message)return;
  if(message.status==='sending'||message.status==='failed'){p.error='Selecione uma mensagem recebida ou enviada com sucesso.';v18RenderPanel();return;}
@@ -8343,7 +8359,7 @@ function v18MessageHtml(m){
  const party=m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[]).join(', ');
  if(channel==='email'){
   const open=V18_PANEL?.openEmails?.has(m.id),bodyId='v18-email-body-'+m.id;
-  return `<article class="v18-msg v18-email ${selected?'v18-reply-selected':''}"><button class="v18-email-summary" data-v18-email-toggle="${esc(m.id)}" ${history?`data-v18-reply-message="${esc(m.id)}"`:''} aria-expanded="${!!open}" aria-controls="${esc(bodyId)}"><span class="v18-email-meta"><time>${esc(v18Stamp(v18Date(m)))}</time><span title="${esc(party||'')}">${esc(party||'E-mail')}</span><span aria-hidden="true">${open?'⌄':'›'}</span></span><span class="v18-email-subject">${esc(m.subject||'(sem assunto)')}</span>${selected?'<span class="v18-history-reply">Respondendo a esta troca</span>':''}</button><div class="v18-email-body" id="${esc(bodyId)}" ${open?'':'hidden'}><div style="white-space:pre-wrap">${esc(content)}</div>${attachments.length?`<div class="v18-hint">${attachments.map(a=>esc(a.filename||a.type||'Anexo')).join(' · ')}</div>`:''}<span class="v18-mt">${esc(state||'Registrado')}</span></div></article>`;
+  return `<article class="v18-msg v18-email ${selected?'v18-reply-selected':''}"><button class="v18-email-summary" data-v18-email-toggle="${esc(m.id)}" aria-expanded="${!!open}" aria-controls="${esc(bodyId)}"><span class="v18-email-meta"><time>${esc(v18Stamp(v18Date(m)))}</time><span title="${esc(party||'')}">${esc((m.direction==='inbound'?'Recebido de ':'Enviado para ')+(CRM_PEOPLE.find(x=>x.email&&String(x.email).toLowerCase()===String(party).toLowerCase())?.name||party||'E-mail'))}</span><span aria-hidden="true">${open?'⌄':'›'}</span></span><span class="v18-email-subject">${esc(m.subject||'(sem assunto)')}</span>${selected?'<span class="v18-history-reply">Respondendo a esta troca</span>':''}</button><div class="v18-email-body" id="${esc(bodyId)}" ${open?'':'hidden'}><div style="white-space:pre-wrap">${esc(content)}</div>${attachments.length?`<div class="v18-hint">${attachments.map(a=>esc(a.filename||a.type||'Anexo')).join(' · ')}</div>`:''}<span class="v18-mt">${esc(state||'Registrado')}</span><button class="v18-btn v18-q" data-v18-reply-message="${esc(m.id)}" ${['sending','failed'].includes(m.status)?'disabled':''}>Responder a esta troca</button></div></article>`;
  }
 
  return `<div class="v18-msg ${m.direction==='inbound'?'v18-in':'v18-out'} ${m.status==='failed'?'v18-fail':m.status==='sending'&&age>120000?'v18-unc':''} ${selected&&history?'v18-reply-selected':''}" ${history?`tabindex="0" role="button" data-v18-reply-message="${esc(m.id)}" aria-label="Responder por ${channel==='email'?'e-mail':'WhatsApp'} nesta conversa"`:''}>
@@ -8360,29 +8376,30 @@ function v18RenderPanel(){
  const restore=()=>{const scroll=document.querySelector('#crm-v18-panel .v18-thread-scroll');if(scroll&&previousTop!=null)scroll.scrollTop=previousTop;if(isPanelFocus){let replacement=focusId?document.getElementById(focusId):focusData?[...document.querySelectorAll('#crm-v18-panel button')].find(x=>x.dataset[focusData[0]]===focusData[1]):null;if(replacement?.closest('.v18-ai-tools')&&!replacement.closest('details').open)replacement=null;(replacement||document.querySelector('.v18-ai-tools summary'))?.focus({preventScroll:true});if(caret&&replacement?.setSelectionRange)replacement.setSelectionRange(...caret);}};
  const p=V18_PANEL,el=document.getElementById('crm-v18-panel');if(!p||!el)return;const t=p.thread;
  const headingMeta=p.task?'Tarefa: '+(p.task.summary||p.text):p.replyChoiceRequired?'Escolha com quem responder':t?[t.state==='done'?'Resolvido':t.state==='waiting_customer'?'Aguardando cliente':'Precisa de resposta',t.needs_reply_since?'aguarda há '+v18Age(t.needs_reply_since):'',t.owner_id===authUser?.id?'Com você':t.owner_id?'Outro responsável':'Sem responsável'].filter(Boolean).join(' · '):p.subtitle;
- const heading=`<div class="v18-ph"><div class="v18-mid"><button class="v18-client-link" data-v18-customer title="Abrir ficha de ${esc(p.title)}">${esc(p.title)}</button><div class="v18-pp" title="${esc(headingMeta)}">${esc(headingMeta)}</div></div>${t&&!p.replyChoiceRequired?`<button class="v18-ico v18-resolve" data-v18-resolve aria-label="${t.state==='done'?'Reabrir conversa':'Resolver conversa'}" title="${t.state==='done'?'Reabrir conversa':'Resolver conversa'}" ${V18_SENDS.get(p.id)?.pending||V18_SENDS.get(p.id)?.uncertain?'disabled':''}>${t.state==='done'?'↺':'✓'}</button>`:''}<button class="v18-ico" data-v18-menu="${esc(p.id)}" aria-label="Mais ações">⋯</button><button class="v18-ico" data-v18-close aria-label="Fechar painel">×</button></div>`;
+ const heading=`<div class="v18-ph"><div class="v18-mid"><button class="v18-client-link" data-v18-customer title="Abrir ficha de ${esc(p.title)}">${esc(p.title)}</button><div class="v18-pp">${p.customer_id?'Histórico e trabalho do cliente':esc(p.subtitle)}</div></div><button class="v18-ico" data-v18-menu="${esc(p.id)}" aria-label="Mais ações">⋯</button><button class="v18-ico" data-v18-close aria-label="Fechar painel">×</button></div>`;
+ const pending=v20PendingHtml(p.customer_id),historyStatus=p.channel==='email'?v20HistoryHtml(p.customer_id):'';
  const channelTabs=`<div class="v18-history-tabs" role="tablist" aria-label="Canal"><button role="tab" class="${p.channel==='email'?'v18-on':''}" data-v18-channel="email" aria-selected="${p.channel==='email'}" ${!p.customer_id&&p.channel!=='email'?'disabled':''}>✉ E-mail</button><button role="tab" class="${p.channel==='whatsapp'?'v18-on':''}" data-v18-channel="whatsapp" aria-selected="${p.channel==='whatsapp'}" ${!p.customer_id&&p.channel!=='whatsapp'?'disabled':''}>◌ WhatsApp</button></div>`;
  const taskContext=p.task?`<div class="v18-context"><span><b>Tarefa</b> · ${esc(p.task.summary||p.text)}</span><button class="v18-btn v18-q" data-v18-primary="${esc('task:'+p.task.id)}">Concluir</button></div>`:p.signal?`<div class="v18-context">${esc(p.text)}</div>`:'';
- const toolbar=`<div class="v18-tools"><button class="v18-btn" data-v18-taskform ${!p.customer_id?'disabled':''}>+ Agendar tarefa</button><details class="v18-ai-tools"><summary>✦ IA</summary><div><button data-v18-ai="summary">Resumir</button><button data-v18-ai="reply" ${!t?'disabled':''}>Preparar resposta</button><button data-v18-ai="action">Sugerir ação</button></div></details></div>`;
- if(!t){el.innerHTML=`<div class="v18-panel">${heading}${channelTabs}${toolbar}<div class="v18-thread-scroll">${taskContext}<div id="v18-panel-form"></div><div class="v18-thread">${p.error?`<p role="alert">${esc(p.error)} <button data-v18-loadmessages class="v18-btn">Tentar novamente</button></p>`:!p.loaded?'<p role="status">Carregando histórico…</p>':`<p>Nenhuma troca de ${p.channel==='email'?'e-mail':'WhatsApp'} registrada neste canal.</p><button class="v18-btn" data-v18-startchannel>Iniciar conversa</button>`}</div></div></div>`;restore();return;}
+ const toolbar=`<div class="v18-tools"><button class="v18-btn" data-v18-taskform ${!p.customer_id?'disabled':''}>+ Agendar tarefa</button><details class="v18-ai-tools"><summary>✦ IA</summary><div><button data-v18-ai="summary">Resumir</button><button data-v18-ai="reply" ${!t||p.replyChoiceRequired?'disabled':''}>Preparar resposta</button><button data-v18-ai="action">Sugerir ação</button></div></details></div>`;
+ if(!t){el.innerHTML=`<div class="v18-panel">${heading}${channelTabs}${toolbar}${v20PickerHtml(p)}<div class="v18-thread-scroll">${pending}${historyStatus}${taskContext}<div id="v18-panel-form"></div>${v20AiHtml(p)}${p.hasMore?'<button class="v18-btn" data-v18-more>Ver mensagens anteriores</button>':''}<div class="v18-thread">${p.error?`<p role="alert">${esc(p.error)} <button data-v18-loadmessages class="v18-btn">Tentar novamente</button></p>`:!p.loaded?'<p role="status">Carregando histórico…</p>':p.messages.length?p.messages.map(v18MessageHtml).join(''):v20EmptyHtml(p)}</div></div><div class="v18-comp v18-hint">Abra uma mensagem e escolha Responder para definir o destinatário.</div></div>`;restore();return;}
  const status=t.state==='done'?'Resolvido':t.state==='waiting_customer'?'Aguardando cliente':'Precisa de resposta';
  const closed=Date.now()-v18Ms(t.last_inbound_at)>=86400000,send=V18_SENDS.get(p.id),draft=V18_DRAFTS.get(p.id)||'',gmail=t.last.channel==='email';
  const recipient=gmail?p.emailContext?.to:(t.person?.phone_normalized||t.person?.phone||(p.replyTarget?.direction==='inbound'?p.replyTarget?.sender_address:(p.replyTarget?.recipient_addresses||[])[0])||t.last.sender_address);
  const triage=!t.customer_id?`<div class="v18-who"><h4>Quem é?</h4><p>Vincule esta conversa a uma pessoa para consultar o histórico do cliente e responder.</p><input class="v18-search" id="v18-link-search" placeholder="Buscar cliente ou pessoa…" aria-label="Buscar pessoa para vincular"><div id="v18-link-options"></div><button class="v18-btn" data-v18-newcustomer>Cadastrar cliente</button><button class="v18-btn" data-v18-classform>Não é comercial</button></div>`:'';
  const disabled=send?.pending||send?.uncertain||(gmail&&!p.emailContext);
- let composer=p.replyChoiceRequired?'<div class="v18-comp v18-hint">Escolha um assunto ou uma mensagem para definir com quem responder. Nenhum destinatário foi escolhido.</div>':!t.customer_id?'<div class="v18-comp v18-hint">Vincule o contato acima para responder.</div>':
+ let composer=p.replyChoiceRequired?'<div class="v18-comp v18-hint">Abra uma mensagem e escolha Responder. Nenhum destinatário foi escolhido.</div>':!t.customer_id?'<div class="v18-comp v18-hint">Vincule o contato acima para responder.</div>':
    !gmail&&closed?`<div class="v18-comp"><div class="v18-reply-destination"><b>${esc((t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Contato')}</div><p class="v18-hint">Janela de texto livre encerrada. Escolha um modelo aprovado.</p><button class="v18-btn v18-p" data-v18-template>Escolher modelo</button></div>`:
-   `<div class="v18-comp ${p.expandedReply?'v18-comp-expanded':''}" ${p.expandedReply?'role="dialog" aria-modal="true" aria-label="Escrever resposta"':''}><div class="v18-reply-destination"><b>${esc(gmail?(t.person?.name?t.person.name+' · E-mail':'E-mail'):(t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Confirmando destinatário…')}</div>${gmail&&p.emailContext?`<div class="v18-reply-subject" title="${esc(p.emailContext.subject||'(sem assunto)')}">${esc(p.emailContext.subject||'(sem assunto)')}</div>`:''}
+   `<div class="v18-comp ${p.expandedReply?'v18-comp-expanded':''}" ${p.expandedReply?'role="dialog" aria-modal="true" aria-label="Escrever resposta"':''}>${p.expandedReply?`<div class="v20-compose-context"><b>${esc(p.title)}</b><p>${esc((p.replyTarget?.body||p.replyTarget?.excerpt||'').slice(0,350))}</p></div>`:''}<div class="v18-reply-destination">Responder para: <b>${esc(gmail?(t.person?.name?t.person.name+' · E-mail':'E-mail'):(t.person?.name?t.person.name+' · WhatsApp':'WhatsApp'))}</b> · ${esc(recipient||'Confirmando destinatário…')}</div>${gmail&&p.emailContext?`<div class="v18-reply-subject" title="${esc(p.emailContext.subject||'(sem assunto)')}">${esc(p.emailContext.subject||'(sem assunto)')}</div>`:''}
     ${p.contextLoading?'<p class="v18-hint" role="status">Confirmando o e-mail original…</p>':''}${p.contextError?`<div class="v18-hint" role="alert">${esc(p.contextError)} <button class="v18-btn v18-q" data-v18-email-context>Tentar novamente</button></div>`:''}
     <textarea class="v18-ta" id="v18-reply" maxlength="${gmail?9500:20000}" aria-label="Resposta" placeholder="Escrever resposta…">${esc(draft)}</textarea><div class="v18-crow"><button class="v18-btn v18-q v18-expand-reply" data-v18-expandreply>${p.expandedReply?'Voltar à conversa':'Ampliar resposta'}</button><button class="v18-btn v18-p" data-v18-send ${disabled?'disabled':''}>${send?.pending?'Enviando…':'Enviar'}</button></div></div>`;
  const sendNotice=send?.notice?`<div class="v18-send-notice ${send.error?'v18-ban':''}" role="status">${esc(send.notice)}${send.uncertain?'<button class="v18-btn" data-v18-checksend>Verificar agora</button>':''}${send.retry?'<button class="v18-btn" data-v18-send>Tentar novamente</button>':''}</div>`:'';
  const wait=t.needs_reply_since?'Aguarda há '+v18Age(t.needs_reply_since):'';
  const historyButtons=channelTabs;
  const options=new Map();V18_THREADS.filter(x=>x.customer_id===p.customer_id&&x.last.channel===p.channel).forEach(x=>options.set(x.key,p.channel==='email'?x.last.subject||'(sem assunto)':v18WhatsAppContactLabel(x.key,x.person?.phone_normalized||x.person?.phone||x.subtitle||x.key)));p.messages.forEach(m=>options.set(m.thread_key,p.channel==='email'?m.subject||options.get(m.thread_key)||'(sem assunto)':v18WhatsAppContactLabel(m.thread_key,(m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[])[0])||m.thread_key)));
- const picker=p.customer_id?`<div class="v18-topic"><label for="v18-topic">${p.replyChoiceRequired?'Responder a':'Ver'}</label><select id="v18-topic" aria-label="${p.channel==='email'?'Assunto do e-mail':'Contato do WhatsApp'}"><option value="">${p.replyChoiceRequired?'Escolha uma troca…':p.channel==='email'?'Todos os assuntos':'Todos os contatos'}</option>${[...options].map(([key,label])=>`<option value="${esc(key)}" ${p.filterKey===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div>`:'';
+ const picker=p.customer_id?`<div class="v18-topic"><label for="v18-topic">Assunto</label><select id="v18-topic" aria-label="${p.channel==='email'?'Assunto do e-mail':'Contato do WhatsApp'}"><option value="">${p.channel==='email'?'Todos os assuntos':'Todos os contatos'}</option>${[...options].map(([key,label])=>`<option value="${esc(key)}" ${p.filterKey===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div>`:'';
  const ai=p.ai?`<div class="v18-ai-result" id="v18-ai-result" tabindex="-1" role="status"><b>✦ ${p.ai.loading?'Consultando…':'Sugestão da IA'}</b><p>${esc(p.ai.text||'')}</p>${p.ai.draft?`<p class="v18-ai-draft">${esc(p.ai.draft)}</p>`:''}${p.ai.draft?'<button class="v18-btn v18-q" data-v18-ai-use>Usar rascunho</button>':''}${p.ai.action?'<button class="v18-btn v18-q" data-v18-ai-task>Agendar esta ação</button>':''}</div>`:'';
  el.innerHTML=`<div class="v18-panel">${heading}${historyButtons}${toolbar}${picker}
- <div class="v18-thread-scroll">${taskContext}<div id="v18-panel-form"></div>${triage}${ai}${p.error?`<div class="v18-ban" role="alert">${esc(p.error)}<button class="v18-btn" data-v18-loadmessages>Tentar novamente</button></div>`:''}
+ <div class="v18-thread-scroll">${pending}${historyStatus}${taskContext}<div id="v18-panel-form"></div>${triage}${ai}${p.error?`<div class="v18-ban" role="alert">${esc(p.error)}<button class="v18-btn" data-v18-loadmessages>Tentar novamente</button></div>`:''}
  ${p.hasMore?'<button class="v18-btn" data-v18-more>Ver mensagens anteriores</button>':''}<div class="v18-thread">${p.loaded?p.messages.map(v18MessageHtml).join(''):'<p role="status">Carregando histórico…</p>'}</div></div>
  ${sendNotice}${composer}</div>`;if(p.expandedReply)for(const child of el.querySelector('.v18-panel').children)if(!child.classList.contains('v18-comp'))child.inert=true;restore();
 }
@@ -8410,7 +8427,7 @@ function v18TaskForm(){
 }
 async function v18SaveTask(event){event.preventDefault();const p=V18_PANEL;if(!p)return;const result=document.getElementById('v18-task-result'),button=event.target.querySelector('[type=submit]');button.disabled=true;
  const summary=document.getElementById('v18-task-text').value.trim(),due=document.getElementById('v18-task-date').value,resolve=!!document.getElementById('v18-task-resolve')?.checked;
- const{error}=await _supa.rpc('crm_save_action',{p_customer_id:p.customer_id,p_type:p.thread?.last.channel==='email'?'email':'followup',p_direction:null,p_occurred_at:null,p_summary:null,p_details:null,
+ const{error}=await _supa.rpc('crm_save_action',{p_customer_id:p.customer_id,p_type:!p.replyChoiceRequired&&p.thread?.last.channel==='email'?'email':'followup',p_direction:null,p_occurred_at:null,p_summary:null,p_details:null,
    p_responsible_user_id:authUser.id,p_next_summary:summary,p_next_due_date:due,p_action_id:null,p_mode:'schedule',p_project_id:p.task?.project_id||p.signal?.project_id||p.project_id||null});
  if(error){result.textContent=error.message;button.disabled=false;return;}
  // Disable the submitted form before refresh to prevent accidental duplicates.
@@ -8492,7 +8509,7 @@ async function v18CheckSend(){const p=V18_PANEL,s=p&&V18_SENDS.get(p.id);if(!s)r
 }
 function v18Menu(id,button){const old=document.getElementById('v18-menu');if(old){old.remove();return;}const i=V18_PANEL?.id===id?V18_PANEL:V18_ITEMS.find(x=>x.id===id);if(!i)return;
  const menu=document.createElement('div');menu.id='v18-menu';menu.className='v18-menu';menu.setAttribute('aria-label','Ações da conversa');
- menu.innerHTML=i.thread?`<button data-v18-resolve ${V18_SENDS.get(i.id)?.pending||V18_SENDS.get(i.id)?.uncertain?'disabled':''}>${i.thread.state==='done'?'Reabrir conversa':'Resolver conversa'}</button><button data-v18-assume>Assumir atendimento</button><button data-v18-wait>Marcar como aguardando cliente</button><hr><button data-v18-classform>Mover para Informativas</button><button data-v18-hide>Ocultar</button><button data-v18-info>Por que esta conversa aparece?</button>${i.thread.last.channel==='email'?`<a class="v18-menu-link" href="${esc(v18GmailUrl(i.thread))}" target="_blank" rel="noopener">Abrir no Gmail</a>`:''}`:
+ menu.innerHTML=i.replyChoiceRequired?'<button data-v18-customer>Abrir ficha do cliente</button>':i.thread?`${i.thread.state==='done'?'<button data-v18-resolve>Reabrir esta conversa</button>':!i.customer_id?'<button data-v18-resolve>Resolver este contato</button>':''}${['informative','ignored'].includes(i.thread.origin)?'<button data-v20-restore>Voltar para Precisa de você</button>':''}<button data-v18-assume>Assumir atendimento</button><button data-v18-wait>Marcar como aguardando cliente</button><hr><button data-v18-classform>Mover para Informativas</button><button data-v18-hide>Ocultar</button><button data-v18-info>Por que esta conversa aparece?</button>${i.thread.last.channel==='email'?`<a class="v18-menu-link" href="${esc(v18GmailUrl(i.thread))}" target="_blank" rel="noopener">Abrir no Gmail</a>`:''}`:
  i.kind==='task'?`<button data-v18-reschedule="${i.task.id}">Reagendar</button><button data-v18-dismiss="${i.task.id}">Dispensar</button><button data-v18-customer>Abrir cliente / projeto</button>`:'<button data-v18-customer>Abrir cliente / projeto</button><button data-v18-signal-dismiss>Dispensar oportunidade</button>';
  const show=()=>{document.getElementById('crm-v18-panel').appendChild(menu);menu.querySelector('button:not([disabled])')?.focus();};
  if(V18_PANEL?.id!==id)crmOpenThreadPanel(id).then(show);else show();
@@ -8512,7 +8529,10 @@ async function v18DismissOpportunity(){const s=V18_PANEL?.signal;if(!s)return;if
 function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root||root.dataset.bound)return;root.dataset.bound='1';
  root.addEventListener('click',async e=>{const control=e.target.closest('button,a,[data-v18-open],[data-v18-reply-message]');if(!control)return;const d=control.dataset;
    if(control.closest('#v18-menu')&&!('v18Menu' in d))document.getElementById('v18-menu')?.remove();
-   if('v18Owner' in d)v18SetOwner(d.v18Owner);
+   if('v20ResolveKey' in d)await v20Resolve(d.v20ResolveKey);
+   else if('v20Restore' in d)await v18ThreadAction('action','manual_restore');
+   else if('v20HistoryRetry' in d)await v19SyncCustomerHistory(d.v20HistoryRetry);
+   else if('v18Owner' in d)v18SetOwner(d.v18Owner);
    else if('v18Origin' in d){V18_SEARCH_ORIGIN=d.v18Origin;crmRenderFeed();}
    else if('v18Refresh' in d)await crmLoadAll();
    else if('v18SectionMore' in d){V18_LIMITS.set(d.v18SectionMore,(V18_LIMITS.get(d.v18SectionMore)||25)+25);crmRenderFeed();}
@@ -8532,7 +8552,7 @@ function v18Bind(){const root=document.getElementById('crmpane-semana');if(!root
    else if('v18AiUse' in d){const p=V18_PANEL;if(p?.ai?.draft){v18RememberDraft();if((V18_DRAFTS.get(p.id)||'').trim()&&!confirm('Substituir o rascunho pela sugestão?'))return;V18_DRAFTS.set(p.id,p.ai.draft);v18RenderPanel();document.getElementById('v18-reply')?.focus();}}
    else if('v18AiTask' in d){v18TaskForm();document.getElementById('v18-task-text').value=V18_PANEL.ai.action;}
    else if('v18Startchannel' in d)v18StartChannel();
-   else if('v18EmailToggle' in d){const p=V18_PANEL;if(!p)return;p.openEmails??=new Set();if(p.openEmails.has(d.v18EmailToggle)){p.openEmails.delete(d.v18EmailToggle);v18RememberDraft();v18RenderPanel();}else{p.openEmails.add(d.v18EmailToggle);await v18SelectReply(d.v18EmailToggle);}}
+   else if('v18EmailToggle' in d){const p=V18_PANEL;if(!p)return;p.openEmails??=new Set();if(p.openEmails.has(d.v18EmailToggle)){p.openEmails.delete(d.v18EmailToggle);v18RememberDraft();v18RenderPanel();}else{p.openEmails.add(d.v18EmailToggle);v18RememberDraft();v18RenderPanel();}}
    else if('v18Expandreply' in d){v18RememberDraft();V18_PANEL.expandedReply=!V18_PANEL.expandedReply;v18RenderPanel();document.getElementById('v18-reply')?.focus();}
    else if('v18ReplyMessage' in d)await v18SelectReply(d.v18ReplyMessage);
    else if('v18EmailContext' in d)await v18LoadEmailContext();
@@ -8570,22 +8590,96 @@ v18Bind();
 async function v18OpenCustomerWorkspace(customerId,projectId=null){
  if(!v18CanLeave())return;const c=v18Customer(customerId);if(!c)return;
  closeM('crmcustomer');closeM('crmproject');crmShowSubTab('semana');
- V18_LAST_FOCUS=document.activeElement;V18_PANEL={id:'customer:'+customerId,kind:'customer',customer_id:customerId,project_id:projectId,title:c.trade_name||c.display_name,subtitle:projectId?CRM_PROJECTS.find(x=>x.id===projectId)?.project_name||'Projeto':'Conversas do cliente',channel:'email',historyMode:'customer',filterKey:'',messages:[],hasMore:false,replyTarget:null};
+ V18_LAST_FOCUS=document.activeElement;V18_PANEL={id:'customer:'+customerId,kind:'customer',replyChoiceRequired:true,customer_id:customerId,project_id:projectId,title:c.trade_name||c.display_name,subtitle:projectId?CRM_PROJECTS.find(x=>x.id===projectId)?.project_name||'Projeto':'Conversas do cliente',channel:'email',historyMode:'customer',filterKey:'',messages:[],hasMore:false,replyTarget:null};
  v18SetPanelOpen(true);v18RenderPanel();await v18LoadPanelMessages();
 }
 function v18StartChannel(){const p=V18_PANEL;if(!p?.customer_id)return;const people=CRM_PEOPLE.filter(x=>x.customer_id===p.customer_id);
  if(p.channel==='email'){crmOpenCustomerEdit(p.customer_id);crmPrepareEmailForContext(p.customer_id,people,null,'',null);}
  else{const person=people.find(x=>x.phone_normalized||x.phone);if(person)crmOpenWhatsAppApiById(person.id);else{toastSave('Cadastre um contato com telefone na ficha do cliente.');crmOpenCustomerEdit(p.customer_id);}}
 }
-async function v18Assist(mode){const p=V18_PANEL;if(!p?.customer_id||p.ai?.loading)return;v18RememberDraft();const key=p.thread?.key,channel=p.channel;p.ai={loading:true};v18RenderPanel();
+async function v18Assist(mode){const p=V18_PANEL;if(!p?.customer_id||p.ai?.loading||(mode==='reply'&&p.replyChoiceRequired))return;v18RememberDraft();const key=p.replyChoiceRequired?null:p.thread?.key,channel=p.channel;p.ai={loading:true};v18RenderPanel();
  try{const{data,error}=await _supa.functions.invoke('crm-conversation-assist',{body:{customer_id:p.customer_id,thread_key:key||null,channel:p.channel,mode}});if(error||data?.error)throw error||new Error(data.error);
- if(V18_PANEL!==p||p.thread?.key!==key||p.channel!==channel)return;p.ai={text:data.summary||data.action||'Sem sugestão agora.',draft:mode==='reply'?data.reply:null,action:mode==='action'?data.action:null};
- }catch(e){if(V18_PANEL===p&&p.channel===channel&&p.thread?.key===key)p.ai={text:'IA indisponível agora. Você pode continuar trabalhando normalmente.'};console.error('conversation assist',e);}
- finally{if(V18_PANEL===p){v18RememberDraft();const typing=document.activeElement?.id==='v18-reply';if(!v18FormEditing()){v18RenderPanel();if(!typing&&p.channel===channel&&p.thread?.key===key)document.getElementById('v18-ai-result')?.focus({preventScroll:false});}}}
+ if(V18_PANEL!==p||(p.replyChoiceRequired?null:p.thread?.key)!==key||p.channel!==channel)return;p.ai={text:data.summary||data.action||'Sem sugestão agora.',draft:mode==='reply'?data.reply:null,action:mode==='action'?data.action:null};
+ }catch(e){if(V18_PANEL===p&&p.channel===channel&&(p.replyChoiceRequired?null:p.thread?.key)===key)p.ai={text:'IA indisponível agora. Você pode continuar trabalhando normalmente.'};console.error('conversation assist',e);}
+ finally{if(V18_PANEL===p){v18RememberDraft();const typing=document.activeElement?.id==='v18-reply';if(!v18FormEditing()){v18RenderPanel();if(!typing&&p.channel===channel&&(p.replyChoiceRequired?null:p.thread?.key)===key)document.getElementById('v18-ai-result')?.focus({preventScroll:false});}}}
 }
 function v18MeasureWorkspace(){const ws=document.getElementById('crm-v18-workspace');if(ws&&matchMedia('(min-width:1180px)').matches)ws.style.setProperty('--v18-top',Math.max(0,ws.getBoundingClientRect().top)+'px');}
 window.addEventListener('resize',v18MeasureWorkspace);
 if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(()=>v18MeasureWorkspace());const ws=document.getElementById('crm-v18-workspace');if(ws)observer.observe(ws);}
+
+// CRM scope: saving/registering a person's address schedules only that customer's history.
+let V19_KNOWN_EMAILS=null,V19_HISTORY_RUNNING=new Map();
+function v19ObserveRegisteredEmails(){
+ const current=new Map();for(const p of CRM_PEOPLE){const email=String(p.email||'').trim().toLowerCase();if(email&&/^[^\s<>"()]+@[^\s<>"()]+\.[^\s<>"()]+$/.test(email)&&p.customer_id)current.set(p.customer_id+'|'+email,{customer_id:p.customer_id,email});}
+ if(V19_KNOWN_EMAILS){const groups=new Map();for(const [key,p] of current)if(!V19_KNOWN_EMAILS.has(key)){if(!groups.has(p.customer_id))groups.set(p.customer_id,[]);groups.get(p.customer_id).push(p.email);}
+ for(const [id,emails] of [...groups].slice(0,5))v19SyncCustomerHistory(id,emails);
+ }
+ V19_KNOWN_EMAILS=current;
+}
+async function v19SyncCustomerHistory(customerId,emails=[]){
+ if(!customerId){toastSave('Salve o cliente e seus contatos primeiro.');return;}
+ if(V19_HISTORY_RUNNING.has(customerId))return V19_HISTORY_RUNNING.get(customerId);
+ const task=(async()=>{const status=document.getElementById('crm-gmail-sync-status');let imported=0,hasMore=false,first=true;
+  V20_HISTORY.set(customerId,{state:'searching',emails});if(V18_PANEL?.customer_id===customerId)v18RenderPanel();
+  if(status)status.textContent='Buscando conversas deste cliente…';
+  try{for(let batch=0;batch<8;batch++){
+   const {data,error}=await _supa.functions.invoke('crm-gmail-sync',{body:{mode:'customer_history',customer_id:customerId,restart:first&&emails.length>0,emails:first?emails:[]}});
+   if(error||data?.error)throw error||new Error(data.error);
+   if(data?.status==='already_syncing'){hasMore=true;await new Promise(resolve=>setTimeout(resolve,1500));continue;}
+   first=false;imported+=data?.imported||0;hasMore=!!data?.has_more;if(!hasMore)break;
+  }
+  if(status)status.textContent=hasMore?`${imported} e-mails recuperados · histórico continua em lotes`:`${imported} e-mails recuperados deste cliente`;
+  await crmLoadAll();await v20RefreshHistory(customerId,true);
+  }catch(e){V20_HISTORY.set(customerId,{state:'error',emails});if(V18_PANEL?.customer_id===customerId)v18RenderPanel();console.error('Registered contact history',e);if(status)status.textContent='Cliente salvo. Histórico pode ser atualizado novamente.';}
+  finally{V19_HISTORY_RUNNING.delete(customerId);}
+ })();V19_HISTORY_RUNNING.set(customerId,task);return task;
+}
+
+// V20: the customer is the presentation unit. Thread/task states remain independent.
+function v20GroupItems(items){
+ const groups=new Map(),out=[];for(const i of items){if(!i.customer_id||i.kind==='signal'){out.push(i);continue;}const id='group:'+i.customer_id+':'+i.origin;if(!groups.has(id)){const g={...i,id,kind:'customer-group',members:[],thread:null,task:null};groups.set(id,g);V20_GROUPS.set(id,g);out.push(g);}groups.get(id).members.push(i);}
+ for(const g of groups.values()){g.members.sort((a,b)=>a.rank-b.rank||b.wait-a.wait);const first=g.members[0];g.text=first.text;g.why=first.why;g.rank=first.rank;g.wait=Math.max(...g.members.map(i=>i.wait));g.subtitle='';}
+ return out.sort((a,b)=>b.wait-a.wait||a.rank-b.rank);
+}
+function v20GroupHtml(g){
+ const counts=[['email','e-mail','e-mails'],['whatsapp','WhatsApp','WhatsApps']].map(([channel,one,many])=>{const n=g.members.filter(i=>i.thread?.last.channel===channel).length;return n?`${n} ${n===1?one:many}`:'';});const n=g.members.filter(i=>i.kind==='task').length;if(n)counts.push(`${n} ${n===1?'tarefa':'tarefas'}`);
+ return `<button type="button" class="v18-row v20-row ${V18_PANEL?.customer_id===g.customer_id?'v18-sel':''}" data-v18-open="${esc(g.id)}"><span class="v18-tile v18-t-mail" aria-hidden="true">◎</span><span class="v18-mid"><span class="v18-l1"><span class="v18-nm">${v18Highlight(g.title)}</span><span class="v18-tm ${g.rank===0?'v18-a':'v18-b'}">${esc(g.why)}</span></span><span class="v18-ct">${v18Highlight(g.text)}</span><span class="v20-counts">${counts.filter(Boolean).map(x=>`<span class="v18-chip">${x}</span>`).join(' ')}</span></span><span class="v20-open" aria-hidden="true">Abrir ›</span></button>`;
+}
+function v20PendingHtml(customerId){
+ if(!customerId)return '';const items=V18_ITEMS.filter(i=>i.customer_id===customerId&&['attention','waiting','future'].includes(i.origin));
+ return `<details class="v20-pending" ${items.length?'open':''}><summary>Pendências · ${items.length}</summary><div>${items.map(i=>`<div class="v20-pending-row"><span><b>${esc(i.thread?(i.thread.person?.name||i.subtitle)+' · '+(i.thread.last.channel==='email'?'E-mail':'WhatsApp'):'Tarefa')}</b><span title="${esc(i.text)}">${esc(i.text)}</span><small>${esc(i.why)}${i.thread?' · '+(i.thread.owner_id===authUser?.id?'Com você':i.thread.owner_id?'Outro responsável':'Sem responsável'):''}</small></span>${i.thread?`<button class="v18-btn v18-q" data-v20-resolve-key="${esc(i.thread.key)}" aria-label="Resolver conversa com ${esc(i.subtitle)} sobre ${esc(i.text)}" ${V18_SENDS.get('thread:'+i.thread.key)?.pending||V18_SENDS.get('thread:'+i.thread.key)?.uncertain?'disabled':''}>Resolver</button>`:`<button class="v18-btn v18-q" data-v18-primary="${esc(i.id)}">Concluir</button>`}</div>`).join('')||'<p class="v18-hint">Nenhuma pendência agora.</p>'}</div></details>`;
+}
+async function v20Resolve(key){
+ const t=V18_THREADS.find(t=>t.key===key);if(!t)return;const id='thread:'+key,send=V18_SENDS.get(id);if(send?.pending||send?.uncertain)return;
+ v18RememberDraft();const draft=V18_DRAFTS.get(id)||'';if(draft.trim()&&!confirm('Resolver esta conversa sem enviar o rascunho?'))return;
+ const expected=t.last.id,previous=t.state,owner=t.owner_id,contact=t.person?.name||t.subtitle;
+ const {error}=await _supa.rpc('crm_v18_thread_action',{p_key:key,p_action:'done',p_expected:expected});if(error){toastSave('Não foi possível resolver. Atualize e tente novamente.');return;}
+ V18_DRAFTS.delete(id);const closed=V18_PANEL?.id===id;if(closed){V18_PANEL=null;v18SetPanelOpen(false);document.getElementById('crm-v18-panel').replaceChildren();}
+ await v18LoadThreads();if(V18_PANEL)v18RenderPanel();
+ v18Snack('Conversa com '+contact+' resolvida.',async()=>{const{error}=await _supa.rpc('crm_v18_thread_action',{p_key:key,p_action:previous==='in_progress'&&owner!==authUser?.id?'waiting_team':previous,p_reason:'Desfazer resolução',p_expected:expected});if(error){toastSave('Uma nova alteração pode ter ocorrido. Atualize para conferir.');return;}if(draft)V18_DRAFTS.set(id,draft);await v18LoadThreads();if(!V18_PANEL&&closed)await crmOpenThreadPanel(id);});
+}
+function v20HistoryHtml(id){
+ if(!id)return '';const h=V20_HISTORY.get(id);if(!h)return `<div class="v20-history" role="status">Histórico de e-mail <button class="v18-btn v18-q" data-v20-history-retry="${esc(id)}">Buscar histórico</button></div>`;
+ const emails=(h.emails?.length?h.emails:CRM_PEOPLE.filter(p=>p.customer_id===id&&p.email).map(p=>p.email)).join(', ');
+ return `<div class="v20-history ${h.state==='error'?'v20-history-error':''}" role="status">${h.state==='searching'?`Buscando conversas${emails?' de '+esc(emails):''} · pode levar alguns minutos`:h.state==='error'?'Não consegui buscar agora':h.state==='done'?h.count>0?`${h.count} e-mails no histórico do CRM`:'Nenhum e-mail encontrado. Confira o endereço no cadastro.':emails?'Histórico ainda não buscado':'Cadastre um e-mail na ficha do cliente para buscar o histórico.'}${h.state==='error'||h.state==='done'||(h.state==='unstarted'&&emails)?` <button class="v18-btn v18-q" data-v20-history-retry="${esc(id)}">${h.state==='error'?'Tentar novamente':h.state==='unstarted'?'Buscar histórico':'Atualizar'}</button>`:''}</div>`;
+}
+function v20EmptyHtml(p){const h=V20_HISTORY.get(p.customer_id);return `<p class="v18-hint">${p.channel==='email'&&h?.state==='searching'?'O histórico está sendo buscado. As conversas aparecerão aqui.':p.channel==='email'&&h?.state==='error'?'A busca não terminou. Use Tentar novamente acima.':p.channel==='email'&&(!h||h.state==='unstarted')?'Use Buscar histórico para recuperar as conversas deste cliente.':'Nenhuma troca registrada neste canal.'}</p><button class="v18-btn" data-v18-startchannel>Iniciar conversa</button>`;}
+async function v20RefreshHistory(id,force=false){
+ if(!_supa.from)return;const last=V20_HISTORY.get(id);if(!force&&(last?.checking||Date.now()-(last?.checkedAt||0)<15000))return;
+ V20_HISTORY.set(id,{...last,checking:true});try{
+ const {data,error}=await _supa.from('crm_gmail_contact_backfill').select('email,status').eq('customer_id',id);if(error)throw error;
+ const jobs=data||[];let state=jobs.some(j=>j.status==='error')?'error':jobs.some(j=>['pending','paused'].includes(j.status))?'searching':jobs.length?'done':'unstarted';
+ const {count,error:countError}=await _supa.from('crm_communications').select('id',{count:'exact',head:true}).eq('customer_id',id).eq('channel','email');if(countError)throw countError;
+ if(V19_HISTORY_RUNNING.has(id)&&state==='unstarted')state='searching';V20_HISTORY.set(id,{state,count:count||0,emails:jobs.map(j=>j.email),checkedAt:Date.now()});
+ }catch(e){V20_HISTORY.set(id,{...last,state:last?.state||'error',checkedAt:Date.now()});console.error('History status',e);}
+ finally{if(V18_PANEL?.customer_id===id&&!v18FormEditing()){v18RememberDraft();v18RenderPanel();}}
+}
+
+function v20PickerHtml(p){
+ if(!p.customer_id)return '';const options=new Map();V18_THREADS.filter(t=>t.customer_id===p.customer_id&&t.last.channel===p.channel).forEach(t=>options.set(t.key,p.channel==='email'?t.last.subject||'(sem assunto)':v18WhatsAppContactLabel(t.key,t.person?.phone||t.subtitle)));p.messages.forEach(m=>options.set(m.thread_key,p.channel==='email'?m.subject||'(sem assunto)':v18WhatsAppContactLabel(m.thread_key,m.direction==='inbound'?m.sender_address:(m.recipient_addresses||[])[0])));
+ return `<div class="v18-topic"><label for="v18-topic">${p.channel==='email'?'Assunto':'Contato'}</label><select id="v18-topic" aria-label="Filtrar histórico sem mudar o destinatário"><option value="">${p.channel==='email'?'Todos os assuntos':'Todos os contatos'}</option>${[...options].map(([key,label])=>`<option value="${esc(key)}" ${p.filterKey===key?'selected':''}>${esc(label)}</option>`).join('')}</select></div>`;
+}
+function v20AiHtml(p){return !p.ai?'':`<div class="v18-ai-result" id="v18-ai-result" tabindex="-1" role="status"><b>✦ ${p.ai.loading?'Consultando…':'Sugestão da IA'}</b><p>${esc(p.ai.text||'')}</p>${p.ai.draft?`<p class="v18-ai-draft">${esc(p.ai.draft)}</p><button class="v18-btn v18-q" data-v18-ai-use>Usar rascunho</button>`:''}${p.ai.action?'<button class="v18-btn v18-q" data-v18-ai-task>Agendar esta ação</button>':''}</div>`;}
 
 async function v18LoadCommunicationPreviews(){
  const {data,error}=await _supa.from('crm_communications').select('id,customer_id,person_id,channel,provider,direction,status,subject,excerpt,external_id,external_thread_id,sender_address,recipient_addresses,created_at,sent_at,read_at,delivered_at,message_type,attachments_meta,provider_metadata').order('sent_at',{ascending:false,nullsFirst:false}).limit(2000);
