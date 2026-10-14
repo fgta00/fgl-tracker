@@ -60,3 +60,5 @@
 .ncrm .nc-profile-dropdown>summary:after{content:' ▾';font-size:10px}.ncrm .nc-profile-dropdown>div{position:absolute;top:100%;left:0;z-index:80;background:#fff;border:1px solid #dce1e7;border-radius:6px;padding:8px;min-width:150px;box-shadow:0 4px 12px #0001}
 .ncrm .nc-profile-dropdown>div label{display:flex;gap:6px;align-items:center;padding:4px;font-size:12px}.ncrm .nc-profile-dropdown input{width:auto!important}
 @media(max-width:900px){.ncrm .nc-identity .nc-title{flex-basis:100%}.ncrm .nc-identity .nc-person+.nc-person{border-left:0;padding-left:0;border-top:1px solid #dce1e7}}
+
+.ncrm .nc-identity input.nc-title{font-size:28px;font-weight:700;line-height:1.2;letter-spacing:-.5px}.ncrm .nc-identity .nc-people{grid-template-columns:repeat(2,minmax(0,1fr))}.ncrm .nc-identity .nc-person input::placeholder{color:#9aa5af;font-weight:400}@media(max-width:900px){.ncrm .nc-identity .nc-people{grid-template-columns:1fr}.ncrm .nc-identity input.nc-title{font-size:24px}}
