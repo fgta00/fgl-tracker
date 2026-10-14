@@ -37,3 +37,26 @@
 .ncrm button:disabled{opacity:.45;cursor:default}
 .ncrm .nc-message{padding-top:14px}.ncrm .nc-message h3{margin-bottom:10px}
 @media(max-width:650px){.ncrm .nc-selection{grid-template-columns:1fr}.ncrm .nc-selection>button{justify-self:end}#view-revenda>.wrap:has(#rvpane-crm.active){padding:12px}}
+
+/* Identity uses the approved study's three editable rows. */
+.ncrm .nc-identity{padding:0 16px;overflow:visible}
+.ncrm .nc-identity .nc-idrow{display:flex;gap:18px;align-items:center;min-height:43px;flex-wrap:wrap;padding:7px 0}
+.ncrm .nc-identity .nc-idrow:first-child{display:flex;padding:10px 0;gap:18px}
+.ncrm .nc-identity .nc-title{font-size:24px;font-weight:700;letter-spacing:-.5px;flex:1;min-width:180px;width:auto;max-width:none;padding:4px;border:1px solid transparent;background:none;color:#202831}
+.ncrm .nc-identity label{min-width:82px;flex:none}
+.ncrm .nc-identity .nc-label{font-size:10px;color:#6e7782;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.ncrm .nc-identity select,.ncrm .nc-profile-dropdown>summary{border:1px solid #e1e6ec;background:#f3f5f8;color:#202831;padding:5px 9px;border-radius:5px;font-weight:600;font-size:13px;width:auto;max-width:200px}
+.ncrm .nc-identity .nc-edit{border:1px solid transparent;background:none;padding:4px;border-radius:4px;min-width:0;font-size:13px;color:#202831;max-width:none}
+.ncrm .nc-identity .nc-edit:hover,.ncrm .nc-identity .nc-edit:focus{border-color:#dce1e7;background:#fafbfd}
+.ncrm .nc-identity .nc-idrow:nth-child(2){padding:9px 0;gap:24px}
+.ncrm .nc-identity .nc-fin{margin-left:auto;gap:24px;flex-wrap:wrap}.ncrm .nc-identity .nc-fin b{font-size:14px;font-weight:600}
+.ncrm .nc-identity-ai{display:flex;align-items:center;gap:4px;flex:none;color:#7758a0}
+.ncrm .nc-identity-ai b{font-size:11px;margin-right:3px}.ncrm .nc-identity-ai button{border:1px solid #e5ddef;background:#fbf8ff;color:#7758a0;font-size:11px;padding:5px 8px}
+.ncrm .nc-identity .nc-people{gap:0;padding:6px 0}.ncrm .nc-identity .nc-person{padding:5px 16px 5px 0;grid-template-columns:minmax(95px,.9fr) minmax(125px,1.4fr) minmax(110px,1fr)}
+.ncrm .nc-identity .nc-person+.nc-person{padding-left:16px;border-left:1px solid #dce1e7}
+.ncrm .nc-identity .nc-person input{font-size:12px;padding:4px;border:1px solid transparent;background:none}
+.ncrm .nc-identity .nc-person input[data-field=name]{font-weight:600}.ncrm .nc-identity .nc-person input[data-field=email]{color:#477499}.ncrm .nc-identity .nc-person input[data-field=phone]{color:#13876b}
+.ncrm .nc-profile-dropdown{position:relative;margin:0}.ncrm .nc-profile-dropdown>summary{padding:5px 9px;cursor:pointer;list-style:none}
+.ncrm .nc-profile-dropdown>summary:after{content:' ▾';font-size:10px}.ncrm .nc-profile-dropdown>div{position:absolute;top:100%;left:0;z-index:80;background:#fff;border:1px solid #dce1e7;border-radius:6px;padding:8px;min-width:150px;box-shadow:0 4px 12px #0001}
+.ncrm .nc-profile-dropdown>div label{display:flex;gap:6px;align-items:center;padding:4px;font-size:12px}.ncrm .nc-profile-dropdown input{width:auto!important}
+@media(max-width:900px){.ncrm .nc-identity .nc-title{flex-basis:100%}.ncrm .nc-identity .nc-person+.nc-person{border-left:0;padding-left:0;border-top:1px solid #dce1e7}}
