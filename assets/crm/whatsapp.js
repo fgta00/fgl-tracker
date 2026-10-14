@@ -150,7 +150,8 @@ async function crmTryFinalizeWhatsAppOnboarding(){
     crmWaSetOnboardingStatus('Coexistence conectado e validado. O WhatsApp oficial está pronto para os testes controlados.','green');
     toastSave('WhatsApp Business conectado');NC.close();NC.render();
   }catch(e){
-    const message=e?.context?.body?.error||e?.message||'Falha ao finalizar o Coexistence.';
+    let message=e?.message||'Falha ao finalizar o Coexistence.';
+    if(e?.context instanceof Response){try{const detail=await e.context.clone().json();message=detail?.error||message;}catch{}}
     crmWaSetOnboardingStatus(`${message} Nada será removido do WhatsApp Business App.`,'red');
     if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}
   }finally{
@@ -165,7 +166,7 @@ function crmHandleWhatsAppSignupMessage(event){
     try{payload=JSON.parse(payload);}catch{return;}
   }
   if(payload?.type!=='WA_EMBEDDED_SIGNUP')return;
-  if(payload.event==='FINISH')crmWaRenderSignupSession(payload.data);
+  if(['FINISH','FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING'].includes(payload.event))crmWaRenderSignupSession(payload.data);
   else if(payload.event==='CANCEL')crmWaSetOnboardingStatus('Onboarding cancelado antes da conclusão. Nenhuma alteração foi aplicada.','amber');
   else if(payload.event==='ERROR')crmWaSetOnboardingStatus(payload.data?.error_message||'A Meta informou um erro durante o onboarding.','red');
 }
@@ -178,11 +179,12 @@ async function crmStartWhatsAppCoexistence(){
   crmWaSetOnboardingStatus('Carregando o fluxo oficial da Meta…');
   try{
     const FB=await crmLoadMetaSdk();
+    crmWaSignupSession=null;
+    crmWaSignupAuthCode=null;
     let answered=false;
     const loginTimeout=setTimeout(()=>{
       if(answered)return;
-      if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}
-      crmWaSetOnboardingStatus('A janela da Meta não abriu. Libere popups para fgta00.github.io e clique em “Tentar novamente”.','red');
+      crmWaSetOnboardingStatus('Conclua o fluxo na janela da Meta. A conexão será finalizada quando ela retornar a autorização e a sessão.');
     },15000);
     FB.login(response=>{
       answered=true;clearTimeout(loginTimeout);
