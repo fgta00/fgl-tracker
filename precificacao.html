@@ -212,7 +212,7 @@
       <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">Calculadora</button>
       <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">Cotações</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">Pedidos</button>
-      <button class="rv-tab" id="rvtab-fin" onclick="rvShowTab('fin')">Financeiro</button>
+      
       <button class="rv-tab" id="rvtab-crm" onclick="rvShowTab('crm')">CRM</button>
     </div>
 
@@ -306,22 +306,7 @@
       </div>
     </div>
 
-    <div id="rvpane-fin" class="rv-pane">
-      <div id="rv-fin-summary" style="margin-bottom:.9rem"></div>
-      <div class="card">
-        <div class="collap-h open" style="cursor:default">
-          <div class="sh" style="margin:0">Financeiro — Pedidos com condições definidas</div>
-        </div>
-        <div class="tb" style="padding:0 .9rem .7rem">
-          <input id="finr-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderFin()" style="flex:1">
-          <span id="msf-finr-cl-wrap"></span>
-          <span id="msf-finr-forn-wrap"></span>
-          <button class="btn btn-s" onclick="rvOpenCalPopup()" title="Calendário de pagamentos/recebimentos" aria-label="Abrir calendário de pagamentos/recebimentos">📅</button>
-        </div>
-        <div id="rv-fin-container" style="padding:.9rem"><p class="hint">Em construção — chega na próxima leva.</p></div>
-      </div>
-
-    </div>
+    
 
     <div id="rvpane-crm" class="rv-pane"><div id="crm-root" class="ncrm">Carregando CRM…</div></div>
 
@@ -378,7 +363,7 @@
           <button onclick="rv2SetCadRegime('SN')">Simples Nacional</button>
         </div>
         <label style="display:flex;align-items:center;gap:.4rem;margin-top:.6rem;font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;cursor:pointer">
-          <input type="checkbox" id="rvcad-produtor" style="width:auto"> É produtor (fábrica) — pedidos dele entram no Controle de Produção/Financeiro de produção
+          <input type="checkbox" id="rvcad-produtor" style="width:auto"> É produtor (fábrica) — pedidos dele entram no Controle de Produção
         </label>
       </div>
       <button class="btn btn-p" style="width:100%;margin-top:1rem" onclick="rv2SaveCad()">Salvar cadastro</button>
@@ -504,33 +489,11 @@
 </div>
 
 <!-- FINANCEIRO REVENDA — detalhe de um pedido: parcelas planejadas + lançamentos reais -->
-<div class="ovl" id="ovl-finr" onclick="if(event.target===this)closeM('finr')">
-  <div class="modal" style="width:min(1150px, calc(100vw - 48px));max-width:min(1150px, calc(100vw - 48px))">
-    <div class="modal-h"><span id="finr-title">Financeiro do pedido</span><button class="btn btn-s" id="finr-edit-btn" style="font-size:.62rem;padding:.25rem .5rem;margin-left:.5rem" onclick="rvOpenCondPagto(rvFinCurPedidoId)">✏️ Editar condições</button><button class="mcls" aria-label="Fechar" onclick="closeM('finr')">✕</button></div>
-    <div class="modal-b" id="finr-body"></div>
-  </div>
-</div>
+
 
 <!-- SEGURANÇA — trocar senha da conta e dos cofres -->
 <!-- CALENDÁRIO — pagamentos/recebimentos agendados e feitos -->
-<div class="ovl" id="ovl-rvcal" onclick="if(event.target===this)closeM('rvcal')">
-  <div class="modal" style="max-width:min(920px, calc(100vw - 48px))">
-    <div class="modal-h"><span>Calendário — Pagamentos e Recebimentos</span><button class="mcls" aria-label="Fechar" onclick="closeM('rvcal')">✕</button></div>
-    <div class="modal-b">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem">
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(-1)" aria-label="Mês anterior">◀</button>
-        <h3 id="rvcal-title" style="font-size:.95rem;font-weight:700;color:var(--ink);margin:0"></h3>
-        <button style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.35rem .7rem;font-size:.8rem;cursor:pointer;font-weight:700" onclick="rvCalNav(1)" aria-label="Próximo mês">▶</button>
-      </div>
-      <div id="rvcal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:6px;overflow:hidden"></div>
-      <div style="display:flex;gap:14px;margin-top:.6rem;font-size:.6rem;color:var(--ink3)">
-        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:3px"></span>Pagar fornecedor/beneficiador</span>
-        <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:3px"></span>Receber cliente</span>
-        <span style="opacity:.55">Opaco = já feito · Sólido = agendado (data futura)</span>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <div class="ovl" id="ovl-security" onclick="if(event.target===this)closeM('security')">
   <div class="modal" style="max-width:420px">

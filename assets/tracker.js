@@ -660,8 +660,8 @@ function updateHeaderVisibility(){
 function applyMetaReviewerMode(){
   if(!isMetaReviewer())return;
   // Reviewer vê somente CRM > Clientes. RLS continua sendo a barreira de segurança dos dados.
-  ['rvtab-calc','rvtab-cotacoes','rvtab-pedidos','rvtab-fin'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
-  ['rvpane-calc','rvpane-cotacoes','rvpane-pedidos','rvpane-fin'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active');});
+  ['rvtab-calc','rvtab-cotacoes','rvtab-pedidos'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  ['rvpane-calc','rvpane-cotacoes','rvpane-pedidos'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active');});
   ['crmtab-semana','crmtab-projetos'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
   ['crmpane-semana','crmpane-projetos'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('active');});
   // Controles de vault/arquivo não fazem parte do fluxo de App Review.
@@ -1168,7 +1168,7 @@ let rvSyncPass=null;
 let _rvSyncTimer=null;
 let _rvRevision=0;
 
-function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),ledgerR:rvLoadLedgerR(),receiptsR:rvLoadReceiptsR(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA,sacacho:RV_SACACHO};}
+function rvCollectSyncData(){return{cotacoes:rvLoadCotacoes(),pedidos:rvLoadPedidos(),clientes2:RV_CLIENTES2,fornecedores2:RV_FORNECEDORES2,empresa:RV_EMPRESA,sacacho:RV_SACACHO};}
 function rvMergeById(localList,cloudList){
   // Une por id, e quando o mesmo id existe dos dois lados, quem tem
   // updatedAt mais recente vence de verdade (não é mais "local sempre
@@ -1194,8 +1194,6 @@ function rvMergeByKey(localList,cloudList,keyFn){
 function rvApplySyncData(data){
   if(Array.isArray(data.cotacoes))rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes));
   if(Array.isArray(data.pedidos))rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos));
-  if(Array.isArray(data.ledgerR))rvSaveLedgerR(rvMergeById(rvLoadLedgerR(),data.ledgerR));
-  if(Array.isArray(data.receiptsR))rvSaveReceiptsR(rvMergeById(rvLoadReceiptsR(),data.receiptsR));
   if(Array.isArray(data.clientes2))RV_CLIENTES2=rvMergeByKey(RV_CLIENTES2,data.clientes2,c=>(c.nome||'').toLowerCase().trim());
   if(Array.isArray(data.fornecedores2))RV_FORNECEDORES2=rvMergeByKey(RV_FORNECEDORES2,data.fornecedores2,f=>(f.nome||'').toLowerCase().trim());
   if(data.empresa&&typeof data.empresa.fedPct==='number'){
@@ -1210,7 +1208,7 @@ function rvApplySyncData(data){
   rv2SaveLocalCad();
   rv2PopulateSelects();
   rvRenderCotacoes();rvRenderPedidos();
-  if(document.getElementById('rv-fin-container'))rvRenderFin();
+  
 }
 function updateRvSyncStatus(msg){
   const el=document.getElementById('rv-sync-status');
@@ -1230,7 +1228,7 @@ async function rvCloudGet(){
 }
 // Busca a versão mais recente da nuvem e MESCLA com o que está local (nunca sobrescreve —
 // usa a mesma lógica de merge por updatedAt de rvApplySyncData). Chamado toda vez que a
-// pessoa entra em Cotações/Pedidos/Financeiro, e também periodicamente enquanto fica nessas
+// pessoa entra em Cotações/Pedidos, e também periodicamente enquanto fica nessas
 // telas — antes disso, o cofre só era lido da nuvem UMA vez por sessão (no primeiro desbloqueio),
 // e nunca mais, então cada pessoa ficava presa numa "foto" do momento em que abriu.
 let _rvRefreshing=false;
@@ -1251,7 +1249,7 @@ let _rvAutoRefreshTimer=null;
 function rvStartAutoRefresh(){
   if(_rvAutoRefreshTimer)return;
   _rvAutoRefreshTimer=setInterval(()=>{
-    if(rvSyncPass&&['cotacoes','pedidos','fin'].includes(_rvCurTab))rvRefreshFromCloud();
+    if(rvSyncPass&&['cotacoes','pedidos'].includes(_rvCurTab))rvRefreshFromCloud();
   },30000); // a cada 30s, só enquanto estiver numa dessas telas
 }
 async function rvCloudSave(blobStr){
@@ -1341,7 +1339,7 @@ function rvUnlockUI(){
   document.getElementById('ovl-rvlock').classList.remove('open');
   document.getElementById('rvlock-err').textContent='';
   document.getElementById('rvlock-pass').value='';
-  rvRenderCotacoes();rvRenderPedidos();rvRenderFin();
+  rvRenderCotacoes();rvRenderPedidos();
 }
 async function rvSyncPush(immediate){
   if(!rvSyncPass||!authUser)return;
@@ -1376,8 +1374,6 @@ async function rvRecoverAndRetry(){
     // mescla: cotações/pedidos/lançamentos por id (não perde nada de ninguém); cadastros/empresa ficam com a versão local (é a que acabamos de editar)
     rvSaveCotacoes(rvMergeById(rvLoadCotacoes(),data.cotacoes||[]));
     rvSavePedidos(rvMergeById(rvLoadPedidos(),data.pedidos||[]));
-    rvSaveLedgerR(rvMergeById(rvLoadLedgerR(),data.ledgerR||[]));
-    rvSaveReceiptsR(rvMergeById(rvLoadReceiptsR(),data.receiptsR||[]));
     _rvRevision=cloud.revision||_rvRevision;
     const payload=await encryptJSON(rvSyncPass,rvCollectSyncData());
     const payloadStr=JSON.stringify(payload);
@@ -1471,16 +1467,7 @@ function rvSavePedidos(d,forceReplace){
   localStorage.setItem('av_pedidos',JSON.stringify(d));
 }
 // Lançamentos reais de pagamento/recebimento (contra o plano de condições de cada pedido)
-function rvLoadLedgerR(){try{return JSON.parse(localStorage.getItem('av_ledger')||'[]');}catch(e){return[];}}
-function rvSaveLedgerR(d,forceReplace){
-  if(!forceReplace){const cur=rvLoadLedgerR();if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}}
-  localStorage.setItem('av_ledger',JSON.stringify(d));
-}
-function rvLoadReceiptsR(){try{return JSON.parse(localStorage.getItem('av_receipts')||'[]');}catch(e){return[];}}
-function rvSaveReceiptsR(d,forceReplace){
-  if(!forceReplace){const cur=rvLoadReceiptsR();if(Array.isArray(d)&&d.length<cur.length){d=rvMergeById(cur,d);}}
-  localStorage.setItem('av_receipts',JSON.stringify(d));
-}
+
 
 /* ── SUB-ABAS DA REVENDA ── */
 let _rvCurTab='calc';
@@ -1491,19 +1478,19 @@ function rvShowTab(id){
   document.querySelectorAll('.rv-tab').forEach(b=>b.classList.remove('active'));
   rvEl('rvpane-'+id).classList.add('active');
   rvEl('rvtab-'+id).classList.add('active');
-  if(id==='cotacoes'||id==='pedidos'||id==='fin'){
+  if(id==='cotacoes'||id==='pedidos'){
     checkRvLock();
     if(rvSyncPass){
       rvStartAutoRefresh();
       rvRefreshFromCloud().then(()=>{
         if(id==='cotacoes')rvRenderCotacoes();
         else if(id==='pedidos')rvRenderPedidos();
-        else if(id==='fin')rvRenderFin();
+        
       });
       // renderiza já com o que tem local, sem esperar a rede — a atualização acima re-renderiza quando chegar
       if(id==='cotacoes')rvRenderCotacoes();
       else if(id==='pedidos')rvRenderPedidos();
-      else if(id==='fin')rvRenderFin();
+      
     }
   }else if(id==='crm'){
     document.getElementById('ovl-rvlock').classList.remove('open');
@@ -2284,7 +2271,7 @@ function rv2SaveEdit(){
     };
   }
   if(kind==='cotacao'){rvSaveCotacoes(lista);rvRenderCotacoes();}
-  else{rvSavePedidos(lista);rvRenderPedidos();rvRenderFin();}
+  else{rvSavePedidos(lista);rvRenderPedidos();}
   rvSyncPush();
   rv2RenderHist();
   toastSave('Alterações salvas ✓');
@@ -2503,7 +2490,7 @@ function rvCPTotais(p){
   map.cliente=p.vendaTotal||0;
   return map;
 }
-let rvCPPrefix='cp'; // 'cp' = modal separado (Financeiro) | 'rvedit-cp' = seção dentro da edição do pedido
+let rvCPPrefix='cp'; // 'cp' = condições comerciais do pedido | 'rvedit-cp' = seção dentro da edição do pedido
 function rvCPIds(tipo){
   if(tipo==='beneficiador')return{nome:`${rvCPPrefix}-benef-nome`,total:`${rvCPPrefix}-benef-total`,rows:`${rvCPPrefix}-benef-rows`,sum:`${rvCPPrefix}-benef-sum`,wrap:`${rvCPPrefix}-benef-wrap`,select:`${rvCPPrefix}-benef-select`};
   if(tipo==='cliente')return{nome:`${rvCPPrefix}-cli-nome`,total:`${rvCPPrefix}-cli-total`,rows:`${rvCPPrefix}-cli-rows`,sum:`${rvCPPrefix}-cli-sum`};
@@ -2649,9 +2636,9 @@ function rvCPSave(){
   rvSyncPush();
   if(rvCPPrefix==='cp'){
     closeM('condpagto');
-    if(rvFinCurPedidoId===rvCPPedidoId)rvOpenFinPopupR(rvCPPedidoId);
+    
   }
-  rvRenderFin();
+  
   toastSave('Condições salvas ✓');
 }
 
@@ -2844,363 +2831,6 @@ function rvCIClearMarco(){
 /* ══════════════════════════════════════
    FINANCEIRO REVENDA — cards + lançamentos reais contra o plano de condições
 ══════════════════════════════════════ */
-function rvDateIsFuture(dispDate){
-  const parts=(dispDate||'').split('/');
-  if(parts.length!==3)return false;
-  const[d,m,y]=parts;
-  const iso=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  const today=new Date();today.setHours(0,0,0,0);
-  const dt=new Date(iso+'T00:00');
-  return dt.getTime()>today.getTime();
-}
-function rvPartyPago(pedidoId,party){return rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party&&!rvDateIsFuture(l.date)).reduce((a,l)=>a+l.amount,0);}
-function rvPartyRecebido(pedidoId){return rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId&&!rvDateIsFuture(r.date)).reduce((a,r)=>a+r.amount,0);}
-
-/* ══════════════════════════════════════
-   NOTIFICAÇÃO DE VENCIMENTO — compara o cronograma de parcelas (dias após o pedido)
-   com o que já foi de fato pago/recebido, pra avisar quando uma parcela está
-   atrasada ou vence em breve. Não rastreia parcela individual (só existe o total
-   pago/recebido acumulado), então o aviso é sobre "quanto deveria ter sido pago
-   até hoje, considerando o cronograma" vs "quanto foi pago de verdade".
-══════════════════════════════════════ */
-function rvParseDataBR(dataStr){ // "DD/MM/AAAA" -> Date
-  const p=(dataStr||'').split('/');
-  if(p.length!==3)return null;
-  return new Date(parseInt(p[2],10),parseInt(p[1],10)-1,parseInt(p[0],10));
-}
-function rvPlanoDoTipo(p,tipo){
-  if(tipo==='cliente'||tipo==='beneficiador')return(p.planoPagamento&&p.planoPagamento[tipo])||[];
-  const novo=p.planoPagamento&&p.planoPagamento.fornecedores&&p.planoPagamento.fornecedores[tipo];
-  if(novo&&novo.length)return novo;
-  if(tipo==='fornecedor'&&p.planoPagamento&&p.planoPagamento.fornecedor&&p.planoPagamento.fornecedor.length)return p.planoPagamento.fornecedor;
-  return[];
-}
-function rvParcelaStatus(p,tipo){ // tipo: 'fornecedor'|'forn_X'|'beneficiador'|'cliente' -> {status,valor,dias}|null
-  const plano=rvPlanoDoTipo(p,tipo);
-  if(!plano||!plano.length)return null;
-  const tot=rvCPTotais(p)[tipo];
-  if(tot<=0)return null;
-  const pago=tipo==='cliente'?rvPartyRecebido(p.id):rvPartyPago(p.id,tipo);
-  const dataPedido=rvParseDataBR(p.data);
-  if(!dataPedido)return null;
-  const hoje=new Date();hoje.setHours(0,0,0,0);
-  let pctVencidoAteHoje=0,proxima=null,maisAntigaVencida=null;
-  plano.forEach(parc=>{
-    const venc=new Date(dataPedido);venc.setDate(venc.getDate()+(parc.dias||0));
-    if(venc<=hoje){
-      pctVencidoAteHoje+=(parc.pct||0);
-      if(!maisAntigaVencida||venc<maisAntigaVencida)maisAntigaVencida=venc;
-    }
-    else if(!proxima||venc<proxima.venc)proxima={venc,pct:parc.pct};
-  });
-  const deveriaTerPago=tot*pctVencidoAteHoje/100;
-  const faltante=deveriaTerPago-pago;
-  if(faltante>0.5){
-    const diasAtraso=maisAntigaVencida?Math.floor((hoje-maisAntigaVencida)/86400000):0;
-    return{status:'atrasado',valor:faltante,dias:diasAtraso};
-  }
-  if(proxima){
-    const dias=Math.ceil((proxima.venc-hoje)/86400000);
-    if(dias<=5)return{status:'em_breve',valor:tot*proxima.pct/100,dias};
-  }
-  return null;
-}
-// Retorna a notificação mais urgente entre fornecedor/beneficiador/cliente de um pedido, ou null
-function rvParcelaStatusPedido(p){
-  const tipos=[...rvCPFornKeys(p).map(fk=>fk.key),'cliente'];
-  if(p.comLogo)tipos.push('beneficiador');
-  let pior=null;
-  tipos.forEach(tipo=>{
-    const st=rvParcelaStatus(p,tipo);
-    if(!st)return;
-    st.tipo=tipo;
-    if(!pior||(st.status==='atrasado'&&pior.status!=='atrasado')||(st.status===pior.status&&(st.dias||0)<(pior.dias||99)))pior=st;
-  });
-  return pior;
-}
-function rvParcelaStatusBadge(p){
-  const st=rvParcelaStatusPedido(p);
-  if(!st)return'';
-  const fk=rvCPFornKeys(p).find(x=>x.key===st.tipo);
-  const lbl=fk?`Pagar ${fk.nome}`:(st.tipo==='beneficiador'?'Pagar beneficiador':'Receber cliente');
-  const col=st.status==='atrasado'?'var(--red)':'var(--amber)';
-  const txt=st.status==='atrasado'?`${lbl} atrasado há ${st.dias}d — falta ${rvBrl(st.valor)}`:`${lbl} vence em ${st.dias}d — ${rvBrl(st.valor)}`;
-  return`<div style="font-size:.62rem;font-weight:700;color:#fff;background:${col};border-radius:5px;padding:.22rem .5rem;margin-bottom:.4rem">⏰ ${esc(txt)}</div>`;
-}
-function rvCountVencimentos(){
-  return rvLoadPedidosActive().filter(p=>p.planoPagamento&&rvParcelaStatusPedido(p)).length;
-}
-
-function rvRenderFin(){
-  const cont=rvEl('rv-fin-container');
-  const lista=rvLoadPedidosActive().filter(p=>p.planoPagamento);
-  // ── resumo geral ──
-  let totCompra=0,totVenda=0,totPagar=0,totReceber=0,totPago=0,totRecebido=0;
-  lista.forEach(p=>{
-    const tot=rvCPTotais(p);
-    const fornKeys=rvCPFornKeys(p);
-    const totForn=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
-    const pagoForn=fornKeys.reduce((a,fk)=>a+rvPartyPago(p.id,fk.key),0),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
-    totCompra+=totForn+(p.comLogo?tot.beneficiador:0);
-    totVenda+=tot.cliente;
-    totPagar+=Math.max(0,totForn-pagoForn)+(p.comLogo?Math.max(0,tot.beneficiador-pagoBenef):0);
-    totReceber+=Math.max(0,tot.cliente-recCli);
-    totPago+=pagoForn+pagoBenef;
-    totRecebido+=recCli;
-  });
-  const margem=totVenda-totCompra;
-  const saldo=totReceber-totPagar;
-  const big=(lbl,val,col)=>`<div style="flex:1;min-width:140px"><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.15rem">${lbl}</div><div style="font-size:1.62rem;font-weight:700;color:${col};font-family:'IBM Plex Mono';line-height:1.1">${val}</div></div>`;
-  const small=(lbl,val,col)=>`<div style="display:flex;justify-content:space-between;gap:.6rem;padding:.36rem 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.74rem;color:var(--ink3)">${lbl}</span><span style="font-size:.80rem;font-weight:600;color:${col};font-family:'IBM Plex Mono'">${val}</span></div>`;
-  rvEl('rv-fin-summary').innerHTML=`
-    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch">
-      <div style="flex:2;min-width:300px;display:flex;gap:1.2rem;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:1.2rem 1.2rem">
-        ${big('A Pagar',rvBrl(totPagar),'var(--red)')}
-        ${big('A Receber',rvBrl(totReceber),'var(--green)')}
-        ${big('Saldo Líquido',rvBrl(saldo),saldo>=0?'var(--green)':'var(--red)')}
-      </div>
-      <div style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:.95rem 1rem">
-        ${small('Total Compra',rvBrl(totCompra),'var(--ink2)')}
-        ${small('Total Venda',rvBrl(totVenda),'var(--teal)')}
-        ${small('Margem Bruta',rvBrl(margem)+(totVenda>0?' ('+Math.round(margem/totVenda*100)+'%)':''),margem>=0?'var(--green)':'var(--red)')}
-        ${small('Pago / Recebido',rvBrl(totPago)+' / '+rvBrl(totRecebido),'var(--ink2)')}
-      </div>
-    </div>`;
-  if(!lista.length){cont.innerHTML='<p class="hint">Nenhum pedido com condições de pagamento definidas ainda. As condições são pedidas automaticamente ao criar um pedido.</p>';return;}
-  const wrapCl=document.getElementById('msf-finr-cl-wrap');
-  if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('finr-cl','Todos Clientes');
-  msfPopulate('finr-cl',[...new Set(lista.map(p=>p.cliente))].sort(),'Todos Clientes',rvRenderFin);
-  const wrapForn=document.getElementById('msf-finr-forn-wrap');
-  if(wrapForn&&!wrapForn.innerHTML)wrapForn.innerHTML=msfHtml('finr-forn','Todos Fornecedores');
-  msfPopulate('finr-forn',[...new Set(lista.map(p=>p.fornecedor))].sort(),'Todos Fornecedores',rvRenderFin);
-  const q=norm(document.getElementById('finr-q')?.value);
-  const listaFiltrada=lista.filter(p=>{
-    const t=norm(`${p.cliente} ${p.fornecedor}`);
-    return(!q||t.includes(q))&&msfMatch('finr-cl',p.cliente)&&msfMatch('finr-forn',p.fornecedor);
-  });
-  if(!listaFiltrada.length){cont.innerHTML='<p class="hint">Nenhum pedido encontrado com esses filtros.</p>';rvUpdateFinBadge();return;}
-  cont.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem">`+listaFiltrada.map(p=>{
-    const tot=rvCPTotais(p);
-    const fornKeys=rvCPFornKeys(p);
-    const totForn=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
-    const pagoForn=fornKeys.reduce((a,fk)=>a+rvPartyPago(p.id,fk.key),0),pagoBenef=p.comLogo?rvPartyPago(p.id,'beneficiador'):0,recCli=rvPartyRecebido(p.id);
-    const bar=(label,pago,total,color)=>{
-      const pct=total>0?Math.min(100,Math.round(pago/total*100)):0;
-      return `<div style="margin-bottom:.48rem">
-        <div style="display:flex;justify-content:space-between;font-size:.70rem;color:var(--ink3)"><span>${label} ${pct}%</span><span>${rvBrl(pago)} / ${rvBrl(total)}</span></div>
-        <div style="height:5px;background:var(--ltgry);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color}"></div></div>
-      </div>`;
-    };
-    return `<div class="card" style="padding:1rem .9rem;cursor:pointer" onclick="rvOpenFinPopupR(${p.id})">
-      <div style="font-weight:700;font-size:.92rem;margin-bottom:.14rem">${esc(p.cliente)}</div>
-      <div style="font-size:.72rem;color:var(--ink4);margin-bottom:.65rem">${esc(p.fornecedor)}${p.comLogo?' + '+esc(p.planoPagamento.beneficiadorNome||'beneficiador'):''} · ${esc(p.data)}</div>
-      ${rvParcelaStatusBadge(p)}
-      ${bar('Pagar Fornecedor',pagoForn,totForn,'var(--red)')}
-      ${p.comLogo?bar('Pagar Beneficiador',pagoBenef,tot.beneficiador,'var(--amber)'):''}
-      ${bar('Receber Cliente',recCli,tot.cliente,'var(--green)')}
-    </div>`;
-  }).join('')+`</div>`;
-  rvUpdateFinBadge();
-}
-function rvUpdateFinBadge(){
-  const tab=document.getElementById('rvtab-fin');
-  if(!tab)return;
-  const n=rvCountVencimentos();
-  tab.innerHTML=n>0?`Financeiro <span style="background:var(--red);color:#fff;border-radius:999px;font-size:.58rem;padding:.1rem .42rem;margin-left:.3rem;font-weight:700">${n}</span>`:'Financeiro';
-}
-/* ── CALENDÁRIO — pagamentos/recebimentos agendados e feitos ── */
-const RV_MO=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-let _rvCalMonth=new Date().getMonth(),_rvCalYear=new Date().getFullYear();
-function rvOpenCalPopup(){
-  _rvCalMonth=new Date().getMonth();_rvCalYear=new Date().getFullYear();
-  rvRenderCalendar();
-  document.getElementById('ovl-rvcal').classList.add('open');
-}
-function rvCalNav(delta){
-  _rvCalMonth+=delta;
-  if(_rvCalMonth<0){_rvCalMonth=11;_rvCalYear--;}
-  if(_rvCalMonth>11){_rvCalMonth=0;_rvCalYear++;}
-  rvRenderCalendar();
-}
-function rvCalDateParts(dispDate){ // DD/MM/AAAA -> {d,m,y}
-  const p=(dispDate||'').split('/');
-  if(p.length!==3)return null;
-  return{d:parseInt(p[0],10),m:parseInt(p[1],10)-1,y:parseInt(p[2],10)};
-}
-function rvRenderCalendar(){
-  document.getElementById('rvcal-title').textContent=RV_MO[_rvCalMonth]+' '+_rvCalYear;
-  const firstDay=new Date(_rvCalYear,_rvCalMonth,1).getDay();
-  const daysInMonth=new Date(_rvCalYear,_rvCalMonth+1,0).getDate();
-  const isDark=document.body.classList.contains('dark');
-  const bgCell=isDark?'var(--card)':'#fff';const bgOther=isDark?'var(--bg)':'var(--ltblue)';
-  const dayNames=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  const pedidosAtivos=rvLoadPedidosActive();
-  const pedidoById={};pedidosAtivos.forEach(p=>pedidoById[p.id]=p);
-  const events={};
-  const addEv=(dispDate,tipo,p,valor,ref)=>{
-    const parts=rvCalDateParts(dispDate);if(!parts)return;
-    if(parts.m!==_rvCalMonth||parts.y!==_rvCalYear)return;
-    if(!events[parts.d])events[parts.d]=[];
-    events[parts.d].push({tipo,cliente:p?p.cliente:'',fornecedor:p?p.fornecedor:'',valor,ref,futuro:rvDateIsFuture(dispDate),pedidoId:p?p.id:null});
-  };
-  rvLoadLedgerR().forEach(l=>{const p=pedidoById[l.pedidoId];if(!p)return;addEv(l.date,'pagar',p,l.amount,l.ref);});
-  rvLoadReceiptsR().forEach(r=>{const p=pedidoById[r.pedidoId];if(!p)return;addEv(r.date,'receber',p,r.amount,r.ref);});
-  let h='';
-  dayNames.forEach(d=>{h+=`<div style="background:${isDark?'var(--head-bg)':'var(--bg)'};padding:5px 3px;text-align:center;font-size:.62rem;font-weight:600;color:var(--ink3)">${d}</div>`;});
-  const startOff=(firstDay===0?6:firstDay-1);
-  for(let i=0;i<startOff;i++)h+=`<div style="background:${bgOther};min-width:0;height:82px"></div>`;
-  const today=new Date();
-  for(let d=1;d<=daysInMonth;d++){
-    const isToday=d===today.getDate()&&_rvCalMonth===today.getMonth()&&_rvCalYear===today.getFullYear();
-    const evts=events[d]||[];
-    h+=`<div style="background:${bgCell};min-width:0;height:82px;padding:3px 4px;display:flex;flex-direction:column;overflow:hidden;${isToday?'outline:2px solid var(--blue);outline-offset:-2px;':''}">`;
-    h+=`<div style="font-size:.7rem;font-weight:${isToday?'700':'500'};color:${isToday?'var(--blue)':'var(--ink)'};margin-bottom:2px;flex-shrink:0">${d}</div>`;
-    h+=`<div style="overflow-y:auto;min-height:0">`;
-    evts.forEach(e=>{
-      const col=e.tipo==='pagar'?'var(--red)':'var(--green)';
-      const nome=e.tipo==='pagar'?e.fornecedor:e.cliente;
-      h+=`<div onclick="closeM('rvcal');${e.pedidoId?`rvOpenFinPopupR(${e.pedidoId})`:''}" style="font-size:.62rem;padding:2px 4px;margin-bottom:2px;border-radius:3px;background:${col}${e.futuro?'':'18'};color:${e.futuro?'#fff':col};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid ${col}" title="${e.futuro?'Agendado':'Feito'} — ${esc(nome)} — ${rvBrl(e.valor)}${e.ref?' — '+esc(e.ref):''}"><b>${rvBrl(e.valor)}</b> ${esc(nome)}</div>`;
-    });
-    h+='</div></div>';
-  }
-  const totalCells=startOff+daysInMonth;
-  const rem=totalCells%7===0?0:7-totalCells%7;
-  for(let i=0;i<rem;i++)h+=`<div style="background:${bgOther};min-width:0;height:82px"></div>`;
-  document.getElementById('rvcal-grid').innerHTML=h;
-}
-
-function rvFinPartyRows(pedidoId,party,total,isReceipt){
-  const list=isReceipt?rvLoadReceiptsR().filter(r=>r.pedidoId===pedidoId):rvLoadLedgerR().filter(l=>l.pedidoId===pedidoId&&l.party===party);
-  if(!list.length)return '<p class="hint" style="margin:.3rem 0">Nenhum lançamento ainda.</p>';
-  return `<table class="rv-data-table" style="margin-top:.3rem"><thead><tr><th>Data</th><th class="rv-num">Valor</th><th>Ref</th><th>Notas</th><th></th></tr></thead><tbody>`+
-    list.map(l=>{
-      const futuro=rvDateIsFuture(l.date);
-      return`<tr>
-      <td>${esc(l.date)}${futuro?' <span style="font-size:.55rem;font-weight:700;color:var(--amber);background:var(--ltamb);padding:.05rem .35rem;border-radius:4px" title="Data ainda não chegou — não entra no total pago/recebido até lá">agendado</span>':''}</td>
-      <td class="rv-num">${rvBrl(l.amount)}</td><td>${esc(l.ref||'—')}</td><td style="font-size:.65rem;color:var(--ink3)">${esc(l.notes||'')}</td>
-      <td><button onclick="${isReceipt?'rvDelReceiptR':'rvDelLedgerR'}(${l.id},${pedidoId})" aria-label="Remover lançamento" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem">✕</button></td></tr>`;
-    }).join('')
-    +'</tbody></table>';
-}
-let rvFinCurPedidoId=null;
-function rvOpenFinPopupR(pedidoId){
-  const p=rvLoadPedidos().find(x=>x.id===pedidoId);
-  if(!p){toastSave('Pedido não encontrado');return;}
-  rvFinCurPedidoId=pedidoId;
-  const tot=rvCPTotais(p);
-  const fornKeys=rvCPFornKeys(p);
-  rvEl('finr-title').textContent=`Financeiro — ${p.cliente} (${p.data})`;
-
-  const custoFornSum=fornKeys.reduce((a,fk)=>a+(tot[fk.key]||0),0);
-  const custoTotal=custoFornSum+(p.comLogo?tot.beneficiador:0);
-  const vendaTotal=tot.cliente;
-  const margem=vendaTotal-custoTotal;
-  const margemPct=vendaTotal?Math.round(margem/vendaTotal*100):0;
-  const pagoFornSum=fornKeys.reduce((a,fk)=>a+rvPartyPago(pedidoId,fk.key),0)+(p.comLogo?rvPartyPago(pedidoId,'beneficiador'):0);
-  const recebidoSum=rvPartyRecebido(pedidoId);
-
-  const partyBlock=(party,total,isReceipt,showHeader,label,icon)=>{
-    const paid=isReceipt?rvPartyRecebido(pedidoId):rvPartyPago(pedidoId,party);
-    const planParcelas=isReceipt?rvPlanoDoTipo(p,'cliente'):rvPlanoDoTipo(p,party);
-    const planTxt=planParcelas.map(pc=>`${pc.dias}d: ${pc.pct}% (${rvBrl(total*pc.pct/100)}) · ${pc.ref}`).join(' · ');
-    return`<div style="margin-top:.5rem">
-      ${showHeader?`<div style="font-size:.66rem;font-weight:700;color:var(--ink2);margin-bottom:.15rem">${icon} ${esc(label)} — ${rvBrl(paid)} / ${rvBrl(total)}</div>`:''}
-      <div style="font-size:.58rem;color:var(--ink4);margin-bottom:.3rem">Plano: ${esc(planTxt)}</div>
-      ${rvFinPartyRows(pedidoId,party,total,isReceipt)}
-      <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem">
-        <input type="date" id="finr-${party}-date" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
-        <input type="number" id="finr-${party}-valor" placeholder="Valor" style="width:80px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
-        <select id="finr-${party}-ref" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">${RV_FIN_REF_TAGS.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
-        <input type="text" id="finr-${party}-notas" placeholder="notas…" style="flex:1;min-width:70px;border:1.5px solid var(--bdr2);border-radius:5px;padding:.3rem;font-size:.68rem">
-      </div>
-      <button style="width:100%;margin-top:.35rem;font-size:.68rem;padding:.45rem;background:${isReceipt?'var(--green)':'var(--red)'};color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="${isReceipt?`rvAddReceiptR(${pedidoId})`:`rvAddLedgerR(${pedidoId},'${party}')`}">＋ Lançar ${isReceipt?'recebimento':'pagamento'}</button>
-    </div>`;
-  };
-
-  const kpiBox=(label,val,cor,extra)=>`<div style="flex:1;background:var(--bg);border-radius:8px;padding:.6rem .8rem">
-    <div style="font-size:.58rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em">${label}</div>
-    <div style="font-size:1rem;font-weight:700;color:${cor};font-family:'IBM Plex Mono'">${val}${extra?` <span style="font-size:.7rem;font-weight:600">${extra}</span>`:''}</div>
-  </div>`;
-
-  const barra=(pago,total,cor)=>{
-    const pct=total?Math.min(100,Math.round(pago/total*100)):0;
-    return`<div style="height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-top:.3rem"><div style="height:100%;width:${pct}%;background:${cor}"></div></div>`;
-  };
-
-  const fornecedoresHtml=fornKeys.map(fk=>partyBlock(fk.key,tot[fk.key],false,fornKeys.length>1,fk.nome,'🏭')).join('');
-
-  let html=`<div style="display:flex;gap:.7rem;margin-bottom:1rem">
-    ${kpiBox('Custo Total (Forn.)',rvBrl(custoTotal),'var(--red)')}
-    ${kpiBox('Venda (Cli.)',rvBrl(vendaTotal),'var(--green)')}
-    ${kpiBox('Margem',rvBrl(margem),'var(--green)',`(${margemPct}%)`)}
-  </div>
-  <div class="grid" style="grid-template-columns:1fr 1fr;gap:1.3rem">
-    <div>
-      <div style="font-size:.7rem;font-weight:700;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:.3rem">🏭 Pago ao Fornecedor</div>
-      ${fornecedoresHtml}
-      ${p.comLogo?partyBlock('beneficiador',tot.beneficiador,false,true,'Beneficiador (logo)','🎨'):''}
-      <div style="font-size:.66rem;margin-top:.6rem">Total pago: <b style="color:var(--red)">${rvBrl(pagoFornSum)}</b> de ${rvBrl(custoTotal)} · falta ${rvBrl(Math.max(0,custoTotal-pagoFornSum))}</div>
-      ${barra(pagoFornSum,custoTotal,'var(--red)')}
-    </div>
-    <div>
-      <div style="font-size:.7rem;font-weight:700;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:.3rem">👤 Recebido do Cliente</div>
-      ${partyBlock('cliente',tot.cliente,true,false)}
-      <div style="font-size:.66rem;margin-top:.6rem">Total recebido: <b style="color:var(--green)">${rvBrl(recebidoSum)}</b> de ${rvBrl(vendaTotal)} · falta ${rvBrl(Math.max(0,vendaTotal-recebidoSum))}</div>
-      ${barra(recebidoSum,vendaTotal,'var(--green)')}
-    </div>
-  </div>
-  <div style="border-top:1px solid var(--bdr);margin-top:1rem;padding-top:.7rem;display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:.72rem;font-weight:700">Saldo líquido (a receber − a pagar)</span>
-    <span style="font-size:.9rem;font-weight:700;font-family:'IBM Plex Mono';color:${(recebidoSum-pagoFornSum)>=0?'var(--green)':'var(--red)'}">${rvBrl(recebidoSum-pagoFornSum)}</span>
-  </div>`;
-  rvEl('finr-body').innerHTML=html;
-  document.getElementById('ovl-finr').classList.add('open');
-}
-function rvAddLedgerR(pedidoId,party){
-  const date=rvEl(`finr-${party}-date`).value;
-  const valor=parseFloat(rvEl(`finr-${party}-valor`).value);
-  const ref=rvEl(`finr-${party}-ref`).value;
-  const notas=rvEl(`finr-${party}-notas`).value.trim();
-  if(!date||!valor){toastSave('Preencha data e valor');return;}
-  const [y,m,d]=date.split('-');
-  const lista=rvLoadLedgerR();
-  lista.unshift({id:Date.now(),updatedAt:Date.now(),pedidoId,party,amount:valor,date:`${d}/${m}/${y}`,ref,notes:notas});
-  rvSaveLedgerR(lista);
-  rvSyncPush();
-  rvOpenFinPopupR(pedidoId);
-  rvRenderFin();
-  toastSave('Lançado ✓');
-}
-function rvAddReceiptR(pedidoId){
-  const date=rvEl(`finr-cliente-date`).value;
-  const valor=parseFloat(rvEl(`finr-cliente-valor`).value);
-  const ref=rvEl(`finr-cliente-ref`).value;
-  const notas=rvEl(`finr-cliente-notas`).value.trim();
-  if(!date||!valor){toastSave('Preencha data e valor');return;}
-  const [y,m,d]=date.split('-');
-  const lista=rvLoadReceiptsR();
-  lista.unshift({id:Date.now(),updatedAt:Date.now(),pedidoId,amount:valor,date:`${d}/${m}/${y}`,ref,notes:notas});
-  rvSaveReceiptsR(lista);
-  rvSyncPush();
-  rvOpenFinPopupR(pedidoId);
-  rvRenderFin();
-  toastSave('Lançado ✓');
-}
-function rvDelLedgerR(id,pedidoId){
-  if(!confirm('Apagar este lançamento?'))return;
-  rvSaveLedgerR(rvLoadLedgerR().filter(l=>l.id!==id),true);
-  rvSyncPush();
-  rvOpenFinPopupR(pedidoId);
-  rvRenderFin();
-}
-function rvDelReceiptR(id,pedidoId){
-  if(!confirm('Apagar este lançamento?'))return;
-  rvSaveReceiptsR(rvLoadReceiptsR().filter(r=>r.id!==id),true);
-  rvSyncPush();
-  rvOpenFinPopupR(pedidoId);
-  rvRenderFin();
-}
-
 function rvToggleStatus(id,key,val){
   const lista=rvLoadPedidos();
   const p=lista.find(x=>x.id===id);
@@ -3259,3 +2889,6 @@ initAuth().then(()=>{
 // obs: os dados da Importação ficam cifrados no localStorage; só são carregados
 // quando o usuário desbloqueia a aba com a senha certa (dentro de tryUnlock)
 
+
+// Retired Prod BR ledger: remove only its dedicated local stores.
+localStorage.removeItem("av_ledger");localStorage.removeItem("av_receipts");
