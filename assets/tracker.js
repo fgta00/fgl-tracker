@@ -2886,6 +2886,7 @@ rvInit();
 initAuth().then(()=>{
   updateRvSyncStatus();
   if(!authUser)openAuthModal(); // gate obrigatório logo na abertura da página
+  else if(typeof crmGoPage==='function')crmGoPage('dashboard'); // Initialize the initially active CRM after session recovery.
 });
 // obs: os dados da Importação ficam cifrados no localStorage; só são carregados
 // quando o usuário desbloqueia a aba com a senha certa (dentro de tryUnlock)
