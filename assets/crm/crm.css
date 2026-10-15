@@ -90,3 +90,5 @@
 
 /* Equal channel panels in Dashboard and customer view. */
 .ncrm .nc-channels{align-items:stretch}.ncrm .nc-channels>.nc-mail,.ncrm .nc-channels>.nc-wa{height:620px!important;min-height:620px!important;max-height:620px;min-width:0}.ncrm .nc-mail{display:flex;flex-direction:column}.ncrm .nc-mail>.nc-head,.ncrm .nc-wa>.nc-wa-head{flex-shrink:0}.ncrm .nc-mailbody{flex:1;min-height:0;overflow:hidden}.ncrm .nc-maillist,.ncrm .nc-reader{min-height:0;overflow-y:auto}.ncrm .nc-wa-body{flex:1;min-height:0}.ncrm .nc-wa-conversation{min-height:0}.ncrm .nc-wa-footer{flex-shrink:0}
+
+.ncrm button.nc-history-import{align-self:flex-end;font-size:10px;padding:3px 8px;border:0;background:#f0f2f5;color:#667781}
