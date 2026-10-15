@@ -428,3 +428,6 @@ button:active{filter:brightness(.94)}
 .msf-panel{border:1px solid var(--bdr2);border-radius:9px;background:var(--card);box-shadow:0 10px 28px rgba(8,21,36,.16)}
 .msf-search{min-height:32px;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:.7rem}
 @media(max-width:720px){.ovl{padding:8px}.ovl .modal-h{padding:.58rem .7rem}.ovl .modal-b{padding:.75rem}.ovl .fg,.ovl .grid-av{grid-template-columns:1fr}}
+
+/* Align both navigation rows at the same left edge. */
+#view-revenda .rv-tabs{padding-left:1.4rem;padding-right:1.4rem;box-sizing:border-box}#view-revenda .rv-tabs>.rv-tab:first-child{padding-left:0} @media(max-width:600px){#view-revenda .rv-tabs{padding-left:1.4rem;padding-right:1.4rem}}
