@@ -355,7 +355,7 @@ body.dark #int-tbl .ms-node .mc,body.dark #int-tbl tr.alt .ms-node .mc{backgroun
 body.dark #int-tbl .ms-node .mc.done{background:transparent}
 @media(max-width:760px){#view-internal .sbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:.2rem}#view-internal .sc{min-width:125px}#int-q{width:100%;min-width:100%}.prod-asia-toolbar-actions{width:100%;margin-left:0;justify-content:flex-end}}
 </style>
-<style id="header-alignment-v24">header{padding-left:1rem}.subheader{padding-left:1rem}.subheader>.stab:first-child{padding-left:0}</style></head>
+<style id="header-alignment-v24">header{padding-left:1rem}.subheader{padding-left:1rem}.subheader>.stab:first-child{padding-left:0}</style><style>.subheader{padding-left:var(--workspace-menu-left,110px)!important}.subheader>.stab:first-child{padding-left:0}</style></head>
 <body>
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
@@ -3661,5 +3661,7 @@ function importBackup(e){
   reader.readAsText(file);e.target.value='';
 }
 </script>
-</body>
+<script>
+(()=>{const align=()=>{const tab=[...document.querySelectorAll('header .tabs .tab')].find(el=>el.getClientRects().length&&getComputedStyle(el).display!=='none');if(!tab)return;const left=tab.getBoundingClientRect().left+(parseFloat(getComputedStyle(tab).paddingLeft)||0);document.documentElement.style.setProperty('--workspace-menu-left',left+'px');};align();window.addEventListener('resize',align);const head=document.querySelector('header');if(head){new MutationObserver(align).observe(head,{attributes:true,subtree:true,attributeFilter:['style','class']});new ResizeObserver(align).observe(head);}})();
+</script></body>
 </html>
