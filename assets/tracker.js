@@ -1079,6 +1079,7 @@ window.addEventListener('unhandledrejection',e=>{console.error('Promise rejeitad
 
 /* ════════ ABAS ════════ */
 function showTab(id){
+  if(id==='revenda'&&typeof crmGoPage==='function')crmGoPage('dashboard');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   document.querySelectorAll('header .tab').forEach(t=>t.classList.remove('active'));
@@ -1470,7 +1471,7 @@ function rvSavePedidos(d,forceReplace){
 
 
 /* ── SUB-ABAS DA REVENDA ── */
-let _rvCurTab='calc';
+let _rvCurTab='crm';
 function rvShowTab(id){
   if(isMetaReviewer()&&id!=='crm')id='crm';
   _rvCurTab=id;
