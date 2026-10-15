@@ -431,3 +431,5 @@ button:active{filter:brightness(.94)}
 
 /* Align both navigation rows at the same left edge. */
 #view-revenda .rv-tabs{padding-left:1.4rem;padding-right:1.4rem;box-sizing:border-box}#view-revenda .rv-tabs>.rv-tab:first-child{padding-left:0} @media(max-width:600px){#view-revenda .rv-tabs{padding-left:1.4rem;padding-right:1.4rem}}
+
+#view-revenda .rv-tabs{padding-left:var(--workspace-menu-left,110px)!important}#view-revenda .rv-tabs>.rv-tab:first-child{padding-left:0}
