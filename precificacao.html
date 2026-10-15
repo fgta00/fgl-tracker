@@ -33,7 +33,7 @@
 
 
 
-<link rel="stylesheet" href="assets/tracker.css?v=21"><link rel="stylesheet" href="assets/crm/crm.css?v=21"></head>
+<link rel="stylesheet" href="assets/tracker.css?v=22"><link rel="stylesheet" href="assets/crm/crm.css?v=22"></head>
 <body>
 <header>
   <div class="logo"><span class="leaf">🌿</span>FGL</div>
@@ -209,11 +209,12 @@
   <div class="wrap">
 
     <div class="rv-tabs no-print" style="display:flex;align-items:center">
-      <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">Calculadora</button>
-      <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">Cotações</button>
+      <button class="rv-tab" id="rvtab-dashboard" onclick="crmGoPage('dashboard')">Dashboard</button>
+      <button class="rv-tab" id="rvtab-clientes" onclick="crmGoPage('clientes')">Clientes</button>
       <button class="rv-tab" id="rvtab-pedidos" onclick="rvShowTab('pedidos')">Pedidos</button>
-      
-      <button class="rv-tab" id="rvtab-crm" onclick="rvShowTab('crm')">CRM</button>
+      <button class="rv-tab" id="rvtab-cotacoes" onclick="rvShowTab('cotacoes')">Cotações</button>
+      <button class="rv-tab active" id="rvtab-calc" onclick="rvShowTab('calc')">Calculadora</button>
+      <button class="rv-tab" id="rvtab-crm" onclick="rvShowTab('crm')" hidden>CRM</button>
     </div>
 
     <div id="rvpane-calc" class="rv-pane active">
@@ -632,10 +633,10 @@
 <!-- CRM — COMPOSER DE E-MAIL (envio sempre explícito) -->
 
 
-<script defer src="assets/tracker.js?v=21"></script>
+<script defer src="assets/tracker.js?v=22"></script>
 
 <!-- ═══ CRM — WHATSAPP ═══ -->
 
 
-<script defer src="assets/crm/data.js?v=21"></script><script defer src="assets/crm/views.js?v=21"></script><script defer src="assets/crm/app.js?v=21"></script><script defer src="assets/crm/whatsapp.js?v=21"></script></body>
+<script defer src="assets/crm/data.js?v=22"></script><script defer src="assets/crm/views.js?v=22"></script><script defer src="assets/crm/app.js?v=22"></script><script defer src="assets/crm/whatsapp.js?v=22"></script></body>
 </html>
