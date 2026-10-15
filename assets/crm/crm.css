@@ -92,3 +92,11 @@
 .ncrm .nc-channels{align-items:stretch}.ncrm .nc-channels>.nc-mail,.ncrm .nc-channels>.nc-wa{height:620px!important;min-height:620px!important;max-height:620px;min-width:0}.ncrm .nc-mail{display:flex;flex-direction:column}.ncrm .nc-mail>.nc-head,.ncrm .nc-wa>.nc-wa-head{flex-shrink:0}.ncrm .nc-mailbody{flex:1;min-height:0;overflow:hidden}.ncrm .nc-maillist,.ncrm .nc-reader{min-height:0;overflow-y:auto}.ncrm .nc-wa-body{flex:1;min-height:0}.ncrm .nc-wa-conversation{min-height:0}.ncrm .nc-wa-footer{flex-shrink:0}
 
 .ncrm button.nc-history-import{align-self:flex-end;font-size:10px;padding:3px 8px;border:0;background:#f0f2f5;color:#667781}
+
+/* V28: centered dialogs, compact simulation typography, plain customer links. */
+.ncrm dialog#nc-dialog{position:fixed!important;inset:0!important;margin:auto!important;transform:none!important;width:min(820px,92vw)!important;height:fit-content!important;max-height:82vh!important;padding:24px!important;overflow:auto!important;font-size:13px!important;border-radius:14px!important;background:#fff}
+.ncrm dialog#nc-dialog h2{font-size:20px!important;line-height:1.3;margin:0 0 20px!important}
+.ncrm dialog#nc-dialog table{width:100%;border-collapse:collapse;font-size:13px}.ncrm dialog#nc-dialog th,.ncrm dialog#nc-dialog td{padding:10px 6px!important;text-align:left;border-bottom:1px solid #dce3e9;vertical-align:middle}
+.ncrm dialog#nc-dialog a{color:#087df1;text-decoration:none;cursor:pointer}.ncrm dialog#nc-dialog a:hover{text-decoration:underline}
+.ncrm dialog#nc-dialog .nc-focus-kpi{font-size:23px!important}.ncrm dialog#nc-dialog input::-webkit-inner-spin-button{appearance:none}
+.ncrm .nc-mix-inline input,.ncrm .nc-mix-inline select{border:1px solid transparent;background:transparent;font:inherit;padding:5px}.ncrm .nc-mix-inline input:hover,.ncrm .nc-mix-inline select:hover{background:#f5f8fa}.ncrm .nc-mix-inline input:focus,.ncrm .nc-mix-inline select:focus{border-color:#8bbde8;outline:none}.ncrm #nc-mix-status{font-size:11px;color:#657585}
