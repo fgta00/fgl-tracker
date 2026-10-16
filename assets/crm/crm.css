@@ -217,3 +217,23 @@
 .ncrm .nc-mail-direction{color:#788795;font-size:12px;font-weight:500;}
 .ncrm .nc-mail-direction-label{display:block;color:#788795;font-size:11px;font-weight:500;margin-bottom:4px;}
 .ncrm .nc-mail-outbound .nc-mailrow:hover{background:#eaf0f4;}
+
+/* V44: SM Foco mais largo, com prioridade ao nome do cliente. */
+.ncrm dialog#nc-dialog.nc-focus-modal{width:min(1120px,94vw)!important;max-width:1120px!important;}
+.ncrm .nc-focus-table{table-layout:fixed;}
+.ncrm .nc-focus-table td:first-child,.ncrm .nc-focus-table th:first-child{width:46%;}
+.ncrm .nc-focus-table td:nth-child(2),.ncrm .nc-focus-table th:nth-child(2){width:11%;}
+.ncrm .nc-focus-table td:nth-child(3),.ncrm .nc-focus-table th:nth-child(3){width:15%;}
+.ncrm .nc-focus-table td:last-child,.ncrm .nc-focus-table th:last-child{width:28%;}
+.ncrm .nc-focus-table .nc-focus-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;}
+.ncrm dialog#nc-dialog:has(.nc-wa-triage){width:min(1040px,94vw)!important;max-width:1040px!important;}
+.ncrm .nc-wa-triage table{width:100%;font-size:12px;}
+.ncrm .nc-wa-triage th,.ncrm .nc-wa-triage td{padding:9px 8px;text-align:left;vertical-align:top;}
+.ncrm .nc-wa-triage td small{display:block;color:#657482;font-size:11px;}
+.ncrm .nc-triage-preview{max-width:290px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ncrm .nc-triage-search,.ncrm .nc-triage-pages{display:flex;gap:10px;align-items:center;margin:14px 0;}
+.ncrm .nc-triage-search input{flex:1;}
+.ncrm .nc-wa-triage label{display:block;margin:12px 0;}
+.ncrm .nc-wa-triage label input:not([type=checkbox]),.ncrm .nc-wa-triage label select{display:block;width:100%;margin-top:5px;}
+.ncrm .nc-wa-triage label[hidden]{display:none;}
+.ncrm .nc-triage-confirm{font-size:12px;}
