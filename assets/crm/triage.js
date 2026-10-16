@@ -1,4 +1,4 @@
-/* V45 — extensão isolada: fila WhatsApp real e SM Foco. */
+/* V46 — extensão isolada: fila WhatsApp real e SM Foco. */
 (()=>{
 'use strict';
 if(NC.waTriageV44)return;
@@ -49,11 +49,25 @@ NC.lead=(...args)=>{
  const result=previousLead(...args);
  const dialog=document.getElementById('nc-dialog');
  if(dialog?.open){
+  dialog.querySelector('footer')?.remove();
   dialog.querySelectorAll('[data-nc="wa-triage"],.nc-wa-triage-entry').forEach(el=>el.remove());
   const entry=document.createElement('p');entry.className='nc-wa-triage-entry';
   const button=document.createElement('button');button.type='button';button.dataset.nc='wa-triage';button.textContent='Conciliar WhatsApp';
   entry.append(button);dialog.querySelector('h2')?.after(entry);
  }
+ return result;
+};
+// Estas janelas fecham pelo clique fora; formulários mantêm suas ações.
+const previousCard=NC.card;
+NC.card=(key,...args)=>{
+ const result=previousCard(key,...args);
+ if(key==='movement')document.getElementById('nc-dialog')?.querySelector('footer')?.remove();
+ return result;
+};
+const previousDialog=NC.dialog;
+NC.dialog=(title,html,submit)=>{
+ const result=previousDialog(title,html,submit);
+ if(String(html).includes('class="nc-wa-triage"')){const dlg=document.getElementById('nc-dialog');if(submit)dlg?.querySelector('[data-nc="close-dialog"]')?.remove();else dlg?.querySelector('footer')?.remove();}
  return result;
 };
 const previousHandle=NC.handle;
