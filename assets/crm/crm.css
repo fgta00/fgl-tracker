@@ -190,3 +190,21 @@
 .ncrm .nc-contact-shortcuts button[data-channel=email]{color:#1879c9}
 .ncrm .nc-contact-shortcuts button:disabled{color:#aab4be!important;opacity:.7;cursor:default}
 @media(max-width:650px){.ncrm .nc-selection{grid-template-columns:1fr}.ncrm .nc-select-wrap{width:100%}}
+
+/* V39 compact inline card editors */
+.ncrm dialog#nc-dialog.nc-inline-dialog{width:min(1180px,96vw)!important;max-width:1180px!important;padding:18px 20px!important}
+.ncrm .nc-inline-head{display:grid;grid-template-columns:minmax(200px,2fr) repeat(2,minmax(135px,1.15fr)) minmax(100px,.8fr) minmax(110px,.9fr);gap:9px;align-items:end;margin-bottom:16px}
+.ncrm .nc-inline-head label{font-size:11px;font-weight:600;color:#657482;min-width:0}
+.ncrm .nc-inline-head input{width:100%;margin-top:4px;min-width:0}
+.ncrm .nc-inline-scroll{overflow-x:auto}
+.ncrm .nc-inline-editor .nc-inline-labels,.ncrm .nc-inline-editor .nc-row-editor{display:grid!important;grid-template-columns:minmax(210px,2fr) minmax(95px,.85fr) minmax(90px,.75fr) minmax(125px,1.1fr) 34px;gap:8px;align-items:center;min-width:650px}
+.ncrm .nc-inline-events .nc-inline-labels,.ncrm .nc-inline-events .nc-row-editor{grid-template-columns:minmax(170px,1.5fr) 125px 125px minmax(130px,1fr) minmax(180px,1.5fr) 34px;min-width:850px}
+.ncrm .nc-inline-editor .nc-inline-labels{font-size:11px;color:#657482;font-weight:600;padding:0 4px 4px}
+.ncrm .nc-inline-editor .nc-row-editor{border:0;border-bottom:1px solid #e7ebef;border-radius:0;padding:5px 0;margin:0}
+.ncrm .nc-inline-editor .nc-row-editor input,.ncrm .nc-inline-editor .nc-row-editor select{padding:7px 6px;min-height:34px}
+.ncrm .nc-inline-editor .nc-row-editor>button{padding:5px;justify-self:center}
+.ncrm .nc-inline-editor #nc-inline-add{margin-top:12px}
+@media(max-width:800px){.ncrm .nc-inline-head{grid-template-columns:repeat(2,minmax(0,1fr))}.ncrm .nc-inline-head label:first-child{grid-column:1/-1}}
+
+/* V40: filtros pesquisáveis sem aumentar a altura */
+.nc-live-filter input{min-width:0;width:100%;box-sizing:border-box}.nc-live-filter{min-width:0;flex:1}.nc-live-filter label{min-width:0;flex:1}
