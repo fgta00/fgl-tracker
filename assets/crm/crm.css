@@ -208,3 +208,6 @@
 
 /* V40: filtros pesquisáveis sem aumentar a altura */
 .nc-live-filter input{min-width:0;width:100%;box-sizing:border-box}.nc-live-filter{min-width:0;flex:1}.nc-live-filter label{min-width:0;flex:1}
+
+/* V42: keep incoming email read controls discoverable without hovering. */
+.ncrm .nc-mail-row-wrap>button.nc-row-options{opacity:.78!important;top:8px;right:6px;width:24px;height:24px;border-radius:4px;background:#ffffffb3;line-height:22px;color:#536776}.ncrm .nc-mail-row-wrap>button.nc-row-options:hover,.ncrm .nc-mail-row-wrap>button.nc-row-options:focus-visible{opacity:1!important;background:#e2edf6;color:#176fae}.ncrm .nc-mail-row-wrap>.nc-mailrow .nc-mailrow-top{padding-right:8px}
