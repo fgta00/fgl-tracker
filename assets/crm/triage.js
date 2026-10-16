@@ -1,4 +1,4 @@
-/* V44 — extensão isolada: fila WhatsApp real e SM Foco. */
+/* V45 — extensão isolada: fila WhatsApp real e SM Foco. */
 (()=>{
 'use strict';
 if(NC.waTriageV44)return;
@@ -42,6 +42,19 @@ NC.waTriageContact=(phone,customerId)=>{
  document.getElementById('nc-dialogform')?.querySelector('footer button.nc-primary')?.replaceChildren(document.createTextNode('Confirmar vínculo'));
  const select=document.getElementById('nc-wa-triage-person');
  select?.addEventListener('change',()=>{const label=document.getElementById('nc-wa-triage-name-label'),input=label?.querySelector('input');if(label)label.hidden=Boolean(select.value);if(input)input.required=!select.value;});
+};
+// Entrada visível também quando o app.js instalado ainda não contém o botão.
+const previousLead=NC.lead;
+NC.lead=(...args)=>{
+ const result=previousLead(...args);
+ const dialog=document.getElementById('nc-dialog');
+ if(dialog?.open){
+  dialog.querySelectorAll('[data-nc="wa-triage"],.nc-wa-triage-entry').forEach(el=>el.remove());
+  const entry=document.createElement('p');entry.className='nc-wa-triage-entry';
+  const button=document.createElement('button');button.type='button';button.dataset.nc='wa-triage';button.textContent='Conciliar WhatsApp';
+  entry.append(button);dialog.querySelector('h2')?.after(entry);
+ }
+ return result;
 };
 const previousHandle=NC.handle;
 NC.handle=async b=>{
