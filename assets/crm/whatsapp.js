@@ -38,7 +38,7 @@ function crmWaConfigureOnboardingUi(){
 async function crmWaRefreshConnectionStatus(){
   if(!_supaOK||!authUser)return false;
   try{
-    const{data,error}=await _supa.functions.invoke('whatsapp-onboarding-complete',{body:{action:'status'}});
+    const{data,error}=await NC.api.guard(_supa.functions.invoke('whatsapp-onboarding-complete',{body:{action:'status'}}));
     if(error)throw error;
     CRM_WHATSAPP_API_ENABLED=!!data?.connected;
     crmWaConfigureOnboardingUi();
@@ -48,6 +48,7 @@ async function crmWaRefreshConnectionStatus(){
     }
     return CRM_WHATSAPP_API_ENABLED;
   }catch(e){
+    if(NC.isStale(e))return false;
     CRM_WHATSAPP_API_ENABLED=false;
     crmWaConfigureOnboardingUi();
     console.warn('Não foi possível confirmar o estado do WhatsApp',e);
@@ -137,9 +138,9 @@ async function crmTryFinalizeWhatsAppOnboarding(){
   if(btn){btn.disabled=true;btn.textContent='Finalizando…';}
   crmWaSetOnboardingStatus('Trocando a autorização e assinando a WABA no servidor…');
   try{
-    const{data,error}=await _supa.functions.invoke('whatsapp-onboarding-complete',{
+    const{data,error}=await NC.api.guard(_supa.functions.invoke('whatsapp-onboarding-complete',{
       body:{action:'complete',code:crmWaSignupAuthCode,session:crmWaSignupSession}
-    });
+    }));
     if(error)throw error;
     if(!data?.ok)throw new Error(data?.error||'A conexão não foi confirmada pelo servidor.');
     CRM_WHATSAPP_API_ENABLED=true;
@@ -150,6 +151,7 @@ async function crmTryFinalizeWhatsAppOnboarding(){
     crmWaSetOnboardingStatus('Coexistence conectado e validado. O WhatsApp oficial está pronto para os testes controlados.','green');
     toastSave('WhatsApp Business conectado');NC.close();NC.render();
   }catch(e){
+    if(NC.isStale(e))return;
     let message=e?.message||'Falha ao finalizar o Coexistence.';
     if(e?.context instanceof Response){try{const detail=await e.context.clone().json();message=detail?.error||message;}catch{}}
     crmWaSetOnboardingStatus(`${message} Nada será removido do WhatsApp Business App.`,'red');
@@ -230,3 +232,6 @@ async function crmCopyWhatsAppSignupInfo(){
 
 NC.waSetup=()=>{NC.dialog('Conectar WhatsApp Business',`<p>Número atual: +55 21 99231-6962</p><div id="crm-wa-onboarding-controls"><button type="button" id="crm-wa-onboarding-btn" data-nc="wa-start">Conectar WhatsApp Business</button><p id="crm-wa-onboarding-status"></p><pre id="crm-wa-onboarding-result" style="display:none"></pre><button type="button" id="crm-wa-copy-session" data-nc="wa-copy" style="display:none">Copiar IDs da sessão</button></div>`);crmWaRefreshConnectionStatus();};
 NC.waSend=async()=>{const p=NS.people.find(p=>p.id===(NS.selectedWa||NS.contact)),el=document.getElementById('nc-wa-draft');if(!p||!el)return;const attachment=NC.waAttachments?.get(p.id);if(!el.value.trim()&&!attachment)return;if(!CRM_WHATSAPP_API_ENABLED)throw new Error('Conecte o WhatsApp antes de enviar.');const key='wa:'+p.id,old=NS.sends.get(key);if(old?.pending||old?.uncertain)throw new Error('Envio aguardando confirmação. Confira a conversa antes de repetir.');const text=el.value.trim(),state={pending:true,uncertain:false,idempotency_key:crypto.randomUUID()};NS.sends.set(key,state);const btn=document.querySelector('[data-nc="wa-send"]');if(btn)btn.disabled=true;try{const result=await NC.api.invoke('whatsapp-send',{customer_id:p.customer_id,person_id:p.id,to_phone:p.phone_normalized||p.phone,message_type:attachment?(attachment.type.startsWith('image/')?'image':'document'):'text',message_body:text,attachment,idempotency_key:state.idempotency_key});if(!result.ok){state.uncertain=true;throw new Error('Envio ainda não confirmado. Confira o WhatsApp.');}el.value='';NS.drafts.delete('wa-draft:'+p.id);NC.waAttachments?.delete(p.id);await NC.api.history(p.customer_id);NC.render();NC.toast('WhatsApp enviado.');}catch(e){state.uncertain=!e.status||e.status>=500;throw e;}finally{state.pending=false;if(btn)btn.disabled=false;}};
+
+// Logout/troca de conta: estado de conexão e sessão de cadastro da Meta não podem sobreviver ao usuário anterior.
+NC.waResetSession=()=>{CRM_WHATSAPP_API_ENABLED=false;crmWaSignupSession=null;crmWaSignupAuthCode=null;crmWaFinalizing=false;try{crmWaConfigureOnboardingUi();}catch{}};

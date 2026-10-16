@@ -89,7 +89,7 @@
 .ncrm .nc-wa-thread .nc-mailrow-top{display:flex;align-items:baseline;gap:7px}.ncrm .nc-wa-thread .nc-mailrow-top b{flex:1;min-width:0;font-size:12px}.ncrm .nc-wa-thread .nc-mailrow-top time{display:block;flex-shrink:0;font-size:9px;margin:0;text-align:right}.ncrm .nc-wa-thread{padding:12px 10px}.ncrm .nc-wa-preview{margin-top:5px}
 
 /* Equal channel panels in Dashboard and customer view. */
-.ncrm .nc-channels{align-items:stretch}.ncrm .nc-channels>.nc-mail,.ncrm .nc-channels>.nc-wa{height:620px!important;min-height:620px!important;max-height:620px;min-width:0}.ncrm .nc-mail{display:flex;flex-direction:column}.ncrm .nc-mail>.nc-head,.ncrm .nc-wa>.nc-wa-head{flex-shrink:0}.ncrm .nc-mailbody{flex:1;min-height:0;overflow:hidden}.ncrm .nc-maillist,.ncrm .nc-reader{min-height:0;overflow-y:auto}.ncrm .nc-wa-body{flex:1;min-height:0}.ncrm .nc-wa-conversation{min-height:0}.ncrm .nc-wa-footer{flex-shrink:0}
+.ncrm .nc-channels{align-items:stretch}.ncrm .nc-channels>.nc-mail,.ncrm .nc-channels>.nc-wa{height:var(--nc-channel-h,486px)!important;min-height:var(--nc-channel-h,486px)!important;max-height:var(--nc-channel-h,486px);min-width:0}.ncrm .nc-mail{display:flex;flex-direction:column}.ncrm .nc-mail>.nc-head,.ncrm .nc-wa>.nc-wa-head{flex-shrink:0}.ncrm .nc-mailbody{flex:1;min-height:0;overflow:hidden}.ncrm .nc-maillist,.ncrm .nc-reader{min-height:0;overflow-y:auto}.ncrm .nc-wa-body{flex:1;min-height:0}.ncrm .nc-wa-conversation{min-height:0}.ncrm .nc-wa-footer{flex-shrink:0}
 
 .ncrm button.nc-history-import{align-self:flex-end;font-size:10px;padding:3px 8px;border:0;background:#f0f2f5;color:#667781}
 
@@ -104,3 +104,63 @@
 /* V30 channel balance and WhatsApp two-line rows. */
 @media(min-width:1101px){.ncrm .nc-channels{grid-template-columns:minmax(0,2fr) minmax(0,3fr)!important}.ncrm .nc-mailbody{grid-template-columns:minmax(140px,38%) minmax(0,1fr)!important}}
 .ncrm .nc-wa-threadopen{width:100%;min-width:0}.ncrm .nc-wa-thread .nc-mailrow-top{min-width:0}.ncrm .nc-wa-secondline{display:flex;align-items:center;gap:8px;min-width:0;margin-top:4px}.ncrm .nc-wa-secondline .nc-wa-preview{display:block!important;flex:1;min-width:0;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;line-height:19px;max-height:19px}.ncrm .nc-wa-secondline .nc-wa-unread-count{position:static!important;display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto;margin:0!important;min-width:18px;height:18px;font-size:10px;border-radius:10px;padding:0 5px}.ncrm .nc-wa-threadopen>.nc-mailrow-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+
+/* ═══ Alinhamento com a simulação CRM_ESTUDO_CLIENTES (somente desktop) ═══
+   Referência de medidas: simulação a 1440 px. Preservados: divisão 40/60 e-mail/WhatsApp, painéis de mesma altura.
+   Para voltar à altura anterior dos painéis de atendimento, defina --nc-channel-h:620px em .ncrm. */
+.ncrm{--nc-channel-h:486px;line-height:normal}
+#view-revenda #rvpane-crm{padding:0 6px}
+.ncrm .nc-card{border-radius:10px}
+/* Identidade (3 linhas) */
+.ncrm .nc-identity input.nc-title{font-size:24px;line-height:normal;font-weight:700}
+.ncrm .nc-identity .nc-idrow{min-height:43px}
+.ncrm .nc-identity .nc-people{padding:6px 0}
+.ncrm .nc-identity .nc-person input{font-size:12px;line-height:normal;padding:4px}
+/* Cartões e cabeçalhos de painel (38 px; títulos 13 px/600) */
+.ncrm .nc-head,.ncrm header.nc-head{min-height:38px;padding:0 12px;gap:8px}
+.ncrm .nc-head h2,.ncrm .nc-head b{font-size:13px;font-weight:600;margin:0}
+.ncrm .nc-mail>.nc-head,.ncrm .nc-mail>header.nc-head{min-height:45px;background:linear-gradient(#fbfcfd,#f0f2f5)}
+.ncrm .nc-mail>.nc-head b{font-size:14px;font-weight:700}
+.ncrm .nc-mailtools button,.ncrm .nc-head>.nc-ai,.ncrm .nc-head button,.ncrm .nc-identity-ai button{font-size:11px;padding:5px 8px;min-height:24px;line-height:normal}
+.ncrm .nc-upper>.nc-card{min-height:231px}
+.ncrm .nc-cal{padding:10px 12px}
+/* Lista de e-mails: 3 linhas, preenchimento 10×12 (cliente só aparece fora da ficha) */
+.ncrm .nc-mailrow{padding:10px 12px}
+.ncrm .nc-mailrow-top b{font-size:13px}
+.ncrm .nc-mailrow span,.ncrm .nc-mailrow b{line-height:1.3}
+.ncrm .nc-identity ~ .nc-channels .nc-mailrow small{display:none}
+/* WhatsApp: cabeçalho compacto (45 px), avatar 29 px, balões 12/18 px */
+.ncrm .nc-wa-head{min-height:45px;padding:0 12px;gap:8px;border-radius:10px 10px 0 0}
+.ncrm .nc-wa-avatar{width:29px;height:29px;font-size:14px}
+.ncrm .nc-wa-identity b{font-size:12px}
+.ncrm .nc-wa-identity small{font-size:10px;margin-top:0}
+.ncrm .nc-wa .nc-bubble{font-size:12px;line-height:18px;padding:8px 10px;border-radius:7px;max-width:90%;margin:0 0 9px}
+.ncrm .nc-wa .nc-bubble small{font-size:9px;margin-top:3px}
+/* Dashboard: bloco superior 365 px, cartões de indicadores */
+.ncrm .nc-top,.ncrm .nc-top .nc-minis,.ncrm .nc-dashboard-calendar{height:365px}
+.ncrm .nc-top .nc-mini{padding:15px;gap:7px;border-radius:10px}
+.ncrm .nc-top .nc-mini strong{font-size:21px;letter-spacing:-.5px;line-height:1.15}
+.ncrm .nc-top .nc-mini>span:not(.nc-label){font-size:12px;line-height:1.4}
+.ncrm .nc-top .nc-mini .nc-label{font-size:11px}
+.ncrm .nc-dashboard-calendar{border-radius:10px}
+.ncrm .nc-dashboard-calendar>.nc-head{min-height:38px;padding:0 12px}
+.ncrm .nc-dashboard-calendar>.nc-cal{padding:10px 12px}
+.ncrm .nc-identity .nc-idrow:nth-child(3){padding:0;min-height:0}
+.ncrm .nc-identity .nc-idrow:nth-child(2) select{padding:3px 9px}
+/* Leitor de e-mail: assunto em destaque (16 px/600), remetente e destinatário abaixo, data sob o bloco, como na simulação */
+.ncrm .nc-mail-messagehead{display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:10px;row-gap:2px;padding-bottom:12px;margin-bottom:14px}
+.ncrm .nc-mail-messagehead>div{display:flex;flex-direction:column;gap:3px}
+.ncrm .nc-mail-messagehead h3{order:-1;font-size:16px;font-weight:600;line-height:22px;margin:0 0 4px}
+.ncrm .nc-mail-messagehead b{font-size:12px;font-weight:600}
+.ncrm .nc-mail-messagehead small{font-size:11px;color:#6e7782}
+.ncrm .nc-mail-messagehead time{grid-column:2;text-align:left;font-size:11px;color:#6e7782;margin-top:2px}
+.ncrm .nc-text{line-height:1.5}
+/* Aviso discreto do limite de mensagens carregadas (Dashboard) */
+.ncrm .nc-limitnote{margin:8px 2px 0;font-size:11px;line-height:1.4;color:#5f6872}
+.ncrm .nc-limitnote.nc-limit-hit{color:#8a5200}
+/* Botão administrativo do cabeçalho: nunca quebra linha; abaixo de 1240 px mostra só o ícone para não apertar as abas */
+#btn-wa-admin{white-space:nowrap;flex:none}
+@media (max-width:1239px){#btn-wa-admin .hb-label{display:none}#btn-wa-admin{padding-left:.6rem;padding-right:.6rem}}
+/* Em janelas estreitas, o e-mail da conta cede o espaço do botão novo, para o cabeçalho ficar igual ao de quem não é administrador */
+@media (max-width:1239px){header.has-wa-admin #auth-status{max-width:116px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
