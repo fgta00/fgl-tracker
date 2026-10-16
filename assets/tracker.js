@@ -693,6 +693,7 @@ async function initAuth(){
   _supa.auth.onAuthStateChange((_evt,session)=>{
     authUser=session?{id:session.user.id,email:session.user.email}:null;
     updateAuthUI();
+    if(typeof crmAuthChanged==='function')crmAuthChanged(_evt);
   });
 }
 function openAuthModal(){
@@ -762,6 +763,7 @@ async function authSignIn(){
   if(error){document.getElementById('auth-err').style.color='var(--red)';document.getElementById('auth-err').textContent='Erro: '+error.message;return;}
   authUser={id:data.user.id,email:data.user.email};
   updateAuthUI();
+  if(typeof crmAuthChanged==='function')crmAuthChanged('SIGNED_IN');
   document.getElementById('ovl-auth').classList.remove('open');
   toastSave('Conectado ✓');
   if(!isMetaReviewer())await attemptAutoUnlock(vaultPw);
@@ -796,6 +798,7 @@ async function authSignOut(){
   authUser=null;importPass=null;rvSyncPass=null;
   sessionStorage.removeItem(SESS_IMPORT_PW);sessionStorage.removeItem(SESS_RV_PW);
   updateAuthUI();
+  if(typeof crmAuthChanged==='function')crmAuthChanged('SIGNED_OUT');
   toastSave('Desconectado');
 }
 function _resumePending(){
@@ -2885,7 +2888,8 @@ if(!cfLoad())cfAddProduct({ncm:'4202.92.00'});else{cfRenderProducts();cfCalc();}
 rvInit();
 initAuth().then(()=>{
   updateRvSyncStatus();
-  if(!authUser)openAuthModal(); // gate obrigatório logo na abertura da página
+  if(!authUser){openAuthModal(); // gate obrigatório logo na abertura da página
+    if(typeof crmAuthChanged==='function')crmAuthChanged('NO_SESSION');}
   else if(typeof crmGoPage==='function')crmGoPage('dashboard'); // Initialize the initially active CRM after session recovery.
 });
 // obs: os dados da Importação ficam cifrados no localStorage; só são carregados
