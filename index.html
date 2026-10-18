@@ -383,7 +383,15 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 .fa-layers{font-size:10px;margin-bottom:12px}.fa-layers>div{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:5px;padding:7px 0;border-bottom:1px solid var(--bdr)}.fa-layers span:not(:first-child){text-align:right;white-space:nowrap}.fa-layer-head{color:var(--ink3);font-size:9px}
 .fa-difference{display:flex;justify-content:space-between;font-size:12px;padding:16px 0;border-top:1px solid var(--bdr);margin-bottom:18px;color:var(--ink3)}.fa-difference b{color:var(--ink2)}.fa-more{font-size:12px;border-top:1px solid var(--bdr);padding:12px 0}.fa-more p{margin:10px 0}
 </style>
-</head>
+<style>
+/* V49: filtros no cabeçalho e produtos editáveis no detalhe */
+.fa-table-wrap{overflow:visible}.fa-table th:first-child{border-radius:12px 0 0 0}.fa-table th:last-child{border-radius:0 12px 0 0}
+.fa-column-filter{position:relative}.fa-column-filter>summary{cursor:pointer;list-style:none;white-space:nowrap;user-select:none}.fa-column-filter>summary.filtered{color:var(--blue)}
+.fa-filter-menu{position:absolute;z-index:25;top:24px;left:0;width:240px;text-align:left;background:var(--card);border:1px solid var(--bdr);box-shadow:0 10px 28px #0002;border-radius:10px;padding:14px;font-weight:400;font-size:12px}
+.fa-table th:nth-child(n+4) .fa-filter-menu{left:auto;right:0}.fa-filter-menu label{display:block;color:var(--ink3);margin-bottom:10px}.fa-filter-menu input{display:block;width:100%;padding:8px;margin-top:5px;border:1px solid var(--bdr);border-radius:6px;background:var(--card);color:var(--ink);font-size:12px}.fa-filter-menu button{padding:6px 9px;margin-right:6px;border:1px solid var(--bdr);border-radius:6px;background:var(--ltgry);color:var(--ink2);cursor:pointer;font-size:11px}.fa-filter-sort{margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px}
+.fa-product-input{border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink2);width:100%;min-width:55px;padding:6px;font:inherit;font-size:12px;text-align:right}.fa-product-input:hover{border-color:var(--bdr)}.fa-product-input:focus{border-color:var(--blue);outline:none;background:var(--card)}.fa-product-input[type=text]{text-align:left;min-width:135px}.fa-product-input[data-product-field=ref]{font-size:10px;color:var(--ink3)}
+.fp-items-detail td{padding:4px!important;vertical-align:top;font-size:12px;border-bottom:1px solid var(--bdr)}.fp-items-detail td:nth-last-child(-n+2){white-space:nowrap;text-align:right;padding:10px 6px!important}.fp-items-detail th{font-size:10px!important}.fa-edit-hint{font-size:11px;color:var(--ink3);padding:5px 0 10px}
+</style></head>
 <body>
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
@@ -2244,6 +2252,8 @@ function buildFinanceCardViewModel(p){
     overPago,overReceb,etdDisp,etaDisp,client,supplier,po,stTxt,stPillCol,stDate};
 }
 let financeBalanceFilter='pending';
+const financeColumnFilters={};
+let financeColumnSort={key:'',direction:1};
 function financeSetBalance(value){financeBalanceFilter=value;renderFinanceiro();}
 function renderFinanceCard(vm){
   const warning=vm.paid>vm.totF||vm.recv>vm.totV;
@@ -2259,10 +2269,46 @@ function renderFinanceCard(vm){
 }
 function renderFinanceCards(list){
   const all=list.map(buildFinanceCardViewModel);
-  const rows=all.filter(v=>{const pending=v.aPagar>0||v.aReceber>0||v.paid>v.totF||v.recv>v.totV;return financeBalanceFilter==='all'||(financeBalanceFilter==='pending'?pending:!pending);});
+  let rows=all.filter(v=>{const pending=v.aPagar>0||v.aReceber>0||v.paid>v.totF||v.recv>v.totV;return financeBalanceFilter==='all'||(financeBalanceFilter==='pending'?pending:!pending);});
+  rows=rows.filter(financeMatchesColumns);
+  if(financeColumnSort.key){const key=financeColumnSort.key;rows.sort((a,b)=>{const av=financeColumnValue(a,key),bv=financeColumnValue(b,key);return financeColumnSort.direction*(typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'pt-BR',{numeric:true}));});}
   document.getElementById('fin-cnt').textContent=rows.length+' de '+all.length+' pedidos';
-  document.getElementById('fin-cards').innerHTML=`<div class="fa-segments" role="group" aria-label="Situação financeira">${[['pending','Com pendências'],['settled','Quitados'],['all','Todos']].map(([k,l])=>`<button class="${financeBalanceFilter===k?'selected':''}" aria-pressed="${financeBalanceFilter===k}" onclick="financeSetBalance('${k}')">${l}</button>`).join('')}</div><div class="fa-table-wrap"><table class="fa-table"><thead><tr><th>IP / PO</th><th>Cliente / Fornecedor</th><th>Situação</th><th>A pagar</th><th>A receber</th><th>Margem</th></tr></thead><tbody>${rows.map(renderFinanceCard).join('')||'<tr><td colspan="6" class="fa-empty">Nenhum pedido neste filtro.</td></tr>'}</tbody></table></div>`;
+  document.getElementById('fin-cards').innerHTML=`<div class="fa-segments" role="group" aria-label="Situação financeira">${[['pending','Com pendências'],['settled','Quitados'],['all','Todos']].map(([k,l])=>`<button class="${financeBalanceFilter===k?'selected':''}" aria-pressed="${financeBalanceFilter===k}" onclick="financeSetBalance('${k}')">${l}</button>`).join('')}</div><div class="fa-table-wrap"><table class="fa-table"><thead><tr>${[['ip','IP / PO'],['customer','Cliente / Fornecedor'],['status','Situação'],['aPagar','A pagar'],['aReceber','A receber'],['mg','Margem']].map(([k,l])=>financeColumnHeader(k,l)).join('')}</tr></thead><tbody>${rows.map(renderFinanceCard).join('')||'<tr><td colspan="6" class="fa-empty">Nenhum pedido neste filtro.</td></tr>'}</tbody></table></div>`;
 }
+
+function financeColumnValue(v,key){
+  if(key==='ip')return v.p.pi+' '+v.po;
+  if(key==='customer')return v.client+' '+v.supplier;
+  if(key==='status')return v.stTxt+' '+(v.aPagar>0||v.aReceber>0?'Pendência financeira':'Quitado');
+  return v[key];
+}
+function financeMatchesColumns(v){
+  return Object.entries(financeColumnFilters).every(([key,f])=>{
+    const value=financeColumnValue(v,key);
+    if(['aPagar','aReceber','mg'].includes(key)){
+      if((key==='mg'||key==='aReceber')&&v.totV<=0)return !f.min&&!f.max;
+      return (f.min===''||value>=Number(f.min))&&(f.max===''||value<=Number(f.max));
+    }
+    return norm(String(value)).includes(norm(f.text||''));
+  });
+}
+function financeColumnHeader(key,label){
+  const f=financeColumnFilters[key]||{text:'',min:'',max:''};
+  const numeric=['aPagar','aReceber','mg'].includes(key);
+  const active=Object.values(f).some(x=>x!=='');
+  return `<th><details class="fa-column-filter" data-key="${key}" ontoggle="if(this.open)document.querySelectorAll('.fa-column-filter[open]').forEach(el=>{if(el!==this)el.open=false})"><summary class="${active?'filtered':''}">${label} ${active?'●':'⌄'}</summary><form class="fa-filter-menu" onsubmit="event.preventDefault();financeApplyColumn('${key}',this)">
+    ${numeric?`<label>Mínimo (USD)<input name="min" type="number" step="any" value="${esc(f.min)}"></label><label>Máximo (USD)<input name="max" type="number" step="any" value="${esc(f.max)}"></label>`:`<label>Pesquisar<input name="text" type="search" placeholder="${label}" value="${esc(f.text)}" autocomplete="off"></label>`}
+    <div><button type="submit">Filtrar</button><button type="button" onclick="delete financeColumnFilters['${key}'];renderFinanceiro()">Limpar</button></div>
+    <div class="fa-filter-sort"><button type="button" onclick="financeColumnSort={key:'${key}',direction:1};renderFinanceiro()">${numeric?'Menor → maior':'A → Z'}</button><button type="button" onclick="financeColumnSort={key:'${key}',direction:-1};renderFinanceiro()">${numeric?'Maior → menor':'Z → A'}</button></div>
+    </form></details></th>`;
+}
+function financeApplyColumn(key,form){
+  const f=Object.fromEntries(new FormData(form).entries());
+  if(f.min!==undefined&&f.min!==''&&f.max!==''&&Number(f.min)>Number(f.max)){toast('⚠ Mínimo maior que máximo','err');return;}
+  financeColumnFilters[key]=f;renderFinanceiro();
+}
+document.addEventListener('click',e=>document.querySelectorAll('.fa-column-filter[open]').forEach(el=>{if(!el.contains(e.target))el.open=false}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.fa-column-filter[open]')){e.stopImmediatePropagation();document.querySelectorAll('.fa-column-filter[open]').forEach(el=>el.open=false);}},true);
 
 function populateFinanceEntrySelectors(){
   const selLP=document.getElementById('l-pi');const curLP=selLP.value;
@@ -3113,32 +3159,25 @@ function openFinPopup(pi){
   </div></details></section></div>`;
   h+=`<div class="fa-difference"><span>Diferença a receber / pagar</span><b>${fUSD(Math.max(0,aReceber)-Math.max(0,aPagar))}</b></div>`;
   // Detalhe por produto (qtd/PU/total — forn. e cliente), colapsado por padrão
-  const fpItems=(p.unitPrices||[]).filter(r=>(r.qty||0)>0);
+  const fpItems=(p.unitPrices||[]);
   if(fpItems.length){
-    const fpRows=fpItems.map(r=>{
-      const tFi=(r.qty||0)*(r.priceForn||0),tCi=(r.qty||0)*(r.priceCli||0);
-      return`<tr>
-        <td style="padding:.32rem .45rem;font-size:.66rem;border-bottom:1px solid var(--bdr)">${esc(r.desc||'—')}${r.ref?` <span style="color:var(--ink4)">· ${esc(r.ref)}</span>`:''}</td>
-        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';border-bottom:1px solid var(--bdr)">${(r.qty||0).toLocaleString('pt-BR')}</td>
-        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';color:var(--red);border-bottom:1px solid var(--bdr)">${fUSD(r.priceForn||0)}</td>
-        <td style="padding:.32rem .45rem;font-size:.66rem;text-align:right;font-family:'IBM Plex Mono';color:var(--teal);border-bottom:1px solid var(--bdr)">${fUSD(r.priceCli||0)}</td>
-        <td style="padding:.32rem .45rem;font-size:.68rem;text-align:right;font-family:'IBM Plex Mono';font-weight:700;color:var(--red);border-bottom:1px solid var(--bdr)">${fUSD(tFi)}</td>
-        <td style="padding:.32rem .45rem;font-size:.68rem;text-align:right;font-family:'IBM Plex Mono';font-weight:700;color:var(--teal);border-bottom:1px solid var(--bdr)">${fUSD(tCi)}</td>
-      </tr>`;
+    const fpRows=fpItems.map((r,index)=>{
+      const field=(key,label,type='number')=>`<input class="fa-product-input" data-product-index="${index}" data-product-field="${key}" aria-label="${label} — produto ${index+1}" type="${type}" ${type==='number'?'min="0" step="'+(key==='qty'?'1':'any')+'"':''} value="${esc(String(r[key]??''))}" onchange="financeSaveProduct(this)">`;
+      return `<tr><td>${field('desc','Produto','text')}<small>${field('ref','Referência','text')}</small></td><td>${field('qty','Quantidade')}</td><td>${field('priceForn','Preço fornecedor USD')}</td><td>${field('priceCli','Preço cliente USD')}</td><td>${field('plates','Cilindros USD')}</td><td>${field('sample','Amostras USD')}</td><td data-product-total="${index}:forn">${fUSD((r.qty||0)*(r.priceForn||0)+(r.plates||0)+(r.sample||0))}</td><td data-product-total="${index}:cli">${fUSD((r.qty||0)*(r.priceCli||0))}</td></tr>`;
     }).join('');
     h+=`<div style="margin-bottom:1rem;border:1px solid var(--bdr);border-radius:8px;overflow:hidden">
       <div onclick="finPopupToggleItems(this)" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:var(--ltgry);font-size:.68rem;font-weight:700;color:var(--ink2);user-select:none">
         <span>Detalhe por produto (${fpItems.length} ${fpItems.length===1?'item':'itens'})</span>
         <span class="fp-items-arrow" style="display:inline-block;transition:transform .15s">▸</span>
       </div>
-      <div class="fp-items-detail" style="display:none;padding:.5rem .7rem;overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;min-width:520px">
+      <div class="fp-items-detail" style="display:none;padding:.5rem .7rem;overflow-x:auto"><p class="fa-edit-hint">Edite os campos diretamente · salva ao sair do campo · preços unitários em USD</p>
+        <table style="width:100%;border-collapse:collapse;min-width:800px">
           <thead><tr>
             <th style="text-align:left;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Produto</th>
             <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Qtd</th>
             <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">PU Forn.</th>
             <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">PU Cli.</th>
-            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Total Forn.</th>
+<th>Cilindros USD</th><th>Amostras USD</th>            <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Total Forn.</th>
             <th style="text-align:right;padding:.25rem .45rem;font-size:.56rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--bdr2)">Total Cli.</th>
           </tr></thead>
           <tbody>${fpRows}</tbody>
@@ -3150,7 +3189,33 @@ function openFinPopup(pi){
 
   if(isC&&o)h+=`<details class="fa-more"><summary>Câmbio e custos originais</summary><p>Câmbio venda: ${esc(String(o.cambioVenda||'—'))} · Câmbio camadas: ${esc(String(o.cambioCamadas||'—'))}</p><p>Importação: R$ ${Number(o.custoImportacaoRF||0).toFixed(2)}${o.rotaAV==='trading'?' · Trading: R$ '+Number(o.custoTrading||0).toFixed(2):''}</p><small>Totais consolidados em USD. Recebimentos desta operação são lançados em R$; pagamentos de mercadoria em USD e demais camadas em R$.</small></details>`;
   document.getElementById('finpop-body').innerHTML=h;
+  document.getElementById('finpop-body').dataset.pi=pi;
   document.getElementById('ovl-finpop').classList.add('open');ovlToFront('ovl-finpop');
+}
+function financeSaveProduct(input){
+  const body=document.getElementById('finpop-body'),pi=body.dataset.pi;
+  const p=payments.find(x=>x.pi===pi),index=Number(input.dataset.productIndex),key=input.dataset.productField;
+  if(!p||!p.unitPrices?.[index]||!['desc','ref','qty','priceForn','priceCli','plates','sample'].includes(key))return;
+  const numeric=!['desc','ref'].includes(key),value=numeric?Number(input.value):input.value.trim();
+  if(numeric&&(input.value.trim()===''||!Number.isFinite(value)||value<0||(key==='qty'&&!Number.isInteger(value)))){
+    input.value=p.unitPrices[index][key]??0;toast('⚠ Informe um valor válido e não negativo','err');return;
+  }
+  if(p.unitPrices[index][key]===value)return;
+  pushUndo('Editar produto — IP '+pi);
+  p.unitPrices[index][key]=value;
+  const o=orders.find(x=>x.pi===pi);
+  if(o){o.total=p.unitPrices.reduce((sum,r)=>sum+(Number(r.qty)||0),0);o.product=p.unitPrices.map(r=>r.desc||'').filter(Boolean).join(' + ');}
+  saveAll();renderAll();renderFinanceiro();
+  // Refresh computed regions only. Keep the live inputs, their focus and open forms intact.
+  const live=[...body.childNodes],scroll=body.scrollTop,active=document.activeElement;
+  openFinPopup(pi);
+  const fresh=[...body.childNodes];body.replaceChildren(...live);
+  for(const selector of ['.fa-popup-summary','.fa-commercial','.fa-layers','.fa-difference']){
+    const next=fresh.find(n=>n.nodeType===1&&n.matches(selector))||fresh.filter(n=>n.nodeType===1).map(n=>n.querySelector(selector)).find(Boolean);
+    const current=body.querySelector(selector);if(next&&current)current.replaceWith(next);
+  }
+  p.unitPrices.forEach((r,i)=>{const f=body.querySelector(`[data-product-total="${i}:forn"]`),c=body.querySelector(`[data-product-total="${i}:cli"]`);if(f)f.textContent=fUSD((r.qty||0)*(r.priceForn||0)+(r.plates||0)+(r.sample||0));if(c)c.textContent=fUSD((r.qty||0)*(r.priceCli||0));});
+  body.scrollTop=scroll;if(active&&body.contains(active))active.focus({preventScroll:true});
 }
 function financeTransactions(rows,isC){
   if(!rows.length)return '<p class="fa-empty">Nenhum lançamento.</p>';
