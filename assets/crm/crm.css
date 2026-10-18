@@ -237,3 +237,25 @@
 .ncrm .nc-wa-triage label input:not([type=checkbox]),.ncrm .nc-wa-triage label select{display:block;width:100%;margin-top:5px;}
 .ncrm .nc-wa-triage label[hidden]{display:none;}
 .ncrm .nc-triage-confirm{font-size:12px;}
+
+/* V47: destaque comercial da agenda e ampliação do calendário. */
+.ncrm .nc-event.nc-focus-appointment{background:#fff0a8!important;color:#665000!important;border:1px solid #dfc55b!important;}
+.ncrm .nc-event.nc-focus-appointment:hover{background:#ffe681!important;}
+.ncrm .nc-dashboard-calendar[data-calendar-expand="true"] .nc-day,.ncrm .nc-dashboard-calendar[data-calendar-expand="true"]>.nc-head>b{cursor:zoom-in;}
+.ncrm .nc-calendar-expand{font-size:17px!important;padding:2px 6px!important;line-height:1.2;}
+.ncrm dialog#nc-dialog.nc-calendar-modal{width:min(1420px,96vw)!important;max-width:1420px!important;height:min(880px,90vh)!important;max-height:90vh!important;padding:20px 24px!important;overflow:hidden!important;display:flex;flex-direction:column;}
+.ncrm dialog#nc-dialog.nc-calendar-modal:not([open]){display:none;}
+.ncrm dialog#nc-dialog.nc-calendar-modal>h2{font-size:18px;margin:0 0 12px;flex-shrink:0;}
+.ncrm .nc-calendar-large-content{flex:1;min-height:0;display:flex;}
+.ncrm .nc-calendar-large-content .nc-calendar-expanded{width:100%;height:100%!important;min-height:0;}
+.ncrm .nc-calendar-expanded>.nc-head{min-height:44px;padding:6px 12px;}
+.ncrm .nc-calendar-expanded>.nc-cal{display:flex;flex-direction:column;overflow:auto;}
+.ncrm .nc-calendar-expanded .nc-week{flex:1;min-height:400px;}
+.ncrm .nc-calendar-expanded .nc-week .nc-day{min-height:400px;padding:4px 6px;}
+.ncrm .nc-calendar-expanded .nc-month{flex:1;grid-auto-rows:minmax(80px,1fr);gap:5px;}
+.ncrm .nc-calendar-expanded .nc-month .nc-day{min-height:80px;padding:4px 6px;}
+.ncrm .nc-calendar-expanded .nc-month .nc-dayhead{font-size:11px;}
+.ncrm .nc-calendar-expanded .nc-month .nc-dayhead b{font-size:16px;}
+.ncrm .nc-calendar-expanded .nc-event,.ncrm .nc-calendar-expanded .nc-month .nc-event{font-size:12px!important;line-height:1.4;padding:5px 7px;margin:4px 0;}
+.ncrm .nc-calendar-expanded .nc-year{flex:1;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.ncrm .nc-calendar-expanded .nc-year button{min-height:110px;font-size:14px;}
