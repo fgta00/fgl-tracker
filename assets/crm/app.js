@@ -51,7 +51,17 @@ function crmShowSubTab(id){NC.remember();NS.page=id==='clientes'?'clientes':'das
 NC.bind();
 
 // Refresh incoming data without interrupting an edit, draft or open dialog.
-setInterval(async()=>{if(typeof _rvCurTab==='undefined'||_rvCurTab!=='crm'||!NS.role||NS.busy||NS.compose||document.getElementById('nc-dialog')?.open||document.activeElement?.matches('input,textarea,select,[contenteditable]'))return;try{await NC.reload();}catch{}},60000);
+// V53: no background-page traffic, no duplicate full reload per minute.
+NC.canAutoRefresh=()=>!document.hidden&&typeof _rvCurTab!=='undefined'&&_rvCurTab==='crm'&&!!NS.role&&!NS.busy&&!NS.compose&&!document.getElementById('nc-dialog')?.open&&!document.activeElement?.matches('input,textarea,select,[contenteditable]');
+NC.autoRefresh=()=>{
+ if(!NC.canAutoRefresh())return Promise.resolve();
+ if(NC.autoRefreshPromise)return NC.autoRefreshPromise;
+ if(Date.now()-(NS.lastAutoRefresh||0)<55000)return Promise.resolve();
+ const sess=NC.session();NS.lastAutoRefresh=Date.now();
+ const promise=(async()=>{try{await NC.api.refresh();if(!NC.live(sess)||document.hidden)return;NC.render();await NC.syncGmailReading();}catch(e){if(NC.live(sess)&&!NC.isStale(e))console.warn('CRM refresh:',e.message);}finally{if(NC.autoRefreshPromise===promise)NC.autoRefreshPromise=null;}})();NC.autoRefreshPromise=promise;return promise;
+};
+setInterval(()=>{NC.autoRefresh();},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)NC.autoRefresh();});
 
 NC.phoneValue=raw=>{const text=String(raw||'').trim();if(!text)return null;if(!/^\+[\d\s().-]+$/.test(text))throw new Error('WhatsApp: inclua + e o país. Brasil: +55 21 98414-7727; Portugal: +351 912 476 605.');const digits=text.replace(/\D/g,'');if(!/^[1-9]\d{7,14}$/.test(digits))throw new Error('Confira o código do país e o número do WhatsApp.');if(digits.startsWith('55')&&![12,13].includes(digits.length))throw new Error('Brasil: +55, DDD com 2 dígitos e telefone com 8 ou 9 dígitos.');return '+'+digits;};
 NC.focused=id=>(NC.api.setting('asia').rows||[]).some(row=>row.customer_id===id);
@@ -93,6 +103,23 @@ NC.markEmailRead=async id=>{const m=NS.communications.find(m=>m.id===id&&m.chann
 NC.setEmailRead=async(id,read)=>{const data=await NC.api.invoke('crm-email-read',{action:'set',communication_id:id,read});const saved=data.results?.find(r=>r.id===id&&!r.skipped);if(!saved)throw new Error('Gmail não confirmou a mudança de leitura.');NS.communications=NS.communications.map(m=>m.id===id?{...m,...saved}:m);};
 
 // Reconcile in the background so Gmail latency never blocks opening the CRM.
-NC.syncGmailReading=()=>{if(NC.gmailReadingPromise||!NS.role||!authUser)return;const sess=NC.session();NC.gmailReadingPromise=(async()=>{try{await NC.api.invoke('crm-gmail-sync',{mode:'sync'});if(!NC.live(sess))return;const r=await NC.api.guard(_supa.from('crm_communications').select('*').eq('channel','email').eq('provider','gmail').order('sent_at',{ascending:false}).limit(500));if(r.error)throw r.error;await NC.api.reconcileEmailReads(r.data||[]);if(!NC.live(sess))return;await NC.api.load();if(NC.live(sess))NC.render();}catch(e){if(NC.live(sess)&&!NC.isStale(e)){NS.errors.push('Leitura Gmail: '+e.message);NC.render();}}finally{NC.gmailReadingPromise=null;}})();};
+NC.syncGmailReading=()=>{
+ if(NC.gmailReadingPromise)return NC.gmailReadingPromise;
+ if(document.hidden||typeof _rvCurTab==='undefined'||_rvCurTab!=='crm'||!NS.role||!authUser)return Promise.resolve();
+ // Each visible session syncs at most once every two minutes (including errors).
+ if(Date.now()-(NS.lastGmailAttempt||0)<120000)return Promise.resolve();
+ const sess=NC.session();NS.lastGmailAttempt=Date.now();
+ const promise=(async()=>{try{
+  const sync=await NC.api.invoke('crm-gmail-sync',{mode:'sync'});if(!NC.live(sess)||document.hidden)return;
+  if(sync?.status==='already_syncing')return;
+  // Use messages already in memory for the initial read reconciliation.
+  const rows=NS.communications.filter(m=>m.channel==='email'&&m.provider==='gmail').sort((a,b)=>new Date(b.sent_at||b.created_at)-new Date(a.sent_at||a.created_at)).slice(0,500);
+  await NC.api.reconcileEmailReads(rows);if(!NC.live(sess)||document.hidden)return;
+  await NC.api.refreshMessages('email');if(!NC.live(sess))return;
+  NS.lastGmailSync=Date.now();NC.render();
+ }catch(e){if(NC.live(sess)&&!NC.isStale(e)){NS.errors.push('Leitura Gmail: '+e.message);NC.render();}}
+ finally{if(NC.gmailReadingPromise===promise)NC.gmailReadingPromise=null;}})();
+ NC.gmailReadingPromise=promise;return promise;
+};
 
 NC.openListContact=async(id,channel)=>{const person=NS.people.find(p=>p.id===id);if(!person)return;const sess=NC.session();await NC.openCustomer(person.customer_id);if(!NC.live(sess))return;NS.contact=id;NS.selectedEmail=null;NS.selectedWa=channel==='whatsapp'?id:null;NC.render();if(channel==='email'){NC.newEmail();const to=document.querySelector('#nc-dialogform [name=to]');if(to)to.value=person.email||'';}else{await NC.markWaRead(id);document.querySelector('.nc-wa')?.scrollIntoView({behavior:'smooth',block:'center'});}};
