@@ -1782,11 +1782,12 @@ function syncLinked(){
 }
 
 let _syncTimer=null;
-async function saveAll(){
+async function saveAll(isCurrent){
   if(!_cryptoKey)return;
   const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile};
   const payload=await encryptJSON(_cryptoKey,data);
   const encrypted=JSON.stringify(payload);
+  if(typeof isCurrent==='function'&&!isCurrent())return false;
   // 1. Sempre grava no localStorage (espelho local imediato)
   localStorage.setItem(SK+'vault_v2',encrypted);
   localStorage.setItem(SK+'vault_v2_ts',new Date().toISOString());
@@ -1794,6 +1795,7 @@ async function saveAll(){
   setSyncStatus('saving');
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(async()=>{
+    if(typeof isCurrent==='function'&&!isCurrent())return;
     const ok=await cloudSet(encrypted);
     setSyncStatus(ok?'ok':'local');
   },1200);
@@ -2712,7 +2714,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packin
     <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>
     <div class="prod-packing-row" style="grid-column:1/-1;display:flex;align-items:end;gap:.6rem;padding:.45rem .6rem .6rem;background:var(--ltgry);border-radius:6px;margin-bottom:.4rem">
       <span class="plbl" style="align-self:center;min-width:74px">Embalagem</span>
-      ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
+      ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
       <span class="prod-packing-summary" style="font-size:.7rem;color:var(--ink3);min-width:110px;align-self:center"></span>
     </div>`;
   container.appendChild(row);updatePreview();
@@ -2724,7 +2726,7 @@ function readProdRows(){
   }).filter(r=>r.qty>0);
 }
 function readOrderPacking(row){
-  return Object.fromEntries(['cartonLength','cartonWidth','cartonHeight','unitsPerCarton'].map(key=>{
+  return Object.fromEntries(['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'].map(key=>{
     const value=row.querySelector('[data-packing="'+key+'"]')?.value;
     return[key,value&&Number(value)>0?Number(value):null];
   }));
@@ -2736,7 +2738,9 @@ function orderPackingInfo(item){
   const complete=dims.every(v=>Number.isFinite(v)&&v>0);
   return{cartons,cartonDimensions:complete?dims:undefined,unitsPerCarton:units>0?units:undefined,
     lastCartonQty:cartons&&qty%units?qty%units:undefined,
-    cbm:cartons&&complete?cartons*dims[0]*dims[1]*dims[2]/1e6:undefined};
+    cbm:cartons&&complete?cartons*dims[0]*dims[1]*dims[2]/1e6:undefined,
+    grossWeightPerCarton:Number(item.grossWeightPerCarton)>0?Number(item.grossWeightPerCarton):undefined,
+    grossWeight:cartons&&Number(item.grossWeightPerCarton)>0?cartons*Number(item.grossWeightPerCarton):undefined};
 }
 function validateOrderPacking(){
   for(const input of document.querySelectorAll('#mo-prod-rows [data-packing]')){
@@ -2980,11 +2984,16 @@ function gerarDocs(num){
     invoiceNumber:(p&&p.clientInv)||'',
     // O Tracker ainda não possui campo próprio para número da Packing List.
     packingListNumber:'',
+    documentEdits:o.documentEdits,documentRevision:o.documentEditsRevision||0,
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html?v=57','_blank');
+  const win=window.open('export-docs.html?v=58','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
+  const docToken=crypto.randomUUID();
+  payload.documentSession=docToken;
+  for(const [child] of DOC_EDIT_WINDOWS)if(child.closed)DOC_EDIT_WINDOWS.delete(child);
+  DOC_EDIT_WINDOWS.set(win,{num:o.num,token:docToken,key:_cryptoKey,userId:authUser?.id,payload});
   let done=false;
   const cleanup=()=>{window.removeEventListener('message',onMsg);clearTimeout(timer);};
   const onMsg=(evt)=>{
@@ -3005,6 +3014,36 @@ function gerarDocs(num){
   window.addEventListener('message',onMsg);
   // Seller e banco têm padrão editável no Export Docs; Perfil da Empresa tem prioridade.
 }
+const DOC_EDIT_WINDOWS=new Map();
+function documentWindowAllowed(entry){
+  return entry&&_cryptoKey&&entry.key===_cryptoKey&&entry.userId===authUser?.id;
+}
+window.addEventListener('message',async event=>{
+  if(event.origin!==window.location.origin)return;
+  const entry=DOC_EDIT_WINDOWS.get(event.source);if(!entry)return;
+  if(!documentWindowAllowed(entry))return;
+  const order=orders.find(o=>o.num===entry.num);if(!order)return;
+  if(event.data==='docs-ready'){
+    // Reopening/reloading the same document tab restores the saved edits too.
+    event.source.postMessage({type:'fgl-order-data',payload:{...entry.payload,documentEdits:order.documentEdits,documentRevision:order.documentEditsRevision||0}},event.origin);return;
+  }
+  const msg=event.data;
+  if(!msg||msg.type!=='fgl-docs-save'||msg.session!==entry.token)return;
+  const reply=data=>event.source.postMessage({type:'fgl-docs-saved',session:entry.token,requestId:msg.requestId,...data},event.origin);
+  if(msg.baseRevision!==(order.documentEditsRevision||0)){reply({ok:false,error:'Este pedido foi alterado em outra janela. Reabra os documentos para continuar.'});return;}
+  const edits=msg.edits;
+  if(!edits||edits.version!==1||!edits.sheets||Object.entries(edits.sheets).some(([id,html])=>!['proforma','invoice','packing'].includes(id)||typeof html!=='string')||JSON.stringify(edits).length>1000000){reply({ok:false,error:'Não foi possível salvar o conteúdo dos documentos.'});return;}
+  const previous=order.documentEdits,revision=order.documentEditsRevision||0;
+  order.documentEdits=edits;order.documentEditsRevision=revision+1;
+  try{
+    await saveAll(()=>documentWindowAllowed(entry));
+    if(!documentWindowAllowed(entry))return;
+    reply({ok:true,revision:order.documentEditsRevision});
+  }catch(error){
+    if(order.documentEditsRevision===revision+1){order.documentEdits=previous;order.documentEditsRevision=revision;}
+    if(documentWindowAllowed(entry))reply({ok:false,error:'Falha ao salvar. Mantenha o Tracker aberto e tente novamente.'});
+  }
+});
 function gerarDocsFromPI(pi){
   const o=orders.find(x=>x.pi===pi);
   if(!o){toast('⚠ Pedido não encontrado para esta IP','err');return;}

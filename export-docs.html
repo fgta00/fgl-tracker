@@ -19,7 +19,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;line
 .table-controls{display:flex;justify-content:flex-end;gap:5px;margin-bottom:4px}.table-controls button,.add-control{font-size:10px;border:1px solid #ddd;background:white;color:#666;border-radius:4px;padding:4px 6px;cursor:pointer}.add-control{margin-top:5px}.remove-row{color:#999;background:none;border:0;cursor:pointer;padding:0 2px;font-size:10px}thead .remove-row{color:#aaa}.optional-fields{margin:10px auto;width:210mm;padding:10px;background:white;font-size:12px}.optional-fields div{padding:6px;border:1px solid #ddd}
 @page{size:A4;margin:0}
 @media print{body{background:#fff}.toolbar,.optional-fields,.no-print,.table-controls,.add-control,.action-col,.remove-row{display:none!important}.sheet{margin:0;box-shadow:none;break-after:page;page-break-after:always}.sheet:last-of-type{break-after:auto;page-break-after:auto}[contenteditable]:hover,[contenteditable]:focus{background:none}[contenteditable]:empty:before{content:'—';color:#777}.words:empty,.packing[contenteditable]:empty,.packing-hint:empty{display:none}tr,.lower,.signatures{break-inside:avoid}thead{display:table-header-group}tfoot{display:table-row-group}}
-</style><div class="toolbar"><div><b>Export Docs · PI / CI / PL</b><small>Edite os campos diretamente · Imprimir / Salvar PDF</small></div><nav><a href="#proforma">PI</a><a href="#invoice">CI</a><a href="#packing">PL</a></nav><button onclick="window.print()">Imprimir / Salvar PDF</button></div><details class="optional-fields no-print"><summary>Campos adicionais</summary><p>Manufacturer</p><div contenteditable="true" data-field="manufacturer_block" data-placeholder="Manufacturer (if required)"></div><p>Validity</p><div contenteditable="true" data-field="pi_validity" data-placeholder="Validity (optional)"></div></details><main class="sheet" id="proforma"><header class="head"><div><p class="seller-title" contenteditable="true" data-field="seller_name" data-placeholder="Seller name"></p><p contenteditable="true" data-field="seller_address" data-placeholder="Address"></p><p contenteditable="true" data-field="seller_contact" data-placeholder="Telephone · Email"></p></div><div class="right"><h1>PROFORMA INVOICE</h1><p class="meta-row document-ref"><span>N° </span><span contenteditable="true" data-field="pi_number" data-placeholder="—"></span><span> / PO </span><span contenteditable="true" data-field="po" data-placeholder="—"></span></p><p class="meta-row"><span>Date: </span><span contenteditable="true" data-field="pi_date" data-placeholder="—"></span><span> · Ref: </span><span contenteditable="true" data-field="reference" data-placeholder="—"></span></p><button class="no-print add-control" onclick="addMetaRow(this)">+ Campo</button></div></header>
+</style><div class="toolbar"><div><b>Export Docs · PI / CI / PL</b><small>Edite os campos diretamente · Imprimir / Salvar PDF</small></div><nav><a href="#proforma">PI</a><a href="#invoice">CI</a><a href="#packing">PL</a></nav><button onclick="resetDocumentEdits()">Usar dados do pedido</button><span id="doc-save-status" role="status" style="font-size:11px;color:#555"></span><button id="doc-save-retry" onclick="saveDocumentNow()" hidden>Tentar salvar</button><button onclick="window.print()">Imprimir / Salvar PDF</button></div><details class="optional-fields no-print"><summary>Campos adicionais</summary><p>Manufacturer</p><div contenteditable="true" data-field="manufacturer_block" data-placeholder="Manufacturer (if required)"></div><p>Validity</p><div contenteditable="true" data-field="pi_validity" data-placeholder="Validity (optional)"></div></details><main class="sheet" id="proforma"><header class="head"><div><p class="seller-title" contenteditable="true" data-field="seller_name" data-placeholder="Seller name"></p><p contenteditable="true" data-field="seller_address" data-placeholder="Address"></p><p contenteditable="true" data-field="seller_contact" data-placeholder="Telephone · Email"></p></div><div class="right"><h1>PROFORMA INVOICE</h1><p class="meta-row document-ref"><span>N° </span><span contenteditable="true" data-field="pi_number" data-placeholder="—"></span><span> / PO </span><span contenteditable="true" data-field="po" data-placeholder="—"></span></p><p class="meta-row"><span>Date: </span><span contenteditable="true" data-field="pi_date" data-placeholder="—"></span><span> · Ref: </span><span contenteditable="true" data-field="reference" data-placeholder="—"></span></p><button class="no-print add-control" onclick="addMetaRow(this)">+ Campo</button></div></header>
 <div class="parties"><section><h2>SELLER</h2><div contenteditable="true" data-field="seller_block" data-placeholder="Seller address"></div></section><section><h2>BUYER</h2><div contenteditable="true" data-field="buyer_block" data-placeholder="Buyer name, address, document"></div></section></div>
 <div class="table-controls no-print"><button onclick="addRow('tbl-pi')">+ Linha</button><button onclick="addColumn('tbl-pi')">+ Coluna</button></div><table id="tbl-pi"><thead><tr><th>#</th><th contenteditable="true" data-col="desc">Description</th><th contenteditable="true" data-col="sku">Ref / EAN</th><th contenteditable="true" data-col="qty">Qty (pcs)</th><th contenteditable="true" data-col="cartons">Cartons</th><th contenteditable="true" data-col="unitPrice">Unit Price (USD)</th><th contenteditable="true" data-col="total">Total (USD)</th><th class="no-print action-col"></th></tr></thead><tbody></tbody><tfoot></tfoot></table>
 <p class="words" contenteditable="true" data-field="amount_words" data-placeholder="Amount in words (optional)"></p>
@@ -84,6 +84,8 @@ function updatePackingNotes(table){
   if(qty!==null&&units>0&&qty%units&&cartons===Math.ceil(qty/units))parts.push('last carton: '+formatNum(qty%units)+' pcs');
   const cbm=parseDocNumber(text('cbm'))??(cartons!==null&&row.dataset.cbmPerCarton?cartons*Number(row.dataset.cbmPerCarton):null);
   if(cbm!==null)parts.push(formatNum(cbm,2)+' CBM');
+  const gw=parseDocNumber(text('grossWeight'))??(cartons!==null&&row.dataset.gwPerCarton?cartons*Number(row.dataset.gwPerCarton):null);
+  if(gw!==null)parts.push('GW '+formatNum(gw,2)+' kg');
   return 'Packing item '+(index+1)+': '+parts.join(' · ');
  }).filter(Boolean);
  const total=sumColumn(table,'cartons');
@@ -94,7 +96,9 @@ function updatePackingRow(row){
  const qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),units=Number(row.dataset.unitsPerCarton);
  const cartonsCell=row.querySelector('[data-col="cartons"]');
  if(cartonsCell&&row.dataset.autoCartons==='true')cartonsCell.textContent=qty!==null&&units>0?formatNum(Math.ceil(qty/units)):'';
- const cartons=parseDocNumber(cartonsCell?.textContent),cbmCell=row.querySelector('[data-col="cbm"]');
+ const cartons=parseDocNumber(cartonsCell?.textContent),grossCell=row.querySelector('[data-col="grossWeight"]');
+ if(grossCell&&row.dataset.autoGross==='true')grossCell.textContent=cartons!==null&&row.dataset.gwPerCarton?formatNum(cartons*Number(row.dataset.gwPerCarton),2):'';
+ const cbmCell=row.querySelector('[data-col="cbm"]');
  if(cbmCell&&row.dataset.autoCbm==='true')cbmCell.textContent=cartons!==null&&row.dataset.cbmPerCarton?formatNum(cartons*Number(row.dataset.cbmPerCarton),2):'';
 }
 function updateFinancialFields(table){
@@ -113,6 +117,7 @@ document.addEventListener('input',e=>{
 });
 function makeDocRow(table,item={}){
  const row=document.createElement('tr');
+ if(item.grossWeightPerCarton>0){row.dataset.gwPerCarton=item.grossWeightPerCarton;row.dataset.autoGross='true';}
  if(item.unitsPerCarton>0){row.dataset.unitsPerCarton=item.unitsPerCarton;row.dataset.autoCartons='true';}
  if(Array.isArray(item.cartonDimensions)&&item.cartonDimensions.length===3&&item.cartonDimensions.every(v=>Number(v)>0)){
   row.dataset.cartonDimensions=item.cartonDimensions.join('×');row.dataset.cbmPerCarton=item.cartonDimensions.reduce((a,b)=>a*Number(b),1)/1e6;row.dataset.autoCbm='true';
@@ -132,12 +137,87 @@ function updateDocTotals(table){
  const sheet=table.closest('.sheet');for(const [key,field,suffix] of [['cartons','total_cartons',' cartons'],['qty','total_quantity',' pcs'],['grossWeight','total_gross',' kg'],['netWeight','total_net',' kg'],['cbm','total_cbm',' CBM']]){const el=sheet.querySelector('[data-field="'+field+'"]');if(el){const v=sumColumn(table,key);el.textContent=v===null?'':formatNum(v,['grossWeight','netWeight','cbm'].includes(key)?2:0)+suffix;}}
  updateFinancialFields(table);updatePackingNotes(table);
 }
-document.addEventListener('input',e=>{const cell=e.target.closest('td[data-col]');if(!cell)return;const table=cell.closest('table');if(cell.dataset.col==='cartons')cell.parentElement.dataset.autoCartons='false';if(cell.dataset.col==='cbm')cell.parentElement.dataset.autoCbm='false';if(cell.dataset.col==='dimensions'){const dims=cell.textContent.split(/[×x*]/i).map(parseDocNumber);if(dims.length===3&&dims.every(v=>v!==null&&v>0)){cell.parentElement.dataset.cartonDimensions=dims.join('×');cell.parentElement.dataset.cbmPerCarton=dims.reduce((a,b)=>a*b,1)/1e6;if(cell.parentElement.dataset.autoCbm!=='false')cell.parentElement.dataset.autoCbm='true';}else delete cell.parentElement.dataset.cbmPerCarton;}if(['qty','cartons','dimensions'].includes(cell.dataset.col))updatePackingRow(cell.parentElement);if(['qty','unitPrice'].includes(cell.dataset.col)){const row=cell.parentElement,qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),price=parseDocNumber(row.querySelector('[data-col="unitPrice"]')?.textContent),total=row.querySelector('[data-col="total"]');if(total)total.textContent=qty===null||price===null?'':cellFormat('total',qty*price);}updateDocTotals(table);});
+document.addEventListener('input',e=>{const cell=e.target.closest('td[data-col]');if(!cell)return;const table=cell.closest('table');if(cell.dataset.col==='cartons')cell.parentElement.dataset.autoCartons='false';if(cell.dataset.col==='cbm')cell.parentElement.dataset.autoCbm='false';if(cell.dataset.col==='grossWeight')cell.parentElement.dataset.autoGross='false';if(cell.dataset.col==='dimensions'){const dims=cell.textContent.split(/[×x*]/i).map(parseDocNumber);if(dims.length===3&&dims.every(v=>v!==null&&v>0)){cell.parentElement.dataset.cartonDimensions=dims.join('×');cell.parentElement.dataset.cbmPerCarton=dims.reduce((a,b)=>a*b,1)/1e6;if(cell.parentElement.dataset.autoCbm!=='false')cell.parentElement.dataset.autoCbm='true';}else delete cell.parentElement.dataset.cbmPerCarton;}if(['qty','cartons','dimensions'].includes(cell.dataset.col))updatePackingRow(cell.parentElement);if(['qty','unitPrice'].includes(cell.dataset.col)){const row=cell.parentElement,qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),price=parseDocNumber(row.querySelector('[data-col="unitPrice"]')?.textContent),total=row.querySelector('[data-col="total"]');if(total)total.textContent=qty===null||price===null?'':cellFormat('total',qty*price);}updateDocTotals(table);});
 function addMetaRow(button){const p=document.createElement('p');p.className='meta-row';p.innerHTML='<span contenteditable="true">Campo: </span><span contenteditable="true" data-placeholder="—"></span>';button.before(p);}
 function addTermRow(button){const dl=button.parentElement.querySelector('dl');const dt=document.createElement('dt'),dd=document.createElement('dd');dt.contentEditable='true';dt.textContent='Campo:';dd.contentEditable='true';dd.dataset.placeholder='—';dl.append(dt,dd);}
 function fillItemsTable(id,items){const table=document.getElementById(id);table.tBodies[0].replaceChildren();(items.length?items:[{}]).forEach(item=>table.tBodies[0].append(makeDocRow(table,item)));updateDocTotals(table);}
+let documentBaseData=null,documentSaveEmpty=false;
+let documentSaveContext=null,documentSaveTimer=null,documentSavePending=null,documentDirty=false,documentHydrating=false,documentObserver=null;
+function documentSaveStatus(text,error=false){
+ document.getElementById('doc-save-status').textContent=text;
+ document.getElementById('doc-save-status').style.color=error?'#a34c00':'#555';
+ document.getElementById('doc-save-retry').hidden=!error;
+}
+function cleanDocumentHTML(html){
+ const template=document.createElement('template');template.innerHTML=html;
+ const allowed=new Set(['HEADER','DIV','P','SPAN','SECTION','H1','H2','H3','TABLE','THEAD','TBODY','TFOOT','TR','TH','TD','DL','DT','DD','BUTTON','FOOTER','BR','B','STRONG','I','EM','U']);
+ for(const el of [...template.content.querySelectorAll('*')]){
+  if(!allowed.has(el.tagName)){el.remove();continue;}
+  for(const attr of [...el.attributes]){
+   if(attr.name==='style'){
+    const styles=Array.from(el.style).filter(k=>['margin-top','grid-column','text-align','font-weight'].includes(k)).map(k=>k+':'+el.style.getPropertyValue(k)).join(';');
+    el.removeAttribute('style');if(styles)el.setAttribute('style',styles);
+   }else if(!['class','id','contenteditable','colspan','title','aria-label'].includes(attr.name)&&!/^data-[a-z0-9_-]+$/.test(attr.name))el.removeAttribute(attr.name);
+  }
+ }
+ return template.innerHTML;
+}
+function restoreDocumentEdits(edits){
+ if(!edits||edits.version!==1||!edits.sheets)return;
+ for(const id of ['proforma','invoice','packing']){
+  if(typeof edits.sheets[id]!=='string')continue;
+  const sheet=document.getElementById(id);sheet.innerHTML=cleanDocumentHTML(edits.sheets[id]);
+  sheet.querySelectorAll('header .add-control').forEach(button=>button.onclick=()=>addMetaRow(button));
+  sheet.querySelectorAll('.lower .add-control').forEach(button=>button.onclick=()=>addTermRow(button));
+  sheet.querySelectorAll('table').forEach(table=>{
+   table.querySelectorAll('thead .remove-row').forEach(button=>button.remove());
+   table.querySelectorAll('thead th[data-col]').forEach(addColumnRemove);
+   table.querySelectorAll('tbody .remove-row').forEach(button=>button.onclick=()=>deleteRow(button));
+   const controls=table.previousElementSibling;
+   if(controls?.classList.contains('table-controls')){const buttons=controls.querySelectorAll('button');if(buttons[0])buttons[0].onclick=()=>addRow(table.id);if(buttons[1])buttons[1].onclick=()=>addColumn(table.id);}
+  });
+ }
+}
+function scheduleDocumentSave(){
+ if(documentHydrating||!documentSaveContext)return;
+ documentSaveEmpty=false;documentDirty=true;documentSaveStatus('Salvando…');clearTimeout(documentSaveTimer);documentSaveTimer=setTimeout(saveDocumentNow,650);
+}
+function saveDocumentNow(){
+ clearTimeout(documentSaveTimer);
+ if(!documentSaveContext||!documentDirty||documentSavePending)return;
+ if(!window.opener||window.opener.closed){documentSaveStatus('Não salvo: abra pelo Tracker e mantenha essa aba aberta.',true);return;}
+ const edits=documentSaveEmpty?{version:1,sheets:{}}:{version:1,sheets:Object.fromEntries(['proforma','invoice','packing'].map(id=>[id,cleanDocumentHTML(document.getElementById(id).innerHTML)]))};
+ documentSaveEmpty=false;
+ const requestId=crypto.randomUUID();documentDirty=false;documentSavePending=requestId;
+ window.opener.postMessage({type:'fgl-docs-save',session:documentSaveContext.session,requestId,baseRevision:documentSaveContext.revision,edits},window.location.origin);
+ documentSaveTimer=setTimeout(()=>{if(documentSavePending===requestId){documentSavePending=null;documentDirty=true;documentSaveStatus('Não salvo: confira se o Tracker continua aberto.',true);}},10000);
+}
+function resetDocumentEdits(){
+ if(!documentBaseData)return;
+ if(!confirm('Substituir as edições salvas pelos dados do pedido?'))return;
+ applyOrderData(documentBaseData);documentSaveEmpty=true;documentDirty=true;documentSaveStatus('Salvando…');saveDocumentNow();
+}
+function initializeDocumentSave(d){
+ documentBaseData={...d,documentEdits:null};
+ documentSaveContext=d.documentSession?{session:d.documentSession,revision:d.documentRevision||0}:null;
+ documentDirty=false;documentSavePending=null;
+ documentSaveStatus(documentSaveContext?'Salvamento automático ativo':'Abra pelo Tracker para salvar as alterações.');
+ if(!documentObserver){documentObserver=new MutationObserver(records=>{if(!documentHydrating&&records.some(record=>document.querySelector('.sheet')&&record.target.closest?.('.sheet')))scheduleDocumentSave();});document.querySelectorAll('.sheet').forEach(sheet=>documentObserver.observe(sheet,{subtree:true,childList:true,characterData:true}));}
+ documentObserver.takeRecords();
+}
+window.addEventListener('message',event=>{
+ if(event.source!==window.opener||event.origin!==window.location.origin)return;
+ const msg=event.data;if(!msg||msg.type!=='fgl-docs-saved'||msg.session!==documentSaveContext?.session||msg.requestId!==documentSavePending)return;
+ clearTimeout(documentSaveTimer);documentSavePending=null;
+ if(msg.ok){documentSaveContext.revision=msg.revision;documentSaveStatus(documentDirty?'Salvando…':'Salvo no Tracker');if(documentDirty)saveDocumentNow();}
+ else{documentDirty=true;documentSaveStatus(msg.error||'Não foi possível salvar.',true);}
+});
+document.addEventListener('input',event=>{if(event.target.closest('.sheet'))scheduleDocumentSave();});
+window.addEventListener('pagehide',saveDocumentNow);
+window.addEventListener('beforeunload',event=>{if(documentDirty||documentSavePending){event.preventDefault();event.returnValue='';}});
 function applyOrderData(d){
  if(!d||typeof d!=='object')return;
+ documentHydrating=true;
  const withDefaults=(defaults,values)=>Object.fromEntries(Object.entries(defaults).map(([key,value])=>[key,values?.[key]||value]));
  const seller=withDefaults(DOC_DEFAULTS.seller,d.seller),bank=withDefaults(DOC_DEFAULTS.bank,d.bank);
  setField('seller_name',seller.name);setField('seller_address',seller.address);setField('seller_contact','Tel: '+[seller.phone,seller.email].filter(Boolean).join(' · '));
@@ -157,6 +237,7 @@ function applyOrderData(d){
   el.dataset.manual=provided?'true':'false';if(provided)el.textContent=String(d[key]);
  });
  for(const id of Object.keys(DOC_COLS))fillItemsTable(id,Array.isArray(d.items)?d.items:[]);
+ restoreDocumentEdits(d.documentEdits);documentObserver?.takeRecords();documentHydrating=false;
 }
 for(const id of Object.keys(DOC_COLS)){const table=document.getElementById(id);table.querySelectorAll('thead th[data-col]').forEach(addColumnRemove);}
 applyOrderData({});
@@ -216,7 +297,7 @@ document.addEventListener('focusout',e=>{const cell=e.target.closest('td[data-co
       clearInterval(pingIv);
       clearTimeout(noDataTimer);
       clearNoDataBanner();
-      applyOrderData(msg.payload);
+      applyOrderData(msg.payload);initializeDocumentSave(msg.payload);
     });
   })();
 
