@@ -113,7 +113,7 @@ function updateFinancialFields(table){
 }
 document.addEventListener('input',e=>{
  const el=e.target.closest('[data-field]');
- if(el&&['payment_advance','payment_balance','amount_words','packing_notes'].includes(el.dataset.field))el.dataset.manual='true';
+ if(el&&['payment_advance','payment_balance','amount_words','packing_notes','delivery'].includes(el.dataset.field))el.dataset.manual='true';
 });
 function makeDocRow(table,item={}){
  const row=document.createElement('tr');
@@ -237,7 +237,14 @@ function applyOrderData(d){
   el.dataset.manual=provided?'true':'false';if(provided)el.textContent=String(d[key]);
  });
  for(const id of Object.keys(DOC_COLS))fillItemsTable(id,Array.isArray(d.items)?d.items:[]);
- restoreDocumentEdits(d.documentEdits);documentObserver?.takeRecords();documentHydrating=false;
+ restoreDocumentEdits(d.documentEdits);
+ if(d.deliverySource==='readiness')document.querySelectorAll('[data-field="delivery"]').forEach(el=>{
+  const current=el.textContent.trim();
+  if(el.dataset.manual==='true')return;
+  if(el.dataset.deliverySource==='readiness'||!current||current===d.delivery||(d.previousDeliveryDates||[]).includes(current)){el.textContent=d.delivery||'';el.dataset.deliverySource='readiness';}
+  else el.dataset.manual='true';
+ });
+ documentObserver?.takeRecords();documentHydrating=false;
 }
 for(const id of Object.keys(DOC_COLS)){const table=document.getElementById(id);table.querySelectorAll('thead th[data-col]').forEach(addColumnRemove);}
 applyOrderData({});

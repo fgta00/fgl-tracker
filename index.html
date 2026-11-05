@@ -313,7 +313,7 @@ main{padding:.8rem 1rem}
 #int-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
 #int-tbl{table-layout:fixed;min-width:1600px}
-#int-tbl col.milestone-col{width:5%}
+#int-tbl col.milestone-col{width:4.4%}
 #int-tbl th:nth-child(5){min-width:280px!important}
 #int-tbl td{padding:.48rem .42rem}
 #int-tbl thead .grp th,#int-sticky-clone thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
@@ -339,7 +339,7 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-cell{position:relative;min-width:68px}
 #int-tbl thead .ch th:nth-child(n+6):nth-child(-n+14),
 #int-tbl tbody td:nth-child(n+6):nth-child(-n+14),
-#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:5%!important;min-width:0!important;max-width:none!important}
+#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:4.4%!important;min-width:0!important;max-width:none!important}
 #int-tbl .ms-cell::before{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:3px;background:var(--bdr2);z-index:0}
 #int-tbl .ms-cell.done::before{background:var(--green)}
 #int-tbl .ms-cell.est::before{background:var(--amber)}
@@ -400,6 +400,11 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 #finpop-body .fa-products-table [data-product-field=desc],#finpop-body .fa-products-table [data-product-field=ref]{text-align:left!important;min-width:0!important}
 #finpop-body .fa-products-table [data-product-field=ref]{font-size:11px;color:var(--ink3)}
 #finpop-body .fa-products-table td:nth-child(3),#finpop-body .fa-products-table th:nth-child(3){text-align:right}
+</style><style id="internal-products-v59">
+#int-tbl .int-products{max-width:none;font-size:11px;line-height:1.5}
+#int-tbl .int-product-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:1.5;font-weight:500}
+#int-tbl thead .ch th:nth-child(3){font-size:11px}
+#int-tbl thead .ch th:nth-child(2),#int-sticky-clone thead .ch th:nth-child(2){font-size:11px;white-space:normal;line-height:1.25}
 </style></head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -470,9 +475,9 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
   <div class="tw">
     <table id="int-tbl">
       <colgroup>
-        <col style="width:2.5%"><col style="width:14%"><col style="width:10%"><col style="width:4%"><col style="width:22%">
+        <col style="width:2%"><col style="width:14%"><col style="width:20%"><col style="width:4.5%"><col style="width:18%">
         <col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col">
-        <col style="width:2.5%">
+        <col style="width:1.9%">
       </colgroup>
       <thead>
         <tr class="grp">
@@ -1189,7 +1194,7 @@ initAuth();
 /* ══════════════════════════════════════
    STATE (loaded after auth)
 ══════════════════════════════════════ */
-let orders=[],payments=[],ledger=[],receipts=[];
+let orders=[],payments=[],ledger=[],receipts=[],productPacking={};
 // Ícones de linha (outline) reutilizados nos botões de Editar/Financeiro/Gerar Docs —
 // usam currentColor, então herdam a cor do botão (inclusive no hover) sem CSS extra.
 function icoEdit(s=17){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`;}
@@ -1234,7 +1239,7 @@ let SNOOZED={}; // alertas adiados: {"pi:idx": "2026-07-01" (ISO até quando fic
 ══════════════════════════════════════ */
 function addDaysToDisp(disp,days){
   const iso=dispToISO(disp);if(!iso)return null;
-  const d=new Date(iso+'T00:00');d.setDate(d.getDate()+days);
+  const d=new Date(iso+'T00:00');const offset=Number(days);if(!Number.isFinite(offset))return null;d.setDate(d.getDate()+Math.trunc(offset));
   return`${String(d.getDate()).padStart(2,'0')}/${MO[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;
 }
 // Auto-fill: a partir do milestone index `fromIdx`, preenche os seguintes como estimados
@@ -1263,6 +1268,16 @@ function autoCascade(o,fromIdx){
 
 // Completa previsões ausentes em pedidos antigos ou sincronizados pelo
 // Financeiro. O caso principal é ETA preenchida com Entrada no CD vazia.
+function saveMilestoneGap(index,value){
+  const days=Number(value);if(!Number.isInteger(days)||days<1||days>999){toast('⚠ Informe um prazo inteiro de 1 a 999 dias','err');renderStatusLists();return;}
+  MS_GAPS[index]=days;
+  orders.forEach(o=>{
+    backfillEstimatedMilestones(o);
+    const p=linkPay(o);
+    if(p)for(const [i,key] of [[6,'etd'],[7,'eta']])if(o.dates[i]?.est&&!o.dates[i]?.manual)p[key]=o.dates[i].v||'—';
+  });
+  saveAll();renderAll();renderStatusLists();
+}
 function backfillEstimatedMilestones(o){
   if(!o)return false;
   if(!Array.isArray(o.dates))o.dates=[];
@@ -1634,6 +1649,7 @@ async function doSignup(){
    LOGIN + ENCRYPTED SAVE/LOAD
 ══════════════════════════════════════ */
 function applyLoadedData(data){
+  productPacking=data.productPacking&&typeof data.productPacking==='object'?data.productPacking:{};
   orders=data.orders||[];payments=data.payments||[];ledger=data.ledger||[];receipts=data.receipts||[];
   if(data.slst)SLST=data.slst;if(data.clientes)CLIENTES=data.clientes;
   if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
@@ -1784,7 +1800,7 @@ function syncLinked(){
 let _syncTimer=null;
 async function saveAll(isCurrent){
   if(!_cryptoKey)return;
-  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile};
+  const data={orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile,productPacking};
   const payload=await encryptJSON(_cryptoKey,data);
   const encrypted=JSON.stringify(payload);
   if(typeof isCurrent==='function'&&!isCurrent())return false;
@@ -2031,7 +2047,6 @@ function renderInternal(){
         <div style="display:flex;align-items:center;gap:5px">
           <b style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}">${o.pi?esc(o.pi):'—'}</b>
           <span style="font-size:.55rem;font-weight:700;color:#fff;background:${isIpC(o.pi)?'var(--green)':'var(--blue)'};padding:.05rem .3rem;border-radius:3px">${isIpC(o.pi)?'AV':'FY'}</span>
-          ${o.notes?`<span style="position:relative;cursor:default;font-size:.7rem" title="${esc(o.notes)}">📝</span>`:''}
         </div>
         <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
           <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--blue)">${esc(o.po)}</span>
@@ -2045,8 +2060,8 @@ function renderInternal(){
         </div>
         <div style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px">${o.colecao?esc(o.colecao):'—'}</div>
       </td>
-      <td class="L W" style="max-width:195px">
-        ${esc(o.product)}
+      <td class="L W int-products">
+        ${internalProductHTML(o)}
         <div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.container||'—')}</div>
       </td>
       <td style="white-space:nowrap">
@@ -2704,7 +2719,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packin
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
   row.style.cssText='display:grid;grid-template-columns:2.3fr 1fr .8fr .9fr .9fr .7fr .7fr auto;gap:.3rem;align-items:end';
-  row.innerHTML=`<div><span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="updatePreview()" style="width:100%"></div>
+  row.innerHTML=`<div><span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="fillProductPacking(this);updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="width:100%"></div>
     <div><span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
@@ -2717,6 +2732,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packin
       ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
       <span class="prod-packing-summary" style="font-size:.7rem;color:var(--ink3);min-width:110px;align-self:center"></span>
     </div>`;
+  row.dataset.packingProductKey=orderSuggestionKey(desc);
   container.appendChild(row);updatePreview();
 }
 function readProdRows(){
@@ -2724,6 +2740,40 @@ function readProdRows(){
     const ins=row.querySelectorAll('input');
     return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0,...readOrderPacking(row)};
   }).filter(r=>r.qty>0);
+}
+const PRODUCT_PACKING_FIELDS=['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'];
+function productPackingFor(name){
+  const key=orderSuggestionKey(name);if(!key)return null;
+  if(Object.prototype.hasOwnProperty.call(productPacking,key))return productPacking[key];
+  // Existing orders also serve as a catalog, without rewriting them.
+  for(const o of orders){
+    const rows=linkPay(o)?.unitPrices||o.items||[];
+    const row=rows.find(r=>orderSuggestionKey(r.desc)===key&&PRODUCT_PACKING_FIELDS.some(k=>Number(r[k])>0));
+    if(row)return row;
+  }
+  for(const p of payments){const row=(p.unitPrices||[]).find(r=>orderSuggestionKey(r.desc)===key&&PRODUCT_PACKING_FIELDS.some(k=>Number(r[k])>0));if(row)return row;}
+  return null;
+}
+function fillProductPacking(input){
+  const row=input.closest('.prodrow'),key=orderSuggestionKey(input.value);
+  if(row.dataset.packingProductKey===key)return;
+  const preset=productPackingFor(input.value);
+  if(preset||row.dataset.packingProductKey)for(const field of PRODUCT_PACKING_FIELDS){const el=row.querySelector('[data-packing="'+field+'"]');if(el)el.value=preset?.[field]??'';}
+  row.dataset.packingProductKey=key;
+}
+function rememberProductPacking(rows){
+  rows.forEach(row=>{
+    const key=orderSuggestionKey(row.desc);if(!key)return;
+    productPacking[key]=Object.fromEntries(PRODUCT_PACKING_FIELDS.map(field=>[field,Number(row[field])>0?Number(row[field]):null]));
+  });
+}
+function internalProductNames(o){
+  const rows=linkPay(o)?.unitPrices||o.items||[];
+  const names=rows.map(r=>r.desc).filter(Boolean);
+  return (names.length?names:String(o.product||'—').split(' + ')).map(name=>String(name).replace(/\s+/g,' ').trim());
+}
+function internalProductHTML(o){
+  return internalProductNames(o).map(name=>'<div class="int-product-line" title="'+esc(name)+'">'+esc(name)+'</div>').join('');
 }
 function readOrderPacking(row){
   return Object.fromEntries(['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'].map(key=>{
@@ -2780,6 +2830,7 @@ function orderSuggestionNames(values){
   }).sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
 }
 function rememberOrderNames(client,supplier,rows){
+  rememberProductPacking(rows);
   const add=(arr,value)=>{
     const name=String(value||'').trim(),key=orderSuggestionKey(name);
     if(key&&key!=='—'&&!arr.some(v=>orderSuggestionKey(v)===key))arr.push(name);
@@ -2969,7 +3020,8 @@ function gerarDocs(num){
     },
     po:o.po&&o.po!=='—'?o.po:'',
     reference:o.pi||'',
-    delivery:[o.dates?.[8]?.v,o.dates?.[7]?.v,p&&p.eta].find(v=>v&&v!=='—')||'',
+    delivery:o.dates?.[4]?.v||'',
+    deliverySource:'readiness',previousDeliveryDates:[o.dates?.[8]?.v,o.dates?.[7]?.v,p&&p.eta].filter(Boolean),
     origin:o.origin||(/CHINA/i.test(o.container||'')?'Made in China':undefined),
     loadingPort:o.loadingPort||(/CHINA/i.test(o.container||'')?'':undefined),
     incoterm:o.incoterm||(/CHINA/i.test(o.container||'')?'FOB':undefined),
@@ -2987,7 +3039,7 @@ function gerarDocs(num){
     documentEdits:o.documentEdits,documentRevision:o.documentEditsRevision||0,
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html?v=58','_blank');
+  const win=window.open('export-docs.html?v=59','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
   const docToken=crypto.randomUUID();
@@ -3459,7 +3511,7 @@ function renderStatusLists(){
   // Render milestone gaps editor
   document.getElementById('ms-gaps-list').innerHTML=MS_GAP_LABELS.map((lbl,i)=>{
     const avg=computeAvgMilestoneGaps()[i];
-    return`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="MS_GAPS[${i}]=parseInt(this.value)||1;saveAll()"><div style="font-size:.52rem;color:${avg!==null?'var(--teal)':'var(--ink4)'};margin-top:.15rem">média real: ${avg!==null?avg+'d':'—'}</div></div>`;
+    return`<div style="text-align:center"><div style="font-size:.55rem;color:var(--ink3);margin-bottom:.2rem;line-height:1.2">${lbl}</div><input type="number" value="${MS_GAPS[i]}" min="1" max="999" style="width:100%;text-align:center;border:1.5px solid var(--bdr2);border-radius:5px;padding:.25rem;font-family:'IBM Plex Mono';font-size:.75rem" onchange="saveMilestoneGap(${i},this.value)"><div style="font-size:.52rem;color:${avg!==null?'var(--teal)':'var(--ink4)'};margin-top:.15rem">média real: ${avg!==null?avg+'d':'—'}</div></div>`;
   }).join('');
   const fasesOrdem=['pre','prod','entrega'];
   document.getElementById('doc-events-list').innerHTML=fasesOrdem.map(fase=>{
@@ -3539,7 +3591,7 @@ function renderDocTimeline(){
   if(!cont)return;
   // dia acumulado de cada um dos 9 marcos
   const msDay=[0];
-  for(let i=0;i<8;i++)msDay.push(msDay[i]+(MS_GAPS[i]||0));
+  for(let i=0;i<8;i++)msDay.push(msDay[i]+(Number(MS_GAPS[i])||0));
   // dia de cada prazo de documento (marco base + offset — pode ser negativo)
   const evDay=DOC_EVENTS.map(ev=>msDay[ev.baseIdx]+ev.offset);
   const minDay=Math.min(0,...evDay);
@@ -3720,7 +3772,7 @@ function datePickerSync(targetId,isoVal){
    BACKUP / RESTORE
 ══════════════════════════════════════ */
 function exportBackup(){
-  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile};
+  const payload={version:5,exported:new Date().toISOString(),orders,payments,ledger,receipts,slst:SLST,clientes:CLIENTES,fornecedores:FORNECEDORES,produtos:PRODUTOS,conteineres:CONTEINERES,msGaps:MS_GAPS,docEvents:DOC_EVENTS,snoozed:SNOOZED,companyProfile,productPacking};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fgl_backup_'+todayDisp().replace(/\//g,'-')+'.json';a.click();
@@ -3740,6 +3792,7 @@ function importBackup(e){
       if(data.fornecedores)FORNECEDORES=data.fornecedores;if(data.produtos)PRODUTOS=data.produtos;
       if(data.conteineres)CONTEINERES=data.conteineres;
       if(data.msGaps)MS_GAPS=data.msGaps;if(data.snoozed)SNOOZED=data.snoozed;
+      productPacking=data.productPacking&&typeof data.productPacking==='object'?data.productPacking:{};
       if(data.companyProfile)companyProfile=Object.assign(companyProfile,data.companyProfile);
       saveAll();renderAll();renderFinanceiro();
       toast('Backup restaurado ✓ ('+orders.length+' pedidos)');
