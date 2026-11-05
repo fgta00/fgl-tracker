@@ -2924,6 +2924,14 @@ function gerarDocs(num){
       account:companyProfile.bankAccount||'',
       swift:companyProfile.swift||''
     },
+    po:o.po&&o.po!=='—'?o.po:'',
+    reference:o.pi||'',
+    delivery:[o.dates?.[8]?.v,o.dates?.[7]?.v,p&&p.eta].find(v=>v&&v!=='—')||'',
+    origin:o.origin||(/CHINA/i.test(o.container||'')?'Made in China':undefined),
+    loadingPort:o.loadingPort||(/CHINA/i.test(o.container||'')?'':undefined),
+    incoterm:o.incoterm||(/CHINA/i.test(o.container||'')?'FOB':undefined),
+    destinationPort:o.destinationPort||undefined,
+    ncm:o.ncm||undefined,
     buyer:o.client||'',
     supplier:(p&&p.supplier)||'',
     piNumber:o.pi||('#'+o.num),
@@ -2935,7 +2943,7 @@ function gerarDocs(num){
     packingListNumber:'',
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html','_blank');
+  const win=window.open('export-docs.html?v=55','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
   let done=false;
@@ -2956,7 +2964,7 @@ function gerarDocs(num){
     toast('⚠ export-docs.html não respondeu — confirme que o arquivo está na mesma pasta/origem do Tracker','err');
   },8000);
   window.addEventListener('message',onMsg);
-  if(!companyProfile.sellerName)toast('💡 Dica: preencha o Perfil da Empresa em ⚙ Tags pra não digitar o Seller/Banco toda vez');
+  // Seller e banco têm padrão editável no Export Docs; Perfil da Empresa tem prioridade.
 }
 function gerarDocsFromPI(pi){
   const o=orders.find(x=>x.pi===pi);
