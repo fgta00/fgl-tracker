@@ -313,7 +313,7 @@ main{padding:.8rem 1rem}
 #int-q{width:min(330px,28vw);min-width:225px}
 #int-tbl,#int-sticky-clone table{font-size:12px}
 #int-tbl{table-layout:fixed;min-width:1600px}
-#int-tbl col.milestone-col{width:4.4%}
+#int-tbl col.milestone-col{width:4.733333%}
 #int-tbl th:nth-child(5){min-width:280px!important}
 #int-tbl td{padding:.48rem .42rem}
 #int-tbl thead .grp th,#int-sticky-clone thead .grp th{background:#F3F6F9!important;color:var(--ink3)!important;border-right:1px solid var(--bdr)!important;border-top:3px solid var(--bdr2);letter-spacing:.07em}
@@ -339,7 +339,7 @@ body.dark #view-internal>.tb,body.dark #ci-content-interno>.tb{box-shadow:none}
 #int-tbl .ms-cell{position:relative;min-width:68px}
 #int-tbl thead .ch th:nth-child(n+6):nth-child(-n+14),
 #int-tbl tbody td:nth-child(n+6):nth-child(-n+14),
-#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:4.4%!important;min-width:0!important;max-width:none!important}
+#int-sticky-clone thead .ch th:nth-child(n+6):nth-child(-n+14){width:4.733333%!important;min-width:0!important;max-width:none!important}
 #int-tbl .ms-cell::before{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:3px;background:var(--bdr2);z-index:0}
 #int-tbl .ms-cell.done::before{background:var(--green)}
 #int-tbl .ms-cell.est::before{background:var(--amber)}
@@ -402,7 +402,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 #finpop-body .fa-products-table td:nth-child(3),#finpop-body .fa-products-table th:nth-child(3){text-align:right}
 </style><style id="internal-products-v59">
 #int-tbl .int-products{max-width:none;font-size:11px;line-height:1.5}
-#int-tbl .int-product-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:1.5;font-weight:500}
+#int-tbl .int-product-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.5;font-weight:500}
 #int-tbl thead .ch th:nth-child(3){font-size:11px}
 #int-tbl thead .ch th:nth-child(2),#int-sticky-clone thead .ch th:nth-child(2){font-size:11px;white-space:normal;line-height:1.25}
 </style></head>
@@ -475,7 +475,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
   <div class="tw">
     <table id="int-tbl">
       <colgroup>
-        <col style="width:2%"><col style="width:14%"><col style="width:20%"><col style="width:4.5%"><col style="width:18%">
+        <col style="width:2%"><col style="width:12%"><col style="width:16%"><col style="width:4.5%"><col style="width:21%">
         <col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col"><col class="milestone-col">
         <col style="width:1.9%">
       </colgroup>
@@ -3039,7 +3039,7 @@ function gerarDocs(num){
     documentEdits:o.documentEdits,documentRevision:o.documentEditsRevision||0,
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html?v=59','_blank');
+  const win=window.open('export-docs.html?v=60','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
   const docToken=crypto.randomUUID();
