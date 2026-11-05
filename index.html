@@ -2651,13 +2651,13 @@ function editOrderPrices(pi,e){
   document.getElementById('pr-pi-lbl').textContent=pi;
   document.getElementById('pr-sup-lbl').textContent=p.supplier||'—';
   const cont=document.getElementById('pr-rows');cont.innerHTML='';
-  (p.unitPrices||[{desc:'',ref:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
+  (p.unitPrices||[{desc:'',ref:'',qty:0,priceForn:0,priceCli:0,plates:0,sample:0}]).forEach(r=>addPriceRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0,r));
   updatePricePreview();
   document.getElementById('ovl-prices').classList.add('open');ovlToFront('ovl-prices');
 }
-function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
+function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={}){
   const cont=document.getElementById('pr-rows');
-  const row=document.createElement('div');
+  const row=document.createElement('div');row._itemMeta={...packing};
   row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr .8fr .8fr auto;gap:.3rem;margin-bottom:.28rem;align-items:center';
   row.innerHTML=`<input type="text" placeholder="Ecobag Raffia" value="${esc(desc)}" oninput="updatePricePreview()" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.77rem;outline:none;width:100%">
     <input type="text" placeholder="Ref." value="${esc(ref)}" style="border:1.5px solid var(--bdr2);border-radius:5px;padding:.28rem .42rem;font-family:'IBM Plex Sans';font-size:.72rem;outline:none;width:100%">
@@ -2672,7 +2672,7 @@ function addPriceRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
 function readPriceRows(){
   return[...document.querySelectorAll('#pr-rows>div')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0};
+    return{...row._itemMeta,desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0};
   }).filter(r=>r.qty>0||r.desc);
 }
 function updatePricePreview(){
@@ -2698,7 +2698,7 @@ function savePrices(){
    ORDER MODAL
 ══════════════════════════════════════ */
 let _editNum=null;
-function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
+function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={}){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
   row.style.cssText='display:grid;grid-template-columns:2.3fr 1fr .8fr .9fr .9fr .7fr .7fr auto;gap:.3rem;align-items:end';
@@ -2709,16 +2709,51 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0){
     <div><span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
-    <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>`;
+    <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>
+    <div class="prod-packing-row" style="grid-column:1/-1;display:flex;align-items:end;gap:.6rem;padding:.45rem .6rem .6rem;background:var(--ltgry);border-radius:6px;margin-bottom:.4rem">
+      <span class="plbl" style="align-self:center;min-width:74px">Embalagem</span>
+      ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
+      <span class="prod-packing-summary" style="font-size:.7rem;color:var(--ink3);min-width:110px;align-self:center"></span>
+    </div>`;
   container.appendChild(row);updatePreview();
 }
 function readProdRows(){
   return[...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0};
+    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0,...readOrderPacking(row)};
   }).filter(r=>r.qty>0);
 }
+function readOrderPacking(row){
+  return Object.fromEntries(['cartonLength','cartonWidth','cartonHeight','unitsPerCarton'].map(key=>{
+    const value=row.querySelector('[data-packing="'+key+'"]')?.value;
+    return[key,value&&Number(value)>0?Number(value):null];
+  }));
+}
+function orderPackingInfo(item){
+  const qty=Number(item.qty),units=Number(item.unitsPerCarton);
+  const cartons=qty>0&&Number.isInteger(units)&&units>0?Math.ceil(qty/units):null;
+  const dims=['cartonLength','cartonWidth','cartonHeight'].map(key=>Number(item[key]));
+  const complete=dims.every(v=>Number.isFinite(v)&&v>0);
+  return{cartons,cartonDimensions:complete?dims:undefined,unitsPerCarton:units>0?units:undefined,
+    lastCartonQty:cartons&&qty%units?qty%units:undefined,
+    cbm:cartons&&complete?cartons*dims[0]*dims[1]*dims[2]/1e6:undefined};
+}
+function validateOrderPacking(){
+  for(const input of document.querySelectorAll('#mo-prod-rows [data-packing]')){
+    if(!input.value&&!input.validity?.badInput)continue;
+    const value=Number(input.value);
+    if(!Number.isFinite(value)||value<=0||(input.dataset.packing==='unitsPerCarton'&&!Number.isInteger(value))){
+      toast('⚠ Embalagem: use medidas positivas em cm e quantidade inteira por caixa','err');input.focus();return false;
+    }
+  }
+  return true;
+}
 function updatePreview(){
+  document.querySelectorAll('#mo-prod-rows .prodrow').forEach(row=>{
+    const info=orderPackingInfo({qty:row.querySelectorAll('input')[2].value,...readOrderPacking(row)});
+    const label=row.querySelector('.prod-packing-summary');
+    if(label)label.textContent=info.cartons?fN(info.cartons)+' caixas'+(info.lastCartonQty?' · última: '+fN(info.lastCartonQty)+' un.':'')+(info.cbm?' · '+info.cbm.toLocaleString('pt-BR',{maximumFractionDigits:2})+' CBM':''):'';
+  });
   const rows=readProdRows();
   const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn+(r.plates||0)+(r.sample||0),0);
   const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
@@ -2804,8 +2839,9 @@ function openOrderModal(num){
         document.getElementById('mo-sup').value=p.supplier||'';
         document.getElementById('mo-sup-inv').value=p.inv||'';
         document.getElementById('mo-etd').value=p.etd||'';
-        (p.unitPrices||[]).forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0));
-      }
+      }else document.getElementById('mo-sup').value=o.supplier||'';
+      const items=p?.unitPrices||o.items||[];
+      (items.length?items:[{}]).forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0,r));
     }
   } else {
     addProdRow();
@@ -2842,6 +2878,7 @@ function submitOrder(){
   if(!client){toast('⚠ Cliente obrigatório','err');return;}
   if(!supplier){toast('⚠ Fornecedor obrigatório','err');return;}
   if(!prodRows.length){toast('⚠ Adicione produto','err');return;}
+  if(!validateOrderPacking())return;
 
   if(_editNum!==null){
     pushUndo('Editar pedido #'+_editNum);
@@ -2850,6 +2887,7 @@ function submitOrder(){
       // Buscar payment ANTES de alterar pi/po
       const p=linkPay(o);
       const oldPi=o.pi;
+      o.items=prodRows;
       o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.supplier=supplier;o.container=container;o.notes=notes;o.orderDate=orderDate;o.amostras=amostras;
       Object.assign(o,avFields);
       if(totalQty>0)o.total=totalQty;
@@ -2872,7 +2910,7 @@ function submitOrder(){
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
   if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true,true);
-  const newOrder={num:nn,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
+  const newOrder={num:nn,items:prodRows,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
   // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
   if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
@@ -2900,12 +2938,13 @@ function gerarDocs(num){
   const o=orders.find(x=>x.num===orderNum);
   if(!o){toast('⚠ Pedido não encontrado','err');return;}
   const p=linkPay(o);
-  const items=((p&&p.unitPrices)||[]).filter(r=>(r.qty||0)>0).map(r=>({
+  const items=((p&&p.unitPrices)||o.items||[]).filter(r=>(r.qty||0)>0).map(r=>({
     sku:r.ref||'',
     desc:r.desc||'',
     qty:r.qty||0,
     unitPrice:r.priceCli||0,
-    total:(r.qty||0)*(r.priceCli||0)
+    total:(r.qty||0)*(r.priceCli||0),
+    ...orderPackingInfo(r)
   }));
   if(!items.length){toast('⚠ Este pedido não tem produtos lançados','err');return;}
   const totalQty=items.reduce((a,r)=>a+r.qty,0);
@@ -2943,7 +2982,7 @@ function gerarDocs(num){
     packingListNumber:'',
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html?v=55','_blank');
+  const win=window.open('export-docs.html?v=57','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
   let done=false;

@@ -34,7 +34,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;line
 <div class="signatures"><div>Seller Signature</div><div>Buyer Signature</div></div><footer class="foot" contenteditable="true"><span contenteditable="true" data-field="seller_name" data-placeholder="Seller"></span> · Commercial Invoice <span contenteditable="true" data-field="invoice_number" data-placeholder="—"></span></footer></main><main class="sheet" id="packing"><header class="head"><div><p class="seller-title" contenteditable="true" data-field="seller_name" data-placeholder="Seller name"></p><p contenteditable="true" data-field="seller_address" data-placeholder="Address"></p><p contenteditable="true" data-field="seller_contact" data-placeholder="Telephone · Email"></p></div><div class="right"><h1>PACKING LIST</h1><p class="meta-row document-ref"><span>N° </span><span contenteditable="true" data-field="pl_number" data-placeholder="—"></span><span> / PO </span><span contenteditable="true" data-field="po" data-placeholder="—"></span></p><p class="meta-row"><span>Date: </span><span contenteditable="true" data-field="pl_date" data-placeholder="—"></span><span> · Ref: </span><span contenteditable="true" data-field="reference" data-placeholder="—"></span></p><button class="no-print add-control" onclick="addMetaRow(this)">+ Campo</button></div></header>
 <div class="parties"><section><h2>SELLER</h2><div contenteditable="true" data-field="seller_block" data-placeholder="Seller address"></div></section><section><h2>BUYER</h2><div contenteditable="true" data-field="buyer_block" data-placeholder="Buyer name, address, document"></div></section></div>
 <div class="table-controls no-print"><button onclick="addRow('tbl-pl')">+ Linha</button><button onclick="addColumn('tbl-pl')">+ Coluna</button></div><table class="packing-table" id="tbl-pl"><thead><tr><th>#</th><th contenteditable="true" data-col="desc">Description</th><th contenteditable="true" data-col="sku">Ref / EAN</th><th contenteditable="true" data-col="qty">Qty<br/>(pcs)</th><th contenteditable="true" data-col="cartons">Cartons</th><th contenteditable="true" data-col="dimensions">Carton size<br/>(cm)</th><th contenteditable="true" data-col="netWeight">NW<br/>(kg)</th><th contenteditable="true" data-col="grossWeight">GW<br/>(kg)</th><th contenteditable="true" data-col="cbm">CBM</th><th class="no-print action-col"></th></tr></thead><tbody></tbody><tfoot></tfoot></table>
-<div class="packing" contenteditable="true"><p class="packing-hint" contenteditable="true" data-field="packing_notes" data-placeholder="Packing notes (optional)"></p></div>
+<div class="packing"><p class="packing-hint" contenteditable="true" data-field="packing_notes" data-placeholder="Packing notes (optional)"></p></div>
 <div class="lower"><section class="block"><h3>SHIPPING</h3><dl><dt contenteditable="true">Origin:</dt><dd contenteditable="true" data-field="origin" data-placeholder="—"></dd><dt contenteditable="true">Incoterm:</dt><dd contenteditable="true" data-field="incoterm" data-placeholder="—"></dd><dt contenteditable="true">Loading:</dt><dd contenteditable="true" data-field="loading_port" data-placeholder="—"></dd><dt contenteditable="true">Destination:</dt><dd contenteditable="true" data-field="destination_port" data-placeholder="—"></dd><dt contenteditable="true">NCM:</dt><dd contenteditable="true" data-field="ncm" data-placeholder="—"></dd><dt contenteditable="true">Delivery:</dt><dd contenteditable="true" data-field="delivery" data-placeholder="—"></dd></dl><button class="no-print add-control" onclick="addTermRow(this)">+ Campo</button></section><section class="block"><h3>SHIPMENT</h3><dl><dt contenteditable="true">Container:</dt><dd contenteditable="true" data-field="container" data-placeholder="—"></dd><dt contenteditable="true">Seal:</dt><dd contenteditable="true" data-field="seal" data-placeholder="—"></dd><dt contenteditable="true">Vessel / Voyage:</dt><dd contenteditable="true" data-field="vessel" data-placeholder="—"></dd><dt contenteditable="true">B/L:</dt><dd contenteditable="true" data-field="bl" data-placeholder="—"></dd></dl><button class="no-print add-control" onclick="addTermRow(this)">+ Campo</button></section><section class="block"><h3>PACKING SUMMARY</h3><dl><dt contenteditable="true">Packages:</dt><dd contenteditable="true" data-field="total_cartons" data-placeholder="—"></dd><dt contenteditable="true">Quantity:</dt><dd contenteditable="true" data-field="total_quantity" data-placeholder="—"></dd><dt contenteditable="true">Gross weight:</dt><dd contenteditable="true" data-field="total_gross" data-placeholder="—"></dd><dt contenteditable="true">Net weight:</dt><dd contenteditable="true" data-field="total_net" data-placeholder="—"></dd><dt contenteditable="true">Volume:</dt><dd contenteditable="true" data-field="total_cbm" data-placeholder="—"></dd></dl><button class="no-print add-control" onclick="addTermRow(this)">+ Campo</button></section></div>
 <div class="signatures"><div>Seller Signature</div><div>Buyer Signature</div></div><footer class="foot" contenteditable="true"><span contenteditable="true" data-field="seller_name" data-placeholder="Seller"></span> · Packing List <span contenteditable="true" data-field="pl_number" data-placeholder="—"></span></footer></main>
 </html><script>'use strict';
@@ -67,6 +67,36 @@ function amountInWords(value){
  const dollars=Math.floor(cents/100),rest=cents%100;
  return '(say total '+englishInteger(dollars)+(dollars===1?' dollar':' dollars')+(rest?' and '+englishInteger(rest)+(rest===1?' cent':' cents'):'')+' only)';
 }
+function updatePackingNotes(table){
+ const sheet=table.closest('.sheet'),el=sheet.querySelector('[data-field="packing_notes"]');
+ if(!el||el.dataset.manual==='true')return;
+ const rows=[...table.tBodies[0].rows];
+ const lines=rows.map((row,index)=>{
+  const text=key=>row.querySelector('[data-col="'+key+'"]')?.textContent.trim();
+  const cartons=parseDocNumber(text('cartons'));
+  const dimensions=text('dimensions')||row.dataset.cartonDimensions||'';
+  if(cartons===null&&!dimensions)return '';
+  const units=Number(row.dataset.unitsPerCarton),qty=parseDocNumber(text('qty'));
+  const parts=[];
+  if(cartons!==null)parts.push(formatNum(cartons)+' cartons');
+  if(dimensions)parts.push(dimensions+' cm');
+  if(units>0)parts.push(formatNum(units)+' pcs/carton');
+  if(qty!==null&&units>0&&qty%units&&cartons===Math.ceil(qty/units))parts.push('last carton: '+formatNum(qty%units)+' pcs');
+  const cbm=parseDocNumber(text('cbm'))??(cartons!==null&&row.dataset.cbmPerCarton?cartons*Number(row.dataset.cbmPerCarton):null);
+  if(cbm!==null)parts.push(formatNum(cbm,2)+' CBM');
+  return 'Packing item '+(index+1)+': '+parts.join(' · ');
+ }).filter(Boolean);
+ const total=sumColumn(table,'cartons');
+ if(lines.length&&total!==null)lines.push('TOTAL: '+formatNum(total)+' cartons');
+ el.textContent=lines.join('\n');
+}
+function updatePackingRow(row){
+ const qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),units=Number(row.dataset.unitsPerCarton);
+ const cartonsCell=row.querySelector('[data-col="cartons"]');
+ if(cartonsCell&&row.dataset.autoCartons==='true')cartonsCell.textContent=qty!==null&&units>0?formatNum(Math.ceil(qty/units)):'';
+ const cartons=parseDocNumber(cartonsCell?.textContent),cbmCell=row.querySelector('[data-col="cbm"]');
+ if(cbmCell&&row.dataset.autoCbm==='true')cbmCell.textContent=cartons!==null&&row.dataset.cbmPerCarton?formatNum(cartons*Number(row.dataset.cbmPerCarton),2):'';
+}
 function updateFinancialFields(table){
  const sheet=table.closest('.sheet');if(sheet.id==='packing')return;
  const total=sumColumn(table,'total');
@@ -79,11 +109,15 @@ function updateFinancialFields(table){
 }
 document.addEventListener('input',e=>{
  const el=e.target.closest('[data-field]');
- if(el&&['payment_advance','payment_balance','amount_words'].includes(el.dataset.field))el.dataset.manual='true';
+ if(el&&['payment_advance','payment_balance','amount_words','packing_notes'].includes(el.dataset.field))el.dataset.manual='true';
 });
 function makeDocRow(table,item={}){
  const row=document.createElement('tr');
- [...table.tHead.rows[0].cells].forEach((th,index)=>{const td=document.createElement('td');if(index===0){td.className='rownum';td.textContent=table.tBodies[0].rows.length+1;}else if(th.classList.contains('action-col')){td.className='no-print';td.innerHTML='<button class="remove-row" title="Remover linha" onclick="deleteRow(this)">×</button>';}else{const key=th.dataset.col;td.contentEditable='true';td.dataset.col=key;td.dataset.placeholder='—';let value=item[key];if(key==='sku')value=item.sku??item.ref;if(key==='dimensions'&&value===undefined&&Array.isArray(item.cartonDimensions))value=item.cartonDimensions.join('×');if(key==='total'&&value===undefined&&item.qty!==undefined&&item.unitPrice!==undefined)value=Number(item.qty)*Number(item.unitPrice);td.textContent=cellFormat(key,value);}row.append(td);});return row;
+ if(item.unitsPerCarton>0){row.dataset.unitsPerCarton=item.unitsPerCarton;row.dataset.autoCartons='true';}
+ if(Array.isArray(item.cartonDimensions)&&item.cartonDimensions.length===3&&item.cartonDimensions.every(v=>Number(v)>0)){
+  row.dataset.cartonDimensions=item.cartonDimensions.join('×');row.dataset.cbmPerCarton=item.cartonDimensions.reduce((a,b)=>a*Number(b),1)/1e6;row.dataset.autoCbm='true';
+ }
+ [...table.tHead.rows[0].cells].forEach((th,index)=>{const td=document.createElement('td');if(index===0){td.className='rownum';td.textContent=table.tBodies[0].rows.length+1;}else if(th.classList.contains('action-col')){td.className='no-print';td.innerHTML='<button class="remove-row" title="Remover linha" onclick="deleteRow(this)">×</button>';}else{const key=th.dataset.col;td.contentEditable='true';td.dataset.col=key;td.dataset.placeholder='—';let value=item[key];if(key==='sku')value=item.sku??item.ref;if(key==='dimensions'&&value===undefined&&Array.isArray(item.cartonDimensions))value=item.cartonDimensions.join('×');if(key==='total'&&value===undefined&&item.qty!==undefined&&item.unitPrice!==undefined)value=Number(item.qty)*Number(item.unitPrice);td.textContent=cellFormat(key,value);}row.append(td);});updatePackingRow(row);return row;
 }
 function addRow(tableId){const table=document.getElementById(tableId);table.tBodies[0].append(makeDocRow(table));updateDocTotals(table);}
 function deleteRow(button){const table=button.closest('table');button.closest('tr').remove();if(!table.tBodies[0].rows.length)table.tBodies[0].append(makeDocRow(table));renumberRows(table);updateDocTotals(table);}
@@ -96,9 +130,9 @@ function updateDocTotals(table){
  const keys=[...table.tHead.rows[0].cells].filter(th=>!th.classList.contains('action-col')).map(th=>th.dataset.col||'index');
  const tr=document.createElement('tr');const firstNumeric=keys.findIndex(k=>['qty','cartons','total','netWeight','grossWeight','cbm'].includes(k));const prefix=firstNumeric>0?firstNumeric:1;const label=document.createElement('td');label.colSpan=prefix;label.textContent='TOTAL';label.style.textAlign='right';tr.append(label);keys.slice(prefix).forEach(key=>{const td=document.createElement('td');if(['qty','cartons','total','netWeight','grossWeight','cbm'].includes(key)){const v=sumColumn(table,key);td.textContent=v===null?'—':cellFormat(key,v);}tr.append(td);});const blank=document.createElement('td');blank.className='no-print';tr.append(blank);table.tFoot.replaceChildren(tr);
  const sheet=table.closest('.sheet');for(const [key,field,suffix] of [['cartons','total_cartons',' cartons'],['qty','total_quantity',' pcs'],['grossWeight','total_gross',' kg'],['netWeight','total_net',' kg'],['cbm','total_cbm',' CBM']]){const el=sheet.querySelector('[data-field="'+field+'"]');if(el){const v=sumColumn(table,key);el.textContent=v===null?'':formatNum(v,['grossWeight','netWeight','cbm'].includes(key)?2:0)+suffix;}}
- updateFinancialFields(table);
+ updateFinancialFields(table);updatePackingNotes(table);
 }
-document.addEventListener('input',e=>{const cell=e.target.closest('td[data-col]');if(!cell)return;const table=cell.closest('table');if(['qty','unitPrice'].includes(cell.dataset.col)){const row=cell.parentElement,qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),price=parseDocNumber(row.querySelector('[data-col="unitPrice"]')?.textContent),total=row.querySelector('[data-col="total"]');if(total)total.textContent=qty===null||price===null?'':cellFormat('total',qty*price);}updateDocTotals(table);});
+document.addEventListener('input',e=>{const cell=e.target.closest('td[data-col]');if(!cell)return;const table=cell.closest('table');if(cell.dataset.col==='cartons')cell.parentElement.dataset.autoCartons='false';if(cell.dataset.col==='cbm')cell.parentElement.dataset.autoCbm='false';if(cell.dataset.col==='dimensions'){const dims=cell.textContent.split(/[×x*]/i).map(parseDocNumber);if(dims.length===3&&dims.every(v=>v!==null&&v>0)){cell.parentElement.dataset.cartonDimensions=dims.join('×');cell.parentElement.dataset.cbmPerCarton=dims.reduce((a,b)=>a*b,1)/1e6;if(cell.parentElement.dataset.autoCbm!=='false')cell.parentElement.dataset.autoCbm='true';}else delete cell.parentElement.dataset.cbmPerCarton;}if(['qty','cartons','dimensions'].includes(cell.dataset.col))updatePackingRow(cell.parentElement);if(['qty','unitPrice'].includes(cell.dataset.col)){const row=cell.parentElement,qty=parseDocNumber(row.querySelector('[data-col="qty"]')?.textContent),price=parseDocNumber(row.querySelector('[data-col="unitPrice"]')?.textContent),total=row.querySelector('[data-col="total"]');if(total)total.textContent=qty===null||price===null?'':cellFormat('total',qty*price);}updateDocTotals(table);});
 function addMetaRow(button){const p=document.createElement('p');p.className='meta-row';p.innerHTML='<span contenteditable="true">Campo: </span><span contenteditable="true" data-placeholder="—"></span>';button.before(p);}
 function addTermRow(button){const dl=button.parentElement.querySelector('dl');const dt=document.createElement('dt'),dd=document.createElement('dd');dt.contentEditable='true';dt.textContent='Campo:';dd.contentEditable='true';dd.dataset.placeholder='—';dl.append(dt,dd);}
 function fillItemsTable(id,items){const table=document.getElementById(id);table.tBodies[0].replaceChildren();(items.length?items:[{}]).forEach(item=>table.tBodies[0].append(makeDocRow(table,item)));updateDocTotals(table);}
@@ -118,7 +152,7 @@ function applyOrderData(d){
   if(!copy){copy=document.createElement('dd');copy.className='payment-copy';copy.contentEditable='true';copy.style.gridColumn='2';el.after(copy);}
   copy.textContent='Against copy: CI, PL & BL';
  });
- for(const [field,key] of [['payment_advance','paymentAdvance'],['payment_balance','paymentBalance'],['amount_words','amountWords']])document.querySelectorAll('[data-field="'+field+'"]').forEach(el=>{
+ for(const [field,key] of [['payment_advance','paymentAdvance'],['payment_balance','paymentBalance'],['amount_words','amountWords'],['packing_notes','packingNotes']])document.querySelectorAll('[data-field="'+field+'"]').forEach(el=>{
   const provided=d[key]!==null&&d[key]!==undefined&&String(d[key]).trim()!=='';
   el.dataset.manual=provided?'true':'false';if(provided)el.textContent=String(d[key]);
  });
