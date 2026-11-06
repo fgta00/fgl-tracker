@@ -405,6 +405,45 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 #int-tbl .int-product-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.5;font-weight:500}
 #int-tbl thead .ch th:nth-child(3){font-size:11px}
 #int-tbl thead .ch th:nth-child(2),#int-sticky-clone thead .ch th:nth-child(2){font-size:11px;white-space:normal;line-height:1.25}
+</style><style id="order-modal-v62">
+#ovl-order{padding:28px;background:rgba(15,23,42,.42)}
+#ovl-order .order-modal{width:1080px;max-width:calc(100vw - 56px);max-height:calc(100dvh - 56px);height:auto;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e3e7ed;border-radius:14px;background:var(--card);font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink)}
+#ovl-order .mhdr{background:var(--card);color:var(--ink);border-bottom:1px solid var(--bdr);padding:18px 24px;min-height:62px;flex-shrink:0}
+#ovl-order .mhdr h2{color:var(--ink);margin:0;flex:1;font-size:18px;letter-spacing:-.3px;font-weight:650}
+#ovl-order .mcls{margin-left:auto;color:var(--ink3);border:0;background:transparent;font-size:24px;padding:0;width:30px;height:30px}
+#ovl-order .mbody{padding:0 24px;overflow:auto;min-height:0;flex:1}
+#ovl-order .order-section{padding:18px 0;border-bottom:1px solid var(--bdr)}
+#ovl-order .order-section:last-child{border-bottom:0}
+#ovl-order .order-section h3{margin:0 0 14px;font-size:13px;font-weight:650;color:var(--ink);letter-spacing:0;text-transform:none}
+#ovl-order .order-primary-grid{display:grid;grid-template-columns:minmax(0,1fr) 160px 160px;gap:12px}
+#ovl-order .order-secondary-grid{display:grid;grid-template-columns:minmax(0,1fr) 180px 220px;gap:12px;margin-top:12px}
+#ovl-order .ff,#ovl-order label{min-width:0}
+#ovl-order .ff>label,#ovl-order .plbl{display:block;font-size:11px;line-height:1.3;color:var(--ink3);letter-spacing:0;text-transform:none;font-weight:500;margin-bottom:5px}
+#ovl-order input:not([type=checkbox]),#ovl-order textarea{height:34px;width:100%;min-width:0;background:var(--card);border:1px solid var(--bdr2);border-radius:6px;padding:7px 9px;font-size:12px;font-family:inherit;font-weight:400;color:var(--ink);box-shadow:none}
+#ovl-order input::placeholder,#ovl-order textarea::placeholder{font-family:inherit;font-size:12px;color:var(--ink4);opacity:1}
+#ovl-order input:focus,#ovl-order textarea:focus{outline:2px solid #d6e7f5;outline-offset:0;border-color:#6e9fc6}
+#ovl-order input[readonly]{background:var(--ltgry);color:var(--ink2)}
+#ovl-order .date-wrap{display:flex;gap:5px;min-width:0}#ovl-order .date-wrap input[type=text]{flex:1}#ovl-order .date-cal-btn{position:static;width:32px;height:34px;flex-shrink:0;border:1px solid var(--bdr2);border-radius:6px;background:var(--card);font-size:14px}
+#ovl-order .order-section-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:4px}#ovl-order .order-section-heading h3{margin:0}
+#ovl-order .order-default-supplier{width:300px}#ovl-order .order-default-supplier .ff{display:flex;align-items:center;gap:8px}#ovl-order .order-default-supplier label{white-space:nowrap;margin:0;font-size:10px}#ovl-order .order-default-supplier input{height:30px;padding:4px 7px;font-size:11px}
+#ovl-order .prodrow{display:block;background:transparent;border:0;border-bottom:1px solid var(--bdr);border-radius:0;padding:14px 0;margin:0}
+#ovl-order .prodrow:last-child{border-bottom:0}
+#ovl-order .order-product-main{display:grid;grid-template-columns:minmax(200px,2.4fr) minmax(105px,1.2fr) minmax(130px,1.5fr) 92px 100px 100px 24px;gap:8px;align-items:end}
+#ovl-order .order-product-main .rm{height:34px;padding:0;background:transparent;border:0;color:var(--ink4);font-size:21px;cursor:pointer}#ovl-order .order-product-main .rm:hover{color:var(--red)}
+#ovl-order .order-pack-row{display:grid;grid-template-columns:230px 110px 120px minmax(0,1fr);gap:12px;align-items:end;margin-top:10px}
+#ovl-order .order-carton-size>div{display:flex;align-items:center;gap:6px;color:var(--ink4)}#ovl-order .order-carton-size input{text-align:center;padding:6px}
+#ovl-order .prod-packing-summary{font-size:11px;color:var(--ink3);line-height:1.4;align-self:center;padding-top:16px}
+#ovl-order .order-extra-costs{margin-top:9px;font-size:11px;color:var(--ink3)}#ovl-order .order-extra-costs summary{cursor:pointer;width:max-content}#ovl-order .order-extra-costs>div{display:grid;grid-template-columns:150px 150px;gap:12px;margin-top:8px}
+#ovl-order .addup{display:inline-block;width:auto;margin:8px 0 0;padding:5px 0;border:0;background:none;color:var(--blue);font-size:12px;font-weight:500;cursor:pointer}
+#ovl-order .order-details>summary{cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:650;list-style:none}#ovl-order .order-details>summary::before{content:'›';font-size:20px;font-weight:400;color:var(--ink3)}#ovl-order .order-details[open]>summary::before{transform:rotate(90deg)}#ovl-order .order-details>summary small{margin-left:auto;font-size:11px;font-weight:400;color:var(--ink3)}
+#ovl-order .order-doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:16px}#ovl-order .order-doc-grid .btn{height:34px;padding:5px 10px;white-space:nowrap;font-size:11px}
+#ovl-order .order-samples{display:flex;align-items:center;gap:8px;padding-top:20px;font-size:12px;color:var(--ink2)}#ovl-order input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue)}
+#ovl-order .order-number-help{grid-column:1/-1;font-size:11px;color:var(--ink3);margin-bottom:6px}#ovl-order .order-number-help summary{cursor:pointer}#ovl-order .order-number-help p{margin:8px 0;line-height:1.5}
+#ovl-order textarea{height:60px;resize:vertical;margin-top:0}#ovl-order .order-details>.ff{margin-top:14px}
+#ovl-order #mo-av-block{margin-top:12px}#ovl-order .fsep{background:none;color:var(--ink2);font-size:12px;border-top:1px solid var(--bdr);padding:12px 0 8px;margin:0;border-radius:0}
+#ovl-order .order-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 24px;border-top:1px solid var(--bdr);background:var(--card);flex-shrink:0}
+#ovl-order .order-summary{display:flex!important;gap:22px;margin:0;padding:0;background:none;border:0;color:var(--ink)}#ovl-order .order-summary>div{display:flex;flex-direction:column;gap:3px}#ovl-order .order-summary span{font-size:10px;color:var(--ink3)}#ovl-order .order-summary strong{font-size:11px;font-weight:650;white-space:nowrap}
+#ovl-order .order-footer-actions{display:flex;gap:8px;align-items:center}#ovl-order .order-footer .btn{padding:8px 13px;min-height:34px;font-size:12px;border-radius:6px}#ovl-order [hidden]{display:none!important}
 </style></head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -667,80 +706,46 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 <datalist id="dl-next-action"><option value="Aguardar confirmação de arte"><option value="Enviar arte para aprovação"><option value="Confirmar pedido com fornecedor"><option value="Acompanhar produção"><option value="Solicitar fotos de produção"><option value="Confirmar prontidão"><option value="Solicitar BL e documentos"><option value="Acompanhar embarque"><option value="Confirmar ETA"><option value="Aguardar chegada no CD"><option value="Enviar fatura ao cliente"><option value="Cobrar pagamento"><option value="Pedido finalizado"></datalist>
 </main>
 
-<!-- MODAL NOVO PEDIDO -->
-<div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')">
-  <div class="modal">
-    <div class="mhdr">
-      <h2 id="mo-ttl">Novo Pedido</h2>
-      <div class="mhdr-actions">
-        <button class="btn btns" onclick="closeOvl('order')">Cancelar</button>
-        <button class="btn btns" onclick="gerarDocs()" title="Abre PI/CI/PL numa aba nova, já preenchido com os dados deste pedido">Documentos</button>
-        <button class="btn btnp" id="mo-btn" onclick="submitOrder()">Criar Pedido</button>
-      </div>
-      <button class="mcls" aria-label="Fechar" onclick="closeOvl('order')">✕</button>
-    </div>
-    <div class="mbody">
-      <div class="fg">
-        <div class="fsep">Identificação</div>
-        <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
-        <div class="ff"><label>Processo AV/FY</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
-        <div class="ff"><label>Data (DD/MM/AA)</label>
+<!-- MODAL NOVO PEDIDO · V62 -->
+<div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')"><div class="modal order-modal">
+ <div class="mhdr"><h2 id="mo-ttl">Novo pedido</h2><button class="mcls" type="button" aria-label="Fechar" onclick="closeOvl('order')">×</button></div>
+ <div class="mbody">
+  <section class="order-section"><h3>Pedido</h3>
+   <div class="order-primary-grid"><div class="ff"><label>Cliente</label>
+          <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
+          <datalist id="mo-cl-list"></datalist>
+        </div><div class="ff"><label>Processo AV/FY</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div><div class="ff"><label>Data</label>
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
             <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
             <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal',event)" tabindex="-1">📅</button>
           </div>
-        </div>
-        <div class="fsep">Referências</div>
-        <div class="ff"><label>PO do cliente</label><input id="mo-po" placeholder="ex: 015/26"></div>
-        <div class="ff"><label>Pedido ao fornecedor (opcional)</label><input id="mo-supplier-order" placeholder="Referência da encomenda à fábrica"></div>
-        <div class="ff"><label>PI FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-pi" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-pi-issue" onclick="issueFyNumber('PI')">Emitir / registrar</button></div></div>
-        <div class="ff"><label>CI/PL FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-ci" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-ci-issue" onclick="issueFyNumber('CIPL')">Emitir / registrar</button></div></div>
-        <div class="ff"><label>Ano de emissão FY</label><input id="mo-fy-year" type="number" min="2000" max="2199"></div>
-        <div class="ff full" style="font-size:.65rem;color:var(--ink3)">Configure em Tags o último número já emitido antes de iniciar. Digite um número existente para registrá-lo, ou deixe vazio e clique Emitir após salvar o pedido.</div>
-        <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
-          <div class="toggle-grp" id="mo-av-rota-toggle">
-            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
-            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
-          </div>
-        </div>
-        <div class="fsep">Cliente</div>
-        <div class="ff"><label>Cliente</label>
-          <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
-          <datalist id="mo-cl-list"></datalist>
-        </div>
-        <div class="fsep">Fornecedor</div>
-        <div class="ff"><label>Fornecedor padrão dos itens</label>
-          <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
-          <datalist id="mo-sup-list"></datalist>
-        </div>
-        <div class="ff"><label>PI / Invoice do fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div>
-        <div class="ff"><label>Contêiner</label>
-          <input id="mo-cont" placeholder='ex: 40" HC VIETNÃ' list="dl-cont" autocomplete="off">
+        </div></div>
+   <div class="order-secondary-grid"><div class="ff"><label>Coleção / descrição</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div><div class="ff"><label>PO do cliente</label><input id="mo-po" placeholder="ex: 015/26"></div><div class="ff"><label>Contêiner</label>
+          <input id="mo-cont" placeholder="ex: 40&quot; HC VIETNÃ" list="dl-cont" autocomplete="off">
           <datalist id="dl-cont"></datalist>
           <datalist id="dl-prod"></datalist>
-        </div>
-        <div class="ff"><label>ETD (DD/MM/AA)</label>
+        </div></div>
+  </section>
+  <section class="order-section order-products"><div class="order-section-heading"><h3>Produtos</h3><div class="order-default-supplier"><div class="ff"><label>Fornecedor padrão</label>
+          <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
+          <datalist id="mo-sup-list"></datalist>
+        </div></div></div><div id="mo-prod-rows"></div><button class="addup" type="button" onclick="addProdRow()">＋ Adicionar produto</button></section>
+  <details id="mo-documents-details" class="order-section order-details"><summary><span>Documentos e logística</span><small id="mo-documents-summary"></small></summary><div class="order-doc-grid">
+   <div class="ff"><label>PI FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-pi" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-pi-issue" onclick="issueFyNumber('PI')">Emitir</button></div></div><div class="ff"><label>CI/PL FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-ci" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-ci-issue" onclick="issueFyNumber('CIPL')">Emitir</button></div></div><div class="ff"><label>Pedido ao fornecedor</label><input id="mo-supplier-order" placeholder="Referência da encomenda à fábrica"></div><div class="ff"><label>PI / Invoice do fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div><div class="ff"><label>ETD · embarque</label>
           <div class="date-wrap">
             <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
             <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
             <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-etd-cal',event)" tabindex="-1">📅</button>
           </div>
-        </div>
-        <div class="ff"><label>Amostras</label>
-          <div class="toggle-grp" id="mo-amostras-toggle">
-            <button class="active" type="button" onclick="setAmostrasToggle(true)">ON</button>
-            <button type="button" onclick="setAmostrasToggle(false)">OFF</button>
+        </div><label class="order-samples"><input id="mo-amostras" type="checkbox" checked onchange="setAmostrasToggle(this.checked)"> Requer amostras</label><div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota AV</label>
+          <div class="toggle-grp" id="mo-av-rota-toggle">
+            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
+            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
           </div>
         </div>
-        <div class="fsep">Produtos — Desc × Ref × Qtd × Forn. × Cli. × Plates × Sample (USD)</div>
-        <div class="ff full">
-          <div id="mo-prod-rows"></div>
-          <button class="addup" onclick="addProdRow()">＋ Adicionar linha de produto</button>
-        </div>
-        <div class="preview-box" id="mo-preview"></div>
-
-        <div id="mo-av-block" style="display:none;grid-column:1/-1">
+   <details class="order-number-help"><summary>Sobre a numeração FY</summary><p>As sequências são configuradas em Tags. Após salvar o pedido, clique em Emitir para reservar o próximo número do ano atual. Para registrar um documento existente, informe o número completo; o ano é reconhecido pelo número.</p></details>
+  </div><div id="mo-av-block" style="display:none;grid-column:1/-1">
           <div class="fsep">🇧🇷 Camadas AV — nacionalização (IP tipo C)</div>
           <div class="grid-av">
             <div class="ff"><label>Câmbio venda cliente R$</label><input type="number" id="mo-av-cambio-venda" class="mono" placeholder="5.50" step="0.01"><span class="hint-sm">no ato da IP</span></div>
@@ -751,13 +756,10 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <div class="ff" id="mo-av-trading-wrap"><label>Custo Trading (R$)</label><input type="number" id="mo-av-custo-trading" class="mono" placeholder="0.00" step="0.01"><span class="hint-sm">valor fechado, editável depois</span></div>
             <div class="ff" id="mo-av-trading-nome-wrap"><label>Trading utilizada</label><input id="mo-av-trading-nome" placeholder="ex: Trading XYZ"><span class="hint-sm">fornecedor dessa camada</span></div>
           </div>
-        </div>
-        <div class="fsep">Notas</div>
-        <div class="ff full"><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div>
-      </div>
-    </div>
-  </div>
-</div>
+        </div><div class="ff full"><label>Observações</label><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div></details>
+ </div>
+ <footer class="order-footer"><div id="mo-preview" class="order-summary"></div><div class="order-footer-actions"><button class="btn btns" type="button" onclick="closeOvl('order')">Cancelar</button><button class="btn btns" type="button" id="mo-docs-btn" onclick="gerarDocs()" hidden>Documentos</button><button class="btn btnp" id="mo-btn" type="button" onclick="submitOrder()">Criar pedido</button></div></footer>
+</div></div>
 
 <!-- INLINE EDIT POPUP -->
 <div class="epop" id="epop">
@@ -2762,9 +2764,9 @@ function updateFyReferenceFields(order,resetYear=true){
  for(const [kind,field,id] of [['PI','fyPiNumber','mo-fy-pi'],['CIPL','fyCiNumber','mo-fy-ci']]){
   const el=document.getElementById(id),button=document.getElementById(id+'-issue');
   el.value=order?.[field]||legacyFyNumber(order,kind);el.readOnly=!!order?.fyNumbersRegistered?.[kind];
-  button.disabled=!!order?.fyNumbersRegistered?.[kind];button.textContent=button.disabled?'Emitido':'Emitir / registrar';
+  button.disabled=!!order?.fyNumbersRegistered?.[kind];button.textContent=button.disabled?'Emitido':'Emitir';
  }
- if(resetYear)document.getElementById('mo-fy-year').value=fyYear();
+ const summary=document.getElementById('mo-documents-summary');if(summary)summary.textContent=[order?.fyPiNumber?'PI '+order.fyPiNumber:'',order?.fyCiNumber?'CI/PL '+order.fyCiNumber:''].filter(Boolean).join(' · ');
  document.getElementById('mo-supplier-order').value=order?.supplierOrderNumber||'';
 }
 async function issueFyNumber(kind){
@@ -2773,7 +2775,7 @@ async function issueFyNumber(kind){
  const key=_cryptoKey,userId=authUser?.id,formVersion=_orderFormVersion;button.disabled=true;
  try{
   if(!order.documentOrderId){order.documentOrderId=crypto.randomUUID();await saveAll(()=>key===_cryptoKey&&userId===authUser?.id);}
-  const number=await reserveFyNumber(order,kind,document.getElementById(id).value.trim(),document.getElementById('mo-fy-year').value);
+  const number=await reserveFyNumber(order,kind,document.getElementById(id).value.trim(),fyYear());
   if(key!==_cryptoKey||userId!==authUser?.id)return;
   order[field]=number;order.fyNumbersRegistered={...order.fyNumbersRegistered,[kind]:true};
   if(kind==='CIPL'){const p=linkPay(order);if(p)p.clientInv=number;}
@@ -2808,31 +2810,27 @@ function orderSupplierLabel(order){return orderSupplierNames(order).join(' / ')|
 ══════════════════════════════════════ */
 let _editNum=null,_orderFormVersion=0,_orderSaving=false;
 function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={}){
-  const container=document.getElementById('mo-prod-rows');
-  const row=document.createElement('div');row.className='prodrow';
-  row.style.cssText='display:grid;grid-template-columns:2.3fr 1fr .8fr .9fr .9fr .7fr .7fr auto;gap:.3rem;align-items:end';
-  row.innerHTML=`<div><span class="plbl">Desc.</span><input type="text" placeholder="Ecobag Raffia G" value="${esc(desc)}" list="dl-prod" oninput="fillProductPacking(this);updatePreview()" style="width:100%"></div>
-    <div><span class="plbl">Ref.</span><input type="text" placeholder="SKU / ref" value="${esc(ref)}" autocomplete="off" style="width:100%"></div>
-    <div><span class="plbl">Qtd</span><input type="number" placeholder="0" value="${qty||''}" min="0" oninput="updatePreview()" style="width:100%"></div>
-    <div><span class="plbl">Forn.$</span><input type="number" placeholder="0.000" value="${pForn||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
-    <div><span class="plbl">Cli.$</span><input type="number" placeholder="0.000" value="${pCli||''}" step="0.001" oninput="updatePreview()" style="width:100%"></div>
-    <div><span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
-    <div><span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
-    <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>
-    <label style="grid-column:1/-1;display:flex;align-items:center;gap:.6rem"><span class="plbl" style="min-width:90px">Fornecedor do item</span><input data-item-supplier list="mo-sup-list" placeholder="Usar fornecedor padrão" value="${esc(packing.supplier||'')}" style="flex:1;min-width:0"></label>
-    <div class="prod-packing-row" style="grid-column:1/-1;display:flex;align-items:end;gap:.6rem;padding:.45rem .6rem .6rem;background:var(--ltgry);border-radius:6px;margin-bottom:.4rem">
-      <span class="plbl" style="align-self:center;min-width:74px">Embalagem</span>
-      ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
-      <span class="prod-packing-summary" style="font-size:.7rem;color:var(--ink3);min-width:110px;align-self:center"></span>
-    </div>`;
-  row.dataset.packingProductKey=orderSuggestionKey(desc);
-  container.appendChild(row);updatePreview();
+ const container=document.getElementById('mo-prod-rows'),row=document.createElement('div');row.className='prodrow';
+ const input=(key,label,value,type='text',extra='')=>'<label><span class="plbl">'+label+'</span><input data-item-field="'+key+'" type="'+type+'" value="'+esc(String(value??''))+'" '+extra+' oninput="'+(key==='desc'?'fillProductPacking(this);':'')+'updatePreview()"></label>';
+ row.innerHTML='<div class="order-product-main">'+
+ input('desc','Produto',desc,'text','list="dl-prod" placeholder="Selecionar ou digitar" autocomplete="off"')+
+ input('ref','Referência',ref,'text','placeholder="SKU / EAN"')+
+ '<label><span class="plbl">Fornecedor</span><input data-item-supplier list="mo-sup-list" placeholder="Padrão" value="'+esc(packing.supplier||'')+'"></label>'+
+ input('qty','Quantidade',qty||'','number','min="0" step="1" placeholder="0"')+
+ input('priceForn','Compra USD',pForn||'','number','min="0" step="0.001" placeholder="0,000"')+
+ input('priceCli','Venda USD',pCli||'','number','min="0" step="0.001" placeholder="0,000"')+
+ '<button class="rm" type="button" onclick="this.closest(&quot;.prodrow&quot;).remove();updatePreview()" aria-label="Remover produto">×</button></div>'+
+ '<div class="order-pack-row"><div class="order-carton-size"><span class="plbl">Caixa C × L × A (cm)</span><div>'+['cartonLength','cartonWidth','cartonHeight'].map((key,index)=>'<input type="number" data-packing="'+key+'" aria-label="'+['C (cm)','L (cm)','A (cm)'][index]+'" placeholder="'+['C','L','A'][index]+'" min="0.01" step="any" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()">').join('<span>×</span>')+'</div></div>'+
+ [['unitsPerCarton','Un./caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>'<label><span class="plbl">'+label+'</span><input type="number" data-packing="'+key+'" aria-label="'+label+'" min="'+(key==='unitsPerCarton'?'1':'0.01')+'" step="'+(key==='unitsPerCarton'?'1':'any')+'" placeholder="—" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()"></label>').join('')+
+ '<span class="prod-packing-summary"></span></div>'+
+ '<details class="order-extra-costs" '+((plates||sample)?'open':'')+'><summary>Custos adicionais <span class="order-extra-value"></span></summary><div>'+input('plates','Cilindros USD',plates||'','number','min="0" step="0.01" placeholder="0,00"')+input('sample','Amostras USD',sample||'','number','min="0" step="0.01" placeholder="0,00"')+'</div></details>';
+ row.dataset.packingProductKey=orderSuggestionKey(desc);container.appendChild(row);updatePreview();
 }
 function readProdRows(){
-  return[...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
-    const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0,supplier:row.querySelector('[data-item-supplier]')?.value.trim()||document.getElementById('mo-sup').value.trim(),...readOrderPacking(row)};
-  }).filter(r=>r.qty>0);
+ return [...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
+  const value=key=>row.querySelector('[data-item-field="'+key+'"]').value;
+  return{desc:value('desc').trim(),ref:value('ref').trim(),qty:parseInt(value('qty'))||0,priceForn:parseFloat(value('priceForn'))||0,priceCli:parseFloat(value('priceCli'))||0,plates:parseFloat(value('plates'))||0,sample:parseFloat(value('sample'))||0,supplier:row.querySelector('[data-item-supplier]').value.trim()||document.getElementById('mo-sup').value.trim(),...readOrderPacking(row)};
+ }).filter(r=>r.qty>0);
 }
 const PRODUCT_PACKING_FIELDS=['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'];
 function productPackingFor(name){
@@ -2898,7 +2896,8 @@ function validateOrderPacking(){
 }
 function updatePreview(){
   document.querySelectorAll('#mo-prod-rows .prodrow').forEach(row=>{
-    const info=orderPackingInfo({qty:row.querySelectorAll('input')[2].value,...readOrderPacking(row)});
+    const info=orderPackingInfo({qty:row.querySelector('[data-item-field=qty]').value,...readOrderPacking(row)});
+    const extra=row.querySelector('.order-extra-value');if(extra){const amount=(Number(row.querySelector('[data-item-field=plates]').value)||0)+(Number(row.querySelector('[data-item-field=sample]').value)||0);extra.textContent=amount?' · '+fUSD(amount):'';}
     const label=row.querySelector('.prod-packing-summary');
     if(label)label.textContent=info.cartons?fN(info.cartons)+' caixas'+(info.lastCartonQty?' · última: '+fN(info.lastCartonQty)+' un.':'')+(info.cbm?' · '+info.cbm.toLocaleString('pt-BR',{maximumFractionDigits:2})+' CBM':''):'';
   });
@@ -2908,8 +2907,7 @@ function updatePreview(){
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
   const prev=document.getElementById('mo-preview');
-  if(rows.length>0){prev.style.display='block';prev.innerHTML=`<b>Resumo</b> | Qtd: <b>${fN(totQty)}</b> | Compra: <b style="color:var(--red)">${fUSD(totForn)}</b> | Venda: <b style="color:var(--teal)">${fUSD(totVenda)}</b> | Margem: <b style="color:${mg>=0?'var(--green)':'var(--red)'}"> ${fUSD(mg)} (${pctM}%)</b>`;}
-  else prev.style.display='none';
+  prev.style.display='';prev.innerHTML=[['Quantidade',fN(totQty)],['Compra',fUSD(totForn)],['Venda',fUSD(totVenda)],['Margem',fUSD(mg)+' · '+pctM+'%']].map(([label,value])=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>').join('');
 }
 // Sugestões compartilhadas: cadastros e nomes já usados em pedidos/IPs.
 function orderSuggestionKey(value){
@@ -2947,7 +2945,7 @@ function rvAVCheck(){
   const pi=(document.getElementById('mo-pi').value||'').trim();
   const isC=/c$/i.test(pi);
   document.getElementById('mo-av-block').style.display=isC?'':'none';
-  document.getElementById('mo-av-rota-ff').style.display=isC?'':'none';
+  document.getElementById('mo-av-rota-ff').style.display=isC?'':'none';if(isC)document.getElementById('mo-documents-details').open=true;
 }
 function rvAVSetRota(r){
   document.querySelectorAll('#mo-av-rota-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(r==='direta'?'direta':'trading')));
@@ -2958,15 +2956,17 @@ function rvAVSetRota(r){
 let _avRota='direta';
 let _moAmostras=true;
 function setAmostrasToggle(v){
-  _moAmostras=v;
+  _moAmostras=v;const checkbox=document.getElementById('mo-amostras');if(checkbox)checkbox.checked=!!v;
   document.querySelectorAll('#mo-amostras-toggle button').forEach(b=>b.classList.toggle('active',(b.textContent==='ON')===v));
 }
 function openOrderModal(num){
   _orderFormVersion++;
   document.getElementById('ovl-order').dataset.documentOrderId=(num!==null?orders.find(o=>o.num===num)?.documentOrderId:null)||crypto.randomUUID();
   _editNum=num;
-  document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
-  document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
+  document.getElementById('mo-docs-btn').hidden=num===null;
+  document.getElementById('mo-documents-details').open=false;
+  document.getElementById('mo-ttl').textContent=num!==null?'Editar pedido':'Novo pedido';
+  document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
   ['po','colecao','pi','data','cl','sup','sup-inv','cont','etd','notes','av-cambio-venda','av-cambio-camadas','av-custo-rf','av-custo-trading','av-trading-nome'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
   updateFyReferenceFields(num!==null?orders.find(o=>o.num===num):null);
