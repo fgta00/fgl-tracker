@@ -238,6 +238,10 @@ function applyOrderData(d){
  });
  for(const id of Object.keys(DOC_COLS))fillItemsTable(id,Array.isArray(d.items)?d.items:[]);
  restoreDocumentEdits(d.documentEdits);
+ if(d.documentNumberingManaged){
+  for(const [field,key] of [['pi_number','piNumber'],['invoice_number','invoiceNumber'],['pl_number','packingListNumber']])document.querySelectorAll('[data-field="'+field+'"]').forEach(el=>{el.textContent=d[key]||'';el.contentEditable='false';el.title='Numeração oficial: emitir ou registrar na Identificação do pedido.';});
+ }
+
  if(d.deliverySource==='readiness')document.querySelectorAll('[data-field="delivery"]').forEach(el=>{
   const current=el.textContent.trim();
   if(el.dataset.manual==='true')return;

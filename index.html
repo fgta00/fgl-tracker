@@ -683,7 +683,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
       <div class="fg">
         <div class="fsep">Identificação</div>
         <div class="ff"><label>Coleção / Descrição PO</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div>
-        <div class="ff"><label>IP (ref. interna)</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
+        <div class="ff"><label>Processo AV/FY</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div>
         <div class="ff"><label>Data (DD/MM/AA)</label>
           <div class="date-wrap">
             <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
@@ -691,6 +691,13 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal',event)" tabindex="-1">📅</button>
           </div>
         </div>
+        <div class="fsep">Referências</div>
+        <div class="ff"><label>PO do cliente</label><input id="mo-po" placeholder="ex: 015/26"></div>
+        <div class="ff"><label>Pedido ao fornecedor (opcional)</label><input id="mo-supplier-order" placeholder="Referência da encomenda à fábrica"></div>
+        <div class="ff"><label>PI FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-pi" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-pi-issue" onclick="issueFyNumber('PI')">Emitir / registrar</button></div></div>
+        <div class="ff"><label>CI/PL FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-ci" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-ci-issue" onclick="issueFyNumber('CIPL')">Emitir / registrar</button></div></div>
+        <div class="ff"><label>Ano de emissão FY</label><input id="mo-fy-year" type="number" min="2000" max="2199"></div>
+        <div class="ff full" style="font-size:.65rem;color:var(--ink3)">Configure em Tags o último número já emitido antes de iniciar. Digite um número existente para registrá-lo, ou deixe vazio e clique Emitir após salvar o pedido.</div>
         <div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota (IP tipo C)</label>
           <div class="toggle-grp" id="mo-av-rota-toggle">
             <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
@@ -702,13 +709,12 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
           <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
           <datalist id="mo-cl-list"></datalist>
         </div>
-        <div class="ff"><label>PO#</label><input id="mo-po" placeholder="ex: 015/26"></div>
         <div class="fsep">Fornecedor</div>
-        <div class="ff"><label>Fornecedor</label>
+        <div class="ff"><label>Fornecedor padrão dos itens</label>
           <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
           <datalist id="mo-sup-list"></datalist>
         </div>
-        <div class="ff"><label>Invoice # Fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div>
+        <div class="ff"><label>PI / Invoice do fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div>
         <div class="ff"><label>Contêiner</label>
           <input id="mo-cont" placeholder='ex: 40" HC VIETNÃ' list="dl-cont" autocomplete="off">
           <datalist id="dl-cont"></datalist>
@@ -784,6 +790,15 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
   <div class="modal" style="width:860px">
     <div class="mhdr"><h2>Gerenciar Cadastros</h2><button class="mcls" aria-label="Fechar" onclick="closeOvl('status')">✕</button></div>
     <div class="mbody">
+      <section style="padding:.7rem;border:1px solid var(--bdr2);border-radius:8px;margin-bottom:1rem">
+       <div class="sh">Numeração oficial FY</div>
+       <label style="font-size:.7rem">Ano <input id="fy-counter-year" type="number" min="2000" max="2199" style="width:90px" onchange="loadFyNumberState()"></label>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.5rem">
+        <div><label style="font-size:.7rem">Última PI FY emitida</label><div style="display:flex;gap:.3rem"><input id="fy-counter-pi" placeholder="2026-008 ou 0" style="width:160px"><button id="fy-counter-pi-save" class="btn btns" disabled onclick="configureFyCounter('PI')">Configurar</button></div><small id="fy-next-pi"></small></div>
+        <div><label style="font-size:.7rem">Última CI/PL FY emitida</label><div style="display:flex;gap:.3rem"><input id="fy-counter-ci" placeholder="2026-003 ou 0" style="width:160px"><button id="fy-counter-ci-save" class="btn btns" disabled onclick="configureFyCounter('CIPL')">Configurar</button></div><small id="fy-next-ci"></small></div>
+       </div><p id="fy-counter-status" style="font-size:.65rem;color:var(--ink3);margin-bottom:0"></p>
+      </section>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
         <div>
           <div class="sh">Clientes</div>
@@ -2056,7 +2071,7 @@ function renderInternal(){
         <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
           <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--purple)" title="Invoice Fornecedor">${esc(linkPay(o)?.inv||'—')}</span>
           <span style="color:var(--ink4);font-size:.65rem">·</span>
-          <span style="font-size:.7rem;color:var(--ink3)">${esc(o.supplier||'—')}</span>
+          <span style="font-size:.7rem;color:var(--ink3)">${esc(orderSupplierLabel(o))}</span>
         </div>
         <div style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px">${o.colecao?esc(o.colecao):'—'}</div>
       </td>
@@ -2711,10 +2726,87 @@ function savePrices(){
   saveAll();renderAll();closeOvl('prices');toast(`IP ${_prPi} atualizado ✓`);
 }
 
+const FY_FORMAT=/^\d{4}-\d{3,6}$/;
+function fyYear(){return new Date().getFullYear();}
+function fyRpcError(error){return error?.code==='23505'?'Este número oficial já está vinculado a outro pedido.':/PGRST202|does not exist|schema cache/i.test((error?.code||'')+' '+(error?.message||''))?'Instale primeiro o SQL de numeração FY no Supabase.':error?.message||'Não foi possível reservar a numeração FY.';}
+async function reserveFyNumber(order,kind,manual='',year=fyYear()){
+ if(!_supaOK||!authUser||!_cryptoKey)throw new Error('Entre no Tracker para emitir a numeração.');
+ const key=_cryptoKey,userId=authUser.id;
+ if(manual&&!FY_FORMAT.test(manual))throw new Error('Use o formato AAAA-001.');
+ const selectedYear=manual?Number(manual.slice(0,4)):Number(year);
+ const {data,error}=await _supa.rpc('fy_reserve_document_number',{p_kind:kind,p_year:selectedYear,p_order_key:order.documentOrderId,p_existing:manual||null});
+ if(key!==_cryptoKey||userId!==authUser?.id)throw new Error('A sessão mudou. Reabra o pedido.');
+ if(error)throw new Error(fyRpcError(error));
+ if(!data?.number||!FY_FORMAT.test(data.number))throw new Error('Resposta de numeração inválida.');
+ return data.number;
+}
+async function prepareFyReferences(existing){
+ const refs={documentOrderId:existing?.documentOrderId||document.getElementById('ovl-order').dataset.documentOrderId||crypto.randomUUID(),supplierOrderNumber:document.getElementById('mo-supplier-order').value.trim(),fyNumbersRegistered:{...existing?.fyNumbersRegistered}};
+ for(const [kind,field,id] of [['PI','fyPiNumber','mo-fy-pi'],['CIPL','fyCiNumber','mo-fy-ci']]){
+  const value=document.getElementById(id).value.trim();
+  if(existing?.fyNumbersRegistered?.[kind]&&value!==existing[field])throw new Error('Um número oficial já emitido não pode ser substituído.');
+  refs[field]=value;
+  if(value&&!existing?.fyNumbersRegistered?.[kind]){refs[field]=await reserveFyNumber(refs,kind,value);refs.fyNumbersRegistered[kind]=true;}
+ }
+ return refs;
+}
+function legacyFyNumber(order,kind){
+ if(!order)return '';
+ const existing=kind==='PI'?order.fyPiNumber:order.fyCiNumber||linkPay(order)?.clientInv;
+ if(FY_FORMAT.test(existing||''))return existing;
+ const html=order.documentEdits?.sheets?.[kind==='PI'?'proforma':'invoice'];
+ if(html){const doc=new DOMParser().parseFromString(html,'text/html'),value=doc.querySelector('[data-field="'+(kind==='PI'?'pi_number':'invoice_number')+'"]')?.textContent.trim();if(FY_FORMAT.test(value||''))return value;}
+ return '';
+}
+function updateFyReferenceFields(order,resetYear=true){
+ for(const [kind,field,id] of [['PI','fyPiNumber','mo-fy-pi'],['CIPL','fyCiNumber','mo-fy-ci']]){
+  const el=document.getElementById(id),button=document.getElementById(id+'-issue');
+  el.value=order?.[field]||legacyFyNumber(order,kind);el.readOnly=!!order?.fyNumbersRegistered?.[kind];
+  button.disabled=!!order?.fyNumbersRegistered?.[kind];button.textContent=button.disabled?'Emitido':'Emitir / registrar';
+ }
+ if(resetYear)document.getElementById('mo-fy-year').value=fyYear();
+ document.getElementById('mo-supplier-order').value=order?.supplierOrderNumber||'';
+}
+async function issueFyNumber(kind){
+ const order=orders.find(o=>o.num===_editNum);if(!order){toast('Salve o pedido antes de emitir o número oficial.','warn');return;}
+ const id=kind==='PI'?'mo-fy-pi':'mo-fy-ci',field=kind==='PI'?'fyPiNumber':'fyCiNumber',button=document.getElementById(id+'-issue');
+ const key=_cryptoKey,userId=authUser?.id,formVersion=_orderFormVersion;button.disabled=true;
+ try{
+  if(!order.documentOrderId){order.documentOrderId=crypto.randomUUID();await saveAll(()=>key===_cryptoKey&&userId===authUser?.id);}
+  const number=await reserveFyNumber(order,kind,document.getElementById(id).value.trim(),document.getElementById('mo-fy-year').value);
+  if(key!==_cryptoKey||userId!==authUser?.id)return;
+  order[field]=number;order.fyNumbersRegistered={...order.fyNumbersRegistered,[kind]:true};
+  if(kind==='CIPL'){const p=linkPay(order);if(p)p.clientInv=number;}
+  await saveAll(()=>key===_cryptoKey&&userId===authUser?.id);if(formVersion===_orderFormVersion)updateFyReferenceFields(order,false);toast((kind==='PI'?'PI FY':'CI/PL FY')+' '+number+' registrada ✓');
+ }catch(error){if(key===_cryptoKey&&userId===authUser?.id)toast(error.message,'err');}
+ finally{if(key===_cryptoKey&&userId===authUser?.id&&formVersion===_orderFormVersion)button.disabled=!!order.fyNumbersRegistered?.[kind];}
+}
+async function loadFyNumberState(){
+ const year=Number(document.getElementById('fy-counter-year')?.value);const status=document.getElementById('fy-counter-status');if(!status||!_supaOK||!authUser)return;
+ const key=_cryptoKey,userId=authUser.id;status.textContent='Consultando sequências…';
+ try{
+  const {data,error}=await _supa.rpc('fy_document_number_state',{p_year:year});
+  if(key!==_cryptoKey||userId!==authUser?.id||Number(document.getElementById('fy-counter-year').value)!==year)return;
+  if(error)throw new Error(fyRpcError(error));
+  for(const row of data||[]){const id=row.kind==='PI'?'pi':'ci';document.getElementById('fy-counter-'+id).value=row.last?String(year)+'-'+String(row.last).padStart(3,'0'):'';document.getElementById('fy-counter-'+id+'-save').disabled=!row.can_configure;document.getElementById('fy-next-'+id).textContent=row.initialized?'Próximo: '+year+'-'+String(row.last+1).padStart(3,'0'):'Configure o último emitido (ou 0 se nenhum).';}
+  status.textContent='Sequências independentes por ano. Números reservados não são reutilizados.';
+ }catch(error){if(key===_cryptoKey&&userId===authUser?.id)status.textContent=error.message;}
+}
+async function configureFyCounter(kind){
+ const year=Number(document.getElementById('fy-counter-year').value),id=kind==='PI'?'pi':'ci',text=document.getElementById('fy-counter-'+id).value.trim();
+ let last;if(text==='0')last=0;else if(FY_FORMAT.test(text)&&Number(text.slice(0,4))===year)last=Number(text.split('-')[1]);else{toast('Informe o último número AAAA-001, ou 0 se nenhum foi emitido.','err');return;}
+ const key=_cryptoKey,userId=authUser?.id;
+ const {error}=await _supa.rpc('fy_configure_document_counter',{p_kind:kind,p_year:year,p_last:last});
+ if(key!==_cryptoKey||userId!==authUser?.id)return;
+ if(error)toast(fyRpcError(error),'err');else{toast('Sequência configurada ✓');loadFyNumberState();}
+}
+function orderSupplierNames(order){const rows=linkPay(order)?.unitPrices||order.items||[];return [...new Set(rows.map(r=>r.supplier).filter(Boolean))];}
+function orderSupplierLabel(order){return orderSupplierNames(order).join(' / ')||order.supplier||'—';}
+
 /* ══════════════════════════════════════
    ORDER MODAL
 ══════════════════════════════════════ */
-let _editNum=null;
+let _editNum=null,_orderFormVersion=0,_orderSaving=false;
 function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={}){
   const container=document.getElementById('mo-prod-rows');
   const row=document.createElement('div');row.className='prodrow';
@@ -2727,6 +2819,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packin
     <div><span class="plbl">Plates</span><input type="number" placeholder="0" value="${plates||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
     <div><span class="plbl">Sample</span><input type="number" placeholder="0" value="${sample||''}" step="0.01" oninput="updatePreview()" style="width:100%"></div>
     <button class="rm" onclick="this.parentElement.remove();updatePreview()" aria-label="Remover produto">✕</button>
+    <label style="grid-column:1/-1;display:flex;align-items:center;gap:.6rem"><span class="plbl" style="min-width:90px">Fornecedor do item</span><input data-item-supplier list="mo-sup-list" placeholder="Usar fornecedor padrão" value="${esc(packing.supplier||'')}" style="flex:1;min-width:0"></label>
     <div class="prod-packing-row" style="grid-column:1/-1;display:flex;align-items:end;gap:.6rem;padding:.45rem .6rem .6rem;background:var(--ltgry);border-radius:6px;margin-bottom:.4rem">
       <span class="plbl" style="align-self:center;min-width:74px">Embalagem</span>
       ${[['cartonLength','C (cm)'],['cartonWidth','L (cm)'],['cartonHeight','A (cm)'],['unitsPerCarton','Qtd/caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>`<label style="flex:1;min-width:0"><span class="plbl">${label}</span><input type="number" data-packing="${key}" aria-label="${label}" min="${key==='unitsPerCarton'?'1':'0.01'}" step="${key==='unitsPerCarton'?'1':'any'}" value="${esc(String(packing[key]??''))}" placeholder="—" oninput="updatePreview()" style="width:100%"></label>`).join('')}
@@ -2738,7 +2831,7 @@ function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packin
 function readProdRows(){
   return[...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
     const ins=row.querySelectorAll('input');
-    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0,...readOrderPacking(row)};
+    return{desc:ins[0].value.trim(),ref:ins[1].value.trim(),qty:parseInt(ins[2].value)||0,priceForn:parseFloat(ins[3].value)||0,priceCli:parseFloat(ins[4].value)||0,plates:parseFloat(ins[5].value)||0,sample:parseFloat(ins[6].value)||0,supplier:row.querySelector('[data-item-supplier]')?.value.trim()||document.getElementById('mo-sup').value.trim(),...readOrderPacking(row)};
   }).filter(r=>r.qty>0);
 }
 const PRODUCT_PACKING_FIELDS=['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'];
@@ -2759,12 +2852,13 @@ function fillProductPacking(input){
   if(row.dataset.packingProductKey===key)return;
   const preset=productPackingFor(input.value);
   if(preset||row.dataset.packingProductKey)for(const field of PRODUCT_PACKING_FIELDS){const el=row.querySelector('[data-packing="'+field+'"]');if(el)el.value=preset?.[field]??'';}
+  const supplierInput=row.querySelector('[data-item-supplier]');if(supplierInput)supplierInput.value=preset?.supplier||'';
   row.dataset.packingProductKey=key;
 }
 function rememberProductPacking(rows){
   rows.forEach(row=>{
     const key=orderSuggestionKey(row.desc);if(!key)return;
-    productPacking[key]=Object.fromEntries(PRODUCT_PACKING_FIELDS.map(field=>[field,Number(row[field])>0?Number(row[field]):null]));
+    productPacking[key]={...Object.fromEntries(PRODUCT_PACKING_FIELDS.map(field=>[field,Number(row[field])>0?Number(row[field]):null])),supplier:row.supplier||''};
   });
 }
 function internalProductNames(o){
@@ -2835,7 +2929,7 @@ function rememberOrderNames(client,supplier,rows){
     const name=String(value||'').trim(),key=orderSuggestionKey(name);
     if(key&&key!=='—'&&!arr.some(v=>orderSuggestionKey(v)===key))arr.push(name);
   };
-  add(CLIENTES,client);add(FORNECEDORES,supplier);
+  add(CLIENTES,client);const suppliers=[...new Set(rows.map(r=>r.supplier).filter(Boolean))];if(suppliers.length)suppliers.forEach(name=>add(FORNECEDORES,name));else add(FORNECEDORES,supplier);
   rows.forEach(row=>add(PRODUTOS,row.desc));
 }
 function populateDatalistsMestre(){
@@ -2868,11 +2962,14 @@ function setAmostrasToggle(v){
   document.querySelectorAll('#mo-amostras-toggle button').forEach(b=>b.classList.toggle('active',(b.textContent==='ON')===v));
 }
 function openOrderModal(num){
+  _orderFormVersion++;
+  document.getElementById('ovl-order').dataset.documentOrderId=(num!==null?orders.find(o=>o.num===num)?.documentOrderId:null)||crypto.randomUUID();
   _editNum=num;
   document.getElementById('mo-ttl').textContent=num!==null?'Editar Pedido':'Novo Pedido';
   document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar Pedido';
   document.getElementById('mo-prod-rows').innerHTML='';
   ['po','colecao','pi','data','cl','sup','sup-inv','cont','etd','notes','av-cambio-venda','av-cambio-camadas','av-custo-rf','av-custo-trading','av-trading-nome'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
+  updateFyReferenceFields(num!==null?orders.find(o=>o.num===num):null);
   rvAVSetRota('direta');
   setAmostrasToggle(true);
   if(num!==null){
@@ -2891,7 +2988,7 @@ function openOrderModal(num){
       rvAVSetRota(o.rotaAV==='trading'?'trading':'direta');
       const p=linkPay(o);
       if(p){
-        document.getElementById('mo-sup').value=p.supplier||'';
+        document.getElementById('mo-sup').value=o.defaultSupplier||p.supplier||o.supplier||'';
         document.getElementById('mo-sup-inv').value=p.inv||'';
         document.getElementById('mo-etd').value=p.etd||'';
       }else document.getElementById('mo-sup').value=o.supplier||'';
@@ -2907,18 +3004,21 @@ function openOrderModal(num){
   populateDatalistsMestre();
   document.getElementById('ovl-order').classList.add('open');ovlToFront('ovl-order');
 }
-function submitOrder(){
+async function submitOrder(){
+  if(_orderSaving)return;_orderSaving=true;try{
+  const submitVersion=_orderFormVersion,submitKey=_cryptoKey,submitUser=authUser?.id;
   const po=document.getElementById('mo-po').value.trim()||'—';
   const colecao=document.getElementById('mo-colecao').value.trim();
   const pi=document.getElementById('mo-pi').value.trim();
   const orderDate=normDate(document.getElementById('mo-data').value.trim())||todayDisp();
   const client=document.getElementById('mo-cl').value.trim();
-  const supplier=document.getElementById('mo-sup').value.trim();
+  let supplier=document.getElementById('mo-sup').value.trim();const defaultSupplier=supplier;
   const inv=document.getElementById('mo-sup-inv').value.trim();
   const container=document.getElementById('mo-cont').value.trim();
   const etd=normDate(document.getElementById('mo-etd').value.trim())||'—';
   const notes=document.getElementById('mo-notes').value.trim();
   const prodRows=readProdRows();const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
+  const itemSuppliers=[...new Set(prodRows.map(r=>r.supplier).filter(Boolean))];if(itemSuppliers.length)supplier=itemSuppliers.join(' / ');
   // Camadas AV — só relevantes se IP tipo C (mas sempre lê o que tiver preenchido)
   const avFields=isIpC(pi)?{
     rotaAV:_avRota,
@@ -2934,6 +3034,9 @@ function submitOrder(){
   if(!supplier){toast('⚠ Fornecedor obrigatório','err');return;}
   if(!prodRows.length){toast('⚠ Adicione produto','err');return;}
   if(!validateOrderPacking())return;
+  if(prodRows.some(r=>!r.supplier)){toast('⚠ Informe o fornecedor padrão ou o fornecedor de cada item','err');return;}
+  let fyRefs;try{fyRefs=await prepareFyReferences(orders.find(o=>o.num===_editNum));}catch(error){toast(error.message,'err');return;}
+  if(submitVersion!==_orderFormVersion||submitKey!==_cryptoKey||submitUser!==authUser?.id){toast('A sessão ou a janela mudou. Confira o pedido antes de salvar.','warn');return;}
 
   if(_editNum!==null){
     pushUndo('Editar pedido #'+_editNum);
@@ -2942,7 +3045,7 @@ function submitOrder(){
       // Buscar payment ANTES de alterar pi/po
       const p=linkPay(o);
       const oldPi=o.pi;
-      o.items=prodRows;
+      o.items=prodRows;Object.assign(o,fyRefs,{defaultSupplier});
       o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.supplier=supplier;o.container=container;o.notes=notes;o.orderDate=orderDate;o.amostras=amostras;
       Object.assign(o,avFields);
       if(totalQty>0)o.total=totalQty;
@@ -2950,6 +3053,7 @@ function submitOrder(){
       if(p){
         if(pi&&pi!==oldPi){p.pi=pi; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
         // clientInv/status/eta não têm mais campo no modal — preserva o que já estava salvo
+        if(fyRefs.fyCiNumber)p.clientInv=fyRefs.fyCiNumber;
         p.po=po;p.inv=inv;p.client=client;p.supplier=supplier||p.supplier;p.etd=etd;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
       }
       if(etd&&etd!=='—'){
@@ -2965,7 +3069,7 @@ function submitOrder(){
   const nn=Math.max(...orders.map(x=>x.num),0)+1;
   const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
   if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true,true);
-  const newOrder={num:nn,items:prodRows,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
+  const newOrder={num:nn,...fyRefs,defaultSupplier,items:prodRows,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
   // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
   if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
   if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
@@ -2976,11 +3080,12 @@ function submitOrder(){
   if(pi&&prodRows.length>0){
     const eta=newOrder.dates[7]&&newOrder.dates[7].v?newOrder.dates[7].v:'—'; // eta não tem campo próprio — vem do auto-cascade a partir do ETD
     const existing=payments.find(x=>x.pi===pi);
-    if(!existing)payments.unshift({pi,po,inv,client,clientInv:'',supplier:supplier||'—',status:'Mass P contracted',etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
+    if(!existing)payments.unshift({pi,po,inv,client,clientInv:fyRefs.fyCiNumber||'',supplier:supplier||'—',status:'Mass P contracted',etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
     else{existing.po=po;existing.inv=inv;existing.client=client;existing.supplier=supplier||existing.supplier;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
   }
   rememberOrderNames(client,supplier,prodRows);
   saveAll();renderAll();closeOvl('order');toast(`Pedido #${nn} criado ✓`);
+  }finally{_orderSaving=false;}
 }
 
 /* ══════════════════════════════════════
@@ -3028,18 +3133,19 @@ function gerarDocs(num){
     destinationPort:o.destinationPort||undefined,
     ncm:o.ncm||undefined,
     buyer:o.client||'',
-    supplier:(p&&p.supplier)||'',
-    piNumber:o.pi||('#'+o.num),
+    supplier:o.supplier||(p&&p.supplier)||'',
+    piNumber:o.fyPiNumber||legacyFyNumber(o,'PI'),
     piDate:o.orderDate||'',
     // Commercial Invoice emitida ao cliente. Não confundir com p.inv,
     // que é a invoice recebida do fornecedor.
-    invoiceNumber:(p&&p.clientInv)||'',
+    invoiceNumber:o.fyCiNumber||((p&&FY_FORMAT.test(p.clientInv||''))?p.clientInv:''),
     // O Tracker ainda não possui campo próprio para número da Packing List.
-    packingListNumber:'',
+    packingListNumber:o.fyCiNumber||((p&&FY_FORMAT.test(p.clientInv||''))?p.clientInv:''),
+    documentNumberingManaged:true,
     documentEdits:o.documentEdits,documentRevision:o.documentEditsRevision||0,
     items,totalQty,totalValue
   };
-  const win=window.open('export-docs.html?v=60','_blank');
+  const win=window.open('export-docs.html?v=61','_blank');
   if(!win){toast('⚠ Pop-up bloqueado — libere pop-ups para este site e tente de novo','err');return;}
   const TRACKER_ORIGIN=window.location.origin;
   const docToken=crypto.randomUUID();
@@ -3504,6 +3610,7 @@ function computeAvgDocGaps(){
   });
 }
 function renderStatusLists(){
+  const fyYearInput=document.getElementById('fy-counter-year');if(fyYearInput&&!fyYearInput.value)fyYearInput.value=fyYear();loadFyNumberState();
   ['cli','forn','prod','cont'].forEach(tipo=>{
     const arr=tipo==='cli'?CLIENTES:tipo==='forn'?FORNECEDORES:tipo==='prod'?PRODUTOS:CONTEINERES;
     document.getElementById('st-'+tipo+'-list').innerHTML=arr.map((v,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="flex:1;font-size:.75rem;padding:.15rem .3rem">${esc(v)}</span><button onclick="renameMestre('${tipo}',${i})" aria-label="Renomear" style="background:none;border:1px solid var(--bdr2);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--ink3)">✏</button><button onclick="deleteMestre('${tipo}',${i})" aria-label="Remover" style="background:none;border:1px solid var(--ltred);border-radius:4px;padding:.15rem .4rem;font-size:.68rem;cursor:pointer;color:var(--red)">✕</button></div>`).join('');
