@@ -444,6 +444,44 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 #ovl-order .order-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 24px;border-top:1px solid var(--bdr);background:var(--card);flex-shrink:0}
 #ovl-order .order-summary{display:flex!important;gap:22px;margin:0;padding:0;background:none;border:0;color:var(--ink)}#ovl-order .order-summary>div{display:flex;flex-direction:column;gap:3px}#ovl-order .order-summary span{font-size:10px;color:var(--ink3)}#ovl-order .order-summary strong{font-size:11px;font-weight:650;white-space:nowrap}
 #ovl-order .order-footer-actions{display:flex;gap:8px;align-items:center}#ovl-order .order-footer .btn{padding:8px 13px;min-height:34px;font-size:12px;border-radius:6px}#ovl-order [hidden]{display:none!important}
+</style><style id="operation-v63">#ovl-order .order-modal{width:1320px}
+#ovl-order .mhdr{min-height:48px;padding:10px 22px}
+#ovl-order .mhdr h2{font-size:15px}
+#ovl-order .op-operation-head{padding:12px 22px 10px;border-bottom:1px solid var(--bdr);display:grid;grid-template-columns:150px 120px minmax(200px,1fr) 170px 120px;gap:8px 12px;flex-shrink:0}
+#ovl-order .op-operation-head #mo-pi{font-size:18px;font-weight:650}
+#ovl-order #mo-op-summary{grid-column:1/-1;font-size:11px;color:var(--ink3)}
+#ovl-order .mbody{padding:0 22px}
+#ovl-order .op-client{padding:16px 0;border-bottom:1px solid var(--bdr)}
+#ovl-order .op-client-head{display:grid;grid-template-columns:minmax(180px,1.6fr) minmax(100px,.85fr) minmax(140px,1.2fr) 150px 150px 50px;gap:10px;background:var(--ltgry);padding:10px;border-radius:6px;align-items:end}
+#ovl-order .op-doc-field{display:flex;gap:3px}#ovl-order .op-doc-field input{min-width:0;flex:1}#ovl-order .op-doc-field button{border:0;background:transparent;color:var(--blue);padding:0 4px;cursor:pointer;font-size:14px}#ovl-order .op-doc-field button:disabled{color:var(--ink4);cursor:default}
+#ovl-order .op-client-actions{display:flex;align-items:center;height:34px;gap:6px}#ovl-order .op-client-actions button{border:0;background:none;padding:0;color:var(--ink3);font-size:20px;cursor:pointer}
+#ovl-order .order-product-main{grid-template-columns:minmax(170px,1.9fr) minmax(95px,1fr) minmax(120px,1.2fr) minmax(100px,1fr) 88px 92px 92px 20px;gap:8px}
+#ovl-order .order-pack-row{grid-template-columns:200px 90px 100px 80px 100px 100px minmax(100px,1fr);gap:10px;align-items:end}
+#ovl-order .order-pack-row .op-sample{display:flex;align-items:center;gap:5px;font-size:11px;height:34px}
+#ovl-order .op-sample input{width:14px;height:14px;accent-color:var(--blue)}
+#ovl-order .prod-packing-summary{text-align:right;font-size:10px;padding-top:0;align-self:center}
+#ovl-order .addup{border:0;background:none;text-align:left;color:var(--blue);margin:8px 0 0;padding:4px 0;font-size:12px}
+#ovl-order .op-add-client{margin:14px 0}
+#ovl-order .order-summary{gap:14px;flex-wrap:wrap}
+#ovl-order .order-summary strong{font-size:11px}#ovl-order .order-footer{padding:12px 22px}
+.op-ip-link{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--navy);border:0;background:none;cursor:pointer;padding:0}
+.op-type{font-size:9px;background:var(--ltblue);color:var(--blue);padding:1px 4px;border-radius:3px;font-weight:600}
+.op-table-note{font-size:10px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;margin:3px 0}
+.op-table-client{font-size:11px;margin:6px 0}.op-table-client b{font-weight:600}.op-table-client small{display:block;font-size:9px;color:var(--ink3);line-height:1.3}
+.op-table-suppliers{font-size:9px;color:var(--ink3);cursor:help}
+.op-table-products{margin:8px 0}.op-table-products:first-child{margin-top:24px}
+.op-party-balances{margin-bottom:12px;font-size:11px}.op-party-balances div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}.op-party-balances small{color:var(--ink3)}
+@media(min-width:800px) and (max-width:1170px){#ovl-order .op-client-head{grid-template-columns:1.4fr .8fr 1fr 120px 120px 45px;gap:6px}#ovl-order .order-product-main{grid-template-columns:minmax(130px,1.5fr) 90px 100px 95px 70px 75px 75px 20px;gap:6px}#ovl-order .order-pack-row{grid-template-columns:165px 70px 80px 70px 80px 80px minmax(70px,1fr);gap:6px}#ovl-order .op-operation-head{grid-template-columns:120px 100px minmax(150px,1fr) 135px 100px}}
+#ovl-order button{font-family:inherit}
+.op-table-expand{display:block;border:0;background:none;color:var(--blue);font-family:inherit;font-size:9px;padding:2px 0;margin-bottom:3px;cursor:pointer}
+#ovl-order .mhdr{min-height:38px;padding:7px 22px}
+#ovl-order .op-operation-head{padding-top:10px;padding-bottom:8px}
+#ovl-order .op-client{padding:12px 0}
+#ovl-order .prodrow{padding:10px 0}
+#ovl-order input:not([type=checkbox]){height:32px}
+#ovl-order .date-cal-btn{height:32px;width:26px;font-size:16px}
+#ovl-order .date-wrap input[type=date]{height:0;width:0;padding:0;border:0}
+#ovl-order .op-client-actions,#ovl-order .order-pack-row .op-sample{height:32px}
 </style></head>
 <body>
 <!-- LOGIN SCREEN -->
@@ -502,7 +540,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
     <span id="msf-int-cl-wrap"></span>
     <span class="finfo" id="int-cnt"></span>
     <div class="prod-asia-toolbar-actions">
-      <button class="btn-add" onclick="openOrderModal(null)">＋ Novo Pedido</button>
+      <button class="btn-add" onclick="openOrderModal(null)">＋ Nova operação</button>
       <button class="bsm" onclick="openStatusModal()">🏷 Tags</button>
       <button class="bsm" onclick="exportCSV()">⬇ CSV</button>
       <div class="toggle-grp ci-subview-toggle">
@@ -520,7 +558,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
       </colgroup>
       <thead>
         <tr class="grp">
-          <th colspan="4" style="background:#091A2A;text-align:center">PEDIDOS</th>
+          <th colspan="4" style="background:#091A2A;text-align:center">OPERAÇÕES</th>
           <th colspan="1" style="background:#1A4A70">PROGRESSO</th>
           <th colspan="3" style="background:var(--pre)">PRÉ-PRODUÇÃO</th>
           <th colspan="2" style="background:var(--prod)">PRODUÇÃO</th>
@@ -529,7 +567,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
         </tr>
         <tr class="ch">
           <th class="L sortable" style="min-width:28px" onclick="sortOrd('num')">#<span class="si"></span></th>
-          <th class="L" style="min-width:150px">AV/FY · Cliente · Fornecedor · Coleção</th>
+          <th class="L" style="min-width:150px">Operação · Clientes</th>
           <th class="L" style="min-width:180px">Produto / Contêiner</th>
           <th style="min-width:68px">Total Unid.</th>
           <th style="min-width:350px">Situação</th>
@@ -621,7 +659,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <option value="rf">RF (importação)</option>
             <option value="trading">Trading</option>
           </select></div>
-          <div class="ff"><label>Fornecedor</label><input id="l-sup" readonly style="background:var(--ltblue);cursor:not-allowed"></div>
+          <div class="ff"><label>Fornecedor</label><select id="l-sup"><option value="">— Fornecedor —</option></select></div>
           <div class="ff"><label>Referência</label><input id="l-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
           <div class="ff"><label>Notas</label><input id="l-notes" placeholder="Notas…"></div>
           <button class="lbtn" onclick="addLedger()">＋ Lançar</button>
@@ -667,7 +705,7 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
           </div>
           <div class="ff"><label id="r-amt-lbl">Valor USD</label><input type="number" id="r-amt" placeholder="0.00" step="0.01"></div>
           <div class="ff"><label>IP</label><select id="r-pi" onchange="onRpiChange()"><option value="">— IP —</option></select></div>
-          <div class="ff"><label>Cliente</label><input id="r-cli" readonly style="background:var(--ltgrn);cursor:not-allowed"></div>
+          <div class="ff"><label>Cliente</label><select id="r-cli"><option value="">— Cliente —</option></select></div>
           <div class="ff"><label>Referência</label><input id="r-ref" placeholder="30% FC… (ou SINAL/BALANÇO/AMOSTRAS pra validar aviso)" list="fin-ref-tags"></div>
           <datalist id="fin-ref-tags"><option value="SINAL"><option value="BALANÇO"><option value="AMOSTRAS"></datalist>
           <div class="ff"><label>Notas</label><input id="r-notes" placeholder="Notas…"></div>
@@ -706,46 +744,21 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
 <datalist id="dl-next-action"><option value="Aguardar confirmação de arte"><option value="Enviar arte para aprovação"><option value="Confirmar pedido com fornecedor"><option value="Acompanhar produção"><option value="Solicitar fotos de produção"><option value="Confirmar prontidão"><option value="Solicitar BL e documentos"><option value="Acompanhar embarque"><option value="Confirmar ETA"><option value="Aguardar chegada no CD"><option value="Enviar fatura ao cliente"><option value="Cobrar pagamento"><option value="Pedido finalizado"></datalist>
 </main>
 
-<!-- MODAL NOVO PEDIDO · V62 -->
+<!-- MODAL OPERAÇÃO V63 -->
 <div class="ovl" id="ovl-order" onclick="ovlOut(event,'order')"><div class="modal order-modal">
- <div class="mhdr"><h2 id="mo-ttl">Novo pedido</h2><button class="mcls" type="button" aria-label="Fechar" onclick="closeOvl('order')">×</button></div>
+ <div class="mhdr"><h2 id="mo-ttl">Nova operação</h2><button class="mcls" type="button" aria-label="Fechar" onclick="closeOvl('order')">×</button></div>
+ <div class="op-operation-head">
+  <label><span class="plbl">IP · Processo AV/FY</span><input id="mo-pi" placeholder="094F" oninput="rvAVCheck()"></label>
+  <label><span class="plbl">Data</span><div class="date-wrap"><input type="text" id="mo-data" placeholder="DD/Mmm/AA"><input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)"><button class="date-cal-btn" type="button" aria-label="Abrir calendário" onclick="openCal('mo-data-cal',event)">▦</button></div></label>
+  <label><span class="plbl">Observação da operação</span><input id="mo-notes" placeholder="Referência geral / observação"></label>
+  <label><span class="plbl">Contêiner</span><input id="mo-cont" list="dl-cont" placeholder="40’ HC VIETNÃ"></label>
+  <label><span class="plbl">ETD · embarque</span><div class="date-wrap"><input type="text" id="mo-etd" placeholder="DD/Mmm/AA"><input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)"><button class="date-cal-btn" type="button" aria-label="Abrir calendário" onclick="openCal('mo-etd-cal',event)">▦</button></div></label>
+  <small id="mo-op-summary"></small>
+ </div>
  <div class="mbody">
-  <section class="order-section"><h3>Pedido</h3>
-   <div class="order-primary-grid"><div class="ff"><label>Cliente</label>
-          <input id="mo-cl" list="mo-cl-list" placeholder="ex: Zona Sul" autocomplete="off">
-          <datalist id="mo-cl-list"></datalist>
-        </div><div class="ff"><label>Processo AV/FY</label><input id="mo-pi" placeholder="ex: 86F" oninput="rvAVCheck()"></div><div class="ff"><label>Data</label>
-          <div class="date-wrap">
-            <input type="text" id="mo-data" placeholder="12/07/26" autocomplete="off">
-            <input type="date" id="mo-data-cal" onchange="datePickerSync('mo-data',this.value)">
-            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-data-cal',event)" tabindex="-1">📅</button>
-          </div>
-        </div></div>
-   <div class="order-secondary-grid"><div class="ff"><label>Coleção / descrição</label><input id="mo-colecao" placeholder="ex: NewDesigns, EMI repeat…"></div><div class="ff"><label>PO do cliente</label><input id="mo-po" placeholder="ex: 015/26"></div><div class="ff"><label>Contêiner</label>
-          <input id="mo-cont" placeholder="ex: 40&quot; HC VIETNÃ" list="dl-cont" autocomplete="off">
-          <datalist id="dl-cont"></datalist>
-          <datalist id="dl-prod"></datalist>
-        </div></div>
-  </section>
-  <section class="order-section order-products"><div class="order-section-heading"><h3>Produtos</h3><div class="order-default-supplier"><div class="ff"><label>Fornecedor padrão</label>
-          <input id="mo-sup" list="mo-sup-list" placeholder="ex: Thuan" autocomplete="off">
-          <datalist id="mo-sup-list"></datalist>
-        </div></div></div><div id="mo-prod-rows"></div><button class="addup" type="button" onclick="addProdRow()">＋ Adicionar produto</button></section>
-  <details id="mo-documents-details" class="order-section order-details"><summary><span>Documentos e logística</span><small id="mo-documents-summary"></small></summary><div class="order-doc-grid">
-   <div class="ff"><label>PI FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-pi" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-pi-issue" onclick="issueFyNumber('PI')">Emitir</button></div></div><div class="ff"><label>CI/PL FY</label><div style="display:flex;gap:.35rem"><input id="mo-fy-ci" placeholder="AAAA-001 · vazio até emitir" style="min-width:0;flex:1"><button type="button" class="btn btns" id="mo-fy-ci-issue" onclick="issueFyNumber('CIPL')">Emitir</button></div></div><div class="ff"><label>Pedido ao fornecedor</label><input id="mo-supplier-order" placeholder="Referência da encomenda à fábrica"></div><div class="ff"><label>PI / Invoice do fornecedor</label><input id="mo-sup-inv" placeholder="ex: TD&FG2601"></div><div class="ff"><label>ETD · embarque</label>
-          <div class="date-wrap">
-            <input type="text" id="mo-etd" placeholder="28/05/26" autocomplete="off">
-            <input type="date" id="mo-etd-cal" onchange="datePickerSync('mo-etd',this.value)">
-            <button class="date-cal-btn" aria-label="Abrir calendário" type="button" onclick="openCal('mo-etd-cal',event)" tabindex="-1">📅</button>
-          </div>
-        </div><label class="order-samples"><input id="mo-amostras" type="checkbox" checked onchange="setAmostrasToggle(this.checked)"> Requer amostras</label><div class="ff" id="mo-av-rota-ff" style="display:none"><label>Rota AV</label>
-          <div class="toggle-grp" id="mo-av-rota-toggle">
-            <button class="active" type="button" onclick="rvAVSetRota('direta')">Direta</button>
-            <button type="button" onclick="rvAVSetRota('trading')">Via Trading</button>
-          </div>
-        </div>
-   <details class="order-number-help"><summary>Sobre a numeração FY</summary><p>As sequências são configuradas em Tags. Após salvar o pedido, clique em Emitir para reservar o próximo número do ano atual. Para registrar um documento existente, informe o número completo; o ano é reconhecido pelo número.</p></details>
-  </div><div id="mo-av-block" style="display:none;grid-column:1/-1">
+  <div id="mo-prod-rows"></div><button class="addup op-add-client" type="button" onclick="addOperationClient()">＋ Adicionar cliente</button>
+  <details id="mo-documents-details" class="order-section" hidden><summary>Nacionalização AV</summary><div class="ff" id="mo-av-rota-ff"><label>Rota AV</label><div id="mo-av-rota-toggle" class="toggle-grp"><button type="button" onclick="rvAVSetRota('direta')">Direta</button><button type="button" onclick="rvAVSetRota('trading')">Via Trading</button></div></div>
+<div id="mo-av-block" style="display:none;grid-column:1/-1">
           <div class="fsep">🇧🇷 Camadas AV — nacionalização (IP tipo C)</div>
           <div class="grid-av">
             <div class="ff"><label>Câmbio venda cliente R$</label><input type="number" id="mo-av-cambio-venda" class="mono" placeholder="5.50" step="0.01"><span class="hint-sm">no ato da IP</span></div>
@@ -756,9 +769,10 @@ body.dark #int-tbl .ms-node .mc.done{background:transparent}
             <div class="ff" id="mo-av-trading-wrap"><label>Custo Trading (R$)</label><input type="number" id="mo-av-custo-trading" class="mono" placeholder="0.00" step="0.01"><span class="hint-sm">valor fechado, editável depois</span></div>
             <div class="ff" id="mo-av-trading-nome-wrap"><label>Trading utilizada</label><input id="mo-av-trading-nome" placeholder="ex: Trading XYZ"><span class="hint-sm">fornecedor dessa camada</span></div>
           </div>
-        </div><div class="ff full"><label>Observações</label><textarea id="mo-notes" placeholder="Observações, issues…" rows="2"></textarea></div></details>
+        </div></details>
  </div>
- <footer class="order-footer"><div id="mo-preview" class="order-summary"></div><div class="order-footer-actions"><button class="btn btns" type="button" onclick="closeOvl('order')">Cancelar</button><button class="btn btns" type="button" id="mo-docs-btn" onclick="gerarDocs()" hidden>Documentos</button><button class="btn btnp" id="mo-btn" type="button" onclick="submitOrder()">Criar pedido</button></div></footer>
+ <datalist id="mo-cl-list"></datalist><datalist id="mo-sup-list"></datalist><datalist id="dl-prod"></datalist><datalist id="dl-cont"></datalist>
+ <footer class="order-footer"><div id="mo-preview" class="order-summary"></div><div class="order-footer-actions"><button class="btn btns" type="button" onclick="closeOvl('order')">Cancelar</button><button class="btn btnp" id="mo-btn" type="button" onclick="submitOrder()">Criar operação</button></div></footer>
 </div></div>
 
 <!-- INLINE EDIT POPUP -->
@@ -1796,7 +1810,7 @@ async function doLogin(pwOverride){
 function syncLinked(){
   let changed=false;
   orders.forEach(o=>{
-    const p=payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po));
+    const p=linkPay(o);
     if(!p)return;
     const oEtd=o.dates[6]?.v, pEtd=normDate(p.etd);
     if(oEtd&&oEtd!==pEtd){p.etd=oEtd;changed=true;}
@@ -1873,9 +1887,9 @@ const SC={'PRÉ-PRODUÇÃO':{c:'pa'},'EM PRODUÇÃO':{c:'pp'},'PRÉ-EMBARQUE':{c
 const _finExp=new Set();
 
 // Helper: encontrar payment vinculado a um order (por pi OU po)
-function linkPay(o){if(!o)return null;return payments.find(x=>(o.pi&&x.pi===o.pi)||(o.po&&o.po!=='—'&&x.po===o.po))||null;}
+function linkPay(o){if(!o)return null;return (o.operationId&&payments.find(p=>p.operationId===o.operationId))||payments.find(p=>!p.operationId&&((o.pi&&p.pi===o.pi)||(!o.pi&&o.po&&o.po!=='—'&&p.po===o.po)))||null;}
 // Helper: encontrar order vinculado a um payment (por pi OU po)
-function linkOrd(p){if(!p)return null;return orders.find(o=>(p.pi&&o.pi===p.pi)||(p.po&&p.po!=='—'&&o.po===p.po))||null;}
+function linkOrd(p){if(!p)return null;return (p.operationId&&orders.find(o=>o.operationId===p.operationId))||orders.find(o=>(p.pi&&o.pi===p.pi)||(!p.pi&&p.po&&p.po!=='—'&&o.po===p.po))||null;}
 
 function statusSel(id,cur){
   const c=SC[cur]?.c||'pgr';
@@ -2046,37 +2060,21 @@ function renderInternal(){
   const q=norm(document.getElementById('int-q')?.value);
   const wrapCl=document.getElementById('msf-int-cl-wrap');
   if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('int-cl','Todos os Clientes');
-  const clients=[...new Set(orders.map(o=>o.client))].sort();
+  const clients=[...new Set(orders.flatMap(o=>o.clients?.map(c=>c.client)||[o.client]))].sort();
   msfPopulate('int-cl',clients,'Todos os Clientes',renderInternal);
   const flt=orders.filter(o=>{
-    const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi} ${o.supplier||''} ${linkPay(o)?.inv||''}`);
-    return(!q||t.includes(q))&&msfMatch('int-st',o.status)&&msfMatch('int-cl',o.client);
+    const t=norm(`${o.po} ${o.client} ${o.product} ${o.pi} ${o.supplier||''} ${o.notes||''} ${o.colecao||''} ${linkPay(o)?.inv||''}`);
+    return(!q||t.includes(q))&&msfMatch('int-st',o.status)&&operationClients(o).some(c=>msfMatch('int-cl',c.client));
   });
   const fltS=applySortOrd(flt);
-  document.getElementById('int-cnt').textContent=`${flt.length} pedidos`;
+  document.getElementById('int-cnt').textContent=`${flt.length} operações`;
   updateSortHeaders();
   document.getElementById('int-body').innerHTML=fltS.map((o,i)=>{
     return`<tr${i%2?'':' class="alt"'}>
       <td class="L">
         <b style="font-family:'IBM Plex Mono';font-size:.76rem">${o.num}</b>
       </td>
-      <td class="L">
-        <div style="display:flex;align-items:center;gap:5px">
-          <b style="font-family:'IBM Plex Mono';font-size:.72rem;color:${o.pi?'var(--navy)':'var(--ink4)'}">${o.pi?esc(o.pi):'—'}</b>
-          <span style="font-size:.55rem;font-weight:700;color:#fff;background:${isIpC(o.pi)?'var(--green)':'var(--blue)'};padding:.05rem .3rem;border-radius:3px">${isIpC(o.pi)?'AV':'FY'}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
-          <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--blue)">${esc(o.po)}</span>
-          <span style="color:var(--ink4);font-size:.65rem">·</span>
-          <span style="font-size:.7rem">${esc(o.client)}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
-          <span style="font-family:'IBM Plex Mono';font-size:.68rem;color:var(--purple)" title="Invoice Fornecedor">${esc(linkPay(o)?.inv||'—')}</span>
-          <span style="color:var(--ink4);font-size:.65rem">·</span>
-          <span style="font-size:.7rem;color:var(--ink3)">${esc(orderSupplierLabel(o))}</span>
-        </div>
-        <div style="font-size:.58rem;color:${o.colecao?'var(--ink3)':'var(--ink4)'};font-style:italic;margin-top:1px">${o.colecao?esc(o.colecao):'—'}</div>
-      </td>
+      <td class="L op-identity">${operationIdentityHTML(o)}</td>
       <td class="L W int-products">
         ${internalProductHTML(o)}
         <div style="color:var(--ink4);font-size:.63rem;margin-top:1px">${esc(o.container||'—')}</div>
@@ -2161,10 +2159,10 @@ function renderClient(){
   const q=norm(document.getElementById('cli-q')?.value);
   const wrapCl=document.getElementById('msf-cli-cl-wrap');
   if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('cli-cl','Todos os Clientes');
-  const clients=[...new Set(orders.map(o=>o.client))].sort();
+  const clients=[...new Set(orders.flatMap(o=>o.clients?.map(c=>c.client)||[o.client]))].sort();
   msfPopulate('cli-cl',clients,'Todos os Clientes',renderClient);
-  const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&msfMatch('cli-st',o.status)&&msfMatch('cli-cl',o.client);});
-  document.getElementById('cli-cnt').textContent=`${flt.length} pedidos`;
+  const flt=orders.filter(o=>{const t=norm(`${o.po} ${o.client} ${o.product}`);return(!q||t.includes(q))&&msfMatch('cli-st',o.status)&&operationClients(o).some(c=>msfMatch('cli-cl',c.client));});
+  document.getElementById('cli-cnt').textContent=`${flt.length} operações`;
   document.getElementById('cli-body').innerHTML=flt.map((o,i)=>{
     let rowStyle='';
     if(o.status==='FINALIZADO')rowStyle=' style="background:var(--ltgrn)"';
@@ -2202,7 +2200,7 @@ function getFilteredFinancePayments(filters){
     const t=norm(`${p.pi} ${p.po} ${p.inv||''} ${p.supplier} ${p.client||''}`);
     const linkedO=linkOrd(p);
     const effStatus=linkedO?linkedO.status:p.status;
-    return(!q||t.includes(q))&&msfMatch('fin-st',effStatus)&&msfMatch('fin-sup',p.supplier)&&msfMatch('fin-cl',p.client||'');
+    return(!q||t.includes(q))&&msfMatch('fin-st',effStatus)&&(linkOrd(p)?.clients?.length?orderSupplierNames(linkOrd(p)).some(name=>msfMatch('fin-sup',name)):msfMatch('fin-sup',p.supplier))&&(linkOrd(p)?.clients?.some(c=>msfMatch('fin-cl',c.client))??msfMatch('fin-cl',p.client||''));
   });
 }
 function getSortedFinancePayments(list){return applySortPay(list);}
@@ -2213,11 +2211,11 @@ function populateFinanceFilters(){
   msfPopulate('fin-st',SLST.slice(),'Todos Status',renderFinanceiro);
   const wrapSup=document.getElementById('msf-fin-sup-wrap');
   if(wrapSup&&!wrapSup.innerHTML)wrapSup.innerHTML=msfHtml('fin-sup','Todos Fornecedores');
-  const sups=[...new Set(payments.map(p=>p.supplier).filter(Boolean))].sort();
+  const sups=[...new Set(payments.flatMap(p=>linkOrd(p)?.clients?.length?orderSupplierNames(linkOrd(p)):[p.supplier]).filter(Boolean))].sort();
   msfPopulate('fin-sup',sups,'Todos Fornecedores',renderFinanceiro);
   const wrapCl=document.getElementById('msf-fin-cl-wrap');
   if(wrapCl&&!wrapCl.innerHTML)wrapCl.innerHTML=msfHtml('fin-cl','Todos Clientes');
-  const cls=[...new Set(payments.map(p=>p.client||'').filter(Boolean))].sort();
+  const cls=[...new Set(payments.flatMap(p=>linkOrd(p)?.clients?.map(c=>c.client)||[p.client||'']).filter(Boolean))].sort();
   msfPopulate('fin-cl',cls,'Todos Clientes',renderFinanceiro);
 }
 
@@ -2364,7 +2362,7 @@ function renderFinanceiro(){
   const filters=getFinanceFilters();
   const filteredPayments=getFilteredFinancePayments(filters);
   const sortedPayments=getSortedFinancePayments(filteredPayments);
-  document.getElementById('fin-cnt').textContent=`${filteredPayments.length} pedidos`;
+  document.getElementById('fin-cnt').textContent=`${filteredPayments.length} operações`;
 
   populateFinanceFilters();
   renderFinanceSummary(calculateFinanceSummary());
@@ -2498,13 +2496,13 @@ function onLCamadaChange(){
   const layer=document.getElementById('l-camada').value||'fy';
   const supEl=document.getElementById('l-sup'),lblEl=document.getElementById('l-amt-lbl');
   if(layer==='fy'){
-    supEl.value=p?p.supplier:'';
+    const values=o?.clients?.length?orderSupplierNames(o):[p?.supplier].filter(Boolean);supEl.innerHTML=(values.length>1?'<option value="">Escolha o fornecedor</option>':'')+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
     lblEl.textContent='Valor USD';
   }else if(layer==='rf'){
-    supEl.value='Receita Federal (RF)';
+    supEl.innerHTML='<option value="Receita Federal (RF)">Receita Federal (RF)</option>';
     lblEl.textContent='Valor R$';
   }else{
-    supEl.value=(o&&o.tradingNome)||'Trading';
+    const name=o?.tradingNome||'Trading';supEl.innerHTML='<option value="'+esc(name)+'">'+esc(name)+'</option>';
     lblEl.textContent='Valor R$';
   }
   const ctx=document.getElementById('l-ctx');
@@ -2525,7 +2523,7 @@ function onLCamadaChange(){
 function onRpiChange(){
   const pi=document.getElementById('r-pi').value;const p=payments.find(x=>x.pi===pi);
   const o=orders.find(x=>x.pi===pi);
-  document.getElementById('r-cli').value=p?(p.client||p.supplier):'';
+  const values=o?.clients?.length?[...new Set(o.clients.map(c=>c.client))]:[p?.client||p?.supplier].filter(Boolean);document.getElementById('r-cli').innerHTML=(values.length>1?'<option value="">Escolha o cliente</option>':'')+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
   document.getElementById('r-amt-lbl').textContent=isIpC(pi)?'Valor R$':'Valor USD';
   const ctx=document.getElementById('r-ctx');
   if(p&&ctx){const tV=pTotalVenda(p),recv=piReceived(pi),falta=Math.max(0,tV-recv);
@@ -2541,7 +2539,7 @@ function addLedger(){
   let amt=parseFloat(document.getElementById('l-amt').value);
   const pi=document.getElementById('l-pi').value;
   const layer=isIpC(pi)?(document.getElementById('l-camada').value||'fy'):'fy';
-  const sup=document.getElementById('l-sup').value;
+  const sup=document.getElementById('l-sup').value;if(!sup){toast('Escolha o fornecedor.','err');return;}
   const ref=document.getElementById('l-ref').value.trim();
   const notes=document.getElementById('l-notes').value.trim();
   if(!rawDate){toast('⚠ Informe uma data','err');return;}
@@ -2568,7 +2566,7 @@ function addReceipt(){
   const rawDate=document.getElementById('r-date').value.trim();
   let amt=parseFloat(document.getElementById('r-amt').value);
   const pi=document.getElementById('r-pi').value;
-  const cli=document.getElementById('r-cli').value;
+  const cli=document.getElementById('r-cli').value;if(!cli){toast('Escolha o cliente.','err');return;}
   const ref=document.getElementById('r-ref').value.trim();
   const notes=document.getElementById('r-notes').value.trim();
   if(!rawDate){toast('⚠ Informe uma data','err');return;}
@@ -2608,9 +2606,10 @@ function finPopupAddPayment(pi){
     if(!fxApplied){toast('⚠ Defina o "Câmbio camadas" nessa IP antes de lançar','err');return;}
     amountBRL=amt;amt=amountBRL/fxApplied;
   }
+  if(layer==='fy'&&document.getElementById('fp-op-supplier')&&!document.getElementById('fp-op-supplier').value){toast('Escolha o fornecedor.','err');return;}
   const n=Math.max(...ledger.map(l=>l.n),190)+1;
   pushUndo('Lançar pagamento #'+n);
-  ledger.push({n,date:dateDisp,amount:amt,pi,supplier:p.supplier||pi,ref:ref||'—',notes:'',layer,...(amountBRL!=null?{amountBRL,fxApplied}:{})});
+  ledger.push({n,date:dateDisp,amount:amt,pi,supplier:layer==='rf'?'Receita Federal (RF)':layer==='trading'?(orders.find(o=>o.pi===pi)?.tradingNome||'Trading'):(document.getElementById('fp-op-supplier')?.value||p.supplier||pi),ref:ref||'—',notes:'',layer,...(amountBRL!=null?{amountBRL,fxApplied}:{})});
   saveAll();renderFinanceiro();openFinPopup(pi);toast(`Lançamento #${n} ✓`);
 }
 function finPopupAddReceipt(pi){
@@ -2629,9 +2628,10 @@ function finPopupAddReceipt(pi){
     if(!fxApplied){toast('⚠ Defina o "Câmbio venda cliente" nessa IP antes de lançar','err');return;}
     amountBRL=amt;amt=amountBRL/fxApplied;
   }
+  if(document.getElementById('fp-op-client')&&!document.getElementById('fp-op-client').value){toast('Escolha o cliente.','err');return;}
   const n=Math.max(...receipts.map(r=>r.n),0)+1;
   pushUndo('Lançar recebimento #'+n);
-  receipts.push({n,date:dateDisp,amount:amt,pi,client:p.client||'',ref:ref||'—',notes:'',...(amountBRL!=null?{amountBRL,fxApplied}:{})});
+  receipts.push({n,date:dateDisp,amount:amt,pi,client:document.getElementById('fp-op-client')?.value||p.client||'',ref:ref||'—',notes:'',...(amountBRL!=null?{amountBRL,fxApplied}:{})});
   saveAll();renderFinanceiro();openFinPopup(pi);toast(`Recebimento #${n} ✓`);
 }
 function delLedger(n){
@@ -2722,7 +2722,8 @@ function updatePricePreview(){
 function savePrices(){
   if(!_prPi)return;const p=payments.find(x=>x.pi===_prPi);if(!p)return;
   const rows=readPriceRows();if(!rows.length){toast('⚠ Adicione ao menos uma linha','err');return;}
-  p.unitPrices=rows;p.plates=0;p.sample=0;
+  const operation=orders.find(o=>o.pi===_prPi);if(operation?.clients?.length===1)rows.forEach(r=>r.clientGroupId=operation.clients[0].id);
+  p.unitPrices=rows;p.plates=0;p.sample=0;if(operation)operation.items=rows;
   const totQty=rows.reduce((a,r)=>a+r.qty,0);
   const o=orders.find(x=>x.pi===_prPi);if(o&&totQty>0)o.total=totQty;
   saveAll();renderAll();closeOvl('prices');toast(`IP ${_prPi} atualizado ✓`);
@@ -2742,16 +2743,6 @@ async function reserveFyNumber(order,kind,manual='',year=fyYear()){
  if(!data?.number||!FY_FORMAT.test(data.number))throw new Error('Resposta de numeração inválida.');
  return data.number;
 }
-async function prepareFyReferences(existing){
- const refs={documentOrderId:existing?.documentOrderId||document.getElementById('ovl-order').dataset.documentOrderId||crypto.randomUUID(),supplierOrderNumber:document.getElementById('mo-supplier-order').value.trim(),fyNumbersRegistered:{...existing?.fyNumbersRegistered}};
- for(const [kind,field,id] of [['PI','fyPiNumber','mo-fy-pi'],['CIPL','fyCiNumber','mo-fy-ci']]){
-  const value=document.getElementById(id).value.trim();
-  if(existing?.fyNumbersRegistered?.[kind]&&value!==existing[field])throw new Error('Um número oficial já emitido não pode ser substituído.');
-  refs[field]=value;
-  if(value&&!existing?.fyNumbersRegistered?.[kind]){refs[field]=await reserveFyNumber(refs,kind,value);refs.fyNumbersRegistered[kind]=true;}
- }
- return refs;
-}
 function legacyFyNumber(order,kind){
  if(!order)return '';
  const existing=kind==='PI'?order.fyPiNumber:order.fyCiNumber||linkPay(order)?.clientInv;
@@ -2759,29 +2750,6 @@ function legacyFyNumber(order,kind){
  const html=order.documentEdits?.sheets?.[kind==='PI'?'proforma':'invoice'];
  if(html){const doc=new DOMParser().parseFromString(html,'text/html'),value=doc.querySelector('[data-field="'+(kind==='PI'?'pi_number':'invoice_number')+'"]')?.textContent.trim();if(FY_FORMAT.test(value||''))return value;}
  return '';
-}
-function updateFyReferenceFields(order,resetYear=true){
- for(const [kind,field,id] of [['PI','fyPiNumber','mo-fy-pi'],['CIPL','fyCiNumber','mo-fy-ci']]){
-  const el=document.getElementById(id),button=document.getElementById(id+'-issue');
-  el.value=order?.[field]||legacyFyNumber(order,kind);el.readOnly=!!order?.fyNumbersRegistered?.[kind];
-  button.disabled=!!order?.fyNumbersRegistered?.[kind];button.textContent=button.disabled?'Emitido':'Emitir';
- }
- const summary=document.getElementById('mo-documents-summary');if(summary)summary.textContent=[order?.fyPiNumber?'PI '+order.fyPiNumber:'',order?.fyCiNumber?'CI/PL '+order.fyCiNumber:''].filter(Boolean).join(' · ');
- document.getElementById('mo-supplier-order').value=order?.supplierOrderNumber||'';
-}
-async function issueFyNumber(kind){
- const order=orders.find(o=>o.num===_editNum);if(!order){toast('Salve o pedido antes de emitir o número oficial.','warn');return;}
- const id=kind==='PI'?'mo-fy-pi':'mo-fy-ci',field=kind==='PI'?'fyPiNumber':'fyCiNumber',button=document.getElementById(id+'-issue');
- const key=_cryptoKey,userId=authUser?.id,formVersion=_orderFormVersion;button.disabled=true;
- try{
-  if(!order.documentOrderId){order.documentOrderId=crypto.randomUUID();await saveAll(()=>key===_cryptoKey&&userId===authUser?.id);}
-  const number=await reserveFyNumber(order,kind,document.getElementById(id).value.trim(),fyYear());
-  if(key!==_cryptoKey||userId!==authUser?.id)return;
-  order[field]=number;order.fyNumbersRegistered={...order.fyNumbersRegistered,[kind]:true};
-  if(kind==='CIPL'){const p=linkPay(order);if(p)p.clientInv=number;}
-  await saveAll(()=>key===_cryptoKey&&userId===authUser?.id);if(formVersion===_orderFormVersion)updateFyReferenceFields(order,false);toast((kind==='PI'?'PI FY':'CI/PL FY')+' '+number+' registrada ✓');
- }catch(error){if(key===_cryptoKey&&userId===authUser?.id)toast(error.message,'err');}
- finally{if(key===_cryptoKey&&userId===authUser?.id&&formVersion===_orderFormVersion)button.disabled=!!order.fyNumbersRegistered?.[kind];}
 }
 async function loadFyNumberState(){
  const year=Number(document.getElementById('fy-counter-year')?.value);const status=document.getElementById('fy-counter-status');if(!status||!_supaOK||!authUser)return;
@@ -2809,28 +2777,19 @@ function orderSupplierLabel(order){return orderSupplierNames(order).join(' / ')|
    ORDER MODAL
 ══════════════════════════════════════ */
 let _editNum=null,_orderFormVersion=0,_orderSaving=false;
-function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={}){
- const container=document.getElementById('mo-prod-rows'),row=document.createElement('div');row.className='prodrow';
+function addProdRow(desc='',ref='',qty=0,pForn=0,pCli=0,plates=0,sample=0,packing={},clientBox){
+ clientBox=clientBox||document.querySelector('#mo-prod-rows .op-client:last-child');if(!clientBox)return;
+ const row=document.createElement('div');row.className='prodrow';row._itemMeta={...packing};
  const input=(key,label,value,type='text',extra='')=>'<label><span class="plbl">'+label+'</span><input data-item-field="'+key+'" type="'+type+'" value="'+esc(String(value??''))+'" '+extra+' oninput="'+(key==='desc'?'fillProductPacking(this);':'')+'updatePreview()"></label>';
- row.innerHTML='<div class="order-product-main">'+
- input('desc','Produto',desc,'text','list="dl-prod" placeholder="Selecionar ou digitar" autocomplete="off"')+
- input('ref','Referência',ref,'text','placeholder="SKU / EAN"')+
- '<label><span class="plbl">Fornecedor</span><input data-item-supplier list="mo-sup-list" placeholder="Padrão" value="'+esc(packing.supplier||'')+'"></label>'+
- input('qty','Quantidade',qty||'','number','min="0" step="1" placeholder="0"')+
- input('priceForn','Compra USD',pForn||'','number','min="0" step="0.001" placeholder="0,000"')+
- input('priceCli','Venda USD',pCli||'','number','min="0" step="0.001" placeholder="0,000"')+
- '<button class="rm" type="button" onclick="this.closest(&quot;.prodrow&quot;).remove();updatePreview()" aria-label="Remover produto">×</button></div>'+
- '<div class="order-pack-row"><div class="order-carton-size"><span class="plbl">Caixa C × L × A (cm)</span><div>'+['cartonLength','cartonWidth','cartonHeight'].map((key,index)=>'<input type="number" data-packing="'+key+'" aria-label="'+['C (cm)','L (cm)','A (cm)'][index]+'" placeholder="'+['C','L','A'][index]+'" min="0.01" step="any" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()">').join('<span>×</span>')+'</div></div>'+
- [['unitsPerCarton','Un./caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>'<label><span class="plbl">'+label+'</span><input type="number" data-packing="'+key+'" aria-label="'+label+'" min="'+(key==='unitsPerCarton'?'1':'0.01')+'" step="'+(key==='unitsPerCarton'?'1':'any')+'" placeholder="—" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()"></label>').join('')+
- '<span class="prod-packing-summary"></span></div>'+
- '<details class="order-extra-costs" '+((plates||sample)?'open':'')+'><summary>Custos adicionais <span class="order-extra-value"></span></summary><div>'+input('plates','Cilindros USD',plates||'','number','min="0" step="0.01" placeholder="0,00"')+input('sample','Amostras USD',sample||'','number','min="0" step="0.01" placeholder="0,00"')+'</div></details>';
- row.dataset.packingProductKey=orderSuggestionKey(desc);container.appendChild(row);updatePreview();
+ row.innerHTML='<div class="order-product-main">'+input('desc','Produto',desc,'text','list="dl-prod" placeholder="Selecionar ou digitar"')+input('ref','Ref. produto',ref)+ '<label><span class="plbl">Fornecedor</span><input data-item-supplier list="mo-sup-list" value="'+esc(packing.supplier||'')+'" placeholder="Selecionar ou digitar"></label>'+input('supplierReference','Ref. fornecedor',packing.supplierReference||'')+input('qty','Quantidade',qty||'','number','min="1" step="1"')+input('priceForn','Compra USD',pForn||'','number','min="0" step="any"')+input('priceCli','Venda USD',pCli||'','number','min="0" step="any"')+'<button class="rm" type="button" onclick="this.closest(&quot;.prodrow&quot;).remove();updatePreview()" aria-label="Remover produto">×</button></div>'+
+ '<div class="order-pack-row"><div class="order-carton-size"><span class="plbl">Caixa C × L × A (cm)</span><div>'+['cartonLength','cartonWidth','cartonHeight'].map((key,i)=>'<input type="number" data-packing="'+key+'" aria-label="'+key+'" placeholder="'+['C','L','A'][i]+'" min="0.01" step="any" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()">').join('<span>×</span>')+'</div></div>'+[['unitsPerCarton','Un./caixa'],['grossWeightPerCarton','GW/caixa (kg)']].map(([key,label])=>'<label><span class="plbl">'+label+'</span><input type="number" data-packing="'+key+'" min="0.01" step="any" value="'+esc(String(packing[key]??''))+'" oninput="updatePreview()"></label>').join('')+'<label class="op-sample"><input data-requires-sample type="checkbox" '+((packing.requiresSample??true)?'checked':'')+' onchange="updatePreview()"> Amostra</label>'+input('plates','Cilindros USD',plates||'','number','min="0" step="any"')+input('sample','Amostra USD',sample||'','number','min="0" step="any"')+'<span class="prod-packing-summary"></span></div>';
+ row.dataset.packingProductKey=orderSuggestionKey(desc);clientBox.querySelector('.op-client-products').appendChild(row);updatePreview();
 }
 function readProdRows(){
  return [...document.querySelectorAll('#mo-prod-rows .prodrow')].map(row=>{
-  const value=key=>row.querySelector('[data-item-field="'+key+'"]').value;
-  return{desc:value('desc').trim(),ref:value('ref').trim(),qty:parseInt(value('qty'))||0,priceForn:parseFloat(value('priceForn'))||0,priceCli:parseFloat(value('priceCli'))||0,plates:parseFloat(value('plates'))||0,sample:parseFloat(value('sample'))||0,supplier:row.querySelector('[data-item-supplier]').value.trim()||document.getElementById('mo-sup').value.trim(),...readOrderPacking(row)};
- }).filter(r=>r.qty>0);
+ const value=k=>row.querySelector('[data-item-field="'+k+'"]').value;
+ return{...row._itemMeta,clientGroupId:row.closest('.op-client').dataset.groupId,desc:value('desc').trim(),ref:value('ref').trim(),supplierReference:value('supplierReference').trim(),qty:Number(value('qty'))||0,priceForn:Number(value('priceForn'))||0,priceCli:Number(value('priceCli'))||0,plates:Number(value('plates'))||0,sample:Number(value('sample'))||0,requiresSample:row.querySelector('[data-requires-sample]').checked,supplier:row.querySelector('[data-item-supplier]').value.trim(),...readOrderPacking(row)};
+ }).filter(r=>r.qty>0||r.desc||r.ref||r.supplier);
 }
 const PRODUCT_PACKING_FIELDS=['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'];
 function productPackingFor(name){
@@ -2865,7 +2824,7 @@ function internalProductNames(o){
   return (names.length?names:String(o.product||'—').split(' + ')).map(name=>String(name).replace(/\s+/g,' ').trim());
 }
 function internalProductHTML(o){
-  return internalProductNames(o).map(name=>'<div class="int-product-line" title="'+esc(name)+'">'+esc(name)+'</div>').join('');
+ return operationTableClients(o).map(c=>'<div class="op-table-products">'+c.items.map(r=>'<div class="int-product-line" title="'+esc(r.desc+' · '+(r.supplier||'')+' · '+(r.supplierReference||''))+'">'+esc(r.desc)+'</div>').join('')+'</div>').join('');
 }
 function readOrderPacking(row){
   return Object.fromEntries(['cartonLength','cartonWidth','cartonHeight','unitsPerCarton','grossWeightPerCarton'].map(key=>{
@@ -2895,19 +2854,14 @@ function validateOrderPacking(){
   return true;
 }
 function updatePreview(){
-  document.querySelectorAll('#mo-prod-rows .prodrow').forEach(row=>{
-    const info=orderPackingInfo({qty:row.querySelector('[data-item-field=qty]').value,...readOrderPacking(row)});
-    const extra=row.querySelector('.order-extra-value');if(extra){const amount=(Number(row.querySelector('[data-item-field=plates]').value)||0)+(Number(row.querySelector('[data-item-field=sample]').value)||0);extra.textContent=amount?' · '+fUSD(amount):'';}
-    const label=row.querySelector('.prod-packing-summary');
-    if(label)label.textContent=info.cartons?fN(info.cartons)+' caixas'+(info.lastCartonQty?' · última: '+fN(info.lastCartonQty)+' un.':'')+(info.cbm?' · '+info.cbm.toLocaleString('pt-BR',{maximumFractionDigits:2})+' CBM':''):'';
-  });
-  const rows=readProdRows();
-  const totForn=rows.reduce((a,r)=>a+r.qty*r.priceForn+(r.plates||0)+(r.sample||0),0);
-  const totVenda=rows.reduce((a,r)=>a+r.qty*r.priceCli,0);
-  const totQty=rows.reduce((a,r)=>a+r.qty,0);
-  const mg=totVenda-totForn;const pctM=totVenda>0?Math.round((mg/totVenda)*100):0;
-  const prev=document.getElementById('mo-preview');
-  prev.style.display='';prev.innerHTML=[['Quantidade',fN(totQty)],['Compra',fUSD(totForn)],['Venda',fUSD(totVenda)],['Margem',fUSD(mg)+' · '+pctM+'%']].map(([label,value])=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>').join('');
+ const rows=readProdRows();
+ document.querySelectorAll('#mo-prod-rows .prodrow').forEach(row=>{
+ const info=orderPackingInfo({qty:Number(row.querySelector('[data-item-field=qty]').value),...readOrderPacking(row)});
+ row.querySelector('.prod-packing-summary').textContent=info.cartons?fN(info.cartons)+' cxs'+(info.lastCartonQty?' · última '+info.lastCartonQty+' un.':'')+(info.cbm?' · '+info.cbm.toLocaleString('pt-BR',{maximumFractionDigits:2})+' m³':''):'';
+ });
+ const qty=rows.reduce((s,r)=>s+r.qty,0),buy=rows.reduce((s,r)=>s+r.qty*r.priceForn+r.plates+r.sample,0),sale=rows.reduce((s,r)=>s+r.qty*r.priceCli,0),volume=rows.reduce((s,r)=>s+(orderPackingInfo(r).cbm||0),0),missing=rows.some(r=>!orderPackingInfo(r).cbm);
+ document.getElementById('mo-preview').innerHTML=[['Quantidade',fN(qty)],['Volume',volume.toLocaleString('pt-BR',{maximumFractionDigits:2})+' m³'+(missing?' *':'')],['Compra',fUSD(buy)],['Venda',fUSD(sale)],['Margem',fUSD(sale-buy)]].map(([label,value])=>'<div><span>'+label+'</span><strong>'+value+'</strong></div>').join('');
+ document.getElementById('mo-op-summary').textContent=readOperationClients().length+' clientes · '+rows.length+' produtos · '+new Set(rows.map(r=>r.supplier).filter(Boolean)).size+' fornecedores'+(missing?' · * volume parcial: embalagem incompleta':'');
 }
 // Sugestões compartilhadas: cadastros e nomes já usados em pedidos/IPs.
 function orderSuggestionKey(value){
@@ -2935,17 +2889,14 @@ function populateDatalistsMestre(){
     const el=document.getElementById(id);
     if(el)el.innerHTML=orderSuggestionNames(values).map(value=>'<option value="'+esc(value)+'"></option>').join('');
   };
-  fill('mo-cl-list',[...CLIENTES,...orders.map(o=>o.client),...payments.map(p=>p.client)]);
-  fill('mo-sup-list',[...FORNECEDORES,...orders.map(o=>o.supplier),...payments.map(p=>p.supplier)]);
+  fill('mo-cl-list',[...CLIENTES,...orders.flatMap(o=>o.clients?.map(c=>c.client)||[o.client]),...payments.flatMap(p=>linkOrd(p)?.clients?.map(c=>c.client)||[p.client])]);
+  fill('mo-sup-list',[...FORNECEDORES,...orders.flatMap(o=>orderSupplierNames(o).length?orderSupplierNames(o):[o.supplier]),...payments.flatMap(p=>(p.unitPrices||[]).map(r=>r.supplier))]);
   fill('dl-cont',CONTEINERES);
-  fill('dl-prod',[...PRODUTOS,...payments.flatMap(p=>(p.unitPrices||[]).map(r=>r.desc)),...orders.map(o=>o.product)]);
+  fill('dl-prod',[...PRODUTOS,...payments.flatMap(p=>(p.unitPrices||[]).map(r=>r.desc)),...orders.flatMap(o=>operationRows(o).length?operationRows(o).map(r=>r.desc):[o.product])]);
 }
 /* ── CAMADAS AV (visual só — sem lógica de cálculo/pagamento ainda) ── */
 function rvAVCheck(){
-  const pi=(document.getElementById('mo-pi').value||'').trim();
-  const isC=/c$/i.test(pi);
-  document.getElementById('mo-av-block').style.display=isC?'':'none';
-  document.getElementById('mo-av-rota-ff').style.display=isC?'':'none';if(isC)document.getElementById('mo-documents-details').open=true;
+ const show=isIpC(document.getElementById('mo-pi').value.trim());document.getElementById('mo-documents-details').hidden=!show;document.getElementById('mo-av-block').style.display=show?'':'none';document.getElementById('mo-av-rota-ff').style.display=show?'':'none';
 }
 function rvAVSetRota(r){
   document.querySelectorAll('#mo-av-rota-toggle button').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(r==='direta'?'direta':'trading')));
@@ -2954,151 +2905,95 @@ function rvAVSetRota(r){
   _avRota=r;
 }
 let _avRota='direta';
-let _moAmostras=true;
-function setAmostrasToggle(v){
-  _moAmostras=v;const checkbox=document.getElementById('mo-amostras');if(checkbox)checkbox.checked=!!v;
-  document.querySelectorAll('#mo-amostras-toggle button').forEach(b=>b.classList.toggle('active',(b.textContent==='ON')===v));
-}
+
 function openOrderModal(num){
-  _orderFormVersion++;
-  document.getElementById('ovl-order').dataset.documentOrderId=(num!==null?orders.find(o=>o.num===num)?.documentOrderId:null)||crypto.randomUUID();
-  _editNum=num;
-  document.getElementById('mo-docs-btn').hidden=num===null;
-  document.getElementById('mo-documents-details').open=false;
-  document.getElementById('mo-ttl').textContent=num!==null?'Editar pedido':'Novo pedido';
-  document.getElementById('mo-btn').textContent=num!==null?'Salvar':'Criar pedido';
-  document.getElementById('mo-prod-rows').innerHTML='';
-  ['po','colecao','pi','data','cl','sup','sup-inv','cont','etd','notes','av-cambio-venda','av-cambio-camadas','av-custo-rf','av-custo-trading','av-trading-nome'].forEach(f=>{const el=document.getElementById('mo-'+f);if(el)el.value='';});
-  updateFyReferenceFields(num!==null?orders.find(o=>o.num===num):null);
-  rvAVSetRota('direta');
-  setAmostrasToggle(true);
-  if(num!==null){
-    const o=orders.find(x=>x.num===num);
-    if(o){
-      document.getElementById('mo-po').value=o.po||'';document.getElementById('mo-colecao').value=o.colecao||'';document.getElementById('mo-pi').value=o.pi||'';
-      document.getElementById('mo-cl').value=o.client||'';document.getElementById('mo-cont').value=o.container||'';
-      document.getElementById('mo-notes').value=o.notes||'';
-      document.getElementById('mo-data').value=o.orderDate||'';
-      setAmostrasToggle(o.amostras!==false); // default true pra pedidos antigos (sem o campo)
-      if(o.cambioVenda)document.getElementById('mo-av-cambio-venda').value=o.cambioVenda;
-      if(o.cambioCamadas)document.getElementById('mo-av-cambio-camadas').value=o.cambioCamadas;
-      if(o.custoImportacaoRF)document.getElementById('mo-av-custo-rf').value=o.custoImportacaoRF;
-      if(o.custoTrading)document.getElementById('mo-av-custo-trading').value=o.custoTrading;
-      if(o.tradingNome)document.getElementById('mo-av-trading-nome').value=o.tradingNome;
-      rvAVSetRota(o.rotaAV==='trading'?'trading':'direta');
-      const p=linkPay(o);
-      if(p){
-        document.getElementById('mo-sup').value=o.defaultSupplier||p.supplier||o.supplier||'';
-        document.getElementById('mo-sup-inv').value=p.inv||'';
-        document.getElementById('mo-etd').value=p.etd||'';
-      }else document.getElementById('mo-sup').value=o.supplier||'';
-      const items=p?.unitPrices||o.items||[];
-      (items.length?items:[{}]).forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0,r));
-    }
-  } else {
-    addProdRow();
-    document.getElementById('mo-data').value=todayDisp(); // pedido novo já vem com a data de hoje
-  }
-  updatePreview();
-  rvAVCheck();
-  populateDatalistsMestre();
-  document.getElementById('ovl-order').classList.add('open');ovlToFront('ovl-order');
+ _orderFormVersion++;_editNum=num;const o=num!=null?orders.find(o=>o.num===num):null;
+ document.getElementById('ovl-order').dataset.documentOrderId=o?.operationId||crypto.randomUUID();
+ document.getElementById('mo-ttl').textContent=o?'Editar operação':'Nova operação';document.getElementById('mo-btn').textContent=o?'Salvar operação':'Criar operação';
+ for(const [key,value] of Object.entries({pi:o?.pi||'',data:o?.orderDate||todayDisp(),notes:o?.notes||'',cont:o?.container||'',etd:(linkPay(o)?.etd&&linkPay(o).etd!=='—'?linkPay(o).etd:o?.dates?.[6]?.v)||'','av-cambio-venda':o?.cambioVenda||'','av-cambio-camadas':o?.cambioCamadas||'','av-custo-rf':o?.custoImportacaoRF||'','av-custo-trading':o?.custoTrading||'','av-trading-nome':o?.tradingNome||''}))document.getElementById('mo-'+key).value=value;
+ document.getElementById('mo-prod-rows').innerHTML='';
+ (o?operationClients(o):[{}]).forEach(c=>addOperationClient(c));rvAVSetRota(o?.rotaAV||'direta');rvAVCheck();populateDatalistsMestre();updatePreview();
+ document.getElementById('ovl-order').classList.add('open');ovlToFront('ovl-order');
 }
-async function submitOrder(){
-  if(_orderSaving)return;_orderSaving=true;try{
-  const submitVersion=_orderFormVersion,submitKey=_cryptoKey,submitUser=authUser?.id;
-  const po=document.getElementById('mo-po').value.trim()||'—';
-  const colecao=document.getElementById('mo-colecao').value.trim();
-  const pi=document.getElementById('mo-pi').value.trim();
-  const orderDate=normDate(document.getElementById('mo-data').value.trim())||todayDisp();
-  const client=document.getElementById('mo-cl').value.trim();
-  let supplier=document.getElementById('mo-sup').value.trim();const defaultSupplier=supplier;
-  const inv=document.getElementById('mo-sup-inv').value.trim();
-  const container=document.getElementById('mo-cont').value.trim();
-  const etd=normDate(document.getElementById('mo-etd').value.trim())||'—';
-  const notes=document.getElementById('mo-notes').value.trim();
-  const prodRows=readProdRows();const totalQty=prodRows.reduce((a,r)=>a+r.qty,0);
-  const itemSuppliers=[...new Set(prodRows.map(r=>r.supplier).filter(Boolean))];if(itemSuppliers.length)supplier=itemSuppliers.join(' / ');
-  // Camadas AV — só relevantes se IP tipo C (mas sempre lê o que tiver preenchido)
-  const avFields=isIpC(pi)?{
-    rotaAV:_avRota,
-    cambioVenda:parseFloat(document.getElementById('mo-av-cambio-venda').value)||0,
-    cambioCamadas:parseFloat(document.getElementById('mo-av-cambio-camadas').value)||0,
-    custoImportacaoRF:parseFloat(document.getElementById('mo-av-custo-rf').value)||0,
-    custoTrading:_avRota==='trading'?(parseFloat(document.getElementById('mo-av-custo-trading').value)||0):0,
-    tradingNome:_avRota==='trading'?document.getElementById('mo-av-trading-nome').value.trim():''
-  }:{};
-  const amostras=_moAmostras;
+async function submitOrder(options={}){
+ if(!authUser||!_cryptoKey){toast('Entre no Tracker para salvar.','warn');return false;}if(_orderSaving)return false;if(_operationNumbering){toast('Aguarde a emissão da numeração.','warn');return false;}_orderSaving=true;
+ const version=_orderFormVersion,key=_cryptoKey,user=authUser?.id;
+ const live=()=>version===_orderFormVersion&&key===_cryptoKey&&user===authUser?.id;
+ try{
+ const value=id=>document.getElementById('mo-'+id).value.trim(),pi=value('pi'),groups=readOperationClients(),rows=readProdRows();
+ const existing=orders.find(o=>o.num===_editNum),oldPi=existing?.pi;
+ if(pi&&(orders.some(o=>o.num!==_editNum&&orderSuggestionKey(o.pi)===orderSuggestionKey(pi))||payments.some(p=>orderSuggestionKey(p.pi)===orderSuggestionKey(pi)&&p!==linkPay(existing)))){toast('Esta IP já existe. Abra a operação existente para adicionar clientes.','err');return false;}
+ if(!groups.length||groups.some(c=>!c.client)){toast('Informe o cliente de cada grupo.','err');return false;}
+ if(groups.some(c=>!rows.some(r=>r.clientGroupId===c.id))){toast('Adicione ao menos um produto para cada cliente.','err');return false;}
+ for(const r of rows){if(!r.desc||!r.supplier||!Number.isInteger(r.qty)||r.qty<=0||[r.priceForn,r.priceCli,r.plates,r.sample].some(v=>!Number.isFinite(v)||v<0)){toast('Produto: informe descrição, fornecedor, quantidade inteira positiva e valores não negativos.','err');return false;}}
+ for(const el of document.querySelectorAll('#mo-prod-rows input[type=number]'))if(el.validity.badInput||(!el.validity.valid&&el.value)){toast('Confira o valor numérico informado.','err');el.focus();return false;}
+ if(!validateOrderPacking())return false;
+ const date=normDate(value('data')),etd=value('etd')?normDate(value('etd')):'';
+ if(!date||(value('etd')&&!etd)){toast('Informe datas válidas.','err');return false;}
+ if(existing&&oldPi&&!pi&&(ledger.some(l=>l.pi===oldPi)||receipts.some(r=>r.pi===oldPi))){toast('Esta IP possui lançamentos. Mantenha seu número.','err');return false;}
+ const boxes=[...document.querySelectorAll('#mo-prod-rows .op-client')];
+ // Validate every reference before reserving any historical number.
+ for(const c of groups)for(const [kind,field] of [['PI','fyPiNumber'],['CIPL','fyCiNumber']]){
+ const previous=existing?.clients?.find(x=>x.id===c.id)||(!existing?.clients&&existing);
+ if(previous){c.documentEdits=previous.documentEdits;c.documentEditsRevision=previous.documentEditsRevision||0;}
+ if(c[field]&&!FY_FORMAT.test(c[field]))throw new Error('Use AAAA-001 nas referências FY.');
+ if(previous?.fyNumbersRegistered?.[kind]&&previous[field]!==c[field])throw new Error('Um número oficial já registrado não pode ser substituído.');
+ }
+ if(!live())return false;
+ pushUndo(existing?'Editar operação '+pi:'Criar operação '+pi);
+ const p=linkPay(existing),nn=existing?.num??Math.max(...orders.map(o=>o.num),0)+1;
+ const o=existing||{num:nn,status:'PRÉ-PRODUÇÃO',dates:Array.from({length:9},(_,i)=>mkD(null,i>=7))};
+ const suppliers=[...new Set(rows.map(r=>r.supplier))],first=groups[0];
+ Object.assign(o,{operationSchemaVersion:1,operationId:existing?.operationId||document.getElementById('ovl-order').dataset.documentOrderId,clients:groups,items:rows,pi,orderDate:date,notes:value('notes'),container:value('cont'),client:[...new Set(groups.map(c=>c.client))].join(' / '),po:groups.map(c=>c.po).filter(Boolean).join(' / ')||'—',colecao:[...new Set(groups.map(c=>c.colecao).filter(Boolean))].join(' / '),supplier:suppliers.join(' / '),total:rows.reduce((s,r)=>s+r.qty,0),product:rows.map(r=>r.desc).join(' + '),amostras:rows.some(r=>r.requiresSample),documentOrderId:first.documentOrderId,fyPiNumber:first.fyPiNumber||'',fyCiNumber:first.fyCiNumber||'',fyNumbersRegistered:first.fyNumbersRegistered||{}});
+ delete o.defaultSupplier;
+ if(isIpC(pi))Object.assign(o,{rotaAV:_avRota,cambioVenda:Number(value('av-cambio-venda'))||0,cambioCamadas:Number(value('av-cambio-camadas'))||0,custoImportacaoRF:Number(value('av-custo-rf'))||0,custoTrading:Number(value('av-custo-trading'))||0,tradingNome:value('av-trading-nome')});
+ if(etd){o.dates[6]=mkD(etd,true,true);autoCascade(o,6);o.dates[6]=mkD(etd,true,true);}else if(p?.etd&&p.etd!=='—'){o.dates[6]=mkD(null,true);}
+ const refs=[...new Set(rows.map(r=>r.supplierReference).filter(Boolean))];
+ const fin=p||{status:'Mass P contracted',plates:0,sample:0};
+ Object.assign(fin,{operationId:o.operationId,pi,po:o.po,client:o.client,supplier:o.supplier,inv:refs.join(' / '),etd:etd||'—',eta:o.dates[7]?.v||'—',unitPrices:rows,clientInv:groups.length===1?first.fyCiNumber||fin.clientInv||'':''});
+ if(!p&&pi)payments.unshift(fin);if(!existing)orders.unshift(o);
+ if(existing&&oldPi&&oldPi!==pi){ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;});receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
+ groups.forEach(c=>rememberOrderNames(c.client,'',rows.filter(r=>r.clientGroupId===c.id)));
+ _editNum=nn;document.getElementById('mo-btn').textContent='Salvar operação';document.getElementById('mo-ttl').textContent='Editar operação';
+ // Persist valid operation and stable document identities before number allocation.
+ await saveAll(()=>key===_cryptoKey&&user===authUser?.id);if(!live())return false;
+ try{
+ for(let i=0;i<groups.length;i++)for(const [kind,field] of [['PI','fyPiNumber'],['CIPL','fyCiNumber']]){
+ const c=groups[i];if(c[field]&&!c.fyNumbersRegistered?.[kind]){
+ c[field]=await reserveFyNumber(c,kind,c[field]);if(!live())return false;
+ c.fyNumbersRegistered={...c.fyNumbersRegistered,[kind]:true};boxes[i]._meta={...boxes[i]._meta,[field]:c[field],fyNumbersRegistered:c.fyNumbersRegistered};boxes[i].querySelector('[data-client-field='+field+']').readOnly=true;boxes[i].querySelectorAll('.op-doc-field button')[kind==='PI'?0:1].disabled=true;
+ }
+ }
 
-  if(!client){toast('⚠ Cliente obrigatório','err');return;}
-  if(!supplier){toast('⚠ Fornecedor obrigatório','err');return;}
-  if(!prodRows.length){toast('⚠ Adicione produto','err');return;}
-  if(!validateOrderPacking())return;
-  if(prodRows.some(r=>!r.supplier)){toast('⚠ Informe o fornecedor padrão ou o fornecedor de cada item','err');return;}
-  let fyRefs;try{fyRefs=await prepareFyReferences(orders.find(o=>o.num===_editNum));}catch(error){toast(error.message,'err');return;}
-  if(submitVersion!==_orderFormVersion||submitKey!==_cryptoKey||submitUser!==authUser?.id){toast('A sessão ou a janela mudou. Confira o pedido antes de salvar.','warn');return;}
-
-  if(_editNum!==null){
-    pushUndo('Editar pedido #'+_editNum);
-    const o=orders.find(x=>x.num===_editNum);
-    if(o){
-      // Buscar payment ANTES de alterar pi/po
-      const p=linkPay(o);
-      const oldPi=o.pi;
-      o.items=prodRows;Object.assign(o,fyRefs,{defaultSupplier});
-      o.po=po;o.colecao=colecao;o.pi=pi;o.client=client;o.supplier=supplier;o.container=container;o.notes=notes;o.orderDate=orderDate;o.amostras=amostras;
-      Object.assign(o,avFields);
-      if(totalQty>0)o.total=totalQty;
-      if(prodRows.length>0)o.product=prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||o.product;
-      if(p){
-        if(pi&&pi!==oldPi){p.pi=pi; ledger.forEach(l=>{if(l.pi===oldPi)l.pi=pi;}); receipts.forEach(r=>{if(r.pi===oldPi)r.pi=pi;});}
-        // clientInv/status/eta não têm mais campo no modal — preserva o que já estava salvo
-        if(fyRefs.fyCiNumber)p.clientInv=fyRefs.fyCiNumber;
-        p.po=po;p.inv=inv;p.client=client;p.supplier=supplier||p.supplier;p.etd=etd;p.plates=0;p.sample=0;if(prodRows.length)p.unitPrices=prodRows;
-      }
-      if(etd&&etd!=='—'){
-        while(o.dates.length<9)o.dates.push(mkD(null,true));
-        o.dates[6]=mkD(etd,true,true);
-        autoCascade(o,6);
-      }
-    }
-    if(o)rememberOrderNames(client,supplier,prodRows);
-    saveAll();renderAll();renderFinanceiro();closeOvl('order');toast(`Pedido #${_editNum} atualizado ✓`);return;
-  }
-
-  const nn=Math.max(...orders.map(x=>x.num),0)+1;
-  const emptyDates=[mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null),mkD(null,true),mkD(null)];
-  if(etd&&etd!=='—')emptyDates[6]=mkD(etd,true,true);
-  const newOrder={num:nn,...fyRefs,defaultSupplier,items:prodRows,po,colecao,pi,client,supplier,container,status:'PRÉ-PRODUÇÃO',total:totalQty||0,product:prodRows.map(r=>r.desc||'').filter(Boolean).join(' + ')||'—',dates:emptyDates,notes,orderDate,amostras,...avFields};
-  // Auto-cascade: se tem ETD, cascatear ETA e o resto. Se tem Arte, cascatear tudo.
-  if(emptyDates[6]&&emptyDates[6].v) autoCascade(newOrder,6);
-  if(emptyDates[0]&&emptyDates[0].v) autoCascade(newOrder,0);
-  // Restaurar ETD se usuário informou explicitamente (não sobrescrever)
-  if(etd&&etd!=='—')newOrder.dates[6]=mkD(etd,true,true);
-  autoStatus(newOrder);
-  orders.unshift(newOrder);
-  if(pi&&prodRows.length>0){
-    const eta=newOrder.dates[7]&&newOrder.dates[7].v?newOrder.dates[7].v:'—'; // eta não tem campo próprio — vem do auto-cascade a partir do ETD
-    const existing=payments.find(x=>x.pi===pi);
-    if(!existing)payments.unshift({pi,po,inv,client,clientInv:fyRefs.fyCiNumber||'',supplier:supplier||'—',status:'Mass P contracted',etd,eta,unitPrices:prodRows,plates:0,sample:0,vnotes:''});
-    else{existing.po=po;existing.inv=inv;existing.client=client;existing.supplier=supplier||existing.supplier;existing.etd=etd;existing.eta=eta;existing.plates=0;existing.sample=0;existing.unitPrices=prodRows;}
-  }
-  rememberOrderNames(client,supplier,prodRows);
-  saveAll();renderAll();closeOvl('order');toast(`Pedido #${nn} criado ✓`);
-  }finally{_orderSaving=false;}
+ }catch(error){
+ if(!live())return false;
+ Object.assign(o,{fyPiNumber:first.fyPiNumber||'',fyCiNumber:first.fyCiNumber||'',fyNumbersRegistered:first.fyNumbersRegistered||{}});
+ await saveAll(()=>key===_cryptoKey&&user===authUser?.id);if(live()){renderAll();renderFinanceiro();toast('Operação salva; numeração pendente: '+error.message,'warn');}return false;
+ }
+ Object.assign(o,{fyPiNumber:first.fyPiNumber||'',fyCiNumber:first.fyCiNumber||'',fyNumbersRegistered:first.fyNumbersRegistered||{}});
+ if(groups.length===1)fin.clientInv=first.fyCiNumber||fin.clientInv||'';
+ await saveAll(()=>key===_cryptoKey&&user===authUser?.id);if(!live())return false;
+ renderAll();renderFinanceiro();if(!options.keepOpen)closeOvl('order');else document.getElementById('mo-btn').textContent='Salvar operação';toast('Operação '+pi+' salva ✓');return true;
+ }catch(error){if(live())toast(error.message,'err');return false;}finally{_orderSaving=false;}
 }
 
 /* ══════════════════════════════════════
    GERAR PI/CI/PL — abre export-docs.html numa
    aba nova e manda os dados do pedido por postMessage
 ══════════════════════════════════════ */
-function gerarDocs(num){
+function gerarDocs(num,clientId){
   const orderNum=(num===undefined||num===null)?_editNum:num;
   if(orderNum===null||orderNum===undefined){toast('⚠ Salve o pedido antes de gerar os documentos','err');return;}
-  const o=orders.find(x=>x.num===orderNum);
+  const baseOrder=orders.find(x=>x.num===orderNum);
+  let o=baseOrder;
   if(!o){toast('⚠ Pedido não encontrado','err');return;}
-  const p=linkPay(o);
-  const items=((p&&p.unitPrices)||o.items||[]).filter(r=>(r.qty||0)>0).map(r=>({
+  if(baseOrder.clients?.length>1&&!clientId){openOrderModal(baseOrder.num);toast('Use o ícone de documentos no cliente desejado.','warn');return;}
+  const client=baseOrder.clients?.find(c=>c.id===(clientId||baseOrder.clients[0].id));
+  if(clientId&&!client){toast('Cliente não encontrado nesta operação.','err');return;}
+  if(client&&['PI','CIPL'].some(kind=>client[kind==='PI'?'fyPiNumber':'fyCiNumber']&&!client.fyNumbersRegistered?.[kind])){openOrderModal(baseOrder.num);toast('Registre a referência FY deste cliente antes de abrir os documentos.','warn');return;}
+  const p=linkPay(baseOrder);
+  if(client){const rows=operationRows(baseOrder).filter(r=>r.clientGroupId===client.id);o={...baseOrder,...client,pi:baseOrder.pi,supplier:[...new Set(rows.map(r=>r.supplier).filter(Boolean))].join(' / '),items:rows};}
+  const items=(client?o.items:((p&&p.unitPrices)||o.items||[])).filter(r=>(r.qty||0)>0).map(r=>({
     sku:r.ref||'',
     desc:r.desc||'',
     qty:r.qty||0,
@@ -3151,7 +3046,7 @@ function gerarDocs(num){
   const docToken=crypto.randomUUID();
   payload.documentSession=docToken;
   for(const [child] of DOC_EDIT_WINDOWS)if(child.closed)DOC_EDIT_WINDOWS.delete(child);
-  DOC_EDIT_WINDOWS.set(win,{num:o.num,token:docToken,key:_cryptoKey,userId:authUser?.id,payload});
+  DOC_EDIT_WINDOWS.set(win,{num:baseOrder.num,clientId:client?.id,token:docToken,key:_cryptoKey,userId:authUser?.id,payload});
   let done=false;
   const cleanup=()=>{window.removeEventListener('message',onMsg);clearTimeout(timer);};
   const onMsg=(evt)=>{
@@ -3180,7 +3075,8 @@ window.addEventListener('message',async event=>{
   if(event.origin!==window.location.origin)return;
   const entry=DOC_EDIT_WINDOWS.get(event.source);if(!entry)return;
   if(!documentWindowAllowed(entry))return;
-  const order=orders.find(o=>o.num===entry.num);if(!order)return;
+  const operation=orders.find(o=>o.num===entry.num);if(!operation)return;
+  const order=entry.clientId?operation.clients?.find(c=>c.id===entry.clientId):operation;if(!order)return;
   if(event.data==='docs-ready'){
     // Reopening/reloading the same document tab restores the saved edits too.
     event.source.postMessage({type:'fgl-order-data',payload:{...entry.payload,documentEdits:order.documentEdits,documentRevision:order.documentEditsRevision||0}},event.origin);return;
@@ -3213,6 +3109,7 @@ function gerarDocsFromPI(pi){
 ══════════════════════════════════════ */
 let _epCtx=null,_epOpenedAt=0;
 function editField(num,field,e){
+ const operation=orders.find(o=>o.num===num);if(operation?.clients?.length&&['client','po','colecao','supplier','product','total','pi'].includes(field)){e.stopPropagation();openOrderModal(num);return;}
   e.stopPropagation();const o=orders.find(x=>x.num===num);if(!o)return;
   const lbls={pi:'IP',po:'PO#',colecao:'Coleção',client:'Cliente',product:'Produto',container:'Contêiner',supplier:'Fornecedor',total:'Total Unid.',notes:'Notas',_nextAction:'Próxima Ação'};
   _epCtx={type:'order',num,field};
@@ -3221,6 +3118,7 @@ function editField(num,field,e){
   if(ep){if(field==='_nextAction')ep.setAttribute('list','dl-next-action');else if(field==='product')ep.setAttribute('list','dl-prod');else if(field==='container')ep.setAttribute('list','dl-cont');else ep.removeAttribute('list');}
 }
 function editFinField(pi,field,e){
+ const operation=orders.find(o=>o.pi===pi);if(operation?.clients?.length&&['pi','po','inv','supplier','client','clientInv'].includes(field)){e.stopPropagation();openOrderModal(operation.num);return;}
   e.stopPropagation();const p=payments.find(x=>x.pi===pi);if(!p)return;
   const lbls={pi:'IP',po:'PO',inv:'Invoice Forn.',supplier:'Fornecedor',client:'Cliente',clientInv:'Invoice Cli.',etd:'ETD',eta:'ETA'};
   _epCtx={type:'pay',pi,field};
@@ -3404,13 +3302,14 @@ function openFinPopup(pi){
     const av=ordAVLayers(o);
     h+=`<div class="fa-layers"><div class="fa-layer-head"><span>Composição (USD)</span><span>Total</span><span>Pago</span><span>Restante</span></div>${[{k:'fy',label:'Mercadoria',total:pTotalForn(p)},{k:'rf',label:'Importação',total:av.rf},...(o.rotaAV==='trading'?[{k:'trading',label:'Trading · '+(o.tradingNome||''),total:av.trading}]:[])].map(l=>{const paidLayer=piPaid(pi,l.k);return `<div><span>${esc(l.label)}</span><span>${fUSD(l.total)}</span><span>${fUSD(paidLayer)}</span><span>${fUSD(Math.max(0,l.total-paidLayer))}${paidLayer>l.total?' ⚠':''}</span></div>`;}).join('')}</div>`;
   }
+  h+=operationBalanceHTML(o,p);
   h+=financeTransactions(pays,isC);
   h+=`<details class="fa-entry"><summary>+ Pagamento</summary>${!isC?`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
       <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
         <input type="text" id="fp-l-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
         <input type="number" id="fp-l-amt" placeholder="Valor US$" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
       </div>
-      <input type="text" id="fp-l-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+      ${operationPartySelect(o,'supplier')}<input type="text" id="fp-l-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
       <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
     </div>`:`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
       <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
@@ -3418,12 +3317,12 @@ function openFinPopup(pi){
         <input type="number" id="fp-l-amt" placeholder="${'Valor: FY em US$; RF/Trading em R$'}" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
       </div>
       <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
-        <select id="fp-l-layer" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.64rem">
+        <select id="fp-l-layer" onchange="const el=document.getElementById('fp-op-supplier');if(el)el.disabled=this.value!=='fy'" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.64rem">
           <option value="fy">FY (mercadoria) — US$</option>
           <option value="rf">RF (importação) — R$</option>
           ${o.rotaAV==='trading'?`<option value="trading">Trading — R$</option>`:''}
         </select>
-        <input type="text" id="fp-l-ref" placeholder="Ref" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem">
+        ${operationPartySelect(o,'supplier')}<input type="text" id="fp-l-ref" placeholder="Ref" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem">
       </div>
       <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
     </div>`}</details></section><section><h3>Recebimentos</h3>${financeTransactions(recs,false)}<details class="fa-entry"><summary>+ Recebimento</summary><div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
@@ -3431,7 +3330,7 @@ function openFinPopup(pi){
       <input type="text" id="fp-r-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
       <input type="number" id="fp-r-amt" placeholder="${isC?'Valor R$':'Valor US$'}" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
     </div>
-    <input type="text" id="fp-r-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+    ${operationPartySelect(o,'client')}<input type="text" id="fp-r-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
     <button class="bsm" style="width:100%;background:var(--green);color:#fff;border-color:var(--green)" onclick="finPopupAddReceipt('${esc(pi)}')">＋ Lançar recebimento</button>
   </div></details></section></div>`;
   h+=`<div class="fa-difference"><span>Diferença a receber / pagar</span><b>${fUSD(Math.max(0,aReceber)-Math.max(0,aPagar))}</b></div>`;
@@ -3482,7 +3381,7 @@ function financeSaveProduct(input){
   pushUndo('Editar produto — IP '+pi);
   p.unitPrices[index][key]=value;
   const o=orders.find(x=>x.pi===pi);
-  if(o){o.total=p.unitPrices.reduce((sum,r)=>sum+(Number(r.qty)||0),0);o.product=p.unitPrices.map(r=>r.desc||'').filter(Boolean).join(' + ');}
+  if(o){o.items=p.unitPrices;o.total=p.unitPrices.reduce((sum,r)=>sum+(Number(r.qty)||0),0);o.product=p.unitPrices.map(r=>r.desc||'').filter(Boolean).join(' + ');}
   saveAll();renderAll();renderFinanceiro();
   // Refresh computed regions only. Keep the live inputs, their focus and open forms intact.
   const live=[...body.childNodes],scroll=body.scrollTop,active=document.activeElement;
@@ -3497,7 +3396,7 @@ function financeSaveProduct(input){
 }
 function financeTransactions(rows,isC){
   if(!rows.length)return '<p class="fa-empty">Nenhum lançamento.</p>';
-  return '<div class="fa-transactions">'+rows.map(r=>`<details><summary><time>${esc(r.date)}</time><span class="fa-ref">${esc(r.ref||'Sem referência')}</span><b>${fUSD(r.amount)}</b></summary><div class="fa-transaction-detail">${isC?'Camada: '+esc(r.layer||'fy')+' · ':''}${esc(r.ref||'Sem referência')}${r.notes?'<p>'+esc(r.notes)+'</p>':''}${r.amountBRL?'<p>Original: R$ '+Number(r.amountBRL).toFixed(2)+(r.fxApplied?' · Câmbio '+esc(String(r.fxApplied)):'')+'</p>':''}</div></details>`).join('')+'</div>';
+  return '<div class="fa-transactions">'+rows.map(r=>`<details><summary><time>${esc(r.date)}</time><span class="fa-ref">${esc(r.ref||'Sem referência')}</span><b>${fUSD(r.amount)}</b></summary><div class="fa-transaction-detail">${isC?'Camada: '+esc(r.layer||'fy')+' · ':''}${esc(r.ref||'Sem referência')} · ${esc(r.client||r.supplier||'')}${r.notes?'<p>'+esc(r.notes)+'</p>':''}${r.amountBRL?'<p>Original: R$ '+Number(r.amountBRL).toFixed(2)+(r.fxApplied?' · Câmbio '+esc(String(r.fxApplied)):'')+'</p>':''}</div></details>`).join('')+'</div>';
 }
 function finPopupToggleItems(el){
   const box=el.nextElementSibling,arrow=el.querySelector('.fp-items-arrow');
@@ -3906,6 +3805,98 @@ function importBackup(e){
     }catch(err){alert('Erro ao ler backup: '+err.message);}
   };
   reader.readAsText(file);e.target.value='';
+}
+let _operationNumbering=false;const OP_TABLE_EXPANDED=new Set();
+/* V63: one import operation, client/PO groups and product-specific sourcing. */
+function operationRows(o){return linkPay(o)?.unitPrices||o.items||[];}
+function operationClients(o){
+ const rows=operationRows(o);
+ if(o.clients?.length)return o.clients.map(c=>({...c,items:rows.filter(r=>r.clientGroupId===c.id)}));
+ const id=o.documentOrderId||'legacy-'+o.num;
+ return[{id,client:o.client||'',po:o.po==='—'?'':o.po||'',colecao:o.colecao||'',documentOrderId:o.documentOrderId,fyPiNumber:legacyFyNumber(o,'PI'),fyCiNumber:legacyFyNumber(o,'CIPL'),fyNumbersRegistered:o.fyNumbersRegistered||{},documentEdits:o.documentEdits,documentEditsRevision:o.documentEditsRevision||0,items:rows.map(r=>({...r,supplier:r.supplier||o.defaultSupplier||o.supplier||'',supplierReference:r.supplierReference||linkPay(o)?.inv||'',supplierOrderNumber:r.supplierOrderNumber||o.supplierOrderNumber||'',requiresSample:r.requiresSample??(o.amostras!==false)}))}];
+}
+function operationField(key,label,value='',extra=''){
+ return '<label><span class="plbl">'+label+'</span><input data-client-field="'+key+'" value="'+esc(String(value||''))+'" '+extra+'></label>';
+}
+function addOperationClient(data={}){
+ const box=document.createElement('section');box.className='op-client';
+ box.dataset.groupId=data.id||crypto.randomUUID();box._meta={...data,id:box.dataset.groupId,documentOrderId:data.documentOrderId||crypto.randomUUID()};delete box._meta.items;
+ box.innerHTML='<div class="op-client-head">'+operationField('client','Cliente',data.client,'list="mo-cl-list" placeholder="Selecionar ou digitar"')+operationField('po','PO cliente',data.po)+operationField('colecao','Coleção',data.colecao)+['PI','CIPL'].map(kind=>{const field=kind==='PI'?'fyPiNumber':'fyCiNumber';return '<label><span class="plbl">'+(kind==='PI'?'PI FY':'CI/PL FY')+'</span><div class="op-doc-field"><input data-client-field="'+field+'" value="'+esc(data[field]||'')+'" placeholder="Não emitida" '+(data.fyNumbersRegistered?.[kind]?'readonly':'')+'><button type="button" onclick="issueOperationNumber(this,\''+kind+'\')" title="Emitir / registrar '+kind+'" '+(data.fyNumbersRegistered?.[kind]?'disabled':'')+'>#</button></div></label>';}).join('')+'<div class="op-client-actions"><button type="button" title="Documentos deste cliente" onclick="openClientDocuments(this)">▤</button><button type="button" title="Remover cliente" onclick="removeOperationClient(this)">×</button></div></div><div class="op-client-products"></div><button type="button" class="addup" onclick="addProdRow(\'\',\'\',0,0,0,0,0,{},this.closest(\'.op-client\'))">＋ Produto</button>';
+ document.getElementById('mo-prod-rows').appendChild(box);
+ const items=data.items?.length?data.items:[{}];items.forEach(r=>addProdRow(r.desc||'',r.ref||'',r.qty,r.priceForn,r.priceCli,r.plates||0,r.sample||0,r,box));
+ updatePreview();return box;
+}
+function removeOperationClient(button){
+ const box=button.closest('.op-client');
+ if(box._meta.fyPiNumber||box._meta.fyCiNumber||box._meta.documentEdits){toast('Este cliente possui documentos. Preserve o vínculo; ajuste seus produtos.','warn');return;}
+ if(!confirm('Remover este cliente e seus produtos da operação?'))return;
+ box.remove();updatePreview();
+}
+function readOperationClients(){
+ return [...document.querySelectorAll('#mo-prod-rows .op-client')].map(box=>{
+ const c={...box._meta};box.querySelectorAll('[data-client-field]').forEach(el=>c[el.dataset.clientField]=el.value.trim());return c;
+ });
+}
+
+
+
+
+
+
+async function issueOperationNumber(button,kind){
+ const box=button.closest('.op-client'),id=box.dataset.groupId,version=_orderFormVersion,key=_cryptoKey,user=authUser?.id;
+ if(!await submitOrder({keepOpen:true}))return;
+ const o=orders.find(o=>o.num===_editNum),c=o?.clients?.find(c=>c.id===id);if(!c)return;
+ const field=kind==='PI'?'fyPiNumber':'fyCiNumber';if(c.fyNumbersRegistered?.[kind])return;
+ setOperationNumberBusy(true);
+ try{
+ const number=await reserveFyNumber(c,kind,c[field]||'');if(key!==_cryptoKey||user!==authUser?.id)return;
+ c[field]=number;c.fyNumbersRegistered={...c.fyNumbersRegistered,[kind]:true};
+ if(c===o.clients[0]){o[field]=number;o.fyNumbersRegistered={...c.fyNumbersRegistered};}if(kind==='CIPL'&&o.clients.length===1)linkPay(o).clientInv=number;
+ await saveAll(()=>key===_cryptoKey&&user===authUser?.id);
+ if(version===_orderFormVersion){box._meta={...c};box.querySelector('[data-client-field='+field+']').value=number;box.querySelector('[data-client-field='+field+']').readOnly=true;}
+ toast(number+' registrado ✓');
+ }catch(e){if(key===_cryptoKey&&user===authUser?.id)toast(e.message,'err');}
+ finally{setOperationNumberBusy(false);}
+}
+async function openClientDocuments(button){
+ const id=button.closest('.op-client').dataset.groupId,version=_orderFormVersion;
+ if(await submitOrder({keepOpen:true})&&version===_orderFormVersion)gerarDocs(_editNum,id);
+}
+function operationIdentityHTML(o){
+ const all=operationClients(o),cs=operationTableClients(o),suppliers=orderSupplierNames(o);
+ return '<button class="op-ip-link" onclick="openOrderModal('+o.num+')">'+esc(o.pi||'—')+'</button> <span class="op-type">'+(isIpC(o.pi)?'AV':'FY')+'</span>'+(o.notes?'<div class="op-table-note" title="'+esc(o.notes)+'">'+esc(o.notes)+'</div>':'')+cs.map(c=>'<div class="op-table-client"><b>'+esc(c.client)+'</b><small>'+esc([c.po?'PO '+c.po:'',c.colecao].filter(Boolean).join(' · '))+'</small></div>').join('')+(all.length>2?'<button class="op-table-expand" onclick="toggleOperationClients('+o.num+')">'+(OP_TABLE_EXPANDED.has(o.num)?'Recolher':'+ '+(all.length-2)+' clientes')+'</button>':'')+(suppliers.length?'<small class="op-table-suppliers" title="'+esc(suppliers.join(' · '))+'">'+suppliers.length+' fornecedor'+(suppliers.length>1?'es':'')+'</small>':'');
+}
+
+function setOperationNumberBusy(busy){
+ _operationNumbering=busy;document.getElementById('mo-btn').disabled=busy;
+ document.querySelectorAll('#mo-prod-rows .op-client').forEach(box=>box.querySelectorAll('.op-doc-field button').forEach((button,i)=>button.disabled=busy||!!box._meta.fyNumbersRegistered?.[i===0?'PI':'CIPL']));
+}
+
+function operationTableClients(o){
+ const cs=operationClients(o);if(OP_TABLE_EXPANDED.has(o.num))return cs;
+ if(typeof msfHasFilter==='function'&&msfHasFilter('int-cl')){const selected=cs.filter(c=>msfMatch('int-cl',c.client));if(selected.length)return selected;}
+ return cs.slice(0,2);
+}
+function toggleOperationClients(num){
+ if(OP_TABLE_EXPANDED.has(num))OP_TABLE_EXPANDED.delete(num);else OP_TABLE_EXPANDED.add(num);renderInternal();
+}
+function operationPartySelect(o,kind){
+ if(!o?.clients?.length)return '';
+ const values=kind==='client'?[...new Set(o.clients.map(c=>c.client))]:orderSupplierNames(o);
+ if(!values.length)return '';
+ return '<select id="fp-op-'+kind+'" aria-label="'+(kind==='client'?'Cliente':'Fornecedor')+'" style="width:100%;margin-bottom:6px;padding:5px;border:1px solid var(--bdr2);border-radius:5px">'+(values.length>1?'<option value="">Escolher '+(kind==='client'?'cliente':'fornecedor')+'</option>':'')+values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select>';
+}
+function operationBalanceHTML(o,p){
+ if(!o?.clients?.length)return '';
+ const rows=p.unitPrices||[],suppliers=orderSupplierNames(o),clients=[...new Set(o.clients.map(c=>c.client))];
+ let html='<details class="op-party-balances"><summary>Distribuição por cliente e fornecedor</summary>';
+ for(const client of clients){const ids=o.clients.filter(c=>c.client===client).map(c=>c.id),total=rows.filter(r=>ids.includes(r.clientGroupId)).reduce((s,r)=>s+r.qty*r.priceCli,0),received=receipts.filter(r=>r.pi===o.pi&&r.client===client).reduce((s,r)=>s+r.amount,0);html+='<div><span>'+esc(client)+'</span><span>Venda '+fUSD(total)+' · recebido '+fUSD(received)+'</span></div>';}
+ for(const supplier of suppliers){const total=rows.filter(r=>r.supplier===supplier).reduce((s,r)=>s+r.qty*r.priceForn+(r.plates||0)+(r.sample||0),0),paid=ledger.filter(r=>r.pi===o.pi&&r.supplier===supplier&&(r.layer||'fy')==='fy').reduce((s,r)=>s+r.amount,0);html+='<div><span>'+esc(supplier)+'</span><span>Compra '+fUSD(total)+' · pago '+fUSD(paid)+'</span></div>';}
+ const unknown=receipts.filter(r=>r.pi===o.pi&&!clients.includes(r.client)).length+ledger.filter(r=>r.pi===o.pi&&!suppliers.includes(r.supplier)&&(r.layer||'fy')==='fy').length;
+ if((p.plates||0)+(p.sample||0))html+='<small>Custos globais anteriores: '+fUSD((p.plates||0)+(p.sample||0))+' · incluídos no total, sem distribuição por produto.</small>';
+ if(unknown)html+='<small>'+unknown+' lançamento(s) anterior(es) sem distribuição individual; incluídos no total da IP.</small>';
+ return html+'</details>';
 }
 </script>
 <script>
