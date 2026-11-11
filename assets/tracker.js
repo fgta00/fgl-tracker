@@ -2338,6 +2338,59 @@ function rvReconciliarConversoes(){
   if(mudou){rvSaveCotacoes(cotacoes,true);if(typeof rvSyncPush==='function')rvSyncPush();}
   return mudou;
 }
+function rvCotToday(){
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function rvCotStatus(c){
+  if(c.pedidoId)return 'converted';
+  const d=c.followup?.next?.date,t=rvCotToday();
+  return !d?'none':d<t?'late':d===t?'today':'future';
+}
+function rvCotShort(d){return typeof d==='string'?d.slice(8,10)+'/'+d.slice(5,7):'—';}
+function rvCotHistory(c){return [...(Array.isArray(c.followup?.history)?c.followup.history:[])].sort((a,b)=>b.date.localeCompare(a.date));}
+function rvCotSave(id,change){
+  const list=rvLoadCotacoes(),c=list.find(x=>String(x.id)===String(id)&&!x.deleted);
+  if(!c){toastSave('Cotação não encontrada.');return false;}
+  change(c);c.updatedAt=Math.max(Date.now(),(Number(c.updatedAt)||0)+1);
+  try{rvSaveCotacoes(list,true);}catch(e){toastSave('Não foi possível salvar a cotação.');return false;}
+  rvSyncPush();return true;
+}
+function rvCotNote(el){
+  if(el.value===el.defaultValue)return;
+  if(rvCotSave(el.dataset.quote,c=>{c.quoteNote=el.value;}))el.defaultValue=el.value;
+}
+function rvCotFollowCell(c){
+  const next=c.pedidoId?null:c.followup?.next,status=rvCotStatus(c);
+  const recent=rvCotHistory(c).slice(0,2).reverse();
+  const dot=(date,label,style,icon)=>'<span class="rv-fu-step" title="'+esc(label)+'"><b class="'+style+'">'+icon+'</b><small>'+esc(rvCotShort(date))+'</small></span>';
+  const dots=recent.map(h=>dot(h.date,h.channel+' · '+h.result,'done','✓')).join('')+(next?dot(next.date,next.action,status,'◷'):'');
+  return '<button type="button" class="rv-fu-cell" data-quote="'+esc(c.id)+'" onclick="rvCotOpenFollow(this.dataset.quote)">'+(dots?'<span class="rv-fu-dots">'+dots+'</span>':'')+'<span>'+esc(next?rvCotShort(next.date)+' · '+(status==='late'?'Atrasado · ':status==='today'?'Hoje · ':'')+next.action:c.pedidoId?'Ver histórico':recent.length?'Programar retorno':'+ Programar contato')+'</span></button>';
+}
+function rvCotOpenFollow(id){
+  const c=rvLoadCotacoesActive().find(x=>String(x.id)===String(id));if(!c)return;
+  let dlg=document.getElementById('rv-cot-follow-dialog');
+  if(!dlg){dlg=document.createElement('dialog');dlg.id='rv-cot-follow-dialog';document.body.append(dlg);}
+  const next=c.pedidoId?null:c.followup?.next;
+  const channels=sel=>['WhatsApp','E-mail','Telefone','Reunião','Outro'].map(v=>'<option'+(sel===v?' selected':'')+'>'+v+'</option>').join('');
+  const history=rvCotHistory(c).map(h=>'<li><strong>'+esc(rvCotShort(h.date)+' · '+h.channel)+'</strong><div>'+esc(h.result)+'</div></li>').join('');
+  dlg.innerHTML='<header><strong>Acompanhamento · '+esc(c.cliente)+'</strong><button type="button" aria-label="Fechar" data-close>×</button></header><div class="rv-fu-grid"><section><h3>Histórico</h3><ul>'+ (history||'<li>Nenhuma interação registrada.</li>')+'</ul><details><summary>+ Registrar interação</summary><form data-log><label>Data<input type="date" name="date" required value="'+rvCotToday()+'" max="'+rvCotToday()+'"></label><label>Canal<select name="channel">'+channels(next?.channel)+'</select></label><label>Resultado<textarea name="result" rows="2" required></textarea></label>'+(next?'<label class="rv-fu-check"><input type="checkbox" name="complete"> Concluir o contato agendado</label>':'')+'<button>Salvar interação</button></form></details></section><section><h3>Próximo contato</h3>'+(c.pedidoId?'<p>Cotação convertida em pedido. Histórico preservado.</p>':'<form data-next><label>Data<input type="date" name="date" required value="'+esc(next?.date||'')+'"></label><label>Canal<select name="channel">'+channels(next?.channel)+'</select></label><label>Ação<input name="action" required value="'+esc(next?.action||'')+'"></label><div class="rv-fu-actions"><button>'+ (next?'Salvar reagendamento':'Programar contato')+'</button>'+(next?'<button type="button" data-remove>Cancelar agendamento</button>':'')+'</div></form>'+(next?'<button type="button" data-complete>Registrar contato realizado</button>':''))+'</section></div>';
+  dlg.querySelector('[data-close]').onclick=()=>dlg.close();
+  const update=change=>{if(rvCotSave(id,change)){rvRenderCotacoes();rvCotOpenFollow(id);}};
+  dlg.querySelector('[data-log]').onsubmit=e=>{
+    e.preventDefault();const d=new FormData(e.currentTarget),result=d.get('result').trim();
+    if(!result){toastSave('Informe o resultado do contato.');return;}
+    update(x=>{const f=x.followup||{};x.followup={...f,history:[...(Array.isArray(f.history)?f.history:[]),{date:d.get('date'),channel:d.get('channel'),result}],next:d.has('complete')?null:f.next};});
+  };
+  const form=dlg.querySelector('[data-next]');
+  if(form)form.onsubmit=e=>{e.preventDefault();const d=new FormData(form),action=d.get('action').trim();if(!action){toastSave('Informe a ação.');return;}update(x=>{if(!x.pedidoId)x.followup={...x.followup,next:{date:d.get('date'),channel:d.get('channel'),action}};});};
+  const remove=dlg.querySelector('[data-remove]');
+  if(remove)remove.onclick=()=>update(x=>{x.followup={...x.followup,next:null};});
+  const complete=dlg.querySelector('[data-complete]');
+  if(complete)complete.onclick=()=>{const log=dlg.querySelector('[data-log]');log.closest('details').open=true;log.elements.complete.checked=true;log.elements.result.focus();};
+  if(!dlg.open)dlg.showModal();
+}
+
 function rvRenderCotacoes(){
   rvReconciliarConversoes();
   const todas=rvLoadCotacoesActive();
@@ -2353,8 +2406,9 @@ function rvRenderCotacoes(){
   msfPopulate('cot-tipo',[...new Set(todas.map(c=>c.tipo))].sort(),'Todos Tipos',rvRenderCotacoes);
   const q=norm(document.getElementById('cot-q')?.value);
   let lista=todas.filter(c=>{
-    const t=norm(`${c.cliente} ${c.fornecedor}`);
-    return(!q||t.includes(q))&&msfMatch('cot-cl',c.cliente)&&msfMatch('cot-forn',c.fornecedor)&&msfMatch('cot-tipo',c.tipo);
+    const t=norm(`${c.cliente} ${c.fornecedor} ${c.quoteNote||""}`);
+    const f=document.getElementById("cot-follow-filter")?.value;
+    return(!f||f===rvCotStatus(c))&&(!q||t.includes(q))&&msfMatch('cot-cl',c.cliente)&&msfMatch('cot-forn',c.fornecedor)&&msfMatch('cot-tipo',c.tipo);
   });
   if(!todas.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação salva ainda.<br>Calcule e clique em "Salvar Cotação".</div>';return;}
   if(!lista.length){cont.innerHTML='<div class="rv-empty">Nenhuma cotação encontrada com esses filtros.</div>';return;}
@@ -2363,7 +2417,7 @@ function rvRenderCotacoes(){
     qtd:{get:c=>c.qtd,mode:'number'},pv:{get:c=>c.pv,mode:'number'},margem:{get:c=>c.margem,mode:'number'},lucro:{get:c=>c.lucroTotal,mode:'number'}
   });
   let html=`<table class="rv-data-table"><thead><tr class="rv-th-center">
-    ${rvSortHeader('cotacoes','data','Data')}${rvSortHeader('cotacoes','cliente','Cliente')}${rvSortHeader('cotacoes','fornecedor','Fornecedor')}${rvSortHeader('cotacoes','tipo','Tipo')}${rvSortHeader('cotacoes','qtd','Qtd','rv-num')}${rvSortHeader('cotacoes','pv','Preço venda','rv-num')}${rvSortHeader('cotacoes','margem','Margem Final','rv-num')}${rvSortHeader('cotacoes','lucro','Lucro','rv-num')}<th>Ações</th>
+    ${rvSortHeader('cotacoes','data','Data')}${rvSortHeader('cotacoes','cliente','Cliente')}${rvSortHeader('cotacoes','fornecedor','Fornecedor')}${rvSortHeader('cotacoes','tipo','Tipo')}${rvSortHeader('cotacoes','qtd','Qtd','rv-num')}${rvSortHeader('cotacoes','pv','Preço venda','rv-num')}${rvSortHeader('cotacoes','margem','Margem Final','rv-num')}${rvSortHeader('cotacoes','lucro','Lucro','rv-num')}<th>Notas</th><th>Acompanhamento</th><th>Ações</th>
   </tr></thead><tbody>`;
   lista.forEach(c=>{
     const jaConvertida=!!c.pedidoId;
@@ -2376,6 +2430,8 @@ function rvRenderCotacoes(){
       <td class="rv-num">${rvBrl(c.pv)}${c.produtos&&c.produtos.length>1?`<div style="font-size:.55rem;color:var(--ink4);font-weight:400">média · ${c.produtos.length} produtos</div>`:''}</td>
       <td class="rv-num rv-pos">${((c.margem||0)*100).toFixed(1).replace('.',',')}%</td>
       <td class="rv-num rv-pos">${rvBrl(c.lucroTotal)}</td>
+      <td onclick="event.stopPropagation()"><textarea class="rv-cot-note" rows="2" aria-label="Notas da cotação" placeholder="+ Adicionar nota" data-quote="${esc(c.id)}" onblur="rvCotNote(this)">${esc(c.quoteNote||'')}</textarea></td>
+      <td onclick="event.stopPropagation()">${rvCotFollowCell(c)}</td>
       <td style="white-space:nowrap">
         ${jaConvertida?'':`<button class="btn-rvsm btn-conv" onclick="event.stopPropagation();rvConverterEmPedido(${c.id})">→ Pedido</button>`}
         <button class="btn-rvdel" onclick="event.stopPropagation();rvExcluirCotacao(${c.id})" title="Excluir" aria-label="Excluir cotação">🗑</button>
