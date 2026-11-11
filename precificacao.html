@@ -33,7 +33,15 @@
 
 
 
-<link rel="stylesheet" href="assets/tracker.css?v=37"><link rel="stylesheet" href="assets/crm/crm.css?v=47"></head>
+<link rel="stylesheet" href="assets/tracker.css?v=37"><link rel="stylesheet" href="assets/crm/crm.css?v=47"><style>
+.rv-cot-note{box-sizing:border-box;width:100%;min-width:135px;font:inherit;color:inherit;background:transparent;border:1px solid var(--bdr2,#ced5dd);border-radius:5px;padding:5px;resize:vertical}
+.rv-fu-cell{font:inherit;color:var(--blue,#2466ae);border:0;background:none;cursor:pointer;padding:2px;text-align:left;min-width:145px;max-width:220px;overflow-wrap:anywhere}
+.rv-fu-dots{display:flex;gap:9px;margin-bottom:3px}.rv-fu-step{display:grid;justify-items:center;gap:1px}.rv-fu-step b{width:17px;height:17px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;font-size:11px}.rv-fu-step .done{color:var(--green,#25804e)}.rv-fu-step .late{color:var(--red,#bc302c)}.rv-fu-step .today{color:var(--amber,#8e5800)}
+#rv-cot-follow-dialog{width:min(740px,92vw);max-height:85vh;border:1px solid var(--bdr2,#ced5dd);border-radius:12px;padding:0;background:var(--card,#fff);color:var(--ink,#172438);font:inherit}
+#rv-cot-follow-dialog::backdrop{background:#0b172766}
+#rv-cot-follow-dialog header{position:static;background:none;color:inherit;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--bdr2,#ced5dd)}
+.rv-fu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;padding:16px 18px}.rv-fu-grid h3{margin:0 0 10px}.rv-fu-grid ul{list-style:none;margin:0 0 12px;padding:0;max-height:240px;overflow:auto}.rv-fu-grid li{padding:6px 0;border-bottom:1px solid var(--bdr2,#ced5dd);white-space:pre-wrap;overflow-wrap:anywhere}.rv-fu-grid label{display:grid;gap:3px;margin:7px 0}.rv-fu-grid input,.rv-fu-grid select,.rv-fu-grid textarea{width:100%;box-sizing:border-box;font:inherit;padding:5px}.rv-fu-grid .rv-fu-check{display:flex;align-items:center}.rv-fu-check input{width:auto}.rv-fu-actions{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}.rv-fu-grid button,#rv-cot-follow-dialog header button{font:inherit;border:1px solid var(--bdr2,#ced5dd);border-radius:5px;background:var(--card,#fff);color:var(--blue,#2466ae);padding:5px 8px;cursor:pointer}.rv-fu-grid summary{cursor:pointer;color:var(--blue,#2466ae)}
+</style></head>
 <body>
 <header>
   <div class="logo"><span class="leaf">🌿</span>FGL</div>
@@ -287,7 +295,7 @@
           <input id="cot-q" placeholder="🔍 Buscar cliente, fornecedor…" oninput="rvRenderCotacoes()" style="flex:1">
           <span id="msf-cot-cl-wrap"></span>
           <span id="msf-cot-forn-wrap"></span>
-          <span id="msf-cot-tipo-wrap"></span>
+          <span id="msf-cot-tipo-wrap"></span><select id="cot-follow-filter" aria-label="Próximo contato" onchange="rvRenderCotacoes()"><option value="">Próximo contato: todos</option><option value="late">Atrasados</option><option value="today">Hoje</option><option value="future">Próximos</option><option value="none">Sem agendamento</option></select>
         </div>
         <div style="overflow-x:auto"><div id="rv-cotacoes-container"></div></div>
       </div>
@@ -634,7 +642,7 @@
 <!-- CRM — COMPOSER DE E-MAIL (envio sempre explícito) -->
 
 
-<script defer src="assets/tracker.js?v=37"></script>
+<script defer src="assets/tracker.js?v=38"></script>
 
 <!-- ═══ CRM — WHATSAPP ═══ -->
 
