@@ -2301,20 +2301,24 @@ function buildFinanceCardViewModel(p){
   const stTxt=linkedOrd?linkedOrd.status:'—';
   const stPillCol={'PRÉ-PRODUÇÃO':'var(--amber)','EM PRODUÇÃO':'var(--purple)','PRÉ-EMBARQUE':'var(--preemb)','EMBARCADO':'var(--teal)','FINALIZADO':'var(--green)','SUSPENSO':'var(--red)'}[stTxt]||'var(--ink3)';
   const stDate=linkedOrd?statusStartDate(linkedOrd):null;
-  return{p,linkedOrd,totF,totV,qtyCalc,paid,recv,aPagar,aReceber,pctPago,pctReceb,mg,pctMg,bcP,bcR,
+  return{p,linkedOrd,totF,totV,qtyCalc,paid,recv,aPagar,aReceber,saldoPago,saldoReceb,pctPago,pctReceb,mg,pctMg,bcP,bcR,
     overPago,overReceb,etdDisp,etaDisp,client,supplier,po,stTxt,stPillCol,stDate};
 }
 let financeBalanceFilter='pending';
 const financeColumnFilters={};
 let financeColumnSort={key:'',direction:1};
 function financeSetBalance(value){financeBalanceFilter=value;renderFinanceiro();}
+function financeBalanceCell(balance, excessLabel, missing=false){
+  if(balance<0)return fUSD(Math.abs(balance))+'<small>'+excessLabel+'</small>';
+  return missing&&balance===0?'—':fUSD(balance);
+}
 function renderFinanceCard(vm){
   return `<tr tabindex="0" data-fin-pi="${esc(vm.p.pi)}" onclick="openFinPopup(this.dataset.finPi)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openFinPopup(this.dataset.finPi)}">
     <td><b>${esc(vm.p.pi)}</b><small>${esc(vm.po)}</small></td>
     <td><b>${esc(vm.client)}</b><small>${esc(vm.supplier)}</small></td>
     <td><span class="fa-status">${esc(vm.stTxt)}</span><small>${financeBalanceLabel(vm)}</small></td>
-    <td class="fa-money fa-pay">${fUSD(vm.aPagar)}</td>
-    <td class="fa-money fa-receive">${vm.totV>0?fUSD(vm.aReceber):'—'}</td>
+    <td class="fa-money fa-pay">${financeBalanceCell(vm.saldoPago,'Pago a mais')}</td>
+    <td class="fa-money fa-receive">${financeBalanceCell(vm.saldoReceb,'Recebido a mais',vm.totV<=0)}</td>
     <td class="fa-money">${vm.totV>0?fUSD(vm.mg)+'<small>'+vm.pctMg+'%</small>':'<small>Venda sem valor</small>'}</td>
   </tr>`;
 }
@@ -3304,13 +3308,13 @@ function openFinPopup(pi){
   if(gerarBtn)gerarBtn.onclick=()=>gerarDocsFromPI(pi);
 
   let h=`<div class="fa-order-meta">${esc(o?.supplier||p.supplier||'')} · ${esc(o?.status||p.status||'—')} · PO ${esc(o?.po||p.po||'—')}</div>
-  <div class="fa-summary fa-popup-summary"><div><small>Falta pagar</small><strong class="fa-pay">${fUSD(Math.max(0,aPagar))}</strong><small>Pago ${fUSD(paid)} de ${fUSD(tF)}</small>${aPagar<0?'<small class="fa-pay">Pago a mais — conferir</small>':''}</div>
-  <div><small>Falta receber</small><strong class="fa-receive">${tV>0?fUSD(Math.max(0,aReceber)):'—'}</strong><small>Recebido ${fUSD(recv)} de ${fUSD(tV)}</small>${aReceber<0?'<small class="fa-pay">Recebido a mais — conferir</small>':''}</div></div>
+  <div class="fa-summary fa-popup-summary"><div><small>${aPagar<0?'Pago a mais':'Falta pagar'}</small><strong class="fa-pay">${fUSD(Math.abs(aPagar))}</strong><small>Pago ${fUSD(paid)} de ${fUSD(tF)}</small></div>
+  <div><small>${aReceber<0?'Recebido a mais':'Falta receber'}</small><strong class="fa-receive">${tV>0||aReceber!==0?fUSD(Math.abs(aReceber)):'—'}</strong><small>Recebido ${fUSD(recv)} de ${fUSD(tV)}</small></div></div>
   <div class="fa-commercial">Compra <b>${fUSD(tF)}</b><span>Venda <b>${fUSD(tV)}</b></span><span>Margem <b>${tV>0?fUSD(mg)+' ('+pM+'%)':'— · venda sem valor'}</b></span></div>`;
   h+=`<div class="fa-columns"><section><h3>Pagamentos</h3>`;
   if(isC&&o){
     const av=ordAVLayers(o);
-    h+=`<div class="fa-layers"><div class="fa-layer-head"><span>Composição (USD)</span><span>Total</span><span>Pago</span><span>Restante</span></div>${[{k:'fy',label:'Mercadoria',total:pTotalForn(p)},{k:'rf',label:'Importação',total:av.rf},...(o.rotaAV==='trading'?[{k:'trading',label:'Trading · '+(o.tradingNome||''),total:av.trading}]:[])].map(l=>{const paidLayer=piPaid(pi,l.k);return `<div><span>${esc(l.label)}</span><span>${fUSD(l.total)}</span><span>${fUSD(paidLayer)}</span><span>${fUSD(Math.max(0,financeBalance(l.total,paidLayer)))}${financeBalance(l.total,paidLayer)<0?' ⚠':''}</span></div>`;}).join('')}</div>`;
+    h+=`<div class="fa-layers"><div class="fa-layer-head"><span>Composição (USD)</span><span>Total</span><span>Pago</span><span>Restante</span></div>${[{k:'fy',label:'Mercadoria',total:pTotalForn(p)},{k:'rf',label:'Importação',total:av.rf},...(o.rotaAV==='trading'?[{k:'trading',label:'Trading · '+(o.tradingNome||''),total:av.trading}]:[])].map(l=>{const paidLayer=piPaid(pi,l.k);return `<div><span>${esc(l.label)}</span><span>${fUSD(l.total)}</span><span>${fUSD(paidLayer)}</span><span>${financeBalanceCell(financeBalance(l.total,paidLayer),'Pago a mais')}</span></div>`;}).join('')}</div>`;
   }
   h+=operationBalanceHTML(o,p);
   h+=financeTransactions(pays,isC);
