@@ -117,6 +117,38 @@ if(typeof focusDialog==='function')NC.focusDialog=(...args)=>{
  const result=focusDialog(...args);
  const table=document.querySelector('#nc-dialog .nc-focus-table');
  if(!table)return result;
+ const picker=document.createElement('form');picker.className='nc-focus-add';
+ picker.innerHTML='<input type="search" aria-label="Buscar cliente para o SM Foco" placeholder="Buscar cliente…"><select aria-label="Cliente para adicionar" required></select><button type="submit" disabled>☆ Adicionar ao Foco</button><button type="button" class="nc-focus-new" title="Cadastrar novo cliente" aria-label="Cadastrar novo cliente">+</button><small role="status"></small>';
+ table.before(picker);
+ const [search,select,submit,newClient,status]=picker.children;
+ const candidates=NS.customers.filter(c=>!c.deleted&&!NC.focused(c.id)).map(c=>({id:String(c.id),name:NC.name(c.id)})).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const norm=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const refresh=()=>{
+  select.replaceChildren();
+  const matches=candidates.filter(c=>norm(c.name).includes(norm(search.value)));
+  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=matches.length?'Selecione um cliente':'Nenhum cliente encontrado';select.append(placeholder);
+  for(const c of matches){const option=document.createElement('option');option.value=c.id;option.textContent=c.name;select.append(option);}
+  submit.disabled=true;
+ };
+ newClient.addEventListener('click',async ()=>{
+  try{await NC.focusSaveQueue;if(picker.isConnected)NC.editCustomer(undefined,{fromFocus:true});}
+  catch{status.textContent='Confira a alteração anterior antes de cadastrar.';}
+ });
+ search.addEventListener('input',refresh);
+ select.addEventListener('change',()=>{submit.disabled=!select.value;});
+ refresh();
+ picker.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const id=select.value;if(!id||submit.disabled)return;
+  search.disabled=select.disabled=submit.disabled=true;status.textContent='Adicionando…';
+  try{
+   await NC.focusSaveQueue;
+   if(!NC.focused(id))await NC.toggleFocus(id);
+   if(!NC.focused(id))throw new Error('Não foi possível adicionar. Tente novamente.');
+   if(picker.isConnected&&picker.closest('dialog')?.open)NC.focusDialog(...args);
+  }catch(error){status.textContent=error?.message||'Não foi possível adicionar.';}
+  finally{search.disabled=select.disabled=false;submit.disabled=!select.value;}
+ });
  const links=[...table.querySelectorAll('.nc-focus-link[data-id]')];
  const firstByCustomer=new Map();
  for(const e of upcomingFor(new Set(links.map(link=>link.dataset.id))))if(!firstByCustomer.has(e.customer))firstByCustomer.set(e.customer,e);
@@ -133,7 +165,7 @@ css.textContent=`
 .nc-calendar-today .nc-dayhead b{color:#215d8b;background:#eaf3fa;border-radius:8px;padding:0 .25em}
 .nc-year .nc-today-label{display:block;margin-top:2px;font-size:9px;color:#215d8b}
 .ncrm .nc-focus-next{display:block;color:#205785;font-size:10px;line-height:1.3;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nc-focus-dialog-next{display:block;color:#205785;font-size:.8em;line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
+.nc-focus-add{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.nc-focus-add select{max-width:min(350px,100%)}.nc-focus-add button{white-space:nowrap}.nc-focus-add .nc-focus-new{font-size:16px;min-width:26px;padding:0 5px;color:#205785}.nc-new-focus-star{display:flex;align-items:center;gap:6px;margin-top:12px;color:#205785}.nc-focus-dialog-next{display:block;color:#205785;font-size:.8em;line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
 `;
 document.head.append(css);
 })();
