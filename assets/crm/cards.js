@@ -71,3 +71,43 @@ const previousHandle=NC.handle;
 NC.handle=async button=>{if(button.dataset.nc==='fair-event'){NC.eventsDialog();const row=document.querySelector('.v50-rows [data-v50-index="'+Number(button.dataset.index)+'"]');row?.scrollIntoView?.({block:'nearest'});row?.querySelector('input')?.focus();return;}return previousHandle(button);};
 const fairCss=document.createElement('style');fairCss.textContent=`.ncrm .nc-fair-event{display:block;width:100%;border:0!important;border-left:3px solid #8d79ad!important;background:#f5f1fa!important;color:#65507e!important;border-radius:2px!important;text-align:left;font-size:10px!important;font-weight:400!important;line-height:1.3;padding:3px 5px!important;margin:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.ncrm .nc-fair-year{display:block;color:#796491;font-size:10px;font-weight:400;border-top:1px solid #ded4e9;margin-top:4px;padding-top:3px}`;document.head.append(fairCss);
 })();
+
+/* Prod BR — hoje na agenda e próximo compromisso no SM Foco. */
+(()=>{
+'use strict';
+const calendar=NC.calendar, mini=NC.mini;
+const localISO=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+NC.calendar=history=>{
+ const html=calendar(history);
+ if(history)return html;
+ const now=new Date(),base=new Date(now),offset=Number(NS.offset)||0;
+ const tpl=document.createElement('template');tpl.innerHTML=html;
+ let current=null;
+ if(NS.calendar==='year'){
+  const year=now.getFullYear()+offset;
+  if(year===now.getFullYear())current=tpl.content.querySelector('.nc-year [data-month="'+now.getMonth()+'"]');
+ }else{
+  if(NS.calendar==='month'){base.setDate(1);base.setMonth(base.getMonth()+offset);}
+  else base.setDate(base.getDate()-(base.getDay()+6)%7+offset*7);
+  const today=localISO(now);
+  current=[...tpl.content.querySelectorAll('.nc-day')].find((_,i)=>localISO(new Date(base.getFullYear(),base.getMonth(),base.getDate()+i))===today);
+ }
+ if(!current)return html;
+ current.classList.add('nc-calendar-today');current.setAttribute('aria-current','date');
+ const tag=document.createElement('span');tag.className='nc-today-label';
+ tag.textContent=NS.calendar==='year'?'Hoje · '+now.getDate():'Hoje';
+ (current.querySelector('.nc-dayhead')||current).append(tag);
+ const out=document.createElement('div');out.append(tpl.content);return out.innerHTML;
+};
+NC.mini=(key,title,big,sub,extra='')=>{
+ if(key!=='asia')return mini(key,title,big,sub,extra);
+ const ids=new Set((NC.api.setting('asia').rows||[]).map(r=>r.customer_id).filter(Boolean));
+ const today=localISO(new Date());
+ const upcoming=NC.events(false).filter(e=>e.type==='schedule'&&ids.has(e.customer)&&/^\d{4}-\d{2}-\d{2}$/.test(e.date||'')&&e.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+ if(upcoming.length){const e=upcoming[0];extra+='<small class="nc-focus-next" title="'+NC.e(NC.name(e.customer)+' · '+(e.label||''))+'">📅 Próximo: '+NC.e(NC.date(e.date))+' · '+NC.e(NC.name(e.customer))+'</small>';}
+ return mini(key,title,big,sub,extra);
+};
+const css=document.createElement('style');
+css.textContent='.ncrm .nc-day.nc-calendar-today,.ncrm .nc-year .nc-calendar-today,.nc-calendar-large-content .nc-calendar-today{box-shadow:inset 0 0 0 2px #3c79b2;background:#eaf3fc!important;color:#173f65}.nc-today-label{display:inline-block;margin-left:4px;font-size:9px;font-weight:700;color:#173f65}.nc-year .nc-today-label{display:block;margin:2px 0 0}.ncrm .nc-focus-next{display:block;color:#205785;font-size:10px;line-height:1.3;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}';
+document.head.append(css);
+})();
