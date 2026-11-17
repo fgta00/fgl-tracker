@@ -94,20 +94,46 @@ NC.calendar=history=>{
  }
  if(!current)return html;
  current.classList.add('nc-calendar-today');current.setAttribute('aria-current','date');
- const tag=document.createElement('span');tag.className='nc-today-label';
- tag.textContent=NS.calendar==='year'?'Hoje · '+now.getDate():'Hoje';
- (current.querySelector('.nc-dayhead')||current).append(tag);
+ if(NS.calendar==='year'){
+  const tag=document.createElement('span');tag.className='nc-today-label';
+  tag.textContent='Hoje · '+now.getDate();current.append(tag);
+ }
  const out=document.createElement('div');out.append(tpl.content);return out.innerHTML;
 };
+const upcomingFor=ids=>{
+ const today=localISO(new Date());
+ return NC.events(false).filter(e=>e.type==='schedule'&&ids.has(e.customer)&&/^\d{4}-\d{2}-\d{2}$/.test(e.date||'')&&e.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+};
+const nextText=(e,includeName)=>'📅 Próximo: '+NC.date(e.date)+(includeName?' · '+NC.name(e.customer):e.label?' · '+e.label:'');
 NC.mini=(key,title,big,sub,extra='')=>{
  if(key!=='asia')return mini(key,title,big,sub,extra);
  const ids=new Set((NC.api.setting('asia').rows||[]).map(r=>r.customer_id).filter(Boolean));
- const today=localISO(new Date());
- const upcoming=NC.events(false).filter(e=>e.type==='schedule'&&ids.has(e.customer)&&/^\d{4}-\d{2}-\d{2}$/.test(e.date||'')&&e.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
- if(upcoming.length){const e=upcoming[0];extra+='<small class="nc-focus-next" title="'+NC.e(NC.name(e.customer)+' · '+(e.label||''))+'">📅 Próximo: '+NC.e(NC.date(e.date))+' · '+NC.e(NC.name(e.customer))+'</small>';}
+ const e=upcomingFor(ids)[0];
+ if(e)extra+='<small class="nc-focus-next" title="'+NC.e(NC.name(e.customer)+' · '+(e.label||''))+'">'+NC.e(nextText(e,true))+'</small>';
  return mini(key,title,big,sub,extra);
 };
+const focusDialog=NC.focusDialog;
+if(typeof focusDialog==='function')NC.focusDialog=(...args)=>{
+ const result=focusDialog(...args);
+ const table=document.querySelector('#nc-dialog .nc-focus-table');
+ if(!table)return result;
+ const links=[...table.querySelectorAll('.nc-focus-link[data-id]')];
+ const firstByCustomer=new Map();
+ for(const e of upcomingFor(new Set(links.map(link=>link.dataset.id))))if(!firstByCustomer.has(e.customer))firstByCustomer.set(e.customer,e);
+ for(const link of links){
+  const e=firstByCustomer.get(link.dataset.id);
+  if(!e)continue;
+  const note=document.createElement('small');note.className='nc-focus-dialog-next';note.textContent=nextText(e,false);
+  link.closest('td').append(note);
+ }
+ return result;
+};
 const css=document.createElement('style');
-css.textContent='.ncrm .nc-day.nc-calendar-today,.ncrm .nc-year .nc-calendar-today,.nc-calendar-large-content .nc-calendar-today{box-shadow:inset 0 0 0 2px #3c79b2;background:#eaf3fc!important;color:#173f65}.nc-today-label{display:inline-block;margin-left:4px;font-size:9px;font-weight:700;color:#173f65}.nc-year .nc-today-label{display:block;margin:2px 0 0}.ncrm .nc-focus-next{display:block;color:#205785;font-size:10px;line-height:1.3;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}';
+css.textContent=`
+.nc-calendar-today .nc-dayhead b{color:#215d8b;background:#eaf3fa;border-radius:8px;padding:0 .25em}
+.nc-year .nc-today-label{display:block;margin-top:2px;font-size:9px;color:#215d8b}
+.ncrm .nc-focus-next{display:block;color:#205785;font-size:10px;line-height:1.3;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nc-focus-dialog-next{display:block;color:#205785;font-size:.8em;line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
+`;
 document.head.append(css);
 })();
