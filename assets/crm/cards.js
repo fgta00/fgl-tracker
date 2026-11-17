@@ -121,8 +121,10 @@ if(typeof focusDialog==='function')NC.focusDialog=(...args)=>{
  const picker=document.createElement('form');picker.className='nc-focus-add';
  picker.innerHTML='<select aria-label="Cliente para adicionar" required></select><button type="submit" title="Adicionar ao SM Foco" aria-label="Adicionar ao SM Foco" disabled>☆</button><button type="button" title="Cadastrar novo cliente" aria-label="Cadastrar novo cliente">+</button><small role="status"></small>';
  const title=table.closest('dialog')?.querySelector('h2');
- if(title){const header=document.createElement('div');header.className='nc-focus-heading';title.before(header);header.append(title,picker);}
- else table.before(picker);
+ if(title){const header=document.createElement('div');header.className='nc-focus-heading';title.before(header);header.append(title);}
+ const objective=table.closest('dialog')?.querySelector('.nc-focus-objective');
+ const row=document.createElement('div');row.className='nc-focus-controls';
+ table.before(row);if(objective)row.append(objective);row.append(picker);
  const [select,submit,newClient,status]=picker.children;
  const candidates=NS.customers.filter(c=>!c.deleted&&!NC.focused(c.id)).map(c=>({id:String(c.id),name:NC.name(c.id)})).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=candidates.length?'Cliente…':'Sem clientes disponíveis';select.append(placeholder);
