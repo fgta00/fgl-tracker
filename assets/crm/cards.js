@@ -121,10 +121,11 @@ if(typeof focusDialog==='function')NC.focusDialog=(...args)=>{
  const picker=document.createElement('form');picker.className='nc-focus-add';
  picker.innerHTML='<select aria-label="Cliente para adicionar" required></select><button type="submit" title="Adicionar ao SM Foco" aria-label="Adicionar ao SM Foco" disabled>☆</button><button type="button" title="Cadastrar novo cliente" aria-label="Cadastrar novo cliente">+</button><small role="status"></small>';
  const title=table.closest('dialog')?.querySelector('h2');
- if(title){const header=document.createElement('div');header.className='nc-focus-heading';title.before(header);header.append(title);}
  const objective=table.closest('dialog')?.querySelector('.nc-focus-objective');
- const row=document.createElement('div');row.className='nc-focus-controls';
- table.before(row);if(objective)row.append(objective);row.append(picker);
+ if(title){
+  const header=document.createElement('div');header.className='nc-focus-heading';
+  title.before(header);header.append(title);if(objective)header.append(objective);header.append(picker);
+ }else table.before(picker);
  const [select,submit,newClient,status]=picker.children;
  const candidates=NS.customers.filter(c=>!c.deleted&&!NC.focused(c.id)).map(c=>({id:String(c.id),name:NC.name(c.id)})).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent=candidates.length?'Cliente…':'Sem clientes disponíveis';select.append(placeholder);
@@ -163,6 +164,15 @@ css.textContent=`
 .nc-year .nc-today-label{display:block;margin-top:2px;font-size:9px;color:#215d8b}
 .ncrm .nc-focus-next{display:block;color:#205785;font-size:10px;line-height:1.3;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nc-focus-heading .nc-focus-title{font:inherit;font-weight:inherit;width:min(23ch,42vw);border:1px solid transparent;background:transparent;padding:2px 0;color:inherit}.nc-focus-heading .nc-focus-title:hover,.nc-focus-heading .nc-focus-title:focus{border-color:#b7c9da}.ncrm dialog#nc-dialog .nc-focus-detail .nc-focus-objective{margin:22px 0 18px!important;display:block}.ncrm dialog#nc-dialog .nc-focus-detail .nc-focus-objective input{width:100%;max-width:620px;font-size:12px!important;color:#526579}.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-title{font:inherit!important;font-weight:inherit!important}.ncrm dialog#nc-dialog .nc-focus-heading h2{font-size:20px!important;font-family:inherit!important;font-weight:700!important;line-height:1.3}.nc-focus-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.nc-focus-heading h2{margin:0!important}.nc-focus-add{display:flex;align-items:center;gap:5px;margin:0 0 0 auto;position:relative}.nc-focus-add select{width:clamp(105px,18vw,220px);height:30px;font-size:12px}.nc-focus-add button{width:28px;height:28px;display:grid;place-items:center;padding:0!important;font-size:16px;color:#205785}.nc-focus-add [role=status]:empty{display:none}.nc-focus-add [role=status]{position:absolute;right:0;top:100%;font-size:11px;background:#fff;z-index:1}.nc-new-focus-star{display:flex;align-items:center;gap:6px;margin-top:12px;color:#205785}.nc-focus-dialog-next{display:block;color:#205785;font-size:.8em;line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
+.ncrm dialog#nc-dialog .nc-focus-heading{display:flex!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:nowrap!important;gap:20px!important;margin:0 0 22px!important}
+.ncrm dialog#nc-dialog .nc-focus-heading h2{flex:0 0 auto!important;margin:0!important;min-width:0!important}
+.ncrm dialog#nc-dialog .nc-focus-heading h2 .nc-focus-title{width:9ch!important;min-width:0!important}
+.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-objective{display:block!important;flex:0 1 460px!important;width:460px!important;min-width:0!important;margin:0!important}
+.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-objective input{width:100%!important;max-width:460px!important;min-width:0!important;box-sizing:border-box;font-size:12px!important}
+.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-add{display:flex!important;align-items:center!important;flex:0 0 auto!important;width:auto!important;gap:5px!important;margin:0 0 0 auto!important}
+.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-add select{flex:0 0 160px!important;width:160px!important;max-width:160px!important;min-width:0!important;height:30px!important;font-size:12px!important}
+.ncrm dialog#nc-dialog .nc-focus-heading .nc-focus-add button{flex:0 0 28px!important;width:28px!important;min-width:28px!important}
+
 `;
 document.head.append(css);
 })();
