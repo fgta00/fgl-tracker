@@ -2623,6 +2623,7 @@ function addReceipt(){
   ['r-date','r-amt','r-ref','r-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('r-pi').value='';document.getElementById('r-cli').value='';
   document.getElementById('r-amt-lbl').textContent='Valor USD';
+  confirmOrderMilestoneAfterPayment(pi,ref,dateDisp);
 }
 function finPopupAddPayment(pi){
   const rawDate=document.getElementById('fp-l-date').value.trim();
@@ -2670,6 +2671,7 @@ function finPopupAddReceipt(pi){
   pushUndo('Lançar recebimento #'+n);
   receipts.push({n,date:dateDisp,amount:amt,pi,client:document.getElementById('fp-op-client')?.value||p.client||'',ref:ref||'—',notes:'',...(amountBRL!=null?{amountBRL,fxApplied}:{})});
   saveAll();renderFinanceiro();openFinPopup(pi);toast(`Recebimento #${n} ✓`);
+  confirmOrderMilestoneAfterPayment(pi,ref,dateDisp);
 }
 function delLedger(n){
   if(!confirm('Apagar lançamento?'))return;
@@ -3347,7 +3349,7 @@ function openFinPopup(pi){
         <input type="text" id="fp-l-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
         <input type="number" id="fp-l-amt" placeholder="Valor US$" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
       </div>
-      ${operationPartySelect(o,'supplier')}<input type="text" id="fp-l-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+      ${operationPartySelect(o,'supplier')}<label for="fp-l-ref" style="display:block;width:100%;margin-bottom:.3rem;font-size:.6rem;color:var(--ink3)">Referência<input type="text" id="fp-l-ref" aria-label="Referência" list="fin-ref-tags" placeholder="SINAL, AMOSTRAS, BALANÇO ou outra…" style="display:block;width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-top:.2rem"></label>
       <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
     </div>`:`<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
       <div style="display:flex;gap:.3rem;margin-bottom:.3rem">
@@ -3360,7 +3362,7 @@ function openFinPopup(pi){
           <option value="rf">RF (importação) — R$</option>
           ${o.rotaAV==='trading'?`<option value="trading">Trading — R$</option>`:''}
         </select>
-        ${operationPartySelect(o,'supplier')}<input type="text" id="fp-l-ref" placeholder="Ref" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem">
+        ${operationPartySelect(o,'supplier')}<label for="fp-l-ref" style="flex:1;min-width:0;font-size:.6rem;color:var(--ink3)">Referência<input type="text" id="fp-l-ref" aria-label="Referência" list="fin-ref-tags" placeholder="SINAL, AMOSTRAS, BALANÇO ou outra…" style="display:block;width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-top:.2rem"></label>
       </div>
       <button class="bsm" style="width:100%;background:var(--red);color:#fff;border-color:var(--red)" onclick="finPopupAddPayment('${esc(pi)}')">＋ Lançar pagamento</button>
     </div>`}</details></section><section><h3>Recebimentos</h3>${financeTransactions(recs,false)}<details class="fa-entry"><summary>+ Recebimento</summary><div style="margin-top:.5rem;padding-top:.5rem;border-top:1px dashed var(--bdr)">
@@ -3368,7 +3370,7 @@ function openFinPopup(pi){
       <input type="text" id="fp-r-date" placeholder="DD/Mmm/AA" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
       <input type="number" id="fp-r-amt" placeholder="${isC?'Valor R$':'Valor US$'}" step="0.01" style="flex:1;min-width:0;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;font-family:'IBM Plex Mono'">
     </div>
-    ${operationPartySelect(o,'client')}<input type="text" id="fp-r-ref" placeholder="Ref (ex: 30% FC)" style="width:100%;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-bottom:.3rem">
+    ${operationPartySelect(o,'client')}<label for="fp-r-ref" style="display:block;width:100%;margin-bottom:.3rem;font-size:.6rem;color:var(--ink3)">Referência<input type="text" id="fp-r-ref" aria-label="Referência" list="fin-ref-tags" placeholder="SINAL, AMOSTRAS, BALANÇO ou outra…" style="display:block;width:100%;box-sizing:border-box;border:1.5px solid var(--bdr2);border-radius:6px;padding:.3rem .4rem;font-size:.66rem;margin-top:.2rem"></label>
     <button class="bsm" style="width:100%;background:var(--green);color:#fff;border-color:var(--green)" onclick="finPopupAddReceipt('${esc(pi)}')">＋ Lançar recebimento</button>
   </div></details></section></div>`;
   h+=`<div class="fa-difference"><span>Diferença a receber / pagar</span><b>${fUSD(Math.max(0,aReceber)-Math.max(0,aPagar))}</b></div>`;
