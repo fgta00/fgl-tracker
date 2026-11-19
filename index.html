@@ -2548,6 +2548,27 @@ function onRpiChange(){
   } else if(ctx) ctx.innerHTML='';
 }
 
+
+// Pagamentos de sinal/amostra solicitam confirmação, sem alterar o milestone sozinhos.
+function confirmOrderMilestoneAfterPayment(pi,ref,date,layer='fy'){
+  const tag=String(ref||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  if(layer!=='fy'||!/(^|[^A-Z])(SINAL|AMOSTRAS?)(?=$|[^A-Z])/.test(tag))return;
+  const matches=orders.filter(o=>o.pi===pi);
+  if(matches.length!==1){toast('Pagamento salvo. Confira o milestone na operação: vínculo não identificado.','err');return;}
+  const o=matches[0];
+  editMS(o.num,1,{stopPropagation(){}});
+  _epCtx.fromFinance=true;
+  const current=o.dates[1];
+  document.getElementById('ep-ttl').textContent='Pedido Confirmado (sinal)';
+  document.getElementById('ep-val').value=current?.v&&!current.est?current.v:date;
+  document.getElementById('ep-est').checked=false;
+  const note=document.createElement('div');
+  note.style.cssText='font-size:.7rem;color:var(--ink3);margin-bottom:.65rem;line-height:1.4';
+  note.textContent='Pagamento '+ref+' salvo · IP '+pi+'. Confirme a data do pedido. Fechar mantém o milestone como estava.';
+  document.getElementById('ep-body').prepend(note);
+  document.getElementById('ep-val').focus();
+}
+
 function addLedger(){
   const rawDate=document.getElementById('l-date').value.trim();
   let amt=parseFloat(document.getElementById('l-amt').value);
@@ -2575,6 +2596,7 @@ function addLedger(){
   document.getElementById('l-pi').value='';document.getElementById('l-sup').value='';
   document.getElementById('l-camada-ff').style.display='none';document.getElementById('l-camada').value='fy';
   document.getElementById('l-amt-lbl').textContent='Valor USD';
+  confirmOrderMilestoneAfterPayment(pi,ref,dateDisp,layer);
 }
 function addReceipt(){
   const rawDate=document.getElementById('r-date').value.trim();
@@ -2625,6 +2647,7 @@ function finPopupAddPayment(pi){
   pushUndo('Lançar pagamento #'+n);
   ledger.push({n,date:dateDisp,amount:amt,pi,supplier:layer==='rf'?'Receita Federal (RF)':layer==='trading'?(orders.find(o=>o.pi===pi)?.tradingNome||'Trading'):(document.getElementById('fp-op-supplier')?.value||p.supplier||pi),ref:ref||'—',notes:'',layer,...(amountBRL!=null?{amountBRL,fxApplied}:{})});
   saveAll();renderFinanceiro();openFinPopup(pi);toast(`Lançamento #${n} ✓`);
+  confirmOrderMilestoneAfterPayment(pi,ref,dateDisp,layer);
 }
 function finPopupAddReceipt(pi){
   const rawDate=document.getElementById('fp-r-date').value.trim();
@@ -3195,6 +3218,7 @@ function epSave(){
   if(!_epCtx){closeEp();return;}
   const val=(document.getElementById('ep-val')?.value||'').trim();
   if(_epCtx.type==='ms'){
+    if(_epCtx.fromFinance&&!normDate(val)){toast('Informe uma data válida para confirmar o pedido.','err');return;}
     const o=orders.find(x=>x.num===_epCtx.num);if(!o)return;
     const est=document.getElementById('ep-est')?.checked||false;
     o.dates[_epCtx.di]=mkD(val||null,est,!!val);
