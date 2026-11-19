@@ -1,0 +1,57 @@
+/* Desktop: acompanhamento compacto e agendas com a mesma linguagem visual. */
+.ncrm .nc-top{grid-template-columns:minmax(0,.84fr) minmax(0,1.16fr)!important;height:365px!important}
+.ncrm .nc-top .nc-minis{height:365px!important;gap:9px!important}
+.ncrm .nc-top .nc-mini{padding:12px!important;gap:6px!important}
+.ncrm .nc-top .nc-mini strong{font-size:19px!important;line-height:1.2!important}
+.ncrm .nc-top .nc-mini>.nc-label{font-size:10px!important}
+.ncrm .nc-top .nc-mini>span:not(.nc-label){font-size:11px!important}
+.ncrm .nc-top .nc-mini small{font-size:10px!important;line-height:1.4!important}
+.ncrm .nc-upper{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;align-items:stretch!important}
+.ncrm .nc-upper>.nc-card{height:350px!important;min-height:0!important}
+.ncrm .nc-followup{display:flex;flex-direction:column}
+.ncrm .nc-followup>.nc-head{flex-shrink:0;background:#fff!important;border-bottom:0!important;height:43px!important;min-height:43px!important}
+.ncrm .nc-followup>.nc-head button{border:0;background:transparent;color:#205b8a;font-size:11px;padding:0}
+.ncrm .nc-followup-body{padding:0 12px 10px;display:flex;flex:1;flex-direction:column;min-height:0;gap:8px}
+.ncrm .nc-followup-form{margin:0!important;padding:0!important;display:block}
+.ncrm .nc-followup-form textarea{display:block;width:100%;height:48px;min-height:48px;max-height:80px;resize:vertical;padding:8px 10px;font-size:12px;line-height:1.4}
+.ncrm .nc-followup-compose{display:flex;gap:8px;align-items:center;margin-top:7px}
+.ncrm .nc-followup-compose input[type=date]{width:145px;height:30px;padding:4px 7px;font-size:12px}
+.ncrm .nc-followup-compose>.nc-primary{margin-left:auto;width:30px;height:30px;padding:0!important;font-size:20px;background:#176fc0!important;color:#fff!important}
+.ncrm .nc-followup-switch{display:flex;gap:0}
+.ncrm .nc-followup-switch button{height:30px;font-size:11px;padding:4px 12px;border-radius:5px 0 0 5px}
+.ncrm .nc-followup-switch button+button{border-radius:0 5px 5px 0;margin-left:-1px}
+.ncrm .nc-followup-switch button[aria-pressed=true]{background:#e8f1fc;border-color:#bdd4ed;color:#165992;font-weight:600;position:relative}
+.ncrm .nc-followup-scroll{flex:1;overflow:auto;min-height:0;scrollbar-width:thin}
+.ncrm .nc-followup h3{font-size:10px;font-weight:600;color:#6a7786;letter-spacing:.6px;text-transform:uppercase;margin:0 0 7px;line-height:1.4}
+.ncrm .nc-followup-next{display:flex;align-items:center;background:#fff7d8;border-radius:7px;margin:0 0 6px;padding:7px 9px;gap:6px}
+.ncrm .nc-followup-next.is-overdue{background:#fff0e9}
+.ncrm button.nc-followup-copy{border:0!important;background:transparent!important;text-align:left;padding:0!important;min-width:0;flex:1;font-size:12px}
+.ncrm .nc-followup-copy b,.ncrm .nc-followup-copy span{display:block;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.ncrm .nc-followup-tools{display:flex;gap:3px;flex-shrink:0}
+.ncrm .nc-followup-tools button{border:0;background:transparent;padding:3px 5px;color:#667887;font-size:16px}
+.ncrm .nc-followup h3.nc-followup-history-title{border-top:1px solid #e6ebef;margin-top:10px;padding-top:9px}
+.ncrm .nc-followup-log{display:grid;grid-template-columns:100px minmax(0,1fr) 14px;gap:8px;padding:7px 0;border-bottom:1px solid #edf0f4;align-items:start}
+.ncrm .nc-followup-log small{font-size:10px;color:#6a7786;padding-top:2px}
+.ncrm .nc-followup-log button{border:0;background:transparent;text-align:left;padding:0;font-size:12px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}
+.ncrm .nc-followup-check{color:#83919d}
+.ncrm .nc-followup-empty{font-size:11px;color:#788491;margin:4px 0 8px}
+.ncrm .nc-agenda-unified{display:flex;flex-direction:column;min-height:0}
+.ncrm .nc-agenda-unified>.nc-head{background:#fff!important;flex-shrink:0;padding:9px 12px!important;min-height:50px!important;gap:5px!important}
+.ncrm .nc-agenda-unified>.nc-head>b{font-size:14px!important;line-height:1.2;min-width:0}
+.ncrm .nc-agenda-unified>.nc-head>b>small{display:block;font-size:11px;font-weight:400;color:#647485;margin-top:4px}
+.ncrm .nc-agenda-unified>.nc-head button{font-size:10px!important;padding:4px 6px!important;white-space:nowrap}
+.ncrm .nc-agenda-unified>.nc-cal{flex:1;min-height:0;overflow:auto;padding:10px 12px!important;display:flex;flex-direction:column;gap:7px}
+.ncrm .nc-agenda-unified .nc-cal>[data-nc=overdue]{align-self:flex-start;font-size:10px;padding:3px 7px}
+.ncrm .nc-agenda-unified .nc-week{flex:1;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:0!important;min-height:180px!important}
+.ncrm .nc-agenda-unified .nc-week .nc-day{min-height:180px!important;padding:0 3px;border-right:1px solid #edf0f4;border-radius:0!important}
+.ncrm .nc-agenda-unified .nc-dayhead{font-size:9px!important;padding:3px 0 5px;line-height:1.3}
+.ncrm .nc-agenda-unified .nc-dayhead b{font-size:17px!important;font-weight:600;display:block;width:27px;height:27px;line-height:27px;margin:0 auto;padding:0!important}
+.ncrm .nc-agenda-unified .nc-calendar-today{outline:0!important;border-top:0!important;background:transparent!important;box-shadow:none!important}
+.ncrm .nc-agenda-unified .nc-calendar-today .nc-dayhead b{background:#215e95!important;color:#fff!important;border-radius:50%!important}
+.ncrm .nc-agenda-unified .nc-event{font-size:10px!important;line-height:1.35;padding:4px 5px!important;border:0!important;background:#edf1f4;color:#344553}
+.ncrm .nc-agenda-unified .nc-event.schedule{background:#f7f4ea}
+.ncrm .nc-agenda-unified .nc-event.nc-focus-appointment{background:#fff1b4!important;border:1px solid #e8cd65!important;color:#665219!important}
+.ncrm .nc-agenda-unified .nc-event.fair{background:#eef3f9!important;border-left:2px solid #9ab4ca!important}
+.ncrm .nc-agenda-unified .nc-month .nc-dayhead b{font-size:11px!important;width:20px;height:20px;line-height:20px}
+.ncrm .nc-dashboard-calendar.nc-agenda-unified{height:365px!important}
+.ncrm .nc-calendar-modal .nc-agenda-unified{height:min(65vh,650px)!important}
