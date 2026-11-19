@@ -1,7 +1,7 @@
 /* Acompanhamento do cliente e apresentação unificada das agendas. */
 (()=>{
 'use strict';
-if(NC.followupV63)return;NC.followupV63=true;
+if(NC.followupV64)return;NC.followupV64=true;
 const iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 const today=()=>iso(new Date());
 const shortDate=v=>v?new Date(String(v).slice(0,10)+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'}):'—';
@@ -19,7 +19,10 @@ NC.customer=(...args)=>{
  panel.querySelector('.nc-head b').textContent='Acompanhamento';
  panel.querySelector('[data-id=note]').setAttribute('aria-pressed','true');
  panel.querySelector('[data-id=agenda]').setAttribute('aria-pressed','false');
- old.replaceWith(panel);return t.innerHTML;
+ old.replaceWith(panel);
+ const upper=t.content.querySelector('.nc-upper');
+ if(upper){let anchor=upper;for(const prefix of ['Negócios','Histórico de ações']){const block=[...t.content.querySelectorAll('details.nc-card')].find(el=>el.querySelector(':scope > summary')?.textContent.trim().startsWith(prefix));if(block){anchor.after(block);anchor=block;}}}
+ return t.innerHTML;
 };
 const calendar=NC.calendar;
 NC.calendar=history=>{
@@ -33,6 +36,65 @@ NC.calendar=history=>{
  section.querySelectorAll('.nc-day').forEach((day,i)=>{const d=NS.calendar==='month'?new Date(base.getFullYear(),base.getMonth(),i+1):new Date(base.getFullYear(),base.getMonth(),base.getDate()+i);day.classList.toggle('nc-calendar-today',iso(d)===today());if(iso(d)===today())day.setAttribute('aria-current','date');else day.removeAttribute('aria-current');});
  return t.innerHTML;
 };
+
+// Janela de trabalho: pendências do cliente e registros do período visível.
+const workPeriod=()=>{
+ const base=new Date(),offset=Number(NS.offset)||0;
+ let start,end;
+ if(NS.calendar==='year'){start=new Date(base.getFullYear()+offset,0,1);end=new Date(base.getFullYear()+offset,11,31);}
+ else if(NS.calendar==='month'){start=new Date(base.getFullYear(),base.getMonth()+offset,1);end=new Date(start.getFullYear(),start.getMonth()+1,0);}
+ else{start=new Date(base.getFullYear(),base.getMonth(),base.getDate()-(base.getDay()+6)%7+offset*7);end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+6);}
+ return {start:iso(start),end:iso(end)};
+};
+const validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(new Date(v+'T12:00:00').getTime())&&iso(new Date(v+'T12:00:00'))===v;
+let workContext=null;
+const originalDialog=NC.dialog;
+NC.dialog=(...args)=>{document.getElementById('nc-dialog')?.classList.remove('nc-work-modal');workContext=null;return originalDialog(...args);};
+const workDraft=()=>{const form=document.querySelector('#nc-dialog .nc-work-new');return {summary:form?.elements.summary.value||'',date:form?.elements.date.value||''};};
+NC.workList=(customerId,selectedId,context=null,draft=null)=>{
+ const period=context?.period||workPeriod(),client=NS.customers.find(c=>c.id===customerId);
+ if(!client)return;
+ const all=NS.actions.filter(a=>a.customer_id===customerId&&!a.deleted);
+ const planned=all.filter(a=>a.status==='planned').sort((a,b)=>String(a.due_date||'9999').localeCompare(String(b.due_date||'9999')));
+ const notes=all.filter(a=>a.status==='done'&&a.type==='other'&&String(a.occurred_at||a.created_at||'').slice(0,10)>=period.start&&String(a.occurred_at||a.created_at||'').slice(0,10)<=period.end).sort((a,b)=>String(b.occurred_at||b.created_at||'').localeCompare(String(a.occurred_at||a.created_at||'')));
+ const row=a=>`<div class="nc-work-row ${a.id===selectedId?'is-selected':''}" data-action-id="${NC.e(a.id)}"><div class="nc-work-text"><small>${a.status==='planned'?'Agendado · '+(a.due_date?NC.date(a.due_date):'sem data'):(a.due_date?'Concluído · ':'Nota · ')+NC.date(a.occurred_at||a.created_at)}</small><span>${NC.e(a.summary)}</span>${a.details?'<small class="nc-work-details">'+NC.e(a.details)+'</small>':''}</div><input type="checkbox" class="nc-work-check" data-work-complete="${NC.e(a.id)}" ${a.status==='done'?'checked disabled':''} title="${a.status==='done'?'Registro concluído':'Concluir agendamento'}" aria-label="${a.status==='done'?'Registro concluído':'Concluir agendamento'}"><input type="date" class="nc-work-date" data-work-date="${NC.e(a.id)}" value="${a.status==='planned'?NC.e(a.due_date||''):''}" title="${a.status==='planned'?'Reagendar':'Agendar a partir desta nota'}" aria-label="${a.status==='planned'?'Reagendar':'Agendar a partir desta nota'}"></div>`;
+ const html=`<p class="nc-work-customer">${NC.e(NC.name(customerId))}</p><div class="nc-work-head"><span>Registro</span><span>Feito</span><span>Data</span></div><div class="nc-work-rows"><h3>Agendamentos em aberto</h3>${planned.length?planned.map(row).join(''):'<p class="nc-work-empty">Nenhum agendamento em aberto.</p>'}<h3>Notas e concluídos · ${NC.date(period.start)} – ${NC.date(period.end)}</h3>${notes.length?notes.map(row).join(''):'<p class="nc-work-empty">Nenhum registro neste período.</p>'}</div><form class="nc-work-new"><textarea name="summary" rows="1" maxlength="160" aria-label="Novo registro" placeholder="Novo registro…" required>${NC.e(draft?.summary||'')}</textarea><input type="date" name="date" aria-label="Data opcional: preenchida agenda; vazia registra nota" title="Com data: agendamento · Sem data: nota" value="${NC.e(draft?.date||'')}"><button type="submit" class="nc-primary" aria-label="Adicionar registro" title="Adicionar registro">+</button></form><small class="nc-work-hint">Com data: agendamento · Sem data: nota</small><small class="nc-work-status" role="status"></small>`;
+ NC.dialog('Acompanhamento',html);
+ const dlg=document.getElementById('nc-dialog');if(!dlg)return;
+ workContext={customerId,period,selectedId};dlg.classList.add('nc-work-modal');dlg.querySelector('footer')?.remove();
+ const first=dlg.querySelector('[data-action-id="'+CSS.escape(selectedId||'')+'"]');if(first)first.scrollIntoView({block:'nearest'});
+};
+NC.task=id=>{const a=NS.actions.find(a=>a.id===id);if(a)NC.workList(a.customer_id,id);};
+const workError=error=>{if(NC.isStale?.(error))return;const status=document.querySelector('#nc-dialog .nc-work-status');if(status)status.textContent=error.message||'Não foi possível salvar.';else NC.toast(error.message||'Não foi possível salvar.');};
+const saveWorkRow=async(el,patch)=>{
+ const context=workContext,dlg=document.getElementById('nc-dialog');if(!context||!dlg?.open||dlg.dataset.workBusy==='true')return;
+ const id=el.dataset.workComplete||el.dataset.workDate,a=NS.actions.find(x=>x.id===id&&x.customer_id===context.customerId);if(!a)return;
+ const draft=workDraft();dlg.dataset.workBusy='true';const controls=[...dlg.querySelectorAll('input,textarea,button')];controls.forEach(x=>x.disabled=true);
+ try{
+  const result=await NC.api.guard(_supa.from('crm_actions').update(patch).eq('id',a.id).eq('status',a.status).eq('updated_at',a.updated_at).select().single());
+  if(result.error)throw new Error('O registro pode ter sido alterado. Atualize antes de tentar novamente.');
+  NS.actions=NS.actions.map(x=>x.id===a.id?result.data:x);NC.render();
+  if(dlg.open&&workContext===context)NC.workList(context.customerId,id,context,draft);
+ }catch(error){if(el.type==='checkbox')el.checked=false;else el.value=a.status==='planned'?a.due_date||'':'';workError(error);}
+ finally{delete dlg.dataset.workBusy;controls.forEach(x=>{if(x.isConnected)x.disabled=x.matches('[data-work-complete]')&&NS.actions.find(a=>a.id===x.dataset.workComplete)?.status==='done';});}
+};
+document.addEventListener('change',async e=>{
+ const el=e.target;if(!el.closest('#nc-dialog.nc-work-modal'))return;
+ if(el.dataset.workComplete){e.stopImmediatePropagation();if(el.checked)await saveWorkRow(el,{status:'done',occurred_at:new Date().toISOString()});}
+ else if(el.dataset.workDate){e.stopImmediatePropagation();if(!validDate(el.value)){const a=NS.actions.find(a=>a.id===el.dataset.workDate);el.value=a?.status==='planned'?a.due_date||'':'';workError(new Error('Escolha uma data válida.'));return;}await saveWorkRow(el,{status:'planned',due_date:el.value});}
+},true);
+document.addEventListener('submit',async e=>{
+ const form=e.target;if(!form.matches('#nc-dialog .nc-work-new'))return;
+ e.preventDefault();e.stopImmediatePropagation();const context=workContext,dlg=document.getElementById('nc-dialog');if(!context||dlg.dataset.workBusy==='true')return;
+ const summary=form.elements.summary.value.trim(),date=form.elements.date.value;
+ if(!summary||(date&&!validDate(date))){workError(new Error('Preencha o texto e confira a data.'));return;}
+ const controls=[...dlg.querySelectorAll('input,textarea,button')];dlg.dataset.workBusy='true';controls.forEach(x=>x.disabled=true);
+ try{
+  await NC.api.action({customer_id:context.customerId,summary,date:date||null});await NC.reload();
+  if(dlg.open&&workContext===context)NC.workList(context.customerId,null,context);
+ }catch(error){workError(error);}finally{delete dlg.dataset.workBusy;controls.forEach(x=>{if(x.isConnected)x.disabled=x.matches('[data-work-complete]')&&NS.actions.find(a=>a.id===x.dataset.workComplete)?.status==='done';});}
+},true);
+
 const handle=NC.handle;
 NC.handle=async b=>{
  const action=b.dataset.nc;

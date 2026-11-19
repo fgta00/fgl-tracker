@@ -55,3 +55,28 @@
 .ncrm .nc-agenda-unified .nc-month .nc-dayhead b{font-size:11px!important;width:20px;height:20px;line-height:20px}
 .ncrm .nc-dashboard-calendar.nc-agenda-unified{height:365px!important}
 .ncrm .nc-calendar-modal .nc-agenda-unified{height:min(65vh,650px)!important}
+/* Janela de trabalho por cliente. */
+.ncrm dialog#nc-dialog.nc-work-modal{width:min(950px,92vw)!important;max-width:950px!important;padding:22px!important;max-height:82vh!important;overflow:auto}
+.ncrm dialog#nc-dialog.nc-work-modal h2{font-size:20px!important;margin:0 0 4px!important}
+.ncrm .nc-work-customer{margin:0 0 15px;font-size:12px;color:#657786}
+.ncrm .nc-work-head,.ncrm .nc-work-row{display:grid;grid-template-columns:minmax(0,1fr) 42px 136px;gap:10px;align-items:center}
+.ncrm .nc-work-head{font-size:10px;color:#7c8893;border-bottom:1px solid #e2e8ee;padding:0 4px 7px}
+.ncrm .nc-work-head span:nth-child(2){text-align:center}
+.ncrm .nc-work-rows{max-height:48vh;overflow:auto;scrollbar-width:thin}
+.ncrm .nc-work-rows h3{font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:600;color:#73808a;margin:15px 0 4px}
+.ncrm .nc-work-row{border-bottom:1px solid #e7ecf0;padding:10px 4px}
+.ncrm .nc-work-row.is-selected{background:#f5f9fc;border-radius:5px}
+.ncrm .nc-work-text{min-width:0;overflow-wrap:anywhere}
+.ncrm .nc-work-text>small{display:block;font-size:10px;color:#6d7d89;margin-bottom:3px;line-height:1.4}
+.ncrm .nc-work-text>span{display:block;font-size:12px;line-height:1.5;white-space:pre-wrap}
+.ncrm .nc-work-text .nc-work-details{margin:4px 0 0;white-space:pre-wrap}
+.ncrm dialog#nc-dialog.nc-work-modal input.nc-work-check{appearance:auto!important;accent-color:#298269;width:16px!important;height:16px!important;min-width:16px!important;padding:0!important;justify-self:center;cursor:pointer}
+.ncrm dialog#nc-dialog.nc-work-modal input.nc-work-check:disabled{opacity:.65;cursor:default}
+.ncrm dialog#nc-dialog.nc-work-modal input.nc-work-date{width:136px!important;padding:5px!important;font-size:11px!important;height:30px}
+.ncrm .nc-work-empty{font-size:11px;color:#8a959e;margin:9px 4px}
+.ncrm dialog#nc-dialog .nc-work-new{display:grid;grid-template-columns:minmax(0,1fr) 136px 30px;gap:8px;align-items:center;margin-top:14px!important;padding-top:12px;border-top:1px solid #dce4eb}
+.ncrm dialog#nc-dialog .nc-work-new textarea{display:block;width:100%;height:34px;min-height:34px;max-height:95px;resize:vertical;padding:7px 8px;font-size:12px;line-height:1.5}
+.ncrm dialog#nc-dialog .nc-work-new input{width:136px!important;height:32px;padding:5px;font-size:11px}
+.ncrm dialog#nc-dialog .nc-work-new button{width:30px;height:30px;font-size:20px;padding:0!important;background:#1879c9!important;color:#fff!important}
+.ncrm .nc-work-hint{display:block;color:#8a959e;font-size:10px;margin-top:5px}
+.ncrm .nc-work-status{display:block;color:#a34535;font-size:11px;margin-top:6px}
