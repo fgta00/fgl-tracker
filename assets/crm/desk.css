@@ -26,7 +26,7 @@
 .ncrm .dc-modes button+button{margin-left:-1px;border-radius:0 5px 5px 0}
 .ncrm button.dc-overdue{font-size:10px;color:#a54938;border:0;padding:4px;background:transparent}
 .ncrm .dc-calendar-body{flex:1;min-height:0;overflow:auto;padding:0 12px 12px;scrollbar-width:thin}
-.ncrm .dc-week,.ncrm .dc-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:100%;gap:0;border-top:1px solid #e4eaf0;border-left:1px solid #e4eaf0}
+.ncrm .dc-week,.ncrm .dc-month{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) repeat(2,minmax(0,.45fr));min-height:100%;gap:0;border-top:1px solid #e4eaf0;border-left:1px solid #e4eaf0}
 .ncrm .dc-day{min-width:0;border-right:1px solid #e4eaf0;border-bottom:1px solid #e4eaf0;min-height:120px;background:#fff}
 .ncrm .dc-day.is-weekend{background:#f8fafc}
 .ncrm .dc-dayhead{height:50px;display:flex;align-items:center;justify-content:center;gap:5px;position:relative;border-bottom:1px solid #eef1f4}
